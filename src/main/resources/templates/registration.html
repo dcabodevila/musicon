@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+  <head>
+	<div th:replace="~{fragments/main-template :: header-css}"/>
+    <title>Registrarse</title>
+  </head>
+
+  <body>
+	<div th:replace="~{fragments/main-template :: header}"/>
+    <div class="container">
+
+        <form method="POST" th:object="${registrationForm}" th:action=@{/registration} class="form-signin">
+        		<div class="col-md-6 col-md-offset-3">
+            	<p><h1 class="form-signin-heading">Registrarse</h1></p>
+                <div class="form-group required">
+                    <input type="text" th:field="*{username}" class="form-control" placeholder="Nombre de usuario"
+                                autofocus="true" required></input>
+                    <p th:each="error: ${#fields.errors('username')}"
+                       th:text="${error}">Validation error</p>
+                </div>
+                <div class="form-group required">
+                    <input type="text" th:field="*{nombre}" class="form-control" placeholder="Nombre"
+                           autofocus="true" required></input>
+                    <p th:each="error: ${#fields.errors('nombre')}"
+                       th:text="${error}">Validation error</p>
+                </div>
+                <div class="form-group">
+                    <input type="text" th:field="*{apellidos}" class="form-control" placeholder="Apellidos"
+                           autofocus="true"></input>
+                    <p th:each="error: ${#fields.errors('apellidos')}"
+                       th:text="${error}">Validation error</p>
+                </div>
+
+                <div class="form-group required">
+                    <input type="password" th:field="*{password}" class="form-control" placeholder="Contraseña" required></input>
+                    <p th:each="error : ${#fields.errors('password')}"
+                       th:text="${error}">Validation error</p>
+                </div>
+
+                <div class="form-group required">
+                    <input type="password"  th:field="*{retryPassword}" class="form-control"
+                                placeholder="Confirma la contraseña" required></input>
+                </div>
+                <div class="form-group required">
+                    <input type="email" th:field="*{email}" class="form-control required"
+                                placeholder="e-mail" required></input>
+                </div>
+
+            <button class="btn btn-lg btn-primary btn-block" type="submit">Registrarse</button>
+            </div>
+        </form>
+
+    </div>
+
+	<div th:replace="~{fragments/main-template :: footer}"/>
+  </body>
+</html>

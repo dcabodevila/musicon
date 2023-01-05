@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<div th:replace="~{fragments/main-template :: header-css}"/>
+</head>
+
+<body>
+	<div th:replace="~{fragments/main-template :: header}"/>
+
+	<!-- Jumbotron -->
+<div class="jumbotron text-center">
+
+
+  <!-- Card image -->
+  <div class="view overlay my-1">
+<!--    <img th:src="@{'/img/ball2.png'}" class="img-fluid center" alt="" style="margin-left: auto;  margin-right: auto;">-->
+    <a href="#">
+      <div class="mask rgba-white-slight"></div>
+    </a>
+  </div>
+  	<div>
+  		<h5 class="indigo-text h5 mb-4">MusicOn</h5>
+	</div>
+
+	<div>
+  		<h7>Management de artistas online</h7>
+	</div>
+	<div>
+		<a type="button" id="btnLogin" th:href=@{/login} class="btn btn-light-blue btn-md btn-firmar" >
+			Iniciar sesión <span class="spinner-border spinner-border-sm spinner" hidden role="status" aria-hidden="true"></span>
+		</a>
+	</div>
+
+
+</div>
+<!-- Jumbotron -->
+	
+	
+    <div th:replace="~{fragments/main-template :: footer}"/>
+</body>
+
+</html>
