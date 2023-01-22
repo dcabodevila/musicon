@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content=""><head>
+    <div th:replace="~{fragments/main-template :: header-css}"/>
+
+</head>
+<body>
+<body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
+<div class="wrapper">
+
+    <div th:replace="~{fragments/main-template :: sidebar}"/>
+    <div class="main">
+
+        <div th:replace="~{fragments/main-template :: navbar}"/>
+        <main class="content">
+            <div class="container-fluid p-0">
+                <a th:href="@{/artista/crear}" class="btn btn-primary float-end mt-n1"><i class="fas fa-plus"></i> Crear artista</a>
+                <div class="mb-3">
+                    <h1 class="h3 d-inline align-middle">Artistas</h1>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 col-md-6 col-lg-3" th:each="artista: ${listaArtistas}">
+                        <div class="card">
+                            <img class="card-img-top" th:if="${artista.logo!=null}"  th:src="@{'/'+${artista.logo}}" alt="Unsplash" style="max-height: 327px;">
+                            <div class="card-header px-4 pt-4">
+                                <h5 class="card-title mb-0" th:text="${artista.nombre}">Card with image and button</h5>
+                            </div>
+                            <div class="card-body">
+                                <a th:href="@{/artista/__${artista.id}__}" class="btn btn-primary">Ver artista</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <div th:replace="~{fragments/main-template :: footer}"/>
+
+    </div>
+</div>
+
+</body>
+
+</body>
+</html>

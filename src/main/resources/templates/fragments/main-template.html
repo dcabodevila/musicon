@@ -1,73 +1,285 @@
 
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org">
+      xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <div th:fragment="header-css">
-        
-		<title>MusicOn</title>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+		<title>GestMusica</title>
 	    <meta http-equiv="x-ua-compatible" content="ie=edge">
-	    <meta name="mobile-web-app-capable" content="yes" />
-	    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">	
-		<link th:href="@{/bootstrap/css/bootstrap.min.css}" rel="stylesheet"></link>
-	    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">	
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-		<link th:href="@{/mdb/css/mdb.min.css}" rel="stylesheet"></link>		
+
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<link th:href="@{/adminkit/css/light.css}" rel="stylesheet"></link>
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+		<script th:src="@{/adminkit/flatpickr/es.js}"></script>
 		<link th:href="@{/css/main.css}" rel="stylesheet"></link>
-		
     </div>
+	<style>
+		body {
+			opacity: 0;
+		}
+	</style>
 </head>
 <body>
-<div th:fragment="header">
 
-	<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-	    <div class="container">
-	        <a class="navbar-brand logo-font" th:href="@{/}" id="brand">
-	            MusicOn
-	        </a>
-	        <!-- links toggle -->
-	        <button class="navbar-toggler order-first" type="button" data-toggle="collapse" data-target="#links" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
-	            <i class="fa fa-bars"></i>
-	        </button>
 
-	        
-	        <div class="collapse navbar-collapse" id="links">
-	            <ul class="navbar-nav mr-auto">
-					<div sec:authorize="hasAuthority('USUARIOS')">
-						<li class="nav-item">
-							<a class="nav-link" th:href=@{/usuarios}>Usuarios</a>
-						</li>
+
+<div th:fragment="navbar">
+	<nav class="navbar navbar-expand navbar-light navbar-bg nav-top-sticky">
+		<a class="sidebar-toggle js-sidebar-toggle">
+			<i class="hamburger align-self-center"></i>
+		</a>
+
+		<div class="navbar-collapse collapse">
+			<ul class="navbar-nav navbar-align">
+				<li class="nav-item dropdown">
+					<a class="nav-icon dropdown-toggle" href="#" id="alertsDropdown" data-bs-toggle="dropdown">
+						<div class="position-relative">
+							<i class="align-middle" data-feather="bell"></i>
+							<span class="indicator">4</span>
+						</div>
+					</a>
+					<div class="dropdown-menu dropdown-menu-lg dropdown-menu-end py-0" aria-labelledby="alertsDropdown">
+						<div class="dropdown-menu-header">
+							4 New Notifications
+						</div>
+						<div class="list-group">
+							<a href="#" class="list-group-item">
+								<div class="row g-0 align-items-center">
+									<div class="col-2">
+										<i class="text-danger" data-feather="alert-circle"></i>
+									</div>
+									<div class="col-10">
+										<div class="text-dark">Update completed</div>
+										<div class="text-muted small mt-1">Restart server 12 to complete the update.</div>
+										<div class="text-muted small mt-1">30m ago</div>
+									</div>
+								</div>
+							</a>
+							<a href="#" class="list-group-item">
+								<div class="row g-0 align-items-center">
+									<div class="col-2">
+										<i class="text-warning" data-feather="bell"></i>
+									</div>
+									<div class="col-10">
+										<div class="text-dark">Lorem ipsum</div>
+										<div class="text-muted small mt-1">Aliquam ex eros, imperdiet vulputate hendrerit et.</div>
+										<div class="text-muted small mt-1">2h ago</div>
+									</div>
+								</div>
+							</a>
+							<a href="#" class="list-group-item">
+								<div class="row g-0 align-items-center">
+									<div class="col-2">
+										<i class="text-primary" data-feather="home"></i>
+									</div>
+									<div class="col-10">
+										<div class="text-dark">Login from 192.186.1.8</div>
+										<div class="text-muted small mt-1">5h ago</div>
+									</div>
+								</div>
+							</a>
+							<a href="#" class="list-group-item">
+								<div class="row g-0 align-items-center">
+									<div class="col-2">
+										<i class="text-success" data-feather="user-plus"></i>
+									</div>
+									<div class="col-10">
+										<div class="text-dark">New connection</div>
+										<div class="text-muted small mt-1">Christina accepted your request.</div>
+										<div class="text-muted small mt-1">14h ago</div>
+									</div>
+								</div>
+							</a>
+						</div>
+						<div class="dropdown-menu-footer">
+							<a href="#" class="text-muted">Show all notifications</a>
+						</div>
 					</div>
-	            	<div sec:authorize="!isAuthenticated()">
-		            	<li class="nav-item">
-		            		<a class="nav-link" th:href=@{/login}>Iniciar sesión</a>	            		
-		           		</li>
-	           		</div>
-					<div sec:authorize="isAuthenticated()">
-						<li class="nav-item">
-							<a class="nav-link" th:href=@{/login?logout}>Log out</a>
-						</li>
-					</div>
-	            </ul>
-	        </div>
+				</li>
+				<li class="nav-item dropdown">
+					<a class="nav-icon dropdown-toggle" href="#" id="messagesDropdown" data-bs-toggle="dropdown">
+						<div class="position-relative">
+							<i class="align-middle" data-feather="message-square"></i>
+						</div>
+					</a>
+					<div class="dropdown-menu dropdown-menu-lg dropdown-menu-end py-0" aria-labelledby="messagesDropdown">
+						<div class="dropdown-menu-header">
+							<div class="position-relative">
+								4 New Messages
+							</div>
+						</div>
+						<div class="list-group">
+							<a href="#" class="list-group-item">
+								<div class="row g-0 align-items-center">
 
-	    </div>
+									<div class="col-10 ps-2">
+										<div class="text-dark">Vanessa Tucker</div>
+										<div class="text-muted small mt-1">Nam pretium turpis et arcu. Duis arcu tortor.</div>
+										<div class="text-muted small mt-1">15m ago</div>
+									</div>
+								</div>
+							</a>
+							<a href="#" class="list-group-item">
+								<div class="row g-0 align-items-center">
+
+									<div class="col-10 ps-2">
+										<div class="text-dark">William Harris</div>
+										<div class="text-muted small mt-1">Curabitur ligula sapien euismod vitae.</div>
+										<div class="text-muted small mt-1">2h ago</div>
+									</div>
+								</div>
+							</a>
+							<a href="#" class="list-group-item">
+								<div class="row g-0 align-items-center">
+
+									<div class="col-10 ps-2">
+										<div class="text-dark">Christina Mason</div>
+										<div class="text-muted small mt-1">Pellentesque auctor neque nec urna.</div>
+										<div class="text-muted small mt-1">4h ago</div>
+									</div>
+								</div>
+							</a>
+							<a href="#" class="list-group-item">
+								<div class="row g-0 align-items-center">
+									<div class="col-2">
+										<img th:src="@{/img/avatars/avatar-3.jpg}" class="avatar img-fluid rounded-circle" alt="Sharon Lessman">
+									</div>
+									<div class="col-10 ps-2">
+										<div class="text-dark">Sharon Lessman</div>
+										<div class="text-muted small mt-1">Aenean tellus metus, bibendum sed, posuere ac, mattis non.</div>
+										<div class="text-muted small mt-1">5h ago</div>
+									</div>
+								</div>
+							</a>
+						</div>
+						<div class="dropdown-menu-footer">
+							<a href="#" class="text-muted">Show all messages</a>
+						</div>
+					</div>
+				</li>
+
+				<div class="sidebar-user">
+					<div class="d-flex justify-content-center">
+						<div class="flex-shrink-0">
+							<img th:src="@{/img/avatars/avatar.jpg}" class="avatar img-fluid rounded me-1" alt="Charles Hall">
+						</div>
+						<div class="flex-grow-1 ps-2">
+							<a class="sidebar-user-title dropdown-toggle text-secondary" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+								<a th:remove="tag" sec:authentication="name">Nombre usuario</a>
+							</a>
+							<div class="dropdown-menu dropdown-menu-end">
+								<a class="dropdown-item" href="pages-profile.html"><i class="align-middle me-1" data-feather="user"></i> Mi perfil</a>
+								<div class="dropdown-divider"></div>
+								<a class="dropdown-item" href="pages-settings.html"><i class="align-middle me-1" data-feather="settings"></i> Ajustes</a>
+								<div class="dropdown-divider"></div>
+								<a class="dropdown-item sign-out-alt" th:href=@{/logout}><i class="align-middle me-1" ></i>Log out</a>
+							</div>
+
+<!--							<div class="sidebar-user-subtitle">Designer</div>-->
+						</div>
+					</div>
+				</div>
+
+
+			</ul>
+		</div>
 	</nav>
-
-	
 </div>
-<div th:fragment="footer">
-	
-      <script type="text/javascript"
-              th:src="@{/jquery/jquery-3.5.1.min.js}"></script>
-	<script type="text/javascript" th:src="@{/mdb/js/mdb.min.js}"></script>
-      <script type="text/javascript" th:src="@{/bootstrap/js/bootstrap.min.js}"></script>
-      <script type="text/javascript"
-              th:src="@{/bootstrap-notify-3.1.3/bootstrap-notify.min.js}"></script>        
-      <script type="text/javascript" th:src="@{/js/scripts.js}"></script>
 
-      </footer>
-    
+<div th:fragment="sidebar">
+	<nav id="sidebar" class="sidebar js-sidebar">
+		<div class="sidebar-content js-simplebar">
+			<a class="sidebar-brand" href="/">
+					<span class="sidebar-brand-text align-middle">
+						Gestmusica
+					</span>
+				<svg class="sidebar-brand-icon align-middle" width="32px" height="32px" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.5"
+					 stroke-linecap="square" stroke-linejoin="miter" color="#FFFFFF" style="margin-left: -3px">
+					<path d="M12 4L20 8.00004L12 12L4 8.00004L12 4Z"></path>
+					<path d="M20 12L12 16L4 12"></path>
+					<path d="M20 16L12 20L4 16"></path>
+				</svg>
+			</a>
+
+			<ul class="sidebar-nav">
+				<li class="sidebar-header">
+					Agencia
+				</li>
+				<li class="sidebar-item">
+					<a class="sidebar-link" href="/agencia">
+						<i class="align-middle me-2 fas fa-fw fa-suitcase" ></i> <span class="align-middle">Agencias</span>
+					</a>
+				</li>
+				<li class="sidebar-item">
+					<a class="sidebar-link" href="/artista">
+						<i class="align-middle me-2 fas fa-fw fa-music" ></i> <span class="align-middle">Artistas</span>
+					</a>
+				</li>
+				<li class="sidebar-item">
+					<a class="sidebar-link" href="/agente">
+						<i class="align-middle me-2 fas fa-fw fa-user-tie" ></i> <span class="align-middle">Agentes</span>
+					</a>
+				</li>
+				<li class="sidebar-header">
+					Fechas
+				</li>
+				<li class="sidebar-item">
+					<a class="sidebar-link" href="/tarifas">
+						<i class="align-middle me-2 fas fa-fw fa-calendar-alt" ></i> <span class="align-middle">Listados</span>
+					</a>
+				</li>
+				<li class="sidebar-item">
+					<a class="sidebar-link" href="/tarifas">
+						<i class="align-middle me-2 fas fa-fw fa-calendar" ></i> <span class="align-middle">Tarifas</span>
+					</a>
+				</li>
+				<li class="sidebar-item">
+					<a class="sidebar-link" href="/tarifas">
+						<i class="align-middle me-2 fas fa-fw fa-calendar-plus" ></i> <span class="align-middle">Ocupaciones</span>
+					</a>
+				</li>
+
+				<li class="sidebar-header">
+					Administración
+				</li>
+				<div sec:authorize="hasAuthority('USUARIOS')">
+					<li class="sidebar-item">
+						<a class="sidebar-link" href="/usuarios">
+							<i class="align-middle me-2 fas fa-fw fa-users"></i> <span class="align-middle">Usuarios</span>
+						</a>
+					</li>
+				</div>
+
+			</ul>
+		</div>
+	</nav>
+</div>
+
+<div th:fragment="footer">
+
+	<footer class="footer">
+		<div class="container-fluid">
+			<div class="row text-muted">
+				<div class="col-6 text-start">
+					<p class="mb-0">
+						<a href="https://adminkit.io/" target="_blank" class="text-muted"><strong>GestMusica</strong></a> &copy;
+					</p>
+				</div>
+				<div class="col-6 text-end">
+					<ul class="list-inline">
+						<li class="list-inline-item">
+							<a class="text-muted" href="#">Contacto</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+		<script th:src="@{/adminkit/js/app.js}"></script>
+	</footer>
+
 
 </div>
 </body>

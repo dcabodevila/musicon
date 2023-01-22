@@ -1,64 +1,116 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org">
+      xmlns:th="http://www.thymeleaf.org" lang="es">
     <head>
 	    <title>Login</title>
 	    <div th:replace="~{fragments/main-template :: header-css}"/>
     </head>
-    <body>
-		<div th:replace="~{fragments/main-template :: header}"/>
-		
-		<div class="container">
-			    
-				<div fragment="content" th:remove="tag">
-				
-				    <div class="row">
-				        <div class="col-md-6 col-md-offset-3">
-				            <p><h1>Iniciar sesión</h1></p>
-				            <form th:action="@{/login}" method="post">
-				                <div th:if="${param.error}">
-				                    <div class="alert alert-danger">
-				                        Password incorrecto
-				                    </div>
-				                </div>
-				                <div th:if="${param.logout}">
-				                    <div class="alert alert-info">
-				                        Has cerrado la sesión
-				                    </div>
-				                </div>
-				                <div class="form-group">
-				                    <input type="text"
-				                           id="username"
-				                           name="username"
-				                           class="form-control"
-				                           autofocus="autofocus"
-				                           placeholder="Nombre de usuario">
-				                </div>
-				                <div class="form-group">
-				                    <input type="password"
-				                           id="password"
-				                           name="password"
-				                           class="form-control"
-				                           placeholder="Contraseña">
-				                </div>
-								<button class="btn btn-primary waves-effect waves-light" type="submit">Iniciar sesión</button>				                
-
-				            </form>
-				        </div>
-				    </div>
-					<p><a href="/" class="btn btn-outline-default waves-effect" th:href="@{/registration}">Registrarse</a></p>				        
-
-				    
 
 
-				    <p><a href="/" th:href="@{/recover}">Has olvidado tu contraseña?</a></p>
+	<body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
+	<main class="d-flex w-100 h-100">
+		<div class="container d-flex flex-column">
+			<div class="row vh-100">
+				<div class="col-sm-10 col-md-8 col-lg-6 mx-auto d-table h-100">
+					<div class="d-table-cell align-middle">
 
-				
+						<div class="text-center mt-4">
+							<h1 class="h2">Bienvenido a Gestmusica</h1>
+							<p class="lead">
+								Inicia sesión para continuar
+							</p>
+						</div>
+
+						<div class="card">
+							<div class="card-body">
+								<div class="m-sm-4">
+									<form th:action="@{/login}" method="post">
+										<div class="mb-3">
+											<label class="form-label">Nombre de usuario</label>
+											<input id="username" name="username" autofocus="autofocus" class="form-control form-control-lg" type="text" placeholder="Introduce nombre de usuario" />
+										</div>
+										<div class="mb-3">
+											<label class="form-label">Contraseña</label>
+											<input id="password" name="password" class="form-control form-control-lg" type="password" placeholder="Introduce tu contraseña" />
+											<small>
+												<a th:href="@{/recover}">He olvidado mi contraseña</a>
+											</small>
+										</div>
+										<div class="text-center mt-3">
+											 <button type="submit" class="btn btn-lg btn-primary">Iniciar sesión</button>
+										</div>
+										<div class="text-center mt-3">
+											<a class="btn btn-outline-primary" th:href="@{/registration}">Registrarse</a>
+										</div>
+
+									</form>
+								</div>
+							</div>
+						</div>
+
+					</div>
 				</div>
+			</div>
+		</div>
+	</main>
 
-		</div>	
-		<div th:replace="~{fragments/main-template :: footer}"/>
-    </body>
+	<script src="js/app.js"></script>
+
+	</body>
+
+<!--    <body>-->
+<!--		-->
+<!--		<div class="container">-->
+<!--			    -->
+<!--				<div fragment="content" th:remove="tag">-->
+<!--				-->
+<!--				    <div class="row">-->
+<!--				        <div class="col-md-6 col-md-offset-3">-->
+<!--				            <p><h1>Iniciar sesión</h1></p>-->
+<!--				            <form th:action="@{/login}" method="post">-->
+<!--				                <div th:if="${param.error}">-->
+<!--				                    <div class="alert alert-danger">-->
+<!--				                        Password incorrecto-->
+<!--				                    </div>-->
+<!--				                </div>-->
+<!--				                <div th:if="${param.logout}">-->
+<!--				                    <div class="alert alert-info">-->
+<!--				                        Has cerrado la sesión-->
+<!--				                    </div>-->
+<!--				                </div>-->
+<!--				                <div class="form-group">-->
+<!--				                    <input type="text"-->
+<!--				                           id="username"-->
+<!--				                           name="username"-->
+<!--				                           class="form-control"-->
+<!--				                           autofocus="autofocus"-->
+<!--				                           placeholder="Nombre de usuario">-->
+<!--				                </div>-->
+<!--				                <div class="form-group">-->
+<!--				                    <input type="password"-->
+<!--				                           id="password"-->
+<!--				                           name="password"-->
+<!--				                           class="form-control"-->
+<!--				                           placeholder="Contraseña">-->
+<!--				                </div>-->
+<!--								<button class="btn btn-primary waves-effect waves-light" type="submit">Iniciar sesión</button>				                -->
+
+<!--				            </form>-->
+<!--				        </div>-->
+<!--				    </div>-->
+<!--					<p><a href="/" class="btn btn-outline-default waves-effect" th:href="@{/registration}">Registrarse</a></p>				        -->
+
+<!--				    -->
+
+
+<!--				    <p><a href="/" th:href="@{/recover}">Has olvidado tu contraseña?</a></p>-->
+
+<!--				-->
+<!--				</div>-->
+
+<!--		</div>-->
+<!--		<div th:replace="~{fragments/main-template :: footer}"/>-->
+<!--    </body>-->
    
 </html>
 

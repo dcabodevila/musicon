@@ -2,57 +2,111 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org">
   <head>
-	<div th:replace="~{fragments/main-template :: header-css}"/>
     <title>Registrarse</title>
+	<div th:replace="~{fragments/main-template :: header-css}"/>
   </head>
 
-  <body>
-	<div th:replace="~{fragments/main-template :: header}"/>
-    <div class="container">
 
-        <form method="POST" th:object="${registrationForm}" th:action=@{/registration} class="form-signin">
-        		<div class="col-md-6 col-md-offset-3">
-            	<p><h1 class="form-signin-heading">Registrarse</h1></p>
-                <div class="form-group required">
-                    <input type="text" th:field="*{username}" class="form-control" placeholder="Nombre de usuario"
-                                autofocus="true" required></input>
-                    <p th:each="error: ${#fields.errors('username')}"
-                       th:text="${error}">Validation error</p>
-                </div>
-                <div class="form-group required">
-                    <input type="text" th:field="*{nombre}" class="form-control" placeholder="Nombre"
-                           autofocus="true" required></input>
-                    <p th:each="error: ${#fields.errors('nombre')}"
-                       th:text="${error}">Validation error</p>
-                </div>
-                <div class="form-group">
-                    <input type="text" th:field="*{apellidos}" class="form-control" placeholder="Apellidos"
-                           autofocus="true"></input>
-                    <p th:each="error: ${#fields.errors('apellidos')}"
-                       th:text="${error}">Validation error</p>
-                </div>
+  <body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
+  <main class="d-flex w-100 h-100">
+      <div class="container d-flex flex-column">
+          <div class="row vh-100">
+              <div class="col-sm-10 col-md-8 col-lg-6 mx-auto d-table h-100">
+                  <div class="d-table-cell align-middle">
 
-                <div class="form-group required">
-                    <input type="password" th:field="*{password}" class="form-control" placeholder="Contraseña" required></input>
-                    <p th:each="error : ${#fields.errors('password')}"
-                       th:text="${error}">Validation error</p>
-                </div>
+                      <div class="text-center mt-4">
+                          <h1 class="h2">Crear una nueva cuenta</h1>
+                      </div>
 
-                <div class="form-group required">
-                    <input type="password"  th:field="*{retryPassword}" class="form-control"
-                                placeholder="Confirma la contraseña" required></input>
-                </div>
-                <div class="form-group required">
-                    <input type="email" th:field="*{email}" class="form-control required"
-                                placeholder="e-mail" required></input>
-                </div>
+                      <div class="card">
+                          <div class="card-body">
+                              <div class="m-sm-4">
+                                  <form method="POST" th:object="${registrationForm}" th:action=@{/registration} class="form-signin">
+                                      <div class="mb-3">
+                                          <label class="form-label">Nombre de usuario</label>
+                                          <input class="form-control form-control-lg" type="text" th:field="*{username}" name="username" placeholder="Nombre de usuario" autofocus="true" required/>
+                                          <div class="col-sm-12">
+                                              <small class="text-danger">
+                                                  <p th:each="error: ${#fields.errors('username')}"
+                                                     th:text="${error}">Validation error</p>
+                                              </small>
+                                          </div>
+                                      </div>
 
-            <button class="btn btn-lg btn-primary btn-block" type="submit">Registrarse</button>
-            </div>
-        </form>
+                                      <div class="mb-3">
+                                          <label class="form-label">Contraseña</label>
+                                          <input type="password" th:field="*{password}" class="form-control form-control-lg" placeholder="Contraseña" required></input>
+                                          <div class="col-sm-12">
+                                              <small id="passwordHelp" class="text-danger">
+                                                  <p th:each="error: ${#fields.errors('password')}"
+                                                     th:text="${error}">Validation error</p>
+                                              </small>
+                                          </div>
 
-    </div>
+                                      </div>
+                                      <div class="mb-3">
+                                          <label class="form-label">Repetir contraseña</label>
+                                          <input type="password" th:field="*{retryPassword}" class="form-control form-control-lg" placeholder="Repite la contraseña" required></input>
+                                          <div class="col-sm-12">
+                                              <small class="text-danger">
+                                                  <p th:each="error: ${#fields.errors('retryPassword')}"
+                                                     th:text="${error}">Validation error</p>
+                                              </small>
+                                          </div>
+                                      </div>
+                                      <div class="mb-3">
+                                          <label class="form-label">e-mail</label>
+                                          <input type="email" th:field="*{email}" class="form-control form-control-lg" placeholder="e-mail" required></input>
+                                          <div class="col-sm-12">
+                                              <small class="text-danger">
+                                                  <p th:each="error: ${#fields.errors('email')}"
+                                                     th:text="${error}">Validation error</p>
+                                              </small>
+                                          </div>
+                                      </div>
+                                      <div class="mb-3">
+                                          <label class="form-label">Nombre</label>
+                                          <input type="text" th:field="*{nombre}" class="form-control form-control-lg" placeholder="Nombre"
+                                                 autofocus="true" required></input>
+                                          <div class="alert alert-warning" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></div>
+                                          <div class="col-sm-12">
+                                              <small class="text-danger">
+                                                  <p th:each="error: ${#fields.errors('nombre')}"
+                                                     th:text="${error}">Validation error</p>
+                                              </small>
+                                          </div>
+                                      </div>
+                                      <div class="mb-3">
+                                          <label class="form-label">Apellidos</label>
+                                          <input type="text" th:field="*{apellidos}" class="form-control form-control-lg" placeholder="Apellidos"
+                                                 autofocus="true"></input>
+                                          <div class="alert alert-warning" th:if="${#fields.hasErrors('apellidos')}" th:errors="*{apellidos}"></div>
+                                          <div class="col-sm-12">
+                                              <small class="text-danger">
+                                                  <p th:each="error: ${#fields.errors('apellidos')}"
+                                                     th:text="${error}">Validation error</p>
+                                              </small>
+                                          </div>
+                                      </div>
+                                      <div class="text-center mt-3">
+                                           <button type="submit" class="btn btn-lg btn-primary">Registrarse</button>
+                                      </div>
+                                      <div class="text-center mt-3">
+                                          <a class="btn btn-outline-primary" th:href="@{/login}">Iniciar sesión</a>
+                                      </div>
+                                  </form>
+                              </div>
+                          </div>
+                      </div>
 
-	<div th:replace="~{fragments/main-template :: footer}"/>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </main>
+
+
+<!--    <div th:replace="~{fragments/main-template :: footer}"/>-->
+
   </body>
 </html>
