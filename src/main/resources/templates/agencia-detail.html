@@ -7,9 +7,11 @@
     <meta name="description" content="">
     <meta name="author" content=""><head>
     <div th:replace="~{fragments/main-template :: header-css}"/>
-
+    <script th:src="@{/js/jquery.min.js}"></script>
+    <script th:src="@{/adminkit/js/datatables.js}"></script>
 </head>
 <body>
+
 <body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
 <div class="wrapper">
 
@@ -32,116 +34,90 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-12 col-xl-6">
+                    <div class="col-12 col-md-3 col-lg-3">
                         <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title" th:text="${agenciaDto.id==null ? 'Crear nueva agencia' : 'Editar agencia' }"></h5>
+                            <img class="card-img-top" th:if="${agenciaDto.logo!=null}"  th:src="@{'/'+${agenciaDto.logo}}" alt="Unsplash" style="max-height: 250px;">
+                            <div class="card-header px-4 pt-4">
+                                <h4 class="card-title mb-0" th:text="${agenciaDto.nombre}">Nombre</h4>
                             </div>
                             <div class="card-body">
-                                <form method="POST" th:object="${agenciaDto}" th:action=@{/agencia/guardar} enctype="multipart/form-data">
+                                <h5 class="card-text" th:if="${agenciaDto.direccion!=null}" th:text="${agenciaDto.descripcion}">Descripción</h5>
+                                <h5 class="card-text" th:if="${agenciaDto.cif!=null}" th:text="${'CIF: '+ agenciaDto.cif}">CIF</h5>
 
-                                    <input hidden th:field="*{id}">
-                                    <div class="mb-3 row required">
-                                        <label class="col-form-label col-sm-3 text-sm-end">Nombre</label>
-                                        <div class="col-sm-9">
-                                            <input type="text" class="form-control" th:field="*{nombre}" placeholder="Nombre" id="nombre" required autocomplete="off">
-                                        </div>
-                                    </div>
+                                <ul class="list-unstyled mb-0">
+                                    <li class="mb-1"><span class="fas fa-user fa-fw me-1"></span> <a th:href="@{/usuario/__${agenciaDto.idUsuario}__}"  th:text="${agenciaDto.nombreUsuario}"></a></li>
+                                    <li class="mb-1" th:if="${agenciaDto.telefono!=null && agenciaDto.telefono!=''}"><span class="fas fa-phone fa-fw me-1"></span> <a th:href="${'tel:'+ agenciaDto.telefono}"  th:text="${agenciaDto.telefono}"></a></li>
+                                    <li class="mb-1" th:if="${agenciaDto.email!=null && agenciaDto.email!=''}"><span class="fas fa-envelope fa-fw me-1"></span> <a th:href="${'mailto:'+ agenciaDto.email}"  th:text="${agenciaDto.email}"></a></li>
+                                    <li class="mb-1" th:if="${agenciaDto.direccion!=null && agenciaDto.direccion!=''}"><span class="fas fa-map-marker fa-fw me-1"></span> <span href="#"  th:text="${agenciaDto.direccion}"></span></li>
+                                    <li class="mb-1" th:if="${agenciaDto.nombreProvincia!=null && agenciaDto.nombreProvincia!=''}"><span class="fas fa-map-marked fa-fw me-1"></span> <span href="#"  th:text="${agenciaDto.nombreProvincia}"></span></li>
+                                </ul>
+                            </div>
+                            <hr class="my-0">
+                            <div class="card-body">
+                                <ul class="list-unstyled mb-0">
+                                    <li class="mb-1" th:if="${agenciaDto.web!=null && agenciaDto.web!=''}"><span class="fas fa-globe fa-fw me-1"></span> <a th:href="${'http://'+agenciaDto.web}" th:target="_blank" th:text="${agenciaDto.web}" ></a></li>
+                                    <li class="mb-1" th:if="${agenciaDto.facebook!=null && agenciaDto.facebook!=''}"><span class="fab fa-fw fa-facebook" ></span> <a th:text="${agenciaDto.facebook}" th:href="${'http://'+agenciaDto.facebook}" th:target="_blank"></a></li>
+                                    <li class="mb-1" th:if="${agenciaDto.instagram!=null  && agenciaDto.instagram!=''}"><span class="fab fa-fw fa-instagram" ></span> <a th:text="${agenciaDto.instagram}" th:href="${'http://'+agenciaDto.instagram}" th:target="_blank"></a></li>
+                                </ul>
+                            </div>
 
-                                    <div class="mb-3 row">
-                                        <label class="col-form-label col-sm-3 text-sm-end">CIF</label>
-                                        <div class="col-sm-9">
-                                            <input class="form-control" th:field="*{cif}" placeholder="CIF" id="cif" autocomplete="off">
-                                        </div>
-                                    </div>
-                                    <div class="mb-3 row">
-                                        <label class="col-form-label col-sm-3 text-sm-end">Descripción</label>
-                                        <div class="col-sm-9">
-                                            <input id="descripcion" class="form-control" th:field="*{descripcion}" placeholder="Texto que describa a la agencia" autocomplete="off"></input>
-                                        </div>
-                                    </div>
-                                    <div class="mb-3 row">
-                                        <label class="col-form-label col-sm-3 text-sm-end">Administrador</label>
-                                        <div class="col-sm-9">
-                                            <select id="usuario" th:field="*{idUsuario}" class="form-control choices-single" required>
-                                                <option th:each="usuario : ${listaUsuarios}" th:value="${usuario.id}" th:text="${usuario.nombreApellidos}"></option>
-                                            </select>
-                                        </div>
-                                    </div>
+                            <div class="card-body text-center">
 
-                                    <div class="mb-3 row">
-                                        <label class="col-form-label col-sm-3 text-sm-end">Provincia</label>
-                                        <div class="col-sm-9">
-                                            <select id="provincia" th:field="*{idProvincia}" class="form-control choices-single" required>
-                                                <option th:each="provincia : ${listaProvincias}" th:value="${provincia.id}" th:text="${provincia.nombre}"></option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="mb-3 row">
-                                        <label class="col-form-label col-sm-3 text-sm-end">Localidad</label>
-                                        <div class="col-sm-9">
-                                            <input class="form-control" th:field="*{localidad}" placeholder="Localidad" id="localidad" autocomplete="off">
-                                        </div>
-                                    </div>
-                                    <div class="mb-3 row">
-                                        <label class="col-form-label col-sm-3 text-sm-end">e-mail</label>
-                                        <div class="col-sm-9">
-                                            <input type="text" th:field="*{email}"class="form-control" data-inputmask="'alias': 'email'" />
-                                        </div>
-                                    </div>
-                                    <div class="mb-3 row">
-                                        <label class="col-form-label col-sm-3 text-sm-end">Web</label>
-                                        <div class="col-sm-9">
-                                            <input class="form-control" th:field="*{web}" placeholder="Web" id="web" autocomplete="off">
-                                        </div>
-                                    </div>
-                                    <div class="mb-3 row">
-                                        <label class="col-form-label col-sm-3 text-sm-end">Teléfono</label>
-                                        <div class="col-sm-9">
-                                            <input class="form-control" th:field="*{telefono}" placeholder="Teléfono" id="telefono" autocomplete="off">
-                                        </div>
-                                    </div>
-                                    <div class="mb-3 row">
-                                        <label class="col-form-label col-sm-3 text-sm-end">Instagram</label>
-                                        <div class="col-sm-9">
-                                            <input class="form-control" th:field="*{instagram}" placeholder="Instagram" id="instagram" autocomplete="off">
-                                        </div>
-                                    </div>
-                                    <div class="mb-3 row">
-                                        <label class="col-form-label col-sm-3 text-sm-end">Facebook</label>
-                                        <div class="col-sm-9">
-                                            <input class="form-control" th:field="*{facebook}" placeholder="Facebook" id="facebook" autocomplete="off">
-                                        </div>
-                                    </div>
+                                <div>
+                                    <a th:href="@{/agencia/edit/__${agenciaDto.id}__}" class="btn btn-primary">Editar datos agencia</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-9 col-lg-9" th:unless="${#lists.isEmpty(listaArtistas)}">
+                        <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title">Artistas de la agencia</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="datatables-reponsive_wrapper" class="dataTables_wrapper dt-bootstrap5 no-footer">
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                <table id="datatables-reponsive" class="table table-striped dataTable no-footer dtr-inline collapsed" style="width: 100%;" aria-describedby="datatables-reponsive_info">
+                                <thead>
+                                    <tr>
+                                        <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Artista</th>
+                                        <th class="sorting" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Responsable</th>
+                                        <th class="sorting dtr-hidden dt-head-right" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Componentes</th>
+                                        <th class="sorting dtr-hidden dt-head-right" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Viento</th>
+                                        <th class="sorting dtr-hidden dt-head-right" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Ritmo</th>
+                                        <th class="sorting dtr-hidden dt-head-right" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Bailarinas</th>
+                                        <th class="sorting dtr-hidden dt-head-right" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Solistas</th>
+                                        <th class="sorting dtr-hidden dt-head-right" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Luz</th>
+                                        <th class="sorting dtr-hidden dt-head-right" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Sonido</th>
+                                        <th class="sorting dtr-hidden dt-head-center" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Escenario</th>
+                                        <th class="sorting dtr-hidden" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Tipo escenario</th>
+                                        <th class="sorting dtr-hidden" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Medidas escenario</th>
 
+                                    </tr>
+                                </thead>
+                                <tbody>
 
-                                    <div class="mb-3 row">
-                                        <label class="col-form-label col-sm-3 text-sm-end">Logo</label>
-                                        <div class="col-sm-9">
-                                            <input type="file" name="image" accept="image/*" class="form-control-file">
-                                            <small class="form-text text-muted">Logo de la empresa. Tamaño máximo 400x400</small>
-                                        </div>
-                                    </div>
-                                    <div class="mb-3 row">
-                                        <label class="col-form-label col-sm-3 text-sm-end pt-sm-0">Visibilidad de tarifas</label>
-                                        <div class="col-sm-9">
-                                            <label class="form-check m-0">
-                                                <input type="checkbox"  th:field="*{tarifasPublicas}" class="form-check-input">
-                                                <span class="form-check-label">Tarifas públicas</span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="mb-3 row">
-                                        <label class="col-form-label col-sm-3 text-sm-end pt-sm-0" for="flexSwitchCheckChecked">Agencia activa</label>
-                                        <div class="col-sm-9">
-                                            <div class="form-check form-switch">
-                                                <input class="form-check-input" type="checkbox" th:field="*{activo}" id="flexSwitchCheckChecked" checked="" wfd-id="id17">
-                                            </div>
-                                        </div>
-                                    </div>
+                                <tr th:each="artista : ${listaArtistas}">
 
-                                    <button type="submit" class="btn btn-primary" th:text="${agenciaDto.id==null ? 'Crear agencia' : 'Guardar' }">Botón</button>
-                                </form>
+                                    <td class="dtr-control sorting_1" tabindex="0" th:text="${artista.nombre}" ></td>
+                                    <td th:text="${artista.nombreUsuario}">Responsable</td>
+                                    <td class="dtr-hidden dt-body-right" th:text="${artista.componentes}">Componentes</td>
+                                    <td class="dtr-hidden dt-body-right" th:text="${artista.viento}">Viento</td>
+                                    <td class="dtr-hidden dt-body-right" th:text="${artista.ritmo}">Ritmo</td>
+                                    <td class="dtr-hidden dt-body-right" th:text="${artista.bailarinas}"></td>
+                                    <td class="dtr-hidden dt-body-right" th:text="${artista.solistas}"></td>
+                                    <td class="dtr-hidden dt-body-right" th:text="${artista.luz}"></td>
+                                    <td class="dtr-hidden dt-body-right" th:text="${artista.sonido}"></td>
+                                    <td class="dtr-hidden dt-body-center" th:text="${artista.escenario ? 'Sí' : 'No'}"></td>
+                                    <td class="dtr-hidden" th:text="${artista.nombreTipoEscenario}"></td>
+                                    <td class="dtr-hidden" th:text="${artista.medidasEscenario}"></td>
+                                </tr>
+
+                            </tbody>
+                            </table></div></div>
+
+                            </div>
                             </div>
                         </div>
                     </div>

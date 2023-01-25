@@ -22,9 +22,12 @@ public class AgenciaDto {
     private String logo;
     private Long idMunicipio;
     private Long idProvincia;
+
+    private String nombreProvincia;
     @NotNull
     @NotEmpty
     private Long idUsuario;
+    private String nombreUsuario;
     private String email;
     private String fax;
     private String web;
@@ -33,6 +36,8 @@ public class AgenciaDto {
     private String facebook;
     private Boolean activo;
     private Boolean tarifasPublicas;
+
+    private String codigoPostal;
 
 
     public AgenciaDto(){
@@ -181,5 +186,29 @@ public class AgenciaDto {
 
     public void setTarifasPublicas(Boolean tarifasPublicas) {
         this.tarifasPublicas = tarifasPublicas;
+    }
+
+    public String getNombreUsuario() {
+        return nombreUsuario;
+    }
+
+    public void setNombreUsuario(String nombreUsuario) {
+        this.nombreUsuario = nombreUsuario;
+    }
+
+    public String getCodigoPostal() {
+        return codigoPostal;
+    }
+
+    public void setCodigoPostal(String codigoPostal) {
+        this.codigoPostal = codigoPostal;
+    }
+
+    public String getNombreProvincia() {
+        return nombreProvincia;
+    }
+
+    public void setNombreProvincia(String nombreProvincia) {
+        this.nombreProvincia = nombreProvincia;
     }
 }

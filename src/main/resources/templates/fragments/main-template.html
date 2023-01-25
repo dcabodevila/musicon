@@ -242,15 +242,17 @@
 					</a>
 				</li>
 
-				<li class="sidebar-header">
-					Administración
-				</li>
-				<div sec:authorize="hasAuthority('USUARIOS')">
-					<li class="sidebar-item">
-						<a class="sidebar-link" href="/usuarios">
-							<i class="align-middle me-2 fas fa-fw fa-users"></i> <span class="align-middle">Usuarios</span>
-						</a>
+				<div sec:authorize="hasAuthority('ACCESO_PANEL_ADMIN')">
+					<li class="sidebar-header">
+						Administración
 					</li>
+					<div sec:authorize="hasAuthority('USUARIOS')">
+						<li class="sidebar-item">
+							<a class="sidebar-link" href="/usuarios">
+								<i class="align-middle me-2 fas fa-fw fa-users"></i> <span class="align-middle">Usuarios</span>
+							</a>
+						</li>
+					</div>
 				</div>
 
 			</ul>
@@ -265,19 +267,20 @@
 			<div class="row text-muted">
 				<div class="col-6 text-start">
 					<p class="mb-0">
-						<a href="https://adminkit.io/" target="_blank" class="text-muted"><strong>GestMusica</strong></a> &copy;
+						<a href="https://gestmusica.com/" target="_blank" class="text-muted"><strong>GestMusica</strong></a> &copy;
 					</p>
 				</div>
 				<div class="col-6 text-end">
 					<ul class="list-inline">
 						<li class="list-inline-item">
-							<a class="text-muted" href="#">Contacto</a>
+							<a class="text-muted" href="mailto:soporte@gestmusica.com">Contacto</a>
 						</li>
 					</ul>
 				</div>
 			</div>
 		</div>
 		<script th:src="@{/adminkit/js/app.js}"></script>
+		<script th:src="@{/js/moment.js}"></script>
 	</footer>
 
 

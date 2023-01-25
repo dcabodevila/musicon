@@ -13,6 +13,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,21 +37,37 @@ public class AgenciaServiceImpl implements AgenciaService {
 		this.agenciaContactoRepository = agenciaContactoRepository;
 	}
 
-	public List<Agencia> findAllAgenciasForUser(final Usuario usuario){
-
+	public List<AgenciaDto> findAllAgenciasForUser(final Usuario usuario){
+		List<Agencia> listaAgencias = new ArrayList<>();
+		List<AgenciaDto> listaAgenciasDto = new ArrayList<>();
 		if (usuario.getRol()!=null && "Administrador".equals(usuario.getRol().getNombre())){
-			return this.agenciaRepository.findAllAgenciasOrderedByName();
+			listaAgencias = this.agenciaRepository.findAllAgenciasOrderedByName();
+		}
+		else {
+			listaAgencias = this.agenciaRepository.findAllAgenciasByIdUsuario(usuario.getId());
 		}
 
-		return this.agenciaRepository.findAllAgenciasByIdUsuario(usuario.getId());
+		for (Agencia agencia : listaAgencias){
+			listaAgenciasDto.add(getAgenciaDto(agencia));
+		}
+		return listaAgenciasDto;
+
 	}
 
-	public AgenciaDto findAgenciaDtoById(Long idAgencia){
-		final Agencia agencia = this.agenciaRepository.findById(idAgencia).get();
 
+	public AgenciaDto findAgenciaDtoById(Long idAgencia){
+		final Agencia agencia = this.agenciaRepository.findById(idAgencia).orElseThrow();
+
+		AgenciaDto agenciaDto = getAgenciaDto(agencia);
+
+		return agenciaDto;
+
+	}
+
+	private static AgenciaDto getAgenciaDto(Agencia agencia) {
 		ModelMapper modelMapper = new ModelMapper();
 		AgenciaDto agenciaDto = modelMapper.map(agencia, AgenciaDto.class);
-
+		agenciaDto.setNombreUsuario(agencia.getUsuario().getNombre().concat(" ").concat(agencia.getUsuario().getApellidos()));
 		final Contacto agenciaContacto = agencia.getAgenciaContacto();
 
 		if (agenciaContacto!=null){
@@ -61,10 +78,9 @@ public class AgenciaServiceImpl implements AgenciaService {
 			agenciaDto.setFacebook(agenciaContacto.getFacebook());
 			agenciaDto.setTelefono(agenciaContacto.getTelefono());
 		}
-
-	return agenciaDto;
-
+		return agenciaDto;
 	}
+
 	@Transactional(readOnly = false)
 	public Agencia saveAgencia(AgenciaDto agenciaDto){
 		Agencia agencia = newAgencia(agenciaDto.getId());
@@ -108,12 +124,12 @@ public class AgenciaServiceImpl implements AgenciaService {
 		}
 
 		Contacto agenciaContacto = agencia.getAgenciaContacto() != null ? agencia.getAgenciaContacto() : new Contacto();
-		agenciaContacto.setFacebook(agenciaDto.getFacebook());
+		agenciaContacto.setFacebook(removeHttp(agenciaDto.getFacebook()));
 		agenciaContacto.setEmail(agenciaDto.getEmail());
 		agenciaContacto.setFax(agenciaDto.getFax());
 		agenciaContacto.setTelefono(agenciaDto.getTelefono());
-		agenciaContacto.setInstagram(agenciaDto.getInstagram());
-		agenciaContacto.setWeb(agenciaDto.getWeb());
+		agenciaContacto.setInstagram(removeHttp(agenciaDto.getInstagram()));
+		agenciaContacto.setWeb(removeHttp(agenciaDto.getWeb()));
 		agenciaContacto = this.agenciaContactoRepository.save(agenciaContacto);
 		agencia.setAgenciaContacto(agenciaContacto);
 
@@ -131,5 +147,15 @@ public class AgenciaServiceImpl implements AgenciaService {
 
 	}
 
+
+	public static String removeHttp(String input) {
+		if (input.startsWith("http://")) {
+			return input.substring(7);
+		}
+		else if (input.startsWith("https://")) {
+			return input.substring(8);
+		}
+		return input;
+	}
 
 }

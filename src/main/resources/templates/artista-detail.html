@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -32,120 +32,42 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-12 col-xl-6">
+
+                    <div class="col-12 col-md-3 col-lg-3">
                         <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title" th:text="${artistaDto.id==null ? 'Crear nueva artista' : 'Editar artista' }"></h5>
+                            <img class="card-img-top" th:if="${artistaDto.logo!=null}"  th:src="@{'/'+${artistaDto.logo}}" alt="Unsplash" style="max-height: 327px;">
+                            <div class="card-header px-4 pt-4">
+                                <h5 class="card-title mb-0" th:text="${artistaDto.nombre}">Card with image and button</h5>
                             </div>
                             <div class="card-body">
-                                <form method="POST" th:object="${artistaDto}" th:action=@{/artista/guardar} enctype="multipart/form-data">
+                                <h5 class="card-text" th:if="${artistaDto.cif!=null}" th:text="${'CIF: '+ artistaDto.cif}">CIF</h5>
 
-                                    <input hidden th:field="*{id}">
-                                    <div class="mb-3 row required">
-                                        <label class="col-form-label col-sm-3 text-sm-end">Nombre</label>
-                                        <div class="col-sm-9">
-                                            <input type="text" class="form-control" th:field="*{nombre}" placeholder="Nombre" id="nombre" required autocomplete="off">
-                                        </div>
-                                    </div>
-                                    <div class="mb-3 row">
-                                        <label class="col-form-label col-sm-3 text-sm-end">Agencia</label>
-                                        <div class="col-sm-9">
-                                            <select id="agencia" th:field="*{idAgencia}" class="form-control choices-single" required>
-                                                <option th:each="agencia : ${listaAgencias}" th:value="${agencia.id}" th:text="${agencia.nombre}"></option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="mb-3 row">
-                                        <label class="col-form-label col-sm-3 text-sm-end">Administrador</label>
-                                        <div class="col-sm-9">
-                                            <select id="usuario" th:field="*{idUsuario}" class="form-control choices-single" required>
-                                                <option th:each="usuario : ${listaUsuarios}" th:value="${usuario.id}" th:text="${usuario.nombreApellidos}"></option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="mb-3 row">
-                                        <label class="col-form-label col-sm-3 text-sm-end">Tipo de artista</label>
-                                        <div class="col-sm-9">
-                                            <select id="tipoArtista" th:field="*{idTipoArtista}" class="form-control choices-single" required>
-                                                <option th:each="tipoArtista : ${listaTipoArtista}" th:value="${tipoArtista.id}" th:text="${tipoArtista.nombre}"></option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="mb-3 row">
-                                        <label class="col-form-label col-sm-3 text-sm-end">Tipo de escenario</label>
-                                        <div class="col-sm-9">
-                                            <select id="tipoEscenario" th:field="*{idTipoEscenario}" class="form-control choices-single">
-                                                <option th:each="tipoEscenario : ${listaTipoEscenario}" th:value="${tipoEscenario.id}" th:text="${tipoEscenario.nombre}"></option>
-                                            </select>
-                                        </div>
-                                    </div>
+                                <ul class="list-unstyled mb-0">
+                                    <li class="mb-1"><span class="fas fa-suitcase fa-fw me-1"></span> <a th:href="@{/agencia/__${artistaDto.idAgencia}__}"  th:text="${artistaDto.nombreAgencia}"></a></li>
 
-                                    <div class="mb-3 row">
-                                        <label class="col-form-label col-sm-3 text-sm-end">Comunidad autónoma</label>
-                                        <div class="col-sm-9">
-                                            <select id="ccaa" th:field="*{idCcaa}" class="form-control choices-single">
-                                                <option th:each="ccaa : ${listaCcaa}" th:value="${ccaa.id}" th:text="${ccaa.nombre}"></option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="mb-3 row">
-                                        <label class="col-form-label col-sm-3 text-sm-end">CIF</label>
-                                        <div class="col-sm-9">
-                                            <input class="form-control" th:field="*{cif}" placeholder="CIF" id="cif" autocomplete="off">
-                                        </div>
-                                    </div>
-
-                                    <div class="mb-3 row">
-                                        <label class="col-form-label col-sm-3 text-sm-end">e-mail</label>
-                                        <div class="col-sm-9">
-                                            <input type="text" th:field="*{email}"class="form-control" data-inputmask="'alias': 'email'" />
-                                        </div>
-                                    </div>
-                                    <div class="mb-3 row">
-                                        <label class="col-form-label col-sm-3 text-sm-end">Web</label>
-                                        <div class="col-sm-9">
-                                            <input class="form-control" th:field="*{web}" placeholder="Web" id="web" autocomplete="off">
-                                        </div>
-                                    </div>
-                                    <div class="mb-3 row">
-                                        <label class="col-form-label col-sm-3 text-sm-end">Teléfono</label>
-                                        <div class="col-sm-9">
-                                            <input class="form-control" th:field="*{telefono}" placeholder="Teléfono" id="telefono" autocomplete="off">
-                                        </div>
-                                    </div>
-                                    <div class="mb-3 row">
-                                        <label class="col-form-label col-sm-3 text-sm-end">Instagram</label>
-                                        <div class="col-sm-9">
-                                            <input class="form-control" th:field="*{instagram}" placeholder="Instagram" id="instagram" autocomplete="off">
-                                        </div>
-                                    </div>
-                                    <div class="mb-3 row">
-                                        <label class="col-form-label col-sm-3 text-sm-end">Facebook</label>
-                                        <div class="col-sm-9">
-                                            <input class="form-control" th:field="*{facebook}" placeholder="Facebook" id="facebook" autocomplete="off">
-                                        </div>
-                                    </div>
-                                    <div class="mb-3 row">
-                                        <label class="col-form-label col-sm-3 text-sm-end">Imágen</label>
-                                        <div class="col-sm-9">
-                                            <input type="file" name="image" accept="image/*" class="form-control-file">
-                                            <small class="form-text text-muted">Logo de la empresa. Tamaño máximo 400x400</small>
-                                        </div>
-                                    </div>
-                                    <div class="mb-3 row">
-                                        <label class="col-form-label col-sm-3 text-sm-end pt-sm-0" for="flexSwitchCheckChecked">Artista activo</label>
-                                        <div class="col-sm-9">
-                                            <div class="form-check form-switch">
-                                                <input class="form-check-input" type="checkbox" th:field="*{activo}" id="flexSwitchCheckChecked" checked="" wfd-id="id17">
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <button type="submit" class="btn btn-primary" th:text="${artistaDto.id==null ? 'Crear artista' : 'Guardar' }">Botón</button>
-                                </form>
+                                    <li class="mb-1"><span class="fas fa-user fa-fw me-1"></span> <a th:href="@{/usuario/__${artistaDto.idUsuario}__}"  th:text="${artistaDto.nombreUsuario}"></a></li>
+                                    <li class="mb-1" th:if="${artistaDto.telefono!=null && artistaDto.telefono!=''}"><span class="fas fa-phone fa-fw me-1" ></span> <a th:href="${'tel:'+ artistaDto.telefono}"  th:text="${artistaDto.telefono}"></a></li>
+                                    <li class="mb-1" th:if="${artistaDto.email!=null && artistaDto.email!=''}"><span class="fas fa-envelope fa-fw me-1" ></span> <a th:href="${'mailto:'+ artistaDto.email}"  th:text="${artistaDto.email}"></a></li>
+                                    <li class="mb-1" th:if="${artistaDto.nombreCcaa!=null  && artistaDto.nombreCcaa!=''}"><span class="fas fa-map-marked fa-fw me-1" ></span> <span th:text="${artistaDto.nombreCcaa}"></span></li>
+                                </ul>
+                            </div>
+                            <hr class="my-0">
+                            <div class="card-body">
+                                <ul class="list-unstyled mb-0">
+                                    <li class="mb-1" th:if="${artistaDto.web!=null && artistaDto.web!=''}"><span class="fas fa-globe fa-fw me-1" ></span> <a th:href="${'http://'+artistaDto.web}" th:target="_blank" th:text="${artistaDto.web}"></a></li>
+                                    <li class="mb-1" th:if="${artistaDto.facebook!=null && artistaDto.facebook!=''}"><span class="fab fa-fw fa-facebook" ></span> <a th:text="${artistaDto.facebook}" th:href="${'http://'+artistaDto.facebook}" th:target="_blank"></a></li>
+                                    <li class="mb-1" th:if="${artistaDto.instagram!=null && artistaDto.instagram!=''}"><span class="fab fa-fw fa-instagram" ></span> <a th:text="${artistaDto.instagram}" th:href="${'http://'+artistaDto.instagram}" th:target="_blank"></a></li>
+                                </ul>
+                            </div>
+                            <div class="card-body text-center">
+                                <a th:href="@{/artista/edit/__${artistaDto.id}__}" class="btn btn-primary">Editar</a>
                             </div>
                         </div>
                     </div>
+                    <div class="col-12 col-md-9 col-lg-9">
+                        <div id="calendar"></div>
+                    </div>
+
                 </div>
             </div>
         </main>
@@ -155,7 +77,7 @@
 </div>
 
 </body>
+<script th:src="@{/adminkit/js/fullcalendar.js}"></script>
 <script type="text/javascript" th:src="@{/js/artistas.js}"></script>
-
 </body>
 </html>

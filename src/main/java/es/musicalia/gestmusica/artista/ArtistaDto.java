@@ -14,25 +14,32 @@ public class ArtistaDto {
     @NotNull
     @NotEmpty
     private Long idUsuario;
+
+    private String nombreUsuario;
     @NotNull
     private Long idCcaa;
+
+    private String nombreCcaa;
 
     private int componentes;
     private int bailarinas;
     private boolean escenario;
     private String medidasEscenario;
     private int ritmo;
+    private int viento;
     private int solistas;
     private int luz;
     private int sonido;
     private Long idTipoEscenario;
+    private String nombreTipoEscenario;
+
     @NotNull
     private Long idTipoArtista;
-
-
     @NotNull
     @NotEmpty
     private Long idAgencia;
+
+    private String nombreAgencia;
     private String email;
     private String fax;
     private String web;
@@ -236,4 +243,45 @@ public class ArtistaDto {
     public void setActivo(Boolean activo) {
         this.activo = activo;
     }
+
+    public String getNombreUsuario() {
+        return nombreUsuario;
+    }
+
+    public void setNombreUsuario(String nombreUsuario) {
+        this.nombreUsuario = nombreUsuario;
+    }
+
+    public String getNombreTipoEscenario() {
+        return nombreTipoEscenario;
+    }
+
+    public void setNombreTipoEscenario(String nombreTipoEscenario) {
+        this.nombreTipoEscenario = nombreTipoEscenario;
+    }
+
+    public int getViento() {
+        return viento;
+    }
+
+    public void setViento(int viento) {
+        this.viento = viento;
+    }
+
+    public String getNombreCcaa() {
+        return nombreCcaa;
+    }
+
+    public void setNombreCcaa(String nombreCcaa) {
+        this.nombreCcaa = nombreCcaa;
+    }
+
+    public String getNombreAgencia() {
+        return nombreAgencia;
+    }
+
+    public void setNombreAgencia(String nombreAgencia) {
+        this.nombreAgencia = nombreAgencia;
+    }
+
 }

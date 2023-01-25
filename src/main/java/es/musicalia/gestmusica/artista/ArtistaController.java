@@ -58,7 +58,7 @@ public class ArtistaController {
     public String crearArtistas(Model model) {
         model.addAttribute("artistaDto", new ArtistaDto());
         getModelAttributeDetail(model);
-        return "artista-detail";
+        return "artista-detail-edit";
     }
 
     private void getModelAttributeDetail(Model model) {
@@ -77,6 +77,14 @@ public class ArtistaController {
         getModelAttributeDetail(model);
 
         return "artista-detail";
+    }
+
+    @GetMapping("/edit/{id}")
+    public String editArtista(Model model, @PathVariable("id") Long idArtista) {
+        model.addAttribute("artistaDto", this.artistaService.findArtistaDtoById(idArtista));
+        getModelAttributeDetail(model);
+
+        return "artista-detail-edit";
     }
 
     @PostMapping("/guardar")

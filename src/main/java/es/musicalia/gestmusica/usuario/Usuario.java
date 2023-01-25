@@ -168,4 +168,7 @@ public class Usuario {
 		this.rol = rol;
 	}
 
+	public String getNombreCompleto(){
+		return this.getApellidos()!=null ? this.getNombre().concat(" ").concat(this.getApellidos()) : this.getNombre();
+	}
 }

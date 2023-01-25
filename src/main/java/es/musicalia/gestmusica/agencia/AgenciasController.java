@@ -1,6 +1,7 @@
 package es.musicalia.gestmusica.agencia;
 
 
+import es.musicalia.gestmusica.artista.ArtistaService;
 import es.musicalia.gestmusica.auth.model.SecurityService;
 import es.musicalia.gestmusica.file.FileService;
 import es.musicalia.gestmusica.localizacion.LocalizacionService;
@@ -32,15 +33,18 @@ public class AgenciasController {
     private LocalizacionService localizacionService;
     private FileService fileService;
     private AgenciaService agenciaService;
+    private ArtistaService artistaService;
 
     private Logger logger = LoggerFactory.getLogger(AgenciasController.class);
 
-    public AgenciasController(UserService userService, SecurityService securityService, LocalizacionService localizacionService, AgenciaService agenciaService, FileService fileService){
+    public AgenciasController(UserService userService, SecurityService securityService, LocalizacionService localizacionService, AgenciaService agenciaService, FileService fileService,
+                              ArtistaService artistaService){
         this.userService = userService;
         this.securityService = securityService;
         this.localizacionService = localizacionService;
         this.agenciaService = agenciaService;
         this.fileService = fileService;
+        this.artistaService = artistaService;
 
     }
 
@@ -59,15 +63,20 @@ public class AgenciasController {
         model.addAttribute("listaProvincias", this.localizacionService.findAllProvincias());
         model.addAttribute("listaUsuarios", this.userService.findAllUsuarioRecords());
 
-        return "agencia-detail";
+        return "agencia-detail-edit";
     }
-
-    @GetMapping("/{id}")
-    public String detalleAgencia(Model model, @PathVariable("id") Long idAgencia) {
+    @GetMapping("/edit/{id}")
+    public String detalleEditarAgencia(Model model, @PathVariable("id") Long idAgencia) {
         model.addAttribute("agenciaDto", this.agenciaService.findAgenciaDtoById(idAgencia));
         model.addAttribute("listaProvincias", this.localizacionService.findAllProvincias());
         model.addAttribute("listaUsuarios", this.userService.findAllUsuarioRecords());
 
+        return "agencia-detail-edit";
+    }
+    @GetMapping("/{id}")
+    public String detalleAgencia(Model model, @PathVariable("id") Long idAgencia) {
+        model.addAttribute("agenciaDto", this.agenciaService.findAgenciaDtoById(idAgencia));
+        model.addAttribute("listaArtistas", this.artistaService.findAllArtistasByAgenciaId(idAgencia));
         return "agencia-detail";
     }
 
@@ -76,7 +85,7 @@ public class AgenciasController {
                                  BindingResult bindingResult, RedirectAttributes redirectAttributes, Errors errors) {
 
         if (bindingResult.hasErrors()) {
-            return "agencia-detail";
+            return "agencia-detail-edit";
         }
 
         try {
@@ -97,7 +106,7 @@ public class AgenciasController {
             logger.error("Error guardando agencia", e);
             model.addAttribute("message", "Error guardando agencia");
             model.addAttribute("alertClass", "danger");
-            return "agencia-detail";
+            return "agencia-detail-edit";
         }
 
 

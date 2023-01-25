@@ -8,10 +8,12 @@ import es.musicalia.gestmusica.usuario.Usuario;
 import java.util.List;
 
 public interface ArtistaService {
-    List<Artista> findAllArtistasForUser(final Usuario usuario);
+    List<ArtistaDto> findAllArtistasForUser(final Usuario usuario);
     Artista saveArtista(ArtistaDto agenciaDto);
     ArtistaDto findArtistaDtoById(Long idArtista);
     List<TipoEscenario> listaTipoEscenario();
     List<TipoArtista> listaTipoArtista();
+
+    List<ArtistaDto> findAllArtistasByAgenciaId(final Long idAgencia);
 
 }

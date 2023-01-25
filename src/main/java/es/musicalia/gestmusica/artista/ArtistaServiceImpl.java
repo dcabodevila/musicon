@@ -16,6 +16,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,36 +47,62 @@ public class ArtistaServiceImpl implements ArtistaService {
 
 	}
 
-	public List<Artista> findAllArtistasForUser(final Usuario usuario){
-		return this.artistaRepository.findAllArtistasOrderedByName();
+	public List<ArtistaDto> findAllArtistasForUser(final Usuario usuario){
+		final List<Artista> listaArtistas = this.artistaRepository.findAllArtistasOrderedByName();
+		List<ArtistaDto> listaArtistasDto = getArtistaDtos(listaArtistas);
+
+		return listaArtistasDto;
+	}
+
+	public List<ArtistaDto> findAllArtistasByAgenciaId(final Long idAgencia){
+		final List<Artista> listaArtistas = this.artistaRepository.findAllArtistasByIdAgencia(idAgencia);
+		List<ArtistaDto> listaArtistasDto = getArtistaDtos(listaArtistas);
+
+		return listaArtistasDto;
+	}
+
+	private static List<ArtistaDto> getArtistaDtos(List<Artista> listaArtistas) {
+		List<ArtistaDto> listaArtistasDto = new ArrayList<>();
+
+		if (listaArtistas !=null){
+			for (Artista artista : listaArtistas){
+				listaArtistasDto.add(getArtistaDto(artista));
+			}
+		}
+		return listaArtistasDto;
 	}
 
 	public ArtistaDto findArtistaDtoById(Long idArtista){
 		final Artista artista = this.artistaRepository.findById(idArtista).get();
 
-		ModelMapper modelMapper = new ModelMapper();
-		ArtistaDto agenciaDto = modelMapper.map(artista, ArtistaDto.class);
+		ArtistaDto artistaDto = getArtistaDto(artista);
 
-		final Contacto agenciaContacto = artista.getContacto();
-
-		if (agenciaContacto!=null){
-			agenciaDto.setEmail(agenciaContacto.getEmail());
-			agenciaDto.setFacebook(agenciaContacto.getFax());
-			agenciaDto.setWeb(agenciaContacto.getWeb());
-			agenciaDto.setInstagram(agenciaContacto.getInstagram());
-			agenciaDto.setFacebook(agenciaContacto.getFacebook());
-			agenciaDto.setTelefono(agenciaContacto.getTelefono());
-		}
-
-	return agenciaDto;
+		return artistaDto;
 
 	}
+
+	private static ArtistaDto getArtistaDto(Artista artista) {
+		ModelMapper modelMapper = new ModelMapper();
+		ArtistaDto artistaDto = modelMapper.map(artista, ArtistaDto.class);
+		artistaDto.setNombreUsuario(artista.getUsuario().getNombreCompleto());
+		final Contacto contacto = artista.getContacto();
+
+		if (contacto!=null){
+			artistaDto.setEmail(contacto.getEmail());
+			artistaDto.setFacebook(contacto.getFax());
+			artistaDto.setWeb(contacto.getWeb());
+			artistaDto.setInstagram(contacto.getInstagram());
+			artistaDto.setFacebook(contacto.getFacebook());
+			artistaDto.setTelefono(contacto.getTelefono());
+		}
+		return artistaDto;
+	}
+
 	@Transactional(readOnly = false)
 	public Artista saveArtista(ArtistaDto artistaDto){
 
 		Artista artista = newArtista(artistaDto.getId());
 		artista.setNombre(artistaDto.getNombre());
-
 
 		if (artistaDto.getIdUsuario()!=null){
 			final Optional<Usuario> optionalUsuario = this.usuarioRepository.findById(artistaDto.getIdUsuario());
@@ -84,9 +111,8 @@ public class ArtistaServiceImpl implements ArtistaService {
 			}
 		}
 
-		if (artistaDto.getActivo()!=null){
-			artista.setActivo(artistaDto.getActivo());
-		}
+
+		artista.setActivo(artistaDto.getActivo());
 
 		if (artistaDto.getLogo()!=null && !artistaDto.getLogo().isEmpty()){
 			artista.setLogo(artistaDto.getLogo());
@@ -95,16 +121,31 @@ public class ArtistaServiceImpl implements ArtistaService {
 		artista.setCcaa(this.ccaaRepository.findById(artistaDto.getIdCcaa()).get());
 		artista.setAgencia(this.agenciaRepository.findById(artistaDto.getIdAgencia()).get());
 
+		artista.setEscenario(artistaDto.isEscenario());
+		if (artistaDto.getIdTipoEscenario()!=null){
+			artista.setTipoEscenario(this.tipoEscenarioRepository.findById(artistaDto.getIdTipoEscenario()).get());
+		}
 
-		Contacto artistaContacto = artista.getContacto() != null ? artista.getContacto() : new Contacto();
-		artistaContacto.setFacebook(artistaDto.getFacebook());
-		artistaContacto.setEmail(artistaDto.getEmail());
-		artistaContacto.setFax(artistaDto.getFax());
-		artistaContacto.setTelefono(artistaDto.getTelefono());
-		artistaContacto.setInstagram(artistaDto.getInstagram());
-		artistaContacto.setWeb(artistaDto.getWeb());
-		artistaContacto = this.agenciaContactoRepository.save(artistaContacto);
-		artista.setContacto(artistaContacto);
+		artista.setComponentes(artistaDto.getComponentes());
+		artista.setMedidasEscenario(artistaDto.getMedidasEscenario());
+		artista.setRitmo(artistaDto.getRitmo());
+		artista.setViento(artistaDto.getViento());
+		artista.setBailarinas(artistaDto.getBailarinas());
+		artista.setSolistas(artistaDto.getSolistas());
+		artista.setActivo(artistaDto.getActivo());
+		artista.setLuz(artistaDto.getLuz());
+		artista.setSonido(artistaDto.getSonido());
+
+
+		Contacto contacto = artista.getContacto() != null ? artista.getContacto() : new Contacto();
+		contacto.setFacebook(artistaDto.getFacebook());
+		contacto.setEmail(artistaDto.getEmail());
+		contacto.setFax(artistaDto.getFax());
+		contacto.setTelefono(artistaDto.getTelefono());
+		contacto.setInstagram(artistaDto.getInstagram());
+		contacto.setWeb(artistaDto.getWeb());
+		contacto = this.agenciaContactoRepository.save(contacto);
+		artista.setContacto(contacto);
 
 		return this.artistaRepository.save(artista);
 
