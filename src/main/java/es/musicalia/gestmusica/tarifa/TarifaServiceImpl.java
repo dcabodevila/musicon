@@ -2,6 +2,8 @@ package es.musicalia.gestmusica.tarifa;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -14,7 +16,7 @@ public class TarifaServiceImpl implements TarifaService {
 		this.tarifaRepository = tarifaRepository;
 	}
 
-	public List<TarifaDto> findByArtistaId(long idArtista){
-		return this.tarifaRepository.findTarifasByArtistaId(idArtista);
+	public List<TarifaDto> findByArtistaId(long idArtista , LocalDateTime start, LocalDateTime end){
+		return this.tarifaRepository.findTarifasByArtistaIdAndDates(idArtista, start, end);
 	}
 }

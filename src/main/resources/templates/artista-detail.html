@@ -20,6 +20,25 @@
         <main class="content">
             <div class="container-fluid p-0">
                 <a th:href="@{/artista}" class="btn btn-primary mt-n1"><i class="fas fa-arrow-left"></i> Volver a artistas</a>
+
+                <div class="modal fade" id="modalNuevaTarifa" tabindex="-1" aria-hidden="true" style="display: none;">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Default modal</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body m-3">
+                                <p class="mb-0">Use Bootstrap’s JavaScript modal plugin to add dialogs to your site for lightboxes, user
+                                    notifications, or completely custom content.</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary">Save changes</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="mb-3">
                     <h1 class="h3 d-inline align-middle"></h1>
                 </div>
@@ -40,11 +59,11 @@
                                 <h5 class="card-title mb-0" th:text="${artistaDto.nombre}">Card with image and button</h5>
                             </div>
                             <div class="card-body">
+                                <input hidden id="idArtista" th:value="${artistaDto.id}"/>
                                 <h5 class="card-text" th:if="${artistaDto.cif!=null}" th:text="${'CIF: '+ artistaDto.cif}">CIF</h5>
 
                                 <ul class="list-unstyled mb-0">
                                     <li class="mb-1"><span class="fas fa-suitcase fa-fw me-1"></span> <a th:href="@{/agencia/__${artistaDto.idAgencia}__}"  th:text="${artistaDto.nombreAgencia}"></a></li>
-
                                     <li class="mb-1"><span class="fas fa-user fa-fw me-1"></span> <a th:href="@{/usuario/__${artistaDto.idUsuario}__}"  th:text="${artistaDto.nombreUsuario}"></a></li>
                                     <li class="mb-1" th:if="${artistaDto.telefono!=null && artistaDto.telefono!=''}"><span class="fas fa-phone fa-fw me-1" ></span> <a th:href="${'tel:'+ artistaDto.telefono}"  th:text="${artistaDto.telefono}"></a></li>
                                     <li class="mb-1" th:if="${artistaDto.email!=null && artistaDto.email!=''}"><span class="fas fa-envelope fa-fw me-1" ></span> <a th:href="${'mailto:'+ artistaDto.email}"  th:text="${artistaDto.email}"></a></li>
@@ -64,8 +83,20 @@
                             </div>
                         </div>
                     </div>
+
+
+
                     <div class="col-12 col-md-9 col-lg-9">
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-primary mt-n1" data-bs-toggle="modal" data-bs-target="#modalNuevaTarifa">
+                                <i class="far fa-calendar"></i> Nueva tarifa
+                            </button>
+                            <button type="button" class="btn btn-success mt-n1" data-bs-toggle="modal" data-bs-target="#modalNuevaTarifa">
+                                <i class="far fa-calendar-plus"></i> Nueva ocupación
+                            </button>
+                        </div>
                         <div id="calendar"></div>
+
                     </div>
 
                 </div>

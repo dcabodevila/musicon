@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "tarifa", schema="gestmusica")
@@ -16,7 +17,7 @@ public class Tarifa {
     private long id;
     @Column(name = "fecha")
     @NotNull
-    private Date fecha;
+    private LocalDateTime fecha;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "artista_id")
     @NotNull
@@ -32,11 +33,11 @@ public class Tarifa {
         this.id = id;
     }
 
-    public Date getFecha() {
+    public LocalDateTime getFecha() {
         return fecha;
     }
 
-    public void setFecha(Date fecha) {
+    public void setFecha(LocalDateTime fecha) {
         this.fecha = fecha;
     }
 

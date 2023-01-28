@@ -1,11 +1,7 @@
 package es.musicalia.gestmusica.tarifa;
 
-import es.musicalia.gestmusica.artista.Artista;
-import jakarta.persistence.*;
-
-import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
-import java.sql.Date;
+import java.time.LocalDateTime;
 
-public record TarifaDto(long id, Date fecha, long idArtista, BigDecimal importe){
+public record TarifaDto(long id, LocalDateTime start, long idArtista, String title, boolean allDay){
 }
