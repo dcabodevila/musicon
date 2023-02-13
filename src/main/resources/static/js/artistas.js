@@ -1,4 +1,9 @@
 $(document).ready(function(){
+    flatpickr(".flatpickr", {"locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y"
+//        ,
+//        onChange: function(selectedDates, dateStr, instance) {
+//        }
+    });
 
     let calendarEl = document.getElementById('calendar');
     let idArtista = document.getElementById('idArtista').value;

@@ -25,6 +25,46 @@
                     <div class="modal-dialog" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
+                                <h5 class="modal-title" th:text="${'Tarifas para '+ artistaDto.nombre}"> </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <form method="POST" action="#">
+                                <div class="modal-body m-3">
+
+                                    <div class="mb-3 row">
+                                        <label class="col-form-label col-sm-3 text-sm-end">Fecha desde</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" required class="form-control flatpickr flatpickr-minimum flatpickr-input active" placeholder="Desde" readonly="readonly" id="idFechaDesde">
+                                        </div>
+
+                                    </div>
+                                    <div class="mb-3 row">
+                                        <label class="col-form-label col-sm-3 text-sm-end">Fecha hasta</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" required class="form-control flatpickr flatpickr-minimum flatpickr-input active" placeholder="Hasta" readonly="readonly" id="idFechaHasta">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 row">
+                                        <label class="col-form-label col-sm-3 text-sm-end">Importe</label>
+                                        <div class="col-sm-9">
+                                            <input type="number" required class="form-control" id="importe" placeholder="Importe" autocomplete="off">
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                    <button type="submit" class="btn btn-primary">Guardar</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal fade" id="modalNuevaOcupacion" tabindex="-1" aria-hidden="true" style="display: none;">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
                                 <h5 class="modal-title">Default modal</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
@@ -91,7 +131,7 @@
                             <button type="button" class="btn btn-primary mt-n1" data-bs-toggle="modal" data-bs-target="#modalNuevaTarifa">
                                 <i class="far fa-calendar"></i> Nueva tarifa
                             </button>
-                            <button type="button" class="btn btn-success mt-n1" data-bs-toggle="modal" data-bs-target="#modalNuevaTarifa">
+                            <button type="button" class="btn btn-success mt-n1" data-bs-toggle="modal" data-bs-target="#modalNuevaOcupacion">
                                 <i class="far fa-calendar-plus"></i> Nueva ocupación
                             </button>
                         </div>
