@@ -5,6 +5,7 @@ import es.musicalia.gestmusica.agencia.AgenciaService;
 import es.musicalia.gestmusica.auth.model.SecurityService;
 import es.musicalia.gestmusica.file.FileService;
 import es.musicalia.gestmusica.localizacion.LocalizacionService;
+import es.musicalia.gestmusica.tarifa.TarifaSaveDto;
 import es.musicalia.gestmusica.usuario.UserService;
 import es.musicalia.gestmusica.usuario.Usuario;
 import org.slf4j.Logger;

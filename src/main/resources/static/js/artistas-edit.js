@@ -18,4 +18,11 @@ $(document).ready(function(){
     new Choices(document.querySelector("#usuario"));
     new Choices(document.querySelector("#ccaa"));
 
+
+
+
 });
+
+
+
+

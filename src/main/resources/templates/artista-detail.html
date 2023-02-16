@@ -30,24 +30,25 @@
                             </div>
                             <form method="POST" action="#">
                                 <div class="modal-body m-3">
-
+                                    <input hidden id="id-tarifa"/>
+                                    <input hidden id="id-artista-modal" th:value="${artistaDto.id}"/>
                                     <div class="mb-3 row">
                                         <label class="col-form-label col-sm-3 text-sm-end">Fecha desde</label>
                                         <div class="col-sm-9">
-                                            <input type="text" required class="form-control flatpickr flatpickr-minimum flatpickr-input active" placeholder="Desde" readonly="readonly" id="idFechaDesde">
+                                            <input id="idFechaDesde" type="text" required class="form-control flatpickr flatpickr-minimum flatpickr-input active" placeholder="Desde" readonly="readonly">
                                         </div>
 
                                     </div>
                                     <div class="mb-3 row">
                                         <label class="col-form-label col-sm-3 text-sm-end">Fecha hasta</label>
                                         <div class="col-sm-9">
-                                            <input type="text" required class="form-control flatpickr flatpickr-minimum flatpickr-input active" placeholder="Hasta" readonly="readonly" id="idFechaHasta">
+                                            <input id="idFechaHasta" type="text" class="form-control flatpickr flatpickr-minimum flatpickr-input active" placeholder="Hasta" readonly="readonly">
                                         </div>
                                     </div>
                                     <div class="mb-3 row">
                                         <label class="col-form-label col-sm-3 text-sm-end">Importe</label>
                                         <div class="col-sm-9">
-                                            <input type="number" required class="form-control" id="importe" placeholder="Importe" autocomplete="off">
+                                            <input id="importe" type="number" required class="form-control" placeholder="Importe" autocomplete="off" step="100">
                                         </div>
                                     </div>
 
@@ -55,7 +56,7 @@
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                                    <button type="submit" class="btn btn-primary">Guardar</button>
+                                    <button type="submit" id="btn-guardar-tarifa" class="btn btn-primary">Guardar</button>
                                 </div>
                             </form>
                         </div>
