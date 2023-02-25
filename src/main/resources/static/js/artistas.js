@@ -1,5 +1,5 @@
 $(document).ready(function(){
-    let pickerFechaDesde = flatpickr("#idFechaDesde", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y"
+    let pickerFechaDesde = flatpickr("#idFechaDesde", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: true
         ,
         onChange: function(selectedDates, dateStr, instance) {
 //            pickerFechaHasta.set("minDate", dateStr);
@@ -9,7 +9,7 @@ $(document).ready(function(){
         }
     });
 
-    let pickerFechaHasta = flatpickr("#idFechaHasta", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y"
+    let pickerFechaHasta = flatpickr("#idFechaHasta", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: true
             ,
             onChange: function(selectedDates, dateStr, instance) {
 //                pickerFechaDesde.set("maxDate", dateStr);
@@ -19,6 +19,7 @@ $(document).ready(function(){
 
     let calendarEl = document.getElementById('calendar');
     let idArtista = document.getElementById('idArtista').value;
+    $("#modal-tarifa-eliminar").hide();
     var calendar = new FullCalendar.Calendar(calendarEl, {
       initialView: 'dayGridMonth',
       locale: 'es',
@@ -35,14 +36,17 @@ $(document).ready(function(){
       events: "/tarifa/list/"+idArtista,
       eventClick: function(info) {
         $("#id-tarifa").val(info.event.id);
-        let momentFecha = moment(info.event.start);
-        pickerFechaDesde.setDate(momentFecha.format('DD-MM-YYYY'));
+        $("#modal-tarifa-eliminar").show();
+        pickerFechaDesde.setDate(moment(info.event.start).format('DD-MM-YYYY'));
+        pickerFechaHasta.setDate(moment(info.event.start).format('DD-MM-YYYY'));
         $("#importe").val(info.event.title);
         $('#modalNuevaTarifa').modal('show');
       },
       dateClick: function(info) {
         $("#id-tarifa").val("");
+        $("#modal-tarifa-eliminar").hide();
         pickerFechaDesde.setDate(moment(info.date).format('DD-MM-YYYY'));
+        pickerFechaHasta.setDate(moment(info.date).format('DD-MM-YYYY'));
         $('#modalNuevaTarifa').modal('show');
       }
     });
@@ -52,6 +56,13 @@ $(document).ready(function(){
 
         event.preventDefault();
         guardar_tarifas();
+        calendar.refetchEvents();
+
+    });
+
+    $("#modal-tarifa-eliminar").click(function (event) {
+
+        eliminar_tarifas();
         calendar.refetchEvents();
 
     });
@@ -76,12 +87,33 @@ function notif(type, message){
 }
 function guardar_tarifas() {
 
+    let tarifaSaveDto = crearTarifaSaveDto();
+
+    $("#btn-guardar-tarifa").prop("disabled", true);
+
+    sendTarifaPost(tarifaSaveDto);
+    $('#modalNuevaTarifa').modal('toggle');
+
+}
+
+
+function eliminar_tarifas() {
+
+    let tarifaSaveDto = crearTarifaSaveDto();
+
+    $("#modal-tarifa-eliminar").prop("disabled", true);
+
+    sendTarifaEliminarPost(tarifaSaveDto);
+    $('#modalNuevaTarifa').modal('toggle');
+
+}
+
+function crearTarifaSaveDto() {
     let tarifaSaveDto = {}
 
     if ($("#id-tarifa").val()!=""){
         tarifaSaveDto["id"] = $("#id-tarifa").val();
     }
-
     tarifaSaveDto["idArtista"] = $("#id-artista-modal").val();
     tarifaSaveDto["fechaDesde"] = moment($("#idFechaDesde").val(), "DD-MM-YYYY").format("YYYY-MM-DDTHH:mm:ss");
 
@@ -91,11 +123,10 @@ function guardar_tarifas() {
 
     tarifaSaveDto["importe"] = $("#importe").val();
 
+    return tarifaSaveDto;
+}
 
-
-
-    $("#btn-guardar-tarifa").prop("disabled", true);
-
+function sendTarifaPost(tarifaSaveDto){
     $.ajax({
         type: "POST",
         contentType: "application/json; charset=utf-8",
@@ -120,8 +151,33 @@ function guardar_tarifas() {
             notyf.error(e);
         }
     });
-    $('#modalNuevaTarifa').modal('toggle');
+}
 
+function sendTarifaEliminarPost(tarifaSaveDto){
+    $.ajax({
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        url: "/tarifa/eliminar",
+        data: JSON.stringify(tarifaSaveDto),
+        dataType: 'json',
+        cache: false,
+        timeout: 600000,
+        async: false,
+        success: function (data) {
+            $("#modal-tarifa-eliminar").prop("disabled", false);
+            if (data.success){
+                notif("success", data.message);
+            }
+            else {
+                notif("error", data.message);
+            }
+        },
+        error: function (e) {
+            $("#modal-tarifa-eliminar").prop("disabled", false);
+            console.log(e);
+            notyf.error(e);
+        }
+    });
 }
 
 

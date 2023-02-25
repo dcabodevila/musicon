@@ -55,7 +55,7 @@ public class TarifaServiceImpl implements TarifaService {
 		tarifa.setArtista(this.artistaRepository.findById(tarifaSaveDto.getIdArtista()).orElseThrow());
 		tarifa.setFecha(fecha);
 		tarifa.setImporte(tarifaSaveDto.getImporte());
-		tarifa.setActivo(true);
+		tarifa.setActivo(tarifaSaveDto.getActivo()!=null? tarifaSaveDto.getActivo() : Boolean.TRUE);
 
 
 

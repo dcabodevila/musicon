@@ -69,5 +69,22 @@ public class TarifaController {
 
     }
 
+    // TODO: securizar por permiso
+    @PostMapping("/eliminar")
+    public ResponseEntity<?> eliminarTarifas(
+            @Valid @RequestBody TarifaSaveDto tarifaSaveDto) {
+
+
+        // TODO: securizar por permiso de usuario sobre agrupación
+        DefaultResponseBody result = new DefaultResponseBody();
+        tarifaSaveDto.setActivo(false);
+        this.tarifaService.saveTarifa(tarifaSaveDto);
+        result.setSuccess(true);
+        result.setMessage("Tarifa eliminada");
+        result.setMessageType("success");
+        return ResponseEntity.ok(result);
+
+    }
+
 
 }

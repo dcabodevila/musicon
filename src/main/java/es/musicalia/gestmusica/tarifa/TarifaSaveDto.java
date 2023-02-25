@@ -14,11 +14,15 @@ public class TarifaSaveDto {
     private LocalDateTime fechaHasta;
     private BigDecimal importe;
 
+    private Boolean activo;
+
     public TarifaSaveDto(long idArtista, LocalDateTime fechaDesde, LocalDateTime fechaHasta, BigDecimal importe) {
         this.idArtista = idArtista;
         this.fechaDesde = fechaDesde;
         this.fechaHasta = fechaHasta;
         this.importe = importe;
+        this.activo = true;
+
     }
 
     public TarifaSaveDto(long idArtista) {
@@ -65,4 +69,10 @@ public class TarifaSaveDto {
         this.importe = importe;
     }
 
+    public Boolean getActivo() {
+        return activo;
+    }
+    public void setActivo(Boolean activo) {
+        this.activo = activo;
+    }
 }

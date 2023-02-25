@@ -21,47 +21,7 @@
             <div class="container-fluid p-0">
                 <a th:href="@{/artista}" class="btn btn-primary mt-n1"><i class="fas fa-arrow-left"></i> Volver a artistas</a>
 
-                <div class="modal fade" id="modalNuevaTarifa" tabindex="-1" aria-hidden="true" style="display: none;">
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" th:text="${'Tarifas para '+ artistaDto.nombre}"> </h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <form method="POST" action="#">
-                                <div class="modal-body m-3">
-                                    <input hidden id="id-tarifa"/>
-                                    <input hidden id="id-artista-modal" th:value="${artistaDto.id}"/>
-                                    <div class="mb-3 row">
-                                        <label class="col-form-label col-sm-3 text-sm-end">Fecha desde</label>
-                                        <div class="col-sm-9">
-                                            <input id="idFechaDesde" type="text" required class="form-control flatpickr flatpickr-minimum flatpickr-input active" placeholder="Desde" readonly="readonly">
-                                        </div>
-
-                                    </div>
-                                    <div class="mb-3 row">
-                                        <label class="col-form-label col-sm-3 text-sm-end">Fecha hasta</label>
-                                        <div class="col-sm-9">
-                                            <input id="idFechaHasta" type="text" class="form-control flatpickr flatpickr-minimum flatpickr-input active" placeholder="Hasta" readonly="readonly">
-                                        </div>
-                                    </div>
-                                    <div class="mb-3 row">
-                                        <label class="col-form-label col-sm-3 text-sm-end">Importe</label>
-                                        <div class="col-sm-9">
-                                            <input id="importe" type="number" required class="form-control" placeholder="Importe" autocomplete="off" step="100">
-                                        </div>
-                                    </div>
-
-
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                                    <button type="submit" id="btn-guardar-tarifa" class="btn btn-primary">Guardar</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
+                <div th:replace="~{fragments/modal-tarifas :: modal-tarifas}"/>
                 <div class="modal fade" id="modalNuevaOcupacion" tabindex="-1" aria-hidden="true" style="display: none;">
                     <div class="modal-dialog" role="document">
                         <div class="modal-content">
@@ -94,8 +54,8 @@
                 <div class="row">
 
                     <div class="col-12 col-md-3 col-lg-3">
-                        <div class="card">
-                            <img class="card-img-top" th:if="${artistaDto.logo!=null}"  th:src="@{'/'+${artistaDto.logo}}" alt="Unsplash" style="max-height: 327px;">
+                        <div class="card card-max-width">
+                            <img class="card-img-top img-max-height" th:if="${artistaDto.logo!=null}"  th:src="@{'/'+${artistaDto.logo}}" alt="Unsplash">
                             <div class="card-header px-4 pt-4">
                                 <h5 class="card-title mb-0" th:text="${artistaDto.nombre}">Card with image and button</h5>
                             </div>
