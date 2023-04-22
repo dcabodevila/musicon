@@ -69,8 +69,15 @@ public class FileServiceImpl implements FileService {
 		}
 	}
 	@Cacheable(value = "files", key = "#pathFileName")
-	public byte[] getFileBytes(String pathFileName) throws IOException {
+	public byte[] getImageFileBytes(String pathFileName) throws IOException {
 		Path filePath = Paths.get("image/".concat(pathFileName));
+		byte[] fileBytes = Files.readAllBytes(filePath);
+		return fileBytes;
+	}
+
+	@Cacheable(value = "files", key = "#pathFileName")
+	public byte[] getFileBytes(String path, String pathFileName) throws IOException {
+		Path filePath = Paths.get(path.concat(pathFileName));
 		byte[] fileBytes = Files.readAllBytes(filePath);
 		return fileBytes;
 	}

@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
+import java.time.Year;
 
 
 @Controller
@@ -69,7 +70,7 @@ public class ArtistaController {
         model.addAttribute("listaTipoArtista", this.artistaService.listaTipoArtista());
         model.addAttribute("listaTipoEscenario", this.artistaService.listaTipoEscenario());
         model.addAttribute("listaCcaa", this.localizacionService.findAllComunidades());
-
+        model.addAttribute("anoTarifa", Year.now());
     }
 
     @GetMapping("/{id}")

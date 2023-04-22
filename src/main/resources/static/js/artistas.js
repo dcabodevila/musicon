@@ -5,6 +5,7 @@ $(document).ready(function(){
 //            pickerFechaHasta.set("minDate", dateStr);
         },
         onMonthChange: function(selectedDates, dateStr, instance) {
+
 //            pickerFechaHasta.changeMonth(instance.currentMonth);
         }
     });

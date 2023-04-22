@@ -61,6 +61,7 @@
                             </div>
                             <div class="card-body">
                                 <input hidden id="idArtista" th:value="${artistaDto.id}"/>
+                                <input hidden id="anoTarifa" th:value="${anoTarifa}"/>
                                 <h5 class="card-text" th:if="${artistaDto.cif!=null}" th:text="${'CIF: '+ artistaDto.cif}">CIF</h5>
 
                                 <ul class="list-unstyled mb-0">
@@ -95,6 +96,11 @@
                             <button type="button" class="btn btn-success mt-n1" data-bs-toggle="modal" data-bs-target="#modalNuevaOcupacion">
                                 <i class="far fa-calendar-plus"></i> Nueva ocupación
                             </button>
+                        </div>
+                        <div class="mb-3">
+                            <a type="button" id="btn-tarifa-anual" th:href="@{/tarifa/tarifa-anual/__${artistaDto.id}__/__${anoTarifa}__}" class="btn btn-success mt-n1">
+                                <i class="far fa-calendar-plus"></i> Imprimir tarifa anual
+                            </a>
                         </div>
                         <div id="calendar"></div>
 
