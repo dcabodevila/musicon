@@ -54,9 +54,9 @@ public class WebSecurityConfig {
 				.and()
 				.formLogin().loginPage("/login").permitAll().defaultSuccessUrl("/", true)
 				.and()
-				.logout().invalidateHttpSession(true)
-				.clearAuthentication(true).
-				logoutRequestMatcher(new AntPathRequestMatcher("/logout")).logoutSuccessUrl("/logout-success").permitAll();
+				.logout().invalidateHttpSession(true);
+//				.clearAuthentication(true).
+//				logoutRequestMatcher(new AntPathRequestMatcher("/logout")).logoutSuccessUrl("/logout-success").permitAll();
 
 		return http.build();
 	}

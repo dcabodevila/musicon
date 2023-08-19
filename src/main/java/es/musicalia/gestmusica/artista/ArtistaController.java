@@ -4,6 +4,7 @@ package es.musicalia.gestmusica.artista;
 import es.musicalia.gestmusica.agencia.AgenciaService;
 import es.musicalia.gestmusica.auth.model.SecurityService;
 import es.musicalia.gestmusica.file.FileService;
+import es.musicalia.gestmusica.incremento.IncrementoService;
 import es.musicalia.gestmusica.localizacion.LocalizacionService;
 import es.musicalia.gestmusica.tarifa.TarifaSaveDto;
 import es.musicalia.gestmusica.usuario.UserService;
@@ -33,17 +34,20 @@ public class ArtistaController {
     private ArtistaService artistaService;
     private AgenciaService agenciaService;
     private LocalizacionService localizacionService;
+    private IncrementoService incrementoService;
+
 
     private Logger logger = LoggerFactory.getLogger(ArtistaController.class);
 
     public ArtistaController(UserService userService, SecurityService securityService, ArtistaService artistaService, FileService fileService, AgenciaService agenciaService,
-                             LocalizacionService localizacionService){
+                             LocalizacionService localizacionService, IncrementoService incrementoService){
         this.userService = userService;
         this.securityService = securityService;
         this.artistaService = artistaService;
         this.fileService = fileService;
         this.agenciaService = agenciaService;
         this.localizacionService = localizacionService;
+        this.incrementoService =incrementoService;
 
     }
 
@@ -71,6 +75,8 @@ public class ArtistaController {
         model.addAttribute("listaTipoEscenario", this.artistaService.listaTipoEscenario());
         model.addAttribute("listaCcaa", this.localizacionService.findAllComunidades());
         model.addAttribute("anoTarifa", Year.now());
+        model.addAttribute("listaProvincias", this.localizacionService.findAllProvincias());
+        model.addAttribute("listaTiposIncremento", this.incrementoService.listTipoIncremento());
     }
 
     @GetMapping("/{id}")

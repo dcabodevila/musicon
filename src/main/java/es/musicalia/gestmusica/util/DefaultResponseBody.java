@@ -1,4 +1,4 @@
-package es.musicalia.gestmusica.tarifa;
+package es.musicalia.gestmusica.util;
 
 public class DefaultResponseBody {
     private String message;

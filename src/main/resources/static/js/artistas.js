@@ -68,7 +68,69 @@ $(document).ready(function(){
 
     });
 
+    $("#modalIncrementos").submit(function (event) {
+
+        event.preventDefault();
+        guardar_incrementos();
+        cargarListaIncrementos();
+        calendar.refetchEvents();
+
+    });
+
+    $("#btn-incrementos").click(function (event) {
+        cargarListaIncrementos();
+
+    });
+
+
 });
+
+function cargarListaIncrementos(){
+
+    let idArtista = $("#id-artista-modal").val();
+
+    $.ajax({
+        url: '/incremento/list/'+idArtista,
+        method: 'GET',
+        dataType: 'json',
+        success: function(data) {
+
+            $('#tablaIncrementos tbody').empty();
+            for (var i = 0; i < data.length; i++) {
+
+                $('#tablaIncrementos tbody').append(
+                    '<tr>' +
+                    '<td>' + data[i].descripcionProvincia + '</td>' +
+                    '<td>' + data[i].decripcionTipoIncremento + '</td>' +
+                    '<td class="text-end">' + data[i].incremento + '</td>' +
+                    '</tr>'
+                );
+            }
+
+            // Agregar eventos click a los botones de editar y eliminar
+            $('.editar').click(function() {
+                var id = $(this).data('id');
+                // Aquí puedes implementar la lógica para editar el objeto con el ID proporcionado
+                // Por ejemplo, puedes redirigir a una página de edición o mostrar un formulario emergente.
+                console.log('Editar objeto con ID:', id);
+            });
+
+            $('.eliminar').click(function() {
+                var id = $(this).data('id');
+                // Aquí puedes implementar la lógica para eliminar el objeto con el ID proporcionado
+                // Por ejemplo, puedes mostrar una confirmación y realizar la eliminación a través de AJAX.
+                console.log('Eliminar objeto con ID:', id);
+            });
+        },
+        error: function(error) {
+            console.error('Error al obtener la lista de objetos:', error);
+        }
+    });
+
+
+
+
+}
 
 function notif(type, message){
     let duration = "5000";
@@ -97,6 +159,18 @@ function guardar_tarifas() {
 
 }
 
+function guardar_incrementos() {
+
+    let incrementoDto = crearIncrementoDto();
+
+    $("#btn-guardar-incremento").prop("disabled", true);
+
+    sendIncrementoPost(incrementoDto);
+
+
+
+
+}
 
 function eliminar_tarifas() {
 
@@ -148,6 +222,47 @@ function sendTarifaPost(tarifaSaveDto){
         },
         error: function (e) {
             $("#btn-guardar-tarifa").prop("disabled", false);
+            console.log(e);
+            notyf.error(e);
+        }
+    });
+}
+
+function crearIncrementoDto() {
+    let incrementoDto = {}
+
+    incrementoDto["idArtista"] = $("#id-artista-modal").val();
+    incrementoDto["idProvincia"] = $("#provincia").val();
+    incrementoDto["idTipoIncremento"] = $("#tipoIncremento").val();
+    incrementoDto["incremento"] = $("#incremento").val();
+
+
+    return incrementoDto;
+}
+
+
+function sendIncrementoPost(incrementoDto){
+    $.ajax({
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        url: "/incremento/save",
+        data: JSON.stringify(incrementoDto),
+        dataType: 'json',
+        cache: false,
+        timeout: 600000,
+        async: false,
+        success: function (data) {
+            $("#btn-guardar-incremento").prop("disabled", false);
+            if (data.success){
+                notif("success", data.message);
+                cargarListaIncrementos();
+            }
+            else {
+                notif("error", data.message);
+            }
+        },
+        error: function (e) {
+            $("#btn-guardar-incremento").prop("disabled", false);
             console.log(e);
             notyf.error(e);
         }

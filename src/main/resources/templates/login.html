@@ -32,9 +32,12 @@
 										<div class="mb-3">
 											<label class="form-label">Contraseña</label>
 											<input id="password" name="password" class="form-control form-control-lg" type="password" placeholder="Introduce tu contraseña" />
-											<small>
-												<a th:href="@{/recover}">He olvidado mi contraseña</a>
-											</small>
+<!--											<label class="form-label">Recordar contraseña </label><input type="checkbox" name="remember-me" />-->
+											<div class="mb-3">
+												<small>
+													<a th:href="@{/recover}">He olvidado mi contraseña</a>
+												</small>
+											</div>
 										</div>
 										<div class="text-center mt-3">
 											 <button type="submit" class="btn btn-lg btn-primary">Iniciar sesión</button>

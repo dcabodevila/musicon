@@ -8,6 +8,7 @@ import es.musicalia.gestmusica.auth.model.SecurityService;
 import es.musicalia.gestmusica.informe.InformeService;
 import es.musicalia.gestmusica.usuario.UserService;
 import es.musicalia.gestmusica.util.DateUtils;
+import es.musicalia.gestmusica.util.DefaultResponseBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -58,11 +59,7 @@ public class TarifaController {
                                         @RequestParam("end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
 
         //TODO: Comprobar permisos sobre el artista
-        logger.info("start: "+ start.toString() + " end: "+ end.toString());
-
-        final List<TarifaDto> listaTarifas = this.tarifaService.findByArtistaId(idArtista, start, end);
-
-        return listaTarifas;
+        return this.tarifaService.findByArtistaId(idArtista, start, end);
 
     }
     @PostMapping("/save")
