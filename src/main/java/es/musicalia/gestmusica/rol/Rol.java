@@ -28,6 +28,10 @@ public class Rol {
 			inverseJoinColumns = @JoinColumn(name = "permiso_id"))
 	private Set<Permiso> permisos;
 
+	public long getId() {
+		return id;
+	}
+
 	public String getNombre() {
 		return nombre;
 	}

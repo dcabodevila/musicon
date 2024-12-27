@@ -6,27 +6,44 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
 public class TarifaServiceImpl implements TarifaService {
 
-	private TarifaRepository tarifaRepository;
-	private ArtistaRepository artistaRepository;
-	private UserService userService;
+
+	private final TarifaRepository tarifaRepository;
+	private final ArtistaRepository artistaRepository;
+	private final UserService userService;
 
 	public TarifaServiceImpl(TarifaRepository tarifaRepository, ArtistaRepository artistaRepository, UserService userService){
 		this.tarifaRepository = tarifaRepository;
 		this.artistaRepository = artistaRepository;
 		this.userService = userService;
 	}
-
+	@Override
 	public List<TarifaDto> findByArtistaId(long idArtista , LocalDateTime start, LocalDateTime end){
-		return this.tarifaRepository.findTarifasDtoByArtistaIdAndDates(idArtista, start, end);
+		return this.tarifaRepository.findTarifasDtoByArtistaIdAndDates(idArtista, start, end).orElse(new ArrayList<>());
 	}
 
+	@Override
+	public TarifaDto findByArtistaIdAndDate(long idArtista, LocalDate fecha){
+		// 1. Convertir el LocalDate en LocalDateTime a medianoche
+		LocalDateTime startOfDay = fecha.atStartOfDay();
+		// 2. endOfDay podría ser 23:59:59.999..., según tu preferencia
+		LocalDateTime endOfDay = fecha.atTime(LocalTime.of(23, 59, 59));
+		final Optional<List<TarifaDto>> optionalTarifas = this.tarifaRepository.findTarifasDtoByArtistaIdAndDates(idArtista, startOfDay, endOfDay);
+		return optionalTarifas.isPresent() && !optionalTarifas.get().isEmpty()? optionalTarifas.get().get(0) : null;
+
+	}
+
+	@Override
 	@Transactional(readOnly = false)
 	public void saveTarifa(TarifaSaveDto tarifaSaveDto){
 
@@ -49,17 +66,13 @@ public class TarifaServiceImpl implements TarifaService {
 
 		final List<Tarifa> listaTarifasFecha = this.tarifaRepository.findTarifasByArtistaIdAndDates(tarifaSaveDto.getIdArtista(), fecha.withHour(0).withMinute(0).withSecond(0) , fecha.withHour(23).withMinute(59).withSecond(59));
 
-		if (listaTarifasFecha!=null && !listaTarifasFecha.isEmpty()){
+		if (listaTarifasFecha != null && !listaTarifasFecha.isEmpty()){
 			tarifa =  listaTarifasFecha.get(0);
 		}
 		tarifa.setArtista(this.artistaRepository.findById(tarifaSaveDto.getIdArtista()).orElseThrow());
 		tarifa.setFecha(fecha);
 		tarifa.setImporte(tarifaSaveDto.getImporte());
 		tarifa.setActivo(tarifaSaveDto.getActivo()!=null? tarifaSaveDto.getActivo() : Boolean.TRUE);
-
-
-
-
 
 		final String userName = this.userService.obtenerUsuarioAutenticado().getUsername();
 

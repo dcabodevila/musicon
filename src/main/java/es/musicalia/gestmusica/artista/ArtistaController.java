@@ -6,6 +6,7 @@ import es.musicalia.gestmusica.auth.model.SecurityService;
 import es.musicalia.gestmusica.file.FileService;
 import es.musicalia.gestmusica.incremento.IncrementoService;
 import es.musicalia.gestmusica.localizacion.LocalizacionService;
+import es.musicalia.gestmusica.ocupacion.OcupacionService;
 import es.musicalia.gestmusica.tarifa.TarifaSaveDto;
 import es.musicalia.gestmusica.usuario.UserService;
 import es.musicalia.gestmusica.usuario.Usuario;
@@ -35,12 +36,13 @@ public class ArtistaController {
     private AgenciaService agenciaService;
     private LocalizacionService localizacionService;
     private IncrementoService incrementoService;
+    private OcupacionService ocupacionService;
 
 
     private Logger logger = LoggerFactory.getLogger(ArtistaController.class);
 
     public ArtistaController(UserService userService, SecurityService securityService, ArtistaService artistaService, FileService fileService, AgenciaService agenciaService,
-                             LocalizacionService localizacionService, IncrementoService incrementoService){
+                             LocalizacionService localizacionService, IncrementoService incrementoService, OcupacionService ocupacionService){
         this.userService = userService;
         this.securityService = securityService;
         this.artistaService = artistaService;
@@ -48,6 +50,7 @@ public class ArtistaController {
         this.agenciaService = agenciaService;
         this.localizacionService = localizacionService;
         this.incrementoService =incrementoService;
+        this.ocupacionService = ocupacionService;
 
     }
 
@@ -76,14 +79,22 @@ public class ArtistaController {
         model.addAttribute("listaCcaa", this.localizacionService.findAllComunidades());
         model.addAttribute("anoTarifa", Year.now());
         model.addAttribute("listaProvincias", this.localizacionService.findAllProvincias());
+        model.addAttribute("listaTiposOcupacion", this.ocupacionService.listarTiposOcupacion());
+
+
         model.addAttribute("listaTiposIncremento", this.incrementoService.listTipoIncremento());
+    }
+
+    private void getModelAttributeArtistaOcupacion(Model model, ArtistaDto artistaDto){
+        model.addAttribute("listaProvinciasCcaaArtista", this.localizacionService.findAllProvinciasByCcaaId(artistaDto.getIdCcaa()));
     }
 
     @GetMapping("/{id}")
     public String detalleArtista(Model model, @PathVariable("id") Long idArtista) {
-        model.addAttribute("artistaDto", this.artistaService.findArtistaDtoById(idArtista));
+        final ArtistaDto artistaDto = this.artistaService.findArtistaDtoById(idArtista);
+        model.addAttribute("artistaDto", artistaDto);
         getModelAttributeDetail(model);
-
+        getModelAttributeArtistaOcupacion(model, artistaDto);
         return "artista-detail";
     }
 

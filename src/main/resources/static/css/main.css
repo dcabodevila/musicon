@@ -5,3 +5,28 @@
 .img-max-height {
   max-height: 340px;
 }
+
+:root {
+    --color-tarifa: #3B7DDD;
+    --color-ocupacion: #1CBB8C;
+    --color-reserva: #FCB92C;
+    --color-otro: #3788d8;
+    --color-texto: #FFFFFF;
+}
+
+.fc-event.tipo-tarifa {
+    background-color: var(--color-tarifa) !important;
+    border-color: var(--color-tarifa) !important;
+    color: var(--color-texto) !important;
+}
+
+.fc-event.tipo-Ocupado {
+    background-color: var(--color-ocupacion) !important;
+    border-color: var(--color-ocupacion) !important;
+    color: var(--color-texto) !important;
+}
+.fc-event.tipo-Reservado {
+    background-color: var(--color-reserva) !important;
+    border-color: var(--color-reserva) !important;
+    color: var(--color-texto) !important;
+}

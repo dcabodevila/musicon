@@ -23,24 +23,7 @@
 
                 <div th:replace="~{fragments/modal-tarifas :: modal-tarifas}"/>
                 <div th:replace="~{fragments/modal-incrementos :: modal-incrementos}"/>
-                <div class="modal fade" id="modalNuevaOcupacion" tabindex="-1" aria-hidden="true" style="display: none;">
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title">Default modal</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body m-3">
-                                <p class="mb-0">Use Bootstrap’s JavaScript modal plugin to add dialogs to your site for lightboxes, user
-                                    notifications, or completely custom content.</p>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="button" class="btn btn-primary">Save changes</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <div th:replace="~{fragments/modal-ocupaciones :: modal-ocupaciones}"/>
                 <div class="mb-3">
                     <h1 class="h3 d-inline align-middle"></h1>
                 </div>
@@ -54,7 +37,7 @@
 
                 <div class="row">
 
-                    <div class="col-12 col-md-3 col-lg-3">
+                    <div class="col-12 col-md-3 col-lg-3 order-2 order-md-1">
                         <div class="card card-max-width">
                             <img class="card-img-top img-max-height" th:if="${artistaDto.logo!=null}"  th:src="@{'/'+${artistaDto.logo}}" alt="Unsplash">
                             <div class="card-header px-4 pt-4">
@@ -90,14 +73,14 @@
 
 
 
-                    <div class="col-12 col-lg-6">
+                    <div class="col-12 col-lg-6 order-1 order-md-2">
                         <div class="card">
                             <div class="card-body text-center">
                                 <div class="mb-3">
                                     <button type="button" class="btn btn-primary mb-1" data-bs-toggle="modal" data-bs-target="#modalNuevaTarifa">
                                         <i class="far fa-calendar"></i> Nueva tarifa
                                     </button>
-                                    <button type="button" class="btn btn-success mb-1" data-bs-toggle="modal" data-bs-target="#modalNuevaOcupacion">
+                                    <button type="button" id="btnModalNuevaOcupacion" class="btn btn-success mb-1" data-bs-toggle="modal" data-bs-target="#modalNuevaOcupacion">
                                         <i class="far fa-calendar-plus"></i> Nueva ocupación
                                     </button>
                                     <button id="btn-incrementos" type="button" class="btn btn-secondary mb-1" data-bs-toggle="modal" data-bs-target="#modalIncrementos">
@@ -123,6 +106,9 @@
 
 </body>
 <script th:src="@{/adminkit/js/fullcalendar.js}"></script>
+
 <script type="text/javascript" th:src="@{/js/artistas.js}"></script>
+<script type="text/javascript" th:src="@{/js/comun.js}"></script>
+
 </body>
 </html>

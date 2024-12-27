@@ -1,9 +1,11 @@
 package es.musicalia.gestmusica.localizacion;
 
 import jakarta.persistence.*;
+import jdk.jfr.DataAmount;
 
 @Entity
 @Table(name = "municipio", schema="gestmusica")
+
 public class Municipio {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,6 +21,11 @@ public class Municipio {
     @JoinColumn(name = "id_provincia")
     private Provincia provincia;
 
+    public long getId() {
+        return id;
+    }
 
-
+    public String getNombre() {
+        return nombre;
+    }
 }

@@ -7,6 +7,7 @@ import es.musicalia.gestmusica.localizacion.Municipio;
 import es.musicalia.gestmusica.localizacion.MunicipioRepository;
 import es.musicalia.gestmusica.localizacion.Provincia;
 import es.musicalia.gestmusica.localizacion.ProvinciaRepository;
+import es.musicalia.gestmusica.rol.RolEnum;
 import es.musicalia.gestmusica.usuario.Usuario;
 import es.musicalia.gestmusica.usuario.UsuarioRepository;
 import org.modelmapper.ModelMapper;
@@ -38,18 +39,18 @@ public class AgenciaServiceImpl implements AgenciaService {
 	}
 
 	public List<AgenciaDto> findAllAgenciasForUser(final Usuario usuario){
-		List<Agencia> listaAgencias = new ArrayList<>();
+
+		final boolean isUsuarioRolAdministrador = usuario.getRol()!=null && RolEnum.ROL_ADMINISTRADOR.getId().equals(usuario.getRol().getId());
+
+		List<Agencia> listaAgencias = isUsuarioRolAdministrador ? this.agenciaRepository.findAllAgenciasOrderedByName() : this.agenciaRepository.findAllAgenciasByIdUsuario(usuario.getId());
 		List<AgenciaDto> listaAgenciasDto = new ArrayList<>();
-		if (usuario.getRol()!=null && "Administrador".equals(usuario.getRol().getNombre())){
-			listaAgencias = this.agenciaRepository.findAllAgenciasOrderedByName();
-		}
-		else {
-			listaAgencias = this.agenciaRepository.findAllAgenciasByIdUsuario(usuario.getId());
+
+		if (listaAgencias!=null && !listaAgencias.isEmpty()){
+			for (Agencia agencia : listaAgencias){
+				listaAgenciasDto.add(getAgenciaDto(agencia));
+			}
 		}
 
-		for (Agencia agencia : listaAgencias){
-			listaAgenciasDto.add(getAgenciaDto(agencia));
-		}
 		return listaAgenciasDto;
 
 	}

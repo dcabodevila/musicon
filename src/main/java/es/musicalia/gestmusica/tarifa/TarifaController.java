@@ -19,10 +19,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 
@@ -52,16 +51,6 @@ public class TarifaController {
 
     }
 
-    @GetMapping("/list/{id}")
-//    @PreAuthorize("hasAuthority('" + Constantes.Permisos.SOLICITUDES_RESERVA_CONSULTAR + "')")
-    @ResponseBody
-    public List<TarifaDto> listaTarifas(@PathVariable("id") Long idArtista, @RequestParam("start") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
-                                        @RequestParam("end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
-
-        //TODO: Comprobar permisos sobre el artista
-        return this.tarifaService.findByArtistaId(idArtista, start, end);
-
-    }
     @PostMapping("/save")
     public ResponseEntity<?> getSearchResultViaAjax(
             @Valid @RequestBody TarifaSaveDto tarifaSaveDto) {
@@ -113,6 +102,13 @@ public class TarifaController {
         return new ResponseEntity<byte[]>(this.informeService.imprimirInforme(parametros, fileNameToExport, fileReport),headers, HttpStatus.OK);
 
     }
+
+    @GetMapping("/{idArtista}/{fecha}")
+    public ResponseEntity<TarifaDto> findTarifaByArtistaAndFecha(@PathVariable("idArtista") Long idArtista, @PathVariable("fecha") @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate fecha) {
+        return ResponseEntity.ok(this.tarifaService.findByArtistaIdAndDate(idArtista, fecha));
+    }
+
+
 
 
 
