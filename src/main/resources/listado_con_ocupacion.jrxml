@@ -66,7 +66,15 @@
 		<queryString language="SQL">
 			<![CDATA[SELECT *
 FROM crosstab(
-  'SELECT a.nombre, ag.nombre, t.fecha::date, COALESCE(p.nombre, to_char(t.importe, ''999999'')) AS importe
+  'SELECT a.nombre, ag.nombre, a.componentes,
+	CASE WHEN (a.escenario) THEN ''SI'' ELSE ''NO'' END ||
+CASE 
+    WHEN (a.escenario=false OR a.tipo_escenario_id IS NULL) THEN ''''
+    ELSE CASE 
+             WHEN a.tipo_escenario_id = 1 THEN ''/T''
+             ELSE ''/R''
+         END
+END AS escenario, t.fecha::date, COALESCE(p.nombre, to_char(t.importe, ''999999'')) AS importe
    FROM gestmusica.tarifa t inner join gestmusica.artista a on t.artista_id=a.id inner join gestmusica.agencia ag on a.agencia_id=ag.id
        LEFT JOIN gestmusica.ocupacion o ON t.artista_id = o.artista_id 
         AND t.fecha = o.fecha 
@@ -148,6 +156,8 @@ FROM crosstab(
 			<property name="com.jaspersoft.studio.field.name" value="dia15val"/>
 			<property name="com.jaspersoft.studio.field.label" value="dia15val"/>
 		</field>
+		<field name="Componentes" class="java.lang.String"/>
+		<field name="Escenario" class="java.lang.String"/>
 		<group name="Group1">
 			<groupExpression><![CDATA[$F{Agencia}]]></groupExpression>
 		</group>
@@ -327,7 +337,7 @@ FROM crosstab(
 							</textField>
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="30">
-							<textField isBlankWhenNull="true">
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="39" height="30" uuid="0e470b77-a132-4a1d-a8c6-d70729bf9a19"/>
 								<box padding="0">
 									<pen lineWidth="0.25" lineColor="#030303"/>
@@ -360,7 +370,7 @@ FROM crosstab(
 							</textField>
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="30">
-							<textField isBlankWhenNull="true">
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="42" height="30" uuid="82e4acc5-197e-44cd-ac22-3e72c723b5c3"/>
 								<box padding="0">
 									<pen lineWidth="0.25" lineColor="#030303"/>
@@ -393,7 +403,7 @@ FROM crosstab(
 							</textField>
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="30">
-							<textField isBlankWhenNull="true">
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="42" height="30" uuid="93f9fe9e-d8c8-4180-8f81-204760fd7136"/>
 								<box padding="0">
 									<pen lineWidth="0.25" lineColor="#030303"/>
@@ -426,7 +436,7 @@ FROM crosstab(
 							</textField>
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="30">
-							<textField isBlankWhenNull="true">
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="42" height="30" uuid="069035af-8224-4191-9117-0d1ac893b79d"/>
 								<box padding="0">
 									<pen lineWidth="0.25" lineColor="#030303"/>
@@ -459,7 +469,7 @@ FROM crosstab(
 							</textField>
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="30">
-							<textField isBlankWhenNull="true">
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="42" height="30" uuid="dcbfd023-b9dc-4ea6-ab2a-93d4be81c66c"/>
 								<box padding="0">
 									<pen lineWidth="0.25" lineColor="#030303"/>
@@ -492,7 +502,7 @@ FROM crosstab(
 							</textField>
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="30">
-							<textField isBlankWhenNull="true">
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="42" height="30" uuid="eeab8de1-e528-47be-9c41-ce8a144a543e"/>
 								<box padding="0">
 									<pen lineWidth="0.25" lineColor="#030303"/>
@@ -525,7 +535,7 @@ FROM crosstab(
 							</textField>
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="30">
-							<textField isBlankWhenNull="true">
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="42" height="30" uuid="e03abf23-0248-4383-84a7-8e74a3c88208"/>
 								<box padding="0">
 									<pen lineWidth="0.25" lineColor="#030303"/>
@@ -558,7 +568,7 @@ FROM crosstab(
 							</textField>
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="30">
-							<textField isBlankWhenNull="true">
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="40" height="30" uuid="a1c46b3e-eea5-402e-aef3-71b04a7da618"/>
 								<box padding="0">
 									<pen lineWidth="0.25" lineColor="#030303"/>
@@ -591,7 +601,7 @@ FROM crosstab(
 							</textField>
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="30">
-							<textField isBlankWhenNull="true">
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="39" height="30" uuid="5e7e8821-e9df-49ad-8bc6-38acdc515535"/>
 								<box padding="0">
 									<pen lineWidth="0.25" lineColor="#030303"/>
@@ -624,7 +634,7 @@ FROM crosstab(
 							</textField>
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="30">
-							<textField isBlankWhenNull="true">
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="38" height="30" uuid="62412b35-2713-4180-b96b-63f7ea283986"/>
 								<box padding="0">
 									<pen lineWidth="0.25" lineColor="#030303"/>
@@ -657,7 +667,7 @@ FROM crosstab(
 							</textField>
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="30">
-							<textField isBlankWhenNull="true">
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="38" height="30" uuid="8f9719ef-dd97-4924-84d7-4609e26d331d"/>
 								<box padding="0">
 									<pen lineWidth="0.25" lineColor="#030303"/>
@@ -690,7 +700,7 @@ FROM crosstab(
 							</textField>
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="30">
-							<textField isBlankWhenNull="true">
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="38" height="30" uuid="68fd064e-a76b-4559-8ae9-1a53497794f7"/>
 								<box padding="0">
 									<pen lineWidth="0.25" lineColor="#030303"/>
@@ -723,7 +733,7 @@ FROM crosstab(
 							</textField>
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="30">
-							<textField isBlankWhenNull="true">
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="38" height="30" uuid="fc7dcc40-33f1-4059-b258-ae1c73820c53"/>
 								<box padding="0">
 									<pen lineWidth="0.25" lineColor="#030303"/>
@@ -756,7 +766,7 @@ FROM crosstab(
 							</textField>
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="30">
-							<textField isBlankWhenNull="true">
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="38" height="30" uuid="f497162b-0c59-4a8d-a4e1-096d6f6534de"/>
 								<box padding="0">
 									<pen lineWidth="0.25" lineColor="#030303"/>
@@ -789,7 +799,7 @@ FROM crosstab(
 							</textField>
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="30">
-							<textField isBlankWhenNull="true">
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="38" height="30" uuid="b0974122-1a9d-48bd-a13c-c7003100a4b1"/>
 								<box padding="0">
 									<pen lineWidth="0.25" lineColor="#030303"/>
@@ -816,7 +826,19 @@ FROM crosstab(
 								<text><![CDATA[MAT]]></text>
 							</staticText>
 						</jr:columnHeader>
-						<jr:detailCell style="Table_TD" height="30"/>
+						<jr:detailCell style="Table_TD" height="30">
+							<textField isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="34" height="30" uuid="7cecc8c3-d272-4f09-bf3d-f819a99b24fe"/>
+								<box padding="0">
+									<pen lineWidth="0.0" lineColor="#030303"/>
+									<topPen lineWidth="0.25" lineStyle="Dotted" lineColor="#050505"/>
+									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="0.0" lineStyle="Dotted" lineColor="#050505"/>
+									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Right" verticalAlignment="Middle"/>
+							</textField>
+						</jr:detailCell>
 					</jr:column>
 					<jr:column width="36" uuid="b7b5c12e-5e94-44eb-970f-db3edd8002ce">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column18"/>
@@ -831,7 +853,18 @@ FROM crosstab(
 								<text><![CDATA[COMP]]></text>
 							</staticText>
 						</jr:columnHeader>
-						<jr:detailCell style="Table_TD" height="30"/>
+						<jr:detailCell style="Table_TD" height="30">
+							<textField>
+								<reportElement x="0" y="0" width="36" height="30" uuid="3a6becd1-a6f8-4a94-bf94-6aeef2400a27"/>
+								<box>
+									<pen lineWidth="0.0"/>
+									<topPen lineWidth="0.25" lineStyle="Dotted"/>
+									<bottomPen lineWidth="0.0"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle"/>
+								<textFieldExpression><![CDATA[$F{Componentes}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
 					</jr:column>
 					<jr:column width="38" uuid="3c44e6cd-c4f3-4f1d-a045-c9b09e111a80">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column19"/>
@@ -846,7 +879,18 @@ FROM crosstab(
 								<text><![CDATA[ESC]]></text>
 							</staticText>
 						</jr:columnHeader>
-						<jr:detailCell style="Table_TD" height="30"/>
+						<jr:detailCell style="Table_TD" height="30">
+							<textField>
+								<reportElement x="0" y="0" width="38" height="30" uuid="8a019b18-e3b8-49a3-a69a-daf6c8dfcc86"/>
+								<box>
+									<pen lineWidth="0.0"/>
+									<topPen lineWidth="0.25" lineStyle="Dotted"/>
+									<bottomPen lineWidth="0.0"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle"/>
+								<textFieldExpression><![CDATA[$F{Escenario}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
 					</jr:column>
 				</jr:table>
 			</componentElement>

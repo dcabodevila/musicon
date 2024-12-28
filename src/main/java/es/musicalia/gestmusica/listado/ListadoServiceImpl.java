@@ -69,7 +69,7 @@ public class ListadoServiceImpl implements ListadoService {
 
 		long daysBetween = ChronoUnit.DAYS.between(fechaIni, fechaFin) + 1; // +1 para incluir ambos días
 		StringBuilder colNamesBuilder = new StringBuilder();
-		colNamesBuilder.append("\"Artista\" text, \"Agencia\" text,");
+		colNamesBuilder.append("\"Artista\" text, \"Agencia\" text, \"Componentes\" text,\"Escenario\" text,");
 
 		for (int i = 1; i <= daysBetween; i++) {
 			colNamesBuilder.append("\"dia")

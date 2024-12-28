@@ -66,7 +66,15 @@
 		<queryString language="SQL">
 			<![CDATA[SELECT *
 FROM crosstab(
-  'SELECT a.nombre, ag.nombre, t.fecha::date, to_char(t.importe, ''999999'') 
+  'SELECT a.nombre, ag.nombre, 	a.componentes,
+	CASE WHEN (a.escenario) THEN ''SI'' ELSE ''NO'' END ||
+CASE 
+    WHEN (a.escenario=false OR a.tipo_escenario_id IS NULL) THEN ''''
+    ELSE CASE 
+             WHEN a.tipo_escenario_id = 1 THEN ''/T''
+             ELSE ''/R''
+         END
+END AS escenario, t.fecha::date, to_char(t.importe, ''999999'') 
    FROM gestmusica.tarifa t inner join gestmusica.artista a on t.artista_id=a.id inner join gestmusica.agencia ag on a.agencia_id=ag.id
    WHERE  t.fecha BETWEEN $P!{fechaRangoDesde} AND $P!{fechaRangoHasta} AND t.activo
    AND t.fecha in ($P!{fechaListIn})
@@ -84,6 +92,8 @@ FROM crosstab(
 			<property name="com.jaspersoft.studio.field.name" value="Agencia"/>
 			<property name="com.jaspersoft.studio.field.label" value="Agencia"/>
 		</field>
+		<field name="Escenario" class="java.lang.String"/>
+		<field name="Componentes" class="java.lang.String"/>
 		<field name="dia1val" class="java.lang.String">
 			<property name="com.jaspersoft.studio.field.name" value="dia1val"/>
 			<property name="com.jaspersoft.studio.field.label" value="dia1val"/>
@@ -812,7 +822,19 @@ FROM crosstab(
 								<text><![CDATA[MAT]]></text>
 							</staticText>
 						</jr:columnHeader>
-						<jr:detailCell style="Table_TD" height="30"/>
+						<jr:detailCell style="Table_TD" height="30">
+							<textField isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="34" height="30" uuid="d9c56d18-d81e-495f-83d3-6f831dda4961"/>
+								<box padding="0">
+									<pen lineWidth="0.25" lineColor="#030303"/>
+									<topPen lineWidth="0.25" lineStyle="Dotted" lineColor="#050505"/>
+									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="0.0" lineStyle="Dotted" lineColor="#050505"/>
+									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Right" verticalAlignment="Middle"/>
+							</textField>
+						</jr:detailCell>
 					</jr:column>
 					<jr:column width="36" uuid="b7b5c12e-5e94-44eb-970f-db3edd8002ce">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column18"/>
@@ -827,7 +849,20 @@ FROM crosstab(
 								<text><![CDATA[COMP]]></text>
 							</staticText>
 						</jr:columnHeader>
-						<jr:detailCell style="Table_TD" height="30"/>
+						<jr:detailCell style="Table_TD" height="30">
+							<textField isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="36" height="30" uuid="a9961021-7bed-43f2-801e-316e9ec2fbca"/>
+								<box padding="0">
+									<pen lineWidth="0.25" lineColor="#030303"/>
+									<topPen lineWidth="0.25" lineStyle="Dotted" lineColor="#050505"/>
+									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="0.0" lineStyle="Dotted" lineColor="#050505"/>
+									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle"/>
+								<textFieldExpression><![CDATA[$F{Componentes}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
 					</jr:column>
 					<jr:column width="38" uuid="3c44e6cd-c4f3-4f1d-a045-c9b09e111a80">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column19"/>
@@ -842,7 +877,20 @@ FROM crosstab(
 								<text><![CDATA[ESC]]></text>
 							</staticText>
 						</jr:columnHeader>
-						<jr:detailCell style="Table_TD" height="30"/>
+						<jr:detailCell style="Table_TD" height="30">
+							<textField isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="38" height="30" uuid="8af788c5-6fc2-48d1-aad8-77446d249c78"/>
+								<box padding="0">
+									<pen lineWidth="0.25" lineColor="#030303"/>
+									<topPen lineWidth="0.25" lineStyle="Dotted" lineColor="#050505"/>
+									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="0.0" lineStyle="Dotted" lineColor="#050505"/>
+									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle"/>
+								<textFieldExpression><![CDATA[$F{Escenario}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
 					</jr:column>
 				</jr:table>
 			</componentElement>
