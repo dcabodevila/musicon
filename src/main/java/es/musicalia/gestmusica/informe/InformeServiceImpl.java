@@ -8,6 +8,8 @@ import org.springframework.util.ResourceUtils;
 
 import javax.sql.DataSource;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
@@ -23,26 +25,29 @@ public class InformeServiceImpl implements InformeService {
 	}
 
 	public byte[] imprimirInforme(Map<String, Object> parametros, String fileNameToExport, String fileReport) {
-		try {
-			String reportFile = "classpath:".concat(fileReport);
+		try (InputStream reportStream = getClass().getResourceAsStream("/" + fileReport)) {
 
-			JasperPrint empReport =
-					JasperFillManager.fillReport
-							(
-									JasperCompileManager.compileReport(ResourceUtils.getFile(reportFile)
-											.getAbsolutePath())
-									, parametros
-									, dataSource.getConnection()
-							);
+			// Verifica si el archivo existe en el classpath
+			if (reportStream == null) {
+				throw new FileNotFoundException("No se encontró el recurso en el classpath: " + fileReport);
+			}
 
+			// Compila el reporte a partir del InputStream
+			JasperReport compiledReport = JasperCompileManager.compileReport(reportStream);
+
+			// Llena el reporte con datos
+			JasperPrint empReport = JasperFillManager.fillReport(
+					compiledReport,
+					parametros,
+					dataSource.getConnection() // tu DataSource
+			);
+
+			// Retorna el PDF en un array de bytes
 			return JasperExportManager.exportReportToPdf(empReport);
-		} catch (JRException e) {
-			throw new RuntimeException(e);
-		} catch (FileNotFoundException e) {
-			throw new RuntimeException(e);
-		} catch (SQLException e) {
+
+		} catch (JRException | SQLException | IOException e) {
 			throw new RuntimeException(e);
 		}
-	}
+    }
 
 }
