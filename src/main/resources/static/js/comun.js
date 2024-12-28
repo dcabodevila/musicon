@@ -46,7 +46,7 @@
                 value: m.id,
                 label: m.nombre
               }));
-              const municipioChoice = $('#municipio-ocupacion').data('choicesInstance');
+              const municipioChoice = $(input).data('choicesInstance');
               municipioChoice.clearStore();
 
               // 3. Agregar las opciones con setChoices
@@ -62,3 +62,19 @@
         });
     }
 
+function notif(type, message){
+    let duration = "5000";
+    let ripple = true;
+    let dismissible = false;
+    window.notyf.open({
+        type,
+        message,
+        duration,
+        ripple,
+        dismissible,
+        position: {
+            x: "center",
+            y: "top"
+        }
+    });
+}

@@ -91,19 +91,26 @@ $(document).ready(function(){
 
       },
         eventDidMount: function(info) {
-            const tipoFecha = info.event.extendedProps.tipoFecha || 'otro';
-            const tooltipEvent = info.event.extendedProps.tooltip || 'otro';
 
-            // Asignar el atributo 'title' para el tooltip
-            info.el.setAttribute('title', tooltipEvent);
+            const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+            if (!isTouchDevice) {
+                // Inicializar el tooltip si no es un dispositivo táctil
+                const tipoFecha = info.event.extendedProps.tipoFecha || 'otro';
+                const tooltipEvent = info.event.extendedProps.tooltip || 'otro';
 
-            // Inicializar el tooltip de Bootstrap
-            var tooltip = new bootstrap.Tooltip(info.el, {
-                container: 'body',
-                placement: 'top',
-                trigger: 'hover',
-                html: true
-            });
+                // Asignar el atributo 'title' para el tooltip
+                info.el.setAttribute('title', tooltipEvent);
+
+                // Inicializar el tooltip de Bootstrap
+                var tooltip = new bootstrap.Tooltip(info.el, {
+                    container: 'body',
+                    placement: 'top',
+                    trigger: 'hover',
+                    html: true
+                });
+            }
+
+
         },
       dateClick: function(info) {
         $("#id-tarifa").val("");
@@ -162,13 +169,8 @@ $(document).ready(function(){
     $("#btnModalNuevaOcupacion").click(function (event) {
         $('#divEstadoOcupacion').hide();
         pickerFechaOcupacion.setDate('');
-
         $("#id-ocupacion").val('');
-        $("#id-artista-modal-ocupacion").val('');
-
         $("#ccaa-ocupacion").change();
-
-
         $("#localidad-ocupacion").val('');
         $("#lugar-ocupacion").val('');
         $("#importe-ocupacion").val('');
