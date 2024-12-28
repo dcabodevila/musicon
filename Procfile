@@ -1,1 +1,1 @@
-web: java -jar target/gestmusica.jar
+web: java -jar target/gestmusica-0.0.1-SNAPSHOT.war
