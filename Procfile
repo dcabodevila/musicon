@@ -1,1 +1,1 @@
-web: java -XX:+UseG1GC -Xmx400m -Xms256m -jar target/gestmusica-0.0.1-SNAPSHOT.war
+web: java -XX:+UseG1GC -XX:+UseContainerSupport -XX:+UseG1GC -Xmx256m -Xms128m -jar target/gestmusica-0.0.1-SNAPSHOT.war
