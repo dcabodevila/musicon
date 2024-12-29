@@ -193,7 +193,7 @@ END AS escenario, t.fecha::date, COALESCE(p.nombre, to_char(t.importe, ''999999'
 			<textField>
 				<reportElement x="0" y="0" width="802" height="47" uuid="a4676890-9119-497a-bc0c-584535b0ccae"/>
 				<textElement textAlignment="Center">
-					<font fontName="Courier New" size="20"/>
+					<font fontName="SansSerif" size="20"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{titulo}]]></textFieldExpression>
 			</textField>
