@@ -1,8 +1,8 @@
 $(document).ready(function(){
-    let pickerFechaDesde = flatpickr("#idFechaDesde", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: true
+    let pickerFechaDesde = flatpickr("#idFechaDesde", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
         ,
         onChange: function(selectedDates, dateStr, instance) {
-//            pickerFechaHasta.set("minDate", dateStr);
+            pickerFechaHasta.set("minDate", dateStr);
         },
         onMonthChange: function(selectedDates, dateStr, instance) {
 
@@ -10,7 +10,7 @@ $(document).ready(function(){
         }
     });
 
-    let pickerFechaHasta = flatpickr("#idFechaHasta", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: true
+    let pickerFechaHasta = flatpickr("#idFechaHasta", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
             ,
             onChange: function(selectedDates, dateStr, instance) {
 //                pickerFechaDesde.set("maxDate", dateStr);
@@ -18,7 +18,7 @@ $(document).ready(function(){
 
     });
 
-    let pickerFechaOcupacion = flatpickr("#idFechaOcupacion", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: true
+    let pickerFechaOcupacion = flatpickr("#idFechaOcupacion", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
             ,
             onChange: function(selectedDates, dateStr, instance) {
 //                pickerFechaDesde.set("maxDate", dateStr);

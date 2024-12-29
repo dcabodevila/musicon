@@ -1,5 +1,5 @@
 $(document).ready(function(){
-    let pickerFechaDesde = flatpickr("#idFechaDesdeListado", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: true
+    let pickerFechaDesde = flatpickr("#idFechaDesdeListado", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
         ,
         onChange: function(selectedDates, dateStr, instance) {
             pickerFechaHasta.set("minDate", dateStr);
@@ -10,7 +10,7 @@ $(document).ready(function(){
         }
     });
 
-    let pickerFechaHasta = flatpickr("#idFechaHastaListado", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: true
+    let pickerFechaHasta = flatpickr("#idFechaHastaListado", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
             ,
             onChange: function(selectedDates, dateStr, instance) {
 //                pickerFechaDesde.set("maxDate", dateStr);
