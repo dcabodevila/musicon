@@ -81,7 +81,7 @@ END AS escenario, t.fecha::date, to_char(t.importe, ''999999'')
    	 
    AND a.activo
    ORDER BY 1, 2',
-  'SELECT unnest(fecha_crosstab($P!{fechaRangoDesde}::date, $P!{fechaRangoHasta}::date))'
+  'SELECT unnest(gestmusica.fecha_crosstab($P!{fechaRangoDesde}::date, $P!{fechaRangoHasta}::date))'
 ) AS ct ($P!{colNames});]]>
 		</queryString>
 		<field name="Artista" class="java.lang.String">
