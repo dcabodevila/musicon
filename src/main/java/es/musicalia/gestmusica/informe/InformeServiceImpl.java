@@ -1,5 +1,6 @@
 package es.musicalia.gestmusica.informe;
 
+import jakarta.annotation.PostConstruct;
 import net.sf.jasperreports.engine.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import javax.sql.DataSource;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
@@ -18,34 +20,68 @@ import java.util.Map;
 @Transactional(readOnly = true)
 public class InformeServiceImpl implements InformeService {
 
-	private DataSource dataSource;
+	private final DataSource dataSource;
+	private JasperReport compiledReportTarifaAnual;
+	private JasperReport compiledReportListadoSinOcupacion;
+	private JasperReport compiledReportListadoConOcupacion;
 
 	public InformeServiceImpl(DataSource dataSource){
 		this.dataSource =dataSource;
 	}
 
-	public byte[] imprimirInforme(Map<String, Object> parametros, String fileNameToExport, String fileReport) {
-		try (InputStream reportStream = getClass().getResourceAsStream("/" + fileReport)) {
-
-			// Verifica si el archivo existe en el classpath
+	@PostConstruct
+	public void init() throws IOException, JRException {
+		try (InputStream reportStream = getClass().getResourceAsStream("/tarifa_anual_horizontal.jrxml")) {
 			if (reportStream == null) {
-				throw new FileNotFoundException("No se encontró el recurso en el classpath: " + fileReport);
+				throw new FileNotFoundException("No se encontró el reporte en el classpath");
+			}
+			// Se compila una sola vez
+			compiledReportTarifaAnual = JasperCompileManager.compileReport(reportStream);
+		}
+		try (InputStream reportStream = getClass().getResourceAsStream("/listado_sin_ocupacion.jrxml")) {
+			if (reportStream == null) {
+				throw new FileNotFoundException("No se encontró el reporte en el classpath");
+			}
+			// Se compila una sola vez
+			compiledReportListadoSinOcupacion = JasperCompileManager.compileReport(reportStream);
+		}
+		try (InputStream reportStream = getClass().getResourceAsStream("/listado_con_ocupacion.jrxml")) {
+			if (reportStream == null) {
+				throw new FileNotFoundException("No se encontró el reporte en el classpath");
+			}
+			// Se compila una sola vez
+			compiledReportListadoConOcupacion = JasperCompileManager.compileReport(reportStream);
+		}
+	}
+
+	private JasperReport getCompiledReport(String fileReport) {
+		switch (fileReport) {
+			case "tarifa_anual_horizontal.jrxml":
+				return compiledReportTarifaAnual;
+			case "listado_sin_ocupacion.jrxml":
+				return compiledReportListadoSinOcupacion;
+			case "listado_con_ocupacion.jrxml":
+				return compiledReportListadoConOcupacion;
+			default:
+				throw new IllegalArgumentException("Reporte no soportado: " + fileReport);
+		}
+	}
+
+	public byte[] imprimirInforme(Map<String, Object> parametros, String fileNameToExport, String fileReport) {
+
+		JasperReport compiledReport = getCompiledReport(fileReport);
+		try (Connection conn = dataSource.getConnection()) {
+				// Llena el reporte con datos
+				JasperPrint empReport = JasperFillManager.fillReport(
+						compiledReport,
+						parametros,
+						conn
+				);
+				return JasperExportManager.exportReportToPdf(empReport);
 			}
 
-			// Compila el reporte a partir del InputStream
-			JasperReport compiledReport = JasperCompileManager.compileReport(reportStream);
 
-			// Llena el reporte con datos
-			JasperPrint empReport = JasperFillManager.fillReport(
-					compiledReport,
-					parametros,
-					dataSource.getConnection() // tu DataSource
-			);
-
-			// Retorna el PDF en un array de bytes
-			return JasperExportManager.exportReportToPdf(empReport);
-
-		} catch (JRException | SQLException | IOException e) {
+		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
     }
