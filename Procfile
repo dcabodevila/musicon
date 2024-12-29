@@ -1,1 +1,1 @@
-web: java -jar target/gestmusica-0.0.1-SNAPSHOT.war
+web: java -Xmx400m -Xms256m -jar target/gestmusica-0.0.1-SNAPSHOT.war
