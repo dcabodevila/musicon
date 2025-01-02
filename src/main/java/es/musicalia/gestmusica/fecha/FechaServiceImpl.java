@@ -85,7 +85,7 @@ public class FechaServiceImpl implements FechaService {
 						ocupacionDto.allDay(),
 						TipoFechaEnum.OCUPACION.getDescripcion(),
 						ocupacionDto.tipoOcupacion(),
-						ocupacionDto.estado() + "<br>" +ocupacionDto.localidad() + "<br>"+ ocupacionDto.municipio() + ", " + ocupacionDto.provincia() +  (ocupacionDto.matinal()? "<br>"+ "Matinal" : "") ,
+						ocupacionDto.estado() + "<br>" +ocupacionDto.localidad() + "<br>"+ ocupacionDto.municipio() + ", " + ocupacionDto.provincia() +  (ocupacionDto.soloMatinal() ? "<br>Solo matinal" : ocupacionDto.matinal()? "<br>"+ "Matinal" : "") ,
 						ocupacionDto.matinal(),
 						ocupacionDto.estado()
 				))

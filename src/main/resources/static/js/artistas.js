@@ -175,6 +175,7 @@ $(document).ready(function(){
         $("#lugar-ocupacion").val('');
         $("#importe-ocupacion").val('');
         $('#matinal-ocupacion').prop('checked', false);
+        $('#solo-matinal-ocupacion').prop('checked', false);
         $("#observaciones-ocupacion").val('');
 
     });
@@ -182,6 +183,14 @@ $(document).ready(function(){
     $('#provincia-ocupacion').on('change', function() {
         cargarMunicipios('#municipio-ocupacion',$(this).val(), null);
     });
+
+    $('#solo-matinal-ocupacion').on('change', function() {
+        if ($(this).is(':checked')) {
+            $('#matinal-ocupacion').prop('checked', true);
+        }
+    });
+
+
 });
 
 
@@ -355,6 +364,7 @@ function crearOcupacionSaveDto() {
     ocupacionSaveDto["lugar"] = $("#lugar-ocupacion").val();
     ocupacionSaveDto["importe"] = $("#importe-ocupacion").val();
     ocupacionSaveDto["matinal"] = $('#matinal-ocupacion').is(':checked');
+    ocupacionSaveDto["soloMatinal"] = $('#solo-matinal-ocupacion').is(':checked');
     ocupacionSaveDto["observaciones"] = $("#observaciones-ocupacion").val();
 
 
@@ -492,6 +502,7 @@ function obtenerOcupacionDto(idOcupacion){
             $("#lugar-ocupacion").val(ocupacionDto.lugar);
             $("#importe-ocupacion").val(ocupacionDto.importe);
             $('#matinal-ocupacion').prop('checked', ocupacionDto.matinal);
+            $('#solo-matinal-ocupacion').prop('checked', ocupacionDto.soloMatinal);
             $("#observaciones-ocupacion").val(ocupacionDto.observaciones);
 
             actualizarBadgeEstado(ocupacionDto.estado);

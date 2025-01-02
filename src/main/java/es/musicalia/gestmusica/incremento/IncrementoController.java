@@ -36,7 +36,7 @@ public class IncrementoController {
     public List<IncrementoListDto> listaIncrementos(@PathVariable("idArtista") Long idArtista) {
 
         //TODO: Comprobar permisos sobre la agencia
-        return this.incrementoService.findByIncrementosByAgencia(idArtista);
+        return this.incrementoService.findByIncrementosByArtista(idArtista);
 
     }
     @PostMapping("/save")

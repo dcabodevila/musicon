@@ -7,6 +7,7 @@ import org.modelmapper.internal.util.Assert;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -28,11 +29,12 @@ public class IncrementoServiceImpl implements IncrementoService {
 
 	}
 
-	public List<IncrementoListDto> findByIncrementosByAgencia(long idArtista){
+	public List<IncrementoListDto> findByIncrementosByArtista(long idArtista){
 		return this.incrementoRepository.findIncrementosByArtistaId(idArtista);
 	}
 
 	@Transactional(readOnly = false)
+	@Override
 	public Incremento saveIncremento(IncrementoSaveDto incrementoSaveDto){
 		Assert.notNull(incrementoSaveDto.getIdArtista());
 		Assert.notNull(incrementoSaveDto.getIdProvincia());
@@ -53,9 +55,17 @@ public class IncrementoServiceImpl implements IncrementoService {
 
 	}
 
+	@Override
 	public List<TipoIncremento> listTipoIncremento(){
 		return this.tipoIncrementoRepository.findAll();
 
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public BigDecimal findIncrementoByAgenciaIdAndProvinciaId(long idArtista, long idProvincia){
+		final Incremento incremento = this.incrementoRepository.findIncrementoByAgenciaIdAndProvinciaId(idArtista, idProvincia);
+		return incremento!=null? incremento.getIncremento() : BigDecimal.ZERO;
 	}
 
 }

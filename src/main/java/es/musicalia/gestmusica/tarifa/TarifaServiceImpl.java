@@ -1,17 +1,19 @@
 package es.musicalia.gestmusica.tarifa;
 
+import es.musicalia.gestmusica.artista.Artista;
 import es.musicalia.gestmusica.artista.ArtistaRepository;
+import es.musicalia.gestmusica.informe.InformeService;
 import es.musicalia.gestmusica.usuario.UserService;
+import es.musicalia.gestmusica.util.DateUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Transactional(readOnly = true)
@@ -21,12 +23,14 @@ public class TarifaServiceImpl implements TarifaService {
 	private final TarifaRepository tarifaRepository;
 	private final ArtistaRepository artistaRepository;
 	private final UserService userService;
+	private final InformeService informeService;
 
-	public TarifaServiceImpl(TarifaRepository tarifaRepository, ArtistaRepository artistaRepository, UserService userService){
+	public TarifaServiceImpl(TarifaRepository tarifaRepository, ArtistaRepository artistaRepository, UserService userService, InformeService informeService){
 		this.tarifaRepository = tarifaRepository;
 		this.artistaRepository = artistaRepository;
 		this.userService = userService;
-	}
+        this.informeService = informeService;
+    }
 	@Override
 	public List<TarifaDto> findByArtistaId(long idArtista , LocalDateTime start, LocalDateTime end){
 		return this.tarifaRepository.findTarifasDtoByArtistaIdAndDates(idArtista, start, end).orElse(new ArrayList<>());
@@ -59,6 +63,23 @@ public class TarifaServiceImpl implements TarifaService {
 			guardarTarifaFecha(tarifaSaveDto, tarifaSaveDto.getFechaDesde());
 		}
 
+	}
+
+	@Override
+	@Transactional(readOnly = false)
+	public byte[] getInformeTarifaAnual(final TarifaAnualDto tarifaAnualDto) {
+		// Cargar el informe desde algún lugar y almacenarlo en un arreglo de bytes.
+		Map<String, Object> parametros = new HashMap<String, Object>();
+		final Artista artista = this.artistaRepository.findById(tarifaAnualDto.getIdArtista()).get();
+		parametros.put("titulo", artista.getNombre());
+		parametros.put("idArtista", tarifaAnualDto.getIdArtista());
+		parametros.put("ano", tarifaAnualDto.getAno().toString());
+		parametros.put("idProvincia", tarifaAnualDto.getIdProvincia().intValue());
+
+		String fileNameToExport = artista.getNombre().concat(DateUtils.getDateStr(new Date(), "ddMMyyyyHHmmss")).concat(".pdf");
+		String fileReport = "tarifa_anual_horizontal_ocupacion.jrxml";
+
+		return this.informeService.imprimirInforme(parametros, fileNameToExport, fileReport);
 	}
 
 	private void guardarTarifaFecha(TarifaSaveDto tarifaSaveDto, LocalDateTime fecha) {

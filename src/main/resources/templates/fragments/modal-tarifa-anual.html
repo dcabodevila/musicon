@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<div th:fragment="modal-tarifa-anual">
+  <div class="modal fade" id="modalTarifaAnual" tabindex="-1" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" th:text="${'Tarifa anual de '+ artistaDto.nombre}"> </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form method="POST" th:object="${tarifaAnualDto}" th:action=@{/tarifa/tarifa-anual}>
+          <div class="modal-body m-3">
+            <input hidden="hidden" id="id-artista-modal" th:field="*{idArtista}"/>
+            <div class="mb-3 row">
+              <label class="col-form-label col-sm-3 text-sm-end">Provincia</label>
+              <div class="col-sm-9">
+                <select id="provincia" th:field="*{idProvincia}" class="form-control choices-single" required>
+                  <option th:each="provincia : ${listaProvincias}" th:value="${provincia.id}" th:text="${provincia.nombre}"></option>
+                </select>
+              </div>
+
+            </div>
+            <div class="mb-3 row">
+              <label class="col-form-label col-sm-3 text-sm-end">Año</label>
+              <div class="col-sm-9">
+                <input id="ano-tarifa" th:field="*{ano}" type="number" required class="form-control" placeholder="Año tarifa" autocomplete="off" step="1">
+              </div>
+            </div>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            <button type="submit" id="btn-guardar-incremento" class="btn btn-primary">Generar tarifa anual</button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>

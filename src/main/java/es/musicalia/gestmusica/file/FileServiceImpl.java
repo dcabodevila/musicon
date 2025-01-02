@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -70,9 +71,17 @@ public class FileServiceImpl implements FileService {
 	}
 	@Cacheable(value = "files", key = "#pathFileName")
 	public byte[] getImageFileBytes(String pathFileName) throws IOException {
-		Path filePath = Paths.get("image/".concat(pathFileName));
-		byte[] fileBytes = Files.readAllBytes(filePath);
-		return fileBytes;
+		Path filePath = Paths.get("image/", pathFileName);
+
+		// Validar si el archivo existe antes de intentar leerlo
+		if (!Files.exists(filePath)) {
+			throw new FileNotFoundException("El archivo no existe: " + filePath);
+		}
+
+		// Usar try-with-resources para asegurar la liberación de recursos
+		try (InputStream inputStream = Files.newInputStream(filePath)) {
+			return inputStream.readAllBytes();
+		}
 	}
 
 	@Cacheable(value = "files", key = "#pathFileName")

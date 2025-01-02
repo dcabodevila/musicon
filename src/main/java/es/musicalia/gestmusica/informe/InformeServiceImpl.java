@@ -31,7 +31,7 @@ public class InformeServiceImpl implements InformeService {
 
 	@PostConstruct
 	public void init() throws IOException, JRException {
-		try (InputStream reportStream = getClass().getResourceAsStream("/tarifa_anual_horizontal.jrxml")) {
+		try (InputStream reportStream = getClass().getResourceAsStream("/tarifa_anual_horizontal_ocupacion.jrxml")) {
 			if (reportStream == null) {
 				throw new FileNotFoundException("No se encontró el reporte en el classpath");
 			}
@@ -56,7 +56,7 @@ public class InformeServiceImpl implements InformeService {
 
 	private JasperReport getCompiledReport(String fileReport) {
 		switch (fileReport) {
-			case "tarifa_anual_horizontal.jrxml":
+			case "tarifa_anual_horizontal_ocupacion.jrxml":
 				return compiledReportTarifaAnual;
 			case "listado_sin_ocupacion.jrxml":
 				return compiledReportListadoSinOcupacion;

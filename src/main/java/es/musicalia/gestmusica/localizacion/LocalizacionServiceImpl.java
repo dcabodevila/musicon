@@ -26,7 +26,7 @@ public class LocalizacionServiceImpl implements LocalizacionService {
 	}
 	@Override
 	public List<Provincia> findAllProvincias(){
-		return this.provinciaRepository.findAll();
+		return this.provinciaRepository.findProvinciasOrderByName();
 	}
 	@Override
 	public List<CodigoNombreDto> findAllProvinciasByCcaaId(Long idCcaa){

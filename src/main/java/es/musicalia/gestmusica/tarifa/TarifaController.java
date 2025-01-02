@@ -5,7 +5,12 @@ import es.musicalia.gestmusica.agencia.AgenciaService;
 import es.musicalia.gestmusica.artista.ArtistaDto;
 import es.musicalia.gestmusica.artista.ArtistaService;
 import es.musicalia.gestmusica.auth.model.SecurityService;
+import es.musicalia.gestmusica.incremento.Incremento;
+import es.musicalia.gestmusica.incremento.IncrementoService;
+import es.musicalia.gestmusica.incremento.IncrementoServiceImpl;
 import es.musicalia.gestmusica.informe.InformeService;
+import es.musicalia.gestmusica.listado.ListadoDto;
+import es.musicalia.gestmusica.listado.TipoOcupacionEnum;
 import es.musicalia.gestmusica.usuario.UserService;
 import es.musicalia.gestmusica.util.DateUtils;
 import es.musicalia.gestmusica.util.DefaultResponseBody;
@@ -16,9 +21,14 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
@@ -30,25 +40,26 @@ import java.util.Map;
 public class TarifaController {
 
 
-    private UserService userService;
-    private SecurityService securityService;
+    private final UserService userService;
+    private final SecurityService securityService;
 
-    private TarifaService tarifaService;
-    private ArtistaService artistaService;
+    private final TarifaService tarifaService;
+    private final ArtistaService artistaService;
 
 
-    private InformeService informeService;
+    private final InformeService informeService;
+    private final IncrementoService incrementoService;
 
     private Logger logger = LoggerFactory.getLogger(TarifaController.class);
 
-    public TarifaController(UserService userService, SecurityService securityService,  AgenciaService agenciaService,
-                            ArtistaService artistaService, TarifaService tarifaService, InformeService informeService){
+    public TarifaController(UserService userService, SecurityService securityService, AgenciaService agenciaService,
+                            ArtistaService artistaService, TarifaService tarifaService, InformeService informeService, IncrementoService incrementoService){
         this.userService = userService;
         this.securityService = securityService;
         this.artistaService = artistaService;
         this.tarifaService = tarifaService;
         this.informeService = informeService;
-
+        this.incrementoService = incrementoService;
     }
 
     @PostMapping("/save")
@@ -81,34 +92,31 @@ public class TarifaController {
 
     }
 
-    @GetMapping("/tarifa-anual/{idArtista}/{anoTarifa}")
-    public ResponseEntity<byte[]> downloadTarifaAnual(@PathVariable("idArtista") Long idArtista,@PathVariable("anoTarifa") String anoTarifa) {
-
-        // Cargar el informe desde algún lugar y almacenarlo en un arreglo de bytes.
-        Map<String, Object> parametros = new HashMap<String, Object>();
-        final ArtistaDto astistaDto = this.artistaService.findArtistaDtoById(idArtista);
-        parametros.put("titulo", astistaDto.getNombre());
-        parametros.put("idArtista", idArtista.intValue());
-        parametros.put("ano", anoTarifa);
-        logger.info("Tarifa anual para el artista con id: " +idArtista);
-
-        String fileNameToExport = astistaDto.getNombre().concat(DateUtils.getDateStr(new Date(), "ddMMyyyyHHmmss")).concat(".pdf");
-        String fileReport = "tarifa_anual_horizontal.jrxml";
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        headers.setContentDispositionFormData("attachment", fileNameToExport);
-
-        return new ResponseEntity<byte[]>(this.informeService.imprimirInforme(parametros, fileNameToExport, fileReport),headers, HttpStatus.OK);
-
-    }
-
     @GetMapping("/{idArtista}/{fecha}")
     public ResponseEntity<TarifaDto> findTarifaByArtistaAndFecha(@PathVariable("idArtista") Long idArtista, @PathVariable("fecha") @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate fecha) {
         return ResponseEntity.ok(this.tarifaService.findByArtistaIdAndDate(idArtista, fecha));
     }
 
+    @PostMapping("/tarifa-anual")
+    public ResponseEntity<byte[]> generarTarifaAnual(Model model, @ModelAttribute("tarifaAnualDto") @Valid TarifaAnualDto tarifaAnualDto,
+                                                 BindingResult bindingResult, RedirectAttributes redirectAttributes, Errors errors) {
 
+
+        byte[] informeGenerado = this.tarifaService.getInformeTarifaAnual(tarifaAnualDto);
+
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        final ArtistaDto astistaDto = this.artistaService.findArtistaDtoById(tarifaAnualDto.getIdArtista());
+
+        String fileNameToExport = astistaDto.getNombre().concat(DateUtils.getDateStr(new Date(), "ddMMyyyyHHmmss")).concat(".pdf");
+        headers.setContentDispositionFormData("attachment", fileNameToExport);
+
+        return new ResponseEntity<byte[]>(informeGenerado,headers, HttpStatus.OK);
+
+
+
+    }
 
 
 

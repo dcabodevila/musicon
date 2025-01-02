@@ -1,9 +1,13 @@
 package es.musicalia.gestmusica.localizacion;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "provincia", schema="gestmusica")
+@Getter
+@Setter
 public class Provincia {
     @Id
     @Column(name = "id")
@@ -14,27 +18,8 @@ public class Provincia {
     @JoinColumn(name = "id_ccaa")
     private Ccaa ccaa;
 
-    public long getId() {
-        return id;
-    }
+    @Column(name = "abreviatura")
+    private String abreviatura;
 
-    public void setId(long id) {
-        this.id = id;
-    }
 
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public Ccaa getCcaa() {
-        return ccaa;
-    }
-
-    public void setCcaa(Ccaa ccaa) {
-        this.ccaa = ccaa;
-    }
 }

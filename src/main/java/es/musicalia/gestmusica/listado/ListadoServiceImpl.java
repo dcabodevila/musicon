@@ -53,6 +53,8 @@ public class ListadoServiceImpl implements ListadoService {
 
 		parametros.put("fechaListIn", getFechaListIn(listadoDto.getFechaDesde(), listadoDto.getFechaHasta()));
 
+		parametros.put("idProvincia",listadoDto.getIdProvincia().intValue());
+
 		List<Map.Entry<String, String>> diaList = generateDiaList(listadoDto.getFechaDesde(), listadoDto.getFechaHasta());
 
 		// Agregar cada par clave-valor de la lista al mapa de parámetros

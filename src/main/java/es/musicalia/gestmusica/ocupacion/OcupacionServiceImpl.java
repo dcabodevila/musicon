@@ -74,6 +74,7 @@ public class OcupacionServiceImpl implements OcupacionService {
 		ocupacion.setTarifa(getTarifa(ocupacionSaveDto, ocupacion));
 		ocupacion.setObservaciones(ocupacionSaveDto.getObservaciones());
 		ocupacion.setMatinal(ocupacionSaveDto.getMatinal());
+		ocupacion.setSoloMatinal(ocupacionSaveDto.getSoloMatinal());
 		ocupacion.setActivo(true);
 
 		final Usuario usuario = this.userService.obtenerUsuarioAutenticado();

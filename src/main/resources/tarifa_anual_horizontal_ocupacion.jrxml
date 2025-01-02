@@ -1,0 +1,978 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.20.0.final using JasperReports Library version 6.20.0-2bc7ab61c56f459e8176eb05c7705e145cd400ad  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Blank_A4_Landscape_Table_Based" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="8a465670-cc4a-4270-965f-8efb86e33b71">
+	<property name="template.engine" value="tabular_template"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Sample DB"/>
+	<style name="Table">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+			<topPen lineWidth="1.0" lineColor="#000000"/>
+			<leftPen lineWidth="1.0" lineColor="#000000"/>
+			<bottomPen lineWidth="1.0" lineColor="#000000"/>
+			<rightPen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<topPen lineWidth="0.5" lineColor="#FFFFFF"/>
+			<bottomPen lineWidth="0.5" lineColor="#FFFFFF"/>
+		</box>
+	</style>
+	<style name="Table_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<topPen lineWidth="0.5" lineColor="#FFFFFF"/>
+			<bottomPen lineWidth="0.5" lineColor="#FFFFFF"/>
+		</box>
+	</style>
+	<style name="Table_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<topPen lineWidth="0.5" lineColor="#FFFFFF"/>
+			<bottomPen lineWidth="0.5" lineColor="#FFFFFF"/>
+		</box>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[new Boolean($V{REPORT_COUNT}.intValue()%2==0)]]></conditionExpression>
+			<style backcolor="#D6D6D6"/>
+		</conditionalStyle>
+	</style>
+	<subDataset name="tableDataset" uuid="3f88e641-232a-4f2e-a95d-fc06edff8c11">
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Sample DB"/>
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<parameter name="idArtista" class="java.lang.Long"/>
+		<parameter name="ano" class="java.lang.String"/>
+		<parameter name="idProvincia" class="java.lang.Integer"/>
+		<queryString language="SQL">
+			<![CDATA[SELECT a.nombre as "Nombre", ag.nombre as "Agencia",  CASE extract(dow from d.enero)
+        WHEN 0 THEN 'D'
+        WHEN 1 THEN 'L'
+        WHEN 2 THEN 'M'
+        WHEN 3 THEN 'X'
+        WHEN 4 THEN 'J'
+        WHEN 5 THEN 'V'
+        WHEN 6 THEN 'S'
+    END ||  EXTRACT(day FROM d.enero::date)	  as "Enero",  case when o1.estado_id=2 then 'RESERVA' else  coalesce(p1.abreviatura, CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t1.importe + COALESCE(ip.incremento,0),'999999') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t1.importe+(t1.importe*ip.incremento)/100,'999999') else TO_CHAR(t1.importe,'999999')  end) end as to_char,
+       CASE extract(dow from d.febrero)
+        WHEN 0 THEN 'D'
+        WHEN 1 THEN 'L'
+        WHEN 2 THEN 'M'
+        WHEN 3 THEN 'X'
+        WHEN 4 THEN 'J'
+        WHEN 5 THEN 'V'
+        WHEN 6 THEN 'S'
+    END || EXTRACT(day FROM d.febrero::date) as "Febrero", case when o2.estado_id=2 then 'RESERVA' else  coalesce(p2.abreviatura, CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t2.importe + COALESCE(ip.incremento,0),'999999') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t2.importe+(t2.importe*ip.incremento)/100,'999999') else TO_CHAR(t2.importe,'999999')  end) end as Marzo1, 
+              CASE extract(dow from d.marzo)
+        WHEN 0 THEN 'D'
+        WHEN 1 THEN 'L'
+        WHEN 2 THEN 'M'
+        WHEN 3 THEN 'X'
+        WHEN 4 THEN 'J'
+        WHEN 5 THEN 'V'
+        WHEN 6 THEN 'S'
+    END || EXTRACT(day FROM d.marzo::date) as "Marzo", case when o3.estado_id=2 then 'RESERVA' else  coalesce(p3.abreviatura, CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t3.importe + COALESCE(ip.incremento,0),'999999') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t3.importe+(t3.importe*ip.incremento)/100,'999999') else TO_CHAR(t3.importe,'999999')  end) end,
+              CASE extract(dow from d.abril)
+        WHEN 0 THEN 'D'
+        WHEN 1 THEN 'L'
+        WHEN 2 THEN 'M'
+        WHEN 3 THEN 'X'
+        WHEN 4 THEN 'J'
+        WHEN 5 THEN 'V'
+        WHEN 6 THEN 'S'
+    END || EXTRACT(day FROM d.abril::date) as "Abril", case when o4.estado_id=2 then 'RESERVA' else  coalesce(p4.abreviatura, CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t4.importe + COALESCE(ip.incremento,0),'999999') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t4.importe+(t4.importe*ip.incremento)/100,'999999') else TO_CHAR(t4.importe,'999999')  end) end,
+              CASE extract(dow from d.mayo)
+        WHEN 0 THEN 'D'
+        WHEN 1 THEN 'L'
+        WHEN 2 THEN 'M'
+        WHEN 3 THEN 'X'
+        WHEN 4 THEN 'J'
+        WHEN 5 THEN 'V'
+        WHEN 6 THEN 'S'
+    END ||EXTRACT(day FROM d.mayo::date) as "Mayo", case when o5.estado_id=2 then 'RESERVA' else  coalesce(p5.abreviatura, CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t5.importe + COALESCE(ip.incremento,0),'999999') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t5.importe+(t5.importe*ip.incremento)/100,'999999') else TO_CHAR(t5.importe,'999999')  end) end,
+              CASE extract(dow from d.junio)
+        WHEN 0 THEN 'D'
+        WHEN 1 THEN 'L'
+        WHEN 2 THEN 'M'
+        WHEN 3 THEN 'X'
+        WHEN 4 THEN 'J'
+        WHEN 5 THEN 'V'
+        WHEN 6 THEN 'S'
+    END ||EXTRACT(day FROM d.junio::date) as "Junio", case when o6.estado_id=2 then 'RESERVA' else  coalesce(p6.abreviatura, CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t6.importe + COALESCE(ip.incremento,0),'999999') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t6.importe+(t6.importe*ip.incremento)/100,'999999') else TO_CHAR(t6.importe,'999999')  end) end,
+              CASE extract(dow from d.julio)
+        WHEN 0 THEN 'D'
+        WHEN 1 THEN 'L'
+        WHEN 2 THEN 'M'
+        WHEN 3 THEN 'X'
+        WHEN 4 THEN 'J'
+        WHEN 5 THEN 'V'
+        WHEN 6 THEN 'S'
+    END ||EXTRACT(day FROM d.julio::date) as "Julio", case when o7.estado_id=2 then 'RESERVA' else  coalesce(p7.abreviatura, CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t7.importe + COALESCE(ip.incremento,0),'999999') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t7.importe+(t7.importe*ip.incremento)/100,'999999') else TO_CHAR(t7.importe,'999999')  end) end,
+              CASE extract(dow from d.agosto)
+        WHEN 0 THEN 'D'
+        WHEN 1 THEN 'L'
+        WHEN 2 THEN 'M'
+        WHEN 3 THEN 'X'
+        WHEN 4 THEN 'J'
+        WHEN 5 THEN 'V'
+        WHEN 6 THEN 'S'
+    END ||EXTRACT(day FROM d.agosto::date) as "Agosto", case when o8.estado_id=2 then 'RESERVA' else  coalesce(p8.abreviatura, CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t8.importe + COALESCE(ip.incremento,0),'999999') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t8.importe+(t8.importe*ip.incremento)/100,'999999') else TO_CHAR(t8.importe,'999999')  end) end,
+              CASE extract(dow from d.septiembre)
+        WHEN 0 THEN 'D'
+        WHEN 1 THEN 'L'
+        WHEN 2 THEN 'M'
+        WHEN 3 THEN 'X'
+        WHEN 4 THEN 'J'
+        WHEN 5 THEN 'V'
+        WHEN 6 THEN 'S'
+    END ||EXTRACT(day FROM d.septiembre::date) as "Septiembre", case when o9.estado_id=2 then 'RESERVA' else  coalesce(p9.abreviatura, CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t9.importe + COALESCE(ip.incremento,0),'999999') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t9.importe+(t9.importe*ip.incremento)/100,'999999') else TO_CHAR(t9.importe,'999999')  end) end,
+              CASE extract(dow from d.octubre)
+        WHEN 0 THEN 'D'
+        WHEN 1 THEN 'L'
+        WHEN 2 THEN 'M'
+        WHEN 3 THEN 'X'
+        WHEN 4 THEN 'J'
+        WHEN 5 THEN 'V'
+        WHEN 6 THEN 'S'
+    END ||EXTRACT(day FROM d.octubre::date) as "Octubre", case when o10.estado_id=2 then 'RESERVA' else  coalesce(p10.abreviatura, CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t10.importe + COALESCE(ip.incremento,0),'999999') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t10.importe+(t10.importe*ip.incremento)/100,'999999') else TO_CHAR(t10.importe,'999999')  end) end,
+              CASE extract(dow from d.noviembre)
+        WHEN 0 THEN 'D'
+        WHEN 1 THEN 'L'
+        WHEN 2 THEN 'M'
+        WHEN 3 THEN 'X'
+        WHEN 4 THEN 'J'
+        WHEN 5 THEN 'V'
+        WHEN 6 THEN 'S'
+    END ||EXTRACT(day FROM d.noviembre::date) as "Noviembre", case when o11.estado_id=2 then 'RESERVA' else  coalesce(p11.abreviatura, CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t11.importe + COALESCE(ip.incremento,0),'999999') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t11.importe+(t11.importe*ip.incremento)/100,'999999') else TO_CHAR(t11.importe,'999999')  end) end,
+              CASE extract(dow from d.diciembre)
+        WHEN 0 THEN 'D'
+        WHEN 1 THEN 'L'
+        WHEN 2 THEN 'M'
+        WHEN 3 THEN 'X'
+        WHEN 4 THEN 'J'
+        WHEN 5 THEN 'V'
+        WHEN 6 THEN 'S'
+    END ||EXTRACT(day FROM d.diciembre::date) as "Diciembre", case when o12.estado_id=2 then 'RESERVA' else  coalesce(p12.abreviatura, CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t12.importe + COALESCE(ip.incremento,0),'999999') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t12.importe+(t12.importe*ip.incremento)/100,'999999') else TO_CHAR(t12.importe,'999999')  end) end 
+FROM (
+	SELECT 
+		generate_series('$P!{ano}-01-01'::date, '$P!{ano}-01-31'::date, '1 day') AS enero,
+		generate_series('$P!{ano}-02-01'::date, '$P!{ano}-02-28'::date, '1 day') AS febrero,	
+		generate_series('$P!{ano}-03-01'::date, '$P!{ano}-03-31'::date, '1 day') AS marzo,
+		generate_series('$P!{ano}-04-01'::date, '$P!{ano}-04-30'::date, '1 day') AS abril,
+		generate_series('$P!{ano}-05-01'::date, '$P!{ano}-05-31'::date, '1 day') AS mayo,
+		generate_series('$P!{ano}-06-01'::date, '$P!{ano}-06-30'::date, '1 day') AS junio,
+		generate_series('$P!{ano}-07-01'::date, '$P!{ano}-07-31'::date, '1 day') AS julio,
+		generate_series('$P!{ano}-08-01'::date, '$P!{ano}-08-31'::date, '1 day') AS agosto,
+		generate_series('$P!{ano}-09-01'::date, '$P!{ano}-09-30'::date, '1 day') AS septiembre,
+		generate_series('$P!{ano}-10-01'::date, '$P!{ano}-10-31'::date, '1 day') AS octubre,
+		generate_series('$P!{ano}-11-01'::date, '$P!{ano}-11-30'::date, '1 day') AS noviembre,
+		generate_series('$P!{ano}-12-01'::date, '$P!{ano}-12-31'::date, '1 day') AS diciembre
+
+) d
+CROSS JOIN gestmusica.artista a inner join gestmusica.agencia ag on a.agencia_id=ag.id
+LEFT JOIN gestmusica.tarifa t1 ON t1.artista_id = a.id AND t1.fecha::date = d.enero::date AND t1.activo
+LEFT JOIN gestmusica.ocupacion o1 ON o1.artista_id = a.id AND o1.fecha::date = d.enero::date  AND o1.activo and o1.estado_id in (1,2,3)
+left join gestmusica.provincia p1 on o1.provincia_id = p1.id
+LEFT JOIN gestmusica.tarifa t2 ON t2.artista_id = a.id AND t2.fecha::date = d.febrero::date AND t2.activo
+LEFT JOIN gestmusica.ocupacion o2 ON o2.artista_id = a.id AND o2.fecha::date = d.febrero::date  AND o2.activo and o2.estado_id in (1,2,3)
+left join gestmusica.provincia p2 on o2.provincia_id = p2.id
+LEFT JOIN gestmusica.tarifa t3 ON t3.artista_id = a.id AND t3.fecha::date = d.marzo::date AND t3.activo
+LEFT JOIN gestmusica.ocupacion o3 ON o3.artista_id = a.id AND o3.fecha::date = d.marzo::date  AND o3.activo and o3.estado_id in (1,2,3)
+left join gestmusica.provincia p3 on o3.provincia_id = p3.id
+LEFT JOIN gestmusica.tarifa t4 ON t4.artista_id = a.id AND t4.fecha::date = d.abril::date AND t4.activo
+LEFT JOIN gestmusica.ocupacion o4 ON o4.artista_id = a.id AND o4.fecha::date = d.abril::date  AND o4.activo and o4.estado_id in (1,2,3)
+left join gestmusica.provincia p4 on o4.provincia_id = p4.id
+LEFT JOIN gestmusica.tarifa t5 ON t5.artista_id = a.id AND t5.fecha::date = d.mayo::date AND t5.activo
+LEFT JOIN gestmusica.ocupacion o5 ON o5.artista_id = a.id AND o5.fecha::date = d.mayo::date  AND o5.activo and o5.estado_id in (1,2,3)
+left join gestmusica.provincia p5 on o5.provincia_id = p5.id
+LEFT JOIN gestmusica.tarifa t6 ON t6.artista_id = a.id AND t6.fecha::date = d.junio::date AND t6.activo
+LEFT JOIN gestmusica.ocupacion o6 ON o6.artista_id = a.id AND o6.fecha::date = d.junio::date  AND o6.activo and o6.estado_id in (1,2,3)
+left join gestmusica.provincia p6 on o6.provincia_id = p6.id
+LEFT JOIN gestmusica.tarifa t7 ON t7.artista_id = a.id AND t7.fecha::date = d.julio::date AND t7.activo
+LEFT JOIN gestmusica.ocupacion o7 ON o7.artista_id = a.id AND o7.fecha::date = d.julio::date  AND o7.activo and o7.estado_id in (1,2,3)
+left join gestmusica.provincia p7 on o7.provincia_id = p7.id
+LEFT JOIN gestmusica.tarifa t8 ON t8.artista_id = a.id AND t8.fecha::date = d.agosto::date AND t8.activo
+LEFT JOIN gestmusica.ocupacion o8 ON o8.artista_id = a.id AND o8.fecha::date = d.agosto::date  AND o8.activo and o8.estado_id in (1,2,3)
+left join gestmusica.provincia p8 on o8.provincia_id = p8.id
+LEFT JOIN gestmusica.tarifa t9 ON t9.artista_id = a.id AND t9.fecha::date = d.septiembre::date AND t9.activo
+LEFT JOIN gestmusica.ocupacion o9 ON o9.artista_id = a.id AND o9.fecha::date = d.septiembre::date  AND o9.activo and o9.estado_id in (1,2,3)
+left join gestmusica.provincia p9 on o9.provincia_id = p9.id
+LEFT JOIN gestmusica.tarifa t10 ON t10.artista_id = a.id AND t10.fecha::date = d.octubre::date AND t10.activo
+LEFT JOIN gestmusica.ocupacion o10 ON o10.artista_id = a.id AND o10.fecha::date = d.octubre::date  AND o10.activo and o10.estado_id in (1,2,3)
+left join gestmusica.provincia p10 on o10.provincia_id = p10.id
+LEFT JOIN gestmusica.tarifa t11 ON t11.artista_id = a.id AND t11.fecha::date = d.noviembre::date AND t11.activo
+LEFT JOIN gestmusica.ocupacion o11 ON o11.artista_id = a.id AND o11.fecha::date = d.noviembre::date  AND o11.activo and o11.estado_id in (1,2,3)
+left join gestmusica.provincia p11 on o11.provincia_id = p11.id
+LEFT JOIN gestmusica.tarifa t12 ON t12.artista_id = a.id AND t12.fecha::date = d.diciembre::date AND t12.activo 
+LEFT JOIN gestmusica.ocupacion o12 ON o12.artista_id = a.id AND o12.fecha::date = d.diciembre::date  AND o12.activo and o12.estado_id in (1,2,3)
+left join gestmusica.provincia p12 on o12.provincia_id = p12.id
+LEFT JOIN gestmusica.incremento_provincial ip ON (ip.artista_id=a.id AND ip.provincia_id=$P{idProvincia}::bigint )    
+WHERE a.id = $P{idArtista} ORDER BY 1, 2]]>
+		</queryString>
+		<field name="Nombre" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.name" value="Nombre"/>
+			<property name="com.jaspersoft.studio.field.label" value="Nombre"/>
+			<property name="com.jaspersoft.studio.field.tree.path" value="artista"/>
+		</field>
+		<field name="Agencia" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.name" value="Agencia"/>
+			<property name="com.jaspersoft.studio.field.label" value="Agencia"/>
+			<property name="com.jaspersoft.studio.field.tree.path" value="agencia"/>
+		</field>
+		<field name="Enero" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.name" value="Enero"/>
+			<property name="com.jaspersoft.studio.field.label" value="Enero"/>
+		</field>
+		<field name="to_char" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.name" value="to_char"/>
+			<property name="com.jaspersoft.studio.field.label" value="to_char"/>
+		</field>
+		<field name="Febrero" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.name" value="Febrero"/>
+			<property name="com.jaspersoft.studio.field.label" value="Febrero"/>
+		</field>
+		<field name="COLUMN_6" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.name" value="to_char"/>
+			<property name="com.jaspersoft.studio.field.label" value="to_char"/>
+		</field>
+		<field name="Marzo" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.name" value="Marzo"/>
+			<property name="com.jaspersoft.studio.field.label" value="Marzo"/>
+		</field>
+		<field name="coalesce" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.name" value="coalesce"/>
+			<property name="com.jaspersoft.studio.field.label" value="coalesce"/>
+		</field>
+		<field name="Abril" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.name" value="Abril"/>
+			<property name="com.jaspersoft.studio.field.label" value="Abril"/>
+		</field>
+		<field name="COLUMN_10" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.name" value="coalesce"/>
+			<property name="com.jaspersoft.studio.field.label" value="coalesce"/>
+		</field>
+		<field name="Mayo" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.name" value="Mayo"/>
+			<property name="com.jaspersoft.studio.field.label" value="Mayo"/>
+		</field>
+		<field name="COLUMN_12" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.name" value="coalesce"/>
+			<property name="com.jaspersoft.studio.field.label" value="coalesce"/>
+		</field>
+		<field name="Junio" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.name" value="Junio"/>
+			<property name="com.jaspersoft.studio.field.label" value="Junio"/>
+		</field>
+		<field name="COLUMN_14" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.name" value="coalesce"/>
+			<property name="com.jaspersoft.studio.field.label" value="coalesce"/>
+		</field>
+		<field name="Julio" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.name" value="Julio"/>
+			<property name="com.jaspersoft.studio.field.label" value="Julio"/>
+		</field>
+		<field name="COLUMN_16" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.name" value="coalesce"/>
+			<property name="com.jaspersoft.studio.field.label" value="coalesce"/>
+		</field>
+		<field name="Agosto" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.name" value="Agosto"/>
+			<property name="com.jaspersoft.studio.field.label" value="Agosto"/>
+		</field>
+		<field name="COLUMN_18" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.name" value="coalesce"/>
+			<property name="com.jaspersoft.studio.field.label" value="coalesce"/>
+		</field>
+		<field name="Septiembre" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.name" value="Septiembre"/>
+			<property name="com.jaspersoft.studio.field.label" value="Septiembre"/>
+		</field>
+		<field name="COLUMN_20" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.name" value="coalesce"/>
+			<property name="com.jaspersoft.studio.field.label" value="coalesce"/>
+		</field>
+		<field name="Octubre" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.name" value="Octubre"/>
+			<property name="com.jaspersoft.studio.field.label" value="Octubre"/>
+		</field>
+		<field name="COLUMN_22" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.name" value="coalesce"/>
+			<property name="com.jaspersoft.studio.field.label" value="coalesce"/>
+		</field>
+		<field name="Noviembre" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.name" value="Noviembre"/>
+			<property name="com.jaspersoft.studio.field.label" value="Noviembre"/>
+		</field>
+		<field name="COLUMN_24" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.name" value="coalesce"/>
+			<property name="com.jaspersoft.studio.field.label" value="coalesce"/>
+		</field>
+		<field name="Diciembre" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.name" value="Diciembre"/>
+			<property name="com.jaspersoft.studio.field.label" value="Diciembre"/>
+		</field>
+		<field name="COLUMN_26" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.name" value="coalesce"/>
+			<property name="com.jaspersoft.studio.field.label" value="coalesce"/>
+		</field>
+	</subDataset>
+	<parameter name="titulo" class="java.lang.String"/>
+	<parameter name="idArtista" class="java.lang.Long">
+		<defaultValueExpression><![CDATA[7]]></defaultValueExpression>
+	</parameter>
+	<parameter name="ano" class="java.lang.String">
+		<defaultValueExpression><![CDATA[2024]]></defaultValueExpression>
+	</parameter>
+	<parameter name="datosAgrupacion" class="java.lang.String"/>
+	<parameter name="datosAgencia" class="java.lang.String"/>
+	<parameter name="idProvincia" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<title>
+		<band height="47" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="802" height="47" uuid="a4676890-9119-497a-bc0c-584535b0ccae"/>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif" size="20"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{titulo} + " Temporada "+$P{ano}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageFooter>
+		<band height="48" splitType="Stretch">
+			<textField isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="390" height="40" isRemoveLineWhenBlank="true" uuid="129981cf-9f40-47d8-80c8-55769f462514"/>
+				<textFieldExpression><![CDATA[$P{datosAgrupacion}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="402" y="0" width="400" height="40" isRemoveLineWhenBlank="true" uuid="1e324847-75ee-4936-85bf-ffa44edffac2"/>
+				<textFieldExpression><![CDATA[$P{datosAgencia}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="200" splitType="Stretch">
+			<property name="local_mesure_unitheight" value="pixel"/>
+			<componentElement>
+				<reportElement key="" mode="Transparent" x="0" y="0" width="802" height="200" uuid="115ca165-edeb-4a05-9fe3-ed5379531b2d">
+					<property name="com.jaspersoft.studio.table.style.table_header" value="Table_TH"/>
+					<property name="com.jaspersoft.studio.table.style.column_header" value="Table_CH"/>
+					<property name="com.jaspersoft.studio.table.style.detail" value="Table_TD"/>
+					<property name="com.jaspersoft.studio.components.autoresize.proportional" value="true"/>
+					<property name="com.jaspersoft.studio.components.autoresize.next" value="true"/>
+				</reportElement>
+				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+					<datasetRun subDataset="tableDataset" uuid="96492926-2a08-4a3e-a971-461afde7f006">
+						<datasetParameter name="idArtista">
+							<datasetParameterExpression><![CDATA[$P{idArtista}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="ano">
+							<datasetParameterExpression><![CDATA[$P{ano}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="idProvincia">
+							<datasetParameterExpression><![CDATA[$P{idProvincia}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:column width="40" uuid="90539b8b-04ac-4768-a4b8-dcd9e959734b">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column1"/>
+						<jr:columnHeader style="Table_CH" height="20" rowSpan="1">
+							<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+						</jr:columnHeader>
+						<jr:detailCell style="Table_TD" height="13">
+							<property name="com.jaspersoft.studio.unit.height" value="px"/>
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="40" height="13" uuid="7c169c6d-25a2-435b-9fe5-daff498d30c9"/>
+								<box leftPadding="2">
+									<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="SansSerif" size="8"/>
+									<paragraph lineSpacing="Single" lineSpacingSize="0.0"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{Enero}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="35" uuid="c4a5fa4d-601b-4b64-8455-56d584d3bfac">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column2"/>
+						<jr:columnHeader style="Table_CH" height="20" rowSpan="1">
+							<staticText>
+								<reportElement x="0" y="0" width="35" height="20" uuid="23ed7815-bd2c-48cf-a4e3-88decf04daba">
+									<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+								</reportElement>
+								<box leftPadding="2"/>
+								<textElement textAlignment="Center">
+									<font fontName="SansSerif" size="12" isBold="true"/>
+								</textElement>
+								<text><![CDATA[Ene]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell style="Table_TD" height="13">
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="35" height="13" uuid="3c164478-d868-40ef-b443-71e0be4cda79">
+									<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+								</reportElement>
+								<box leftPadding="2">
+									<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="SansSerif" size="8"/>
+									<paragraph lineSpacing="Single" lineSpacingSize="0.0"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{to_char}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="37" uuid="e7c45fd4-a309-4f71-a434-b8588628f673">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column3"/>
+						<jr:columnHeader style="Table_CH" height="20" rowSpan="1"/>
+						<jr:detailCell style="Table_TD" height="13">
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="37" height="13" uuid="2150bf4b-ea7d-4962-a5b4-2c584ca4991f">
+									<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+								</reportElement>
+								<box leftPadding="2">
+									<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="SansSerif" size="8"/>
+									<paragraph lineSpacing="Single" lineSpacingSize="0.0"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{Febrero}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="36" uuid="c10d9965-79db-480e-b59c-1c703ade04fa">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column4"/>
+						<jr:columnHeader style="Table_CH" height="20" rowSpan="1">
+							<staticText>
+								<reportElement x="0" y="0" width="36" height="20" uuid="9cbaa40f-d176-4380-8244-fdcdc9390130"/>
+								<box leftPadding="2"/>
+								<textElement textAlignment="Center">
+									<font fontName="SansSerif" size="12" isBold="true"/>
+								</textElement>
+								<text><![CDATA[Feb]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell style="Table_TD" height="13">
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="36" height="13" uuid="71e6987c-bacb-4285-ba26-e143e907d1cf"/>
+								<box leftPadding="2">
+									<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="SansSerif" size="8"/>
+									<paragraph lineSpacing="Single" lineSpacingSize="0.0"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{COLUMN_6}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="30" uuid="9e7667b0-383f-4bad-aa1b-bd7c2c8622df">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column5"/>
+						<jr:columnHeader style="Table_CH" height="20" rowSpan="1"/>
+						<jr:detailCell style="Table_TD" height="13">
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="30" height="13" uuid="be36e339-2e51-41b6-a259-dd9394978c4f"/>
+								<box leftPadding="2">
+									<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="SansSerif" size="8"/>
+									<paragraph lineSpacing="Single" lineSpacingSize="0.0"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{Marzo}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="35" uuid="56519460-68dd-4bbb-9869-cee07db0771d">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column6"/>
+						<jr:columnHeader style="Table_CH" height="20" rowSpan="1">
+							<staticText>
+								<reportElement x="0" y="0" width="35" height="20" uuid="6457ace9-cd79-4105-a362-8100c21bff86"/>
+								<box leftPadding="2"/>
+								<textElement textAlignment="Center">
+									<font fontName="SansSerif" size="12" isBold="true"/>
+								</textElement>
+								<text><![CDATA[Mar]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell style="Table_TD" height="13">
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="35" height="13" uuid="d75504c9-b22c-4bae-ae54-5007b761cbed"/>
+								<box leftPadding="2">
+									<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="SansSerif" size="8"/>
+									<paragraph lineSpacing="Single" lineSpacingSize="0.0"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{coalesce}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="32" uuid="31edb663-ef17-411e-9528-f1b305bde73b">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column7"/>
+						<jr:columnHeader style="Table_CH" height="20" rowSpan="1"/>
+						<jr:detailCell style="Table_TD" height="13">
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="32" height="13" uuid="d31c189b-6cf6-4566-a9ca-7bb6999e27c3"/>
+								<box leftPadding="2">
+									<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="SansSerif" size="8"/>
+									<paragraph lineSpacing="Single" lineSpacingSize="0.0"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{Abril}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="35" uuid="022af586-b10e-4b95-9c71-7e790da794c8">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column8"/>
+						<jr:columnHeader style="Table_CH" height="20" rowSpan="1">
+							<staticText>
+								<reportElement x="0" y="0" width="35" height="20" uuid="46d19442-8a0e-4999-94c2-78aa18f2bb01"/>
+								<box leftPadding="2"/>
+								<textElement textAlignment="Center">
+									<font fontName="SansSerif" size="12" isBold="true"/>
+								</textElement>
+								<text><![CDATA[Abr]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell style="Table_TD" height="13">
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="35" height="13" uuid="09636a87-6734-4085-b49f-228ca59afe66"/>
+								<box leftPadding="2">
+									<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="SansSerif" size="8"/>
+									<paragraph lineSpacing="Single" lineSpacingSize="0.0"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{COLUMN_10}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="31" uuid="d58cbb72-c4fc-4a49-b570-56c6a45be955">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column9"/>
+						<jr:columnHeader style="Table_CH" height="20" rowSpan="1"/>
+						<jr:detailCell style="Table_TD" height="13">
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="31" height="13" uuid="7dc29493-73a4-4b1e-9202-d8f2baf06aa5"/>
+								<box leftPadding="2">
+									<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="SansSerif" size="8"/>
+									<paragraph lineSpacing="Single" lineSpacingSize="0.0"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{Mayo}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="35" uuid="211eb6f6-8911-431e-a53c-ab1c57fb5dc3">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column10"/>
+						<jr:columnHeader style="Table_CH" height="20" rowSpan="1">
+							<staticText>
+								<reportElement x="0" y="0" width="35" height="20" uuid="c0826e77-3ea4-4c8e-8e2c-28050e87f9e9"/>
+								<box leftPadding="2"/>
+								<textElement textAlignment="Center">
+									<font fontName="SansSerif" size="12" isBold="true"/>
+								</textElement>
+								<text><![CDATA[May]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell style="Table_TD" height="13">
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="35" height="13" uuid="d07c45d2-18d6-46eb-9199-e9d32c2096d1"/>
+								<box leftPadding="2">
+									<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="SansSerif" size="8"/>
+									<paragraph lineSpacing="Single" lineSpacingSize="0.0"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{COLUMN_12}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="31" uuid="e59e78b3-ed27-41d4-b55e-97e1c104b3b9">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column11"/>
+						<jr:columnHeader style="Table_CH" height="20" rowSpan="1"/>
+						<jr:detailCell style="Table_TD" height="13">
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="31" height="13" uuid="42a7be50-4550-4120-a0e7-2e44334d62cf"/>
+								<box leftPadding="2">
+									<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="SansSerif" size="8"/>
+									<paragraph lineSpacing="Single" lineSpacingSize="0.0"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{Junio}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="35" uuid="a1ad9419-7dda-4582-90c4-ca26fe57f499">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column12"/>
+						<jr:columnHeader style="Table_CH" height="20" rowSpan="1">
+							<staticText>
+								<reportElement x="0" y="0" width="35" height="20" uuid="0bf490c5-9f7f-4f65-9339-b7f460a0dd4a"/>
+								<box leftPadding="2"/>
+								<textElement textAlignment="Center">
+									<font fontName="SansSerif" size="12" isBold="true"/>
+								</textElement>
+								<text><![CDATA[Jun]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell style="Table_TD" height="13">
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="35" height="13" uuid="ab4cb29c-3df1-4f49-be2b-6c3ba2ecc819"/>
+								<box leftPadding="2">
+									<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="SansSerif" size="8"/>
+									<paragraph lineSpacing="Single" lineSpacingSize="0.0"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{COLUMN_14}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="31" uuid="642cc354-df9b-44ff-bd3b-d9f33a7cc4a2">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column13"/>
+						<jr:columnHeader style="Table_CH" height="20" rowSpan="1"/>
+						<jr:detailCell style="Table_TD" height="13">
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="31" height="13" uuid="94909dea-b5e3-4333-b230-2314a11a3f40"/>
+								<box leftPadding="2">
+									<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="SansSerif" size="8"/>
+									<paragraph lineSpacing="Single" lineSpacingSize="0.0"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{Julio}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="35" uuid="8933dc9b-aaa4-4388-8686-ebbee070c609">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column14"/>
+						<jr:columnHeader style="Table_CH" height="20" rowSpan="1">
+							<staticText>
+								<reportElement x="0" y="0" width="35" height="20" uuid="5c68a19a-228b-4b8f-823b-8bf12dedaea1"/>
+								<box leftPadding="2"/>
+								<textElement textAlignment="Center">
+									<font fontName="SansSerif" size="12" isBold="true"/>
+								</textElement>
+								<text><![CDATA[Jul]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell style="Table_TD" height="13">
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="35" height="13" uuid="b63384fe-b1fc-4452-853d-2ea12d32a172"/>
+								<box leftPadding="2">
+									<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="SansSerif" size="8"/>
+									<paragraph lineSpacing="Single" lineSpacingSize="0.0"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{COLUMN_16}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="31" uuid="1c39b1d5-a6b4-4dd5-b021-a32e03ad052b">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column15"/>
+						<jr:columnHeader style="Table_CH" height="20" rowSpan="1"/>
+						<jr:detailCell style="Table_TD" height="13">
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="31" height="13" uuid="33c8db3a-8665-4e3d-a31d-473b617a40a5"/>
+								<box leftPadding="2">
+									<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="SansSerif" size="8"/>
+									<paragraph lineSpacing="Single" lineSpacingSize="0.0"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{Agosto}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="35" uuid="b171f037-0348-4111-8f50-5ebcc24b9cf1">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column16"/>
+						<jr:columnHeader style="Table_CH" height="20" rowSpan="1">
+							<staticText>
+								<reportElement x="0" y="0" width="35" height="20" uuid="ddd6f9a0-4991-4fb3-a612-9b7df2d1a5e3"/>
+								<box leftPadding="2"/>
+								<textElement textAlignment="Center">
+									<font fontName="SansSerif" size="12" isBold="true"/>
+								</textElement>
+								<text><![CDATA[Ago]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell style="Table_TD" height="13">
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="35" height="13" uuid="97cc0b08-6b91-422f-bd33-6d24b36df286"/>
+								<box leftPadding="2">
+									<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="SansSerif" size="8"/>
+									<paragraph lineSpacing="Single" lineSpacingSize="0.0"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{COLUMN_18}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="30" uuid="40ed8913-ddec-4c46-91af-e8cc2df5af0e">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column17"/>
+						<jr:columnHeader style="Table_CH" height="20" rowSpan="1"/>
+						<jr:detailCell style="Table_TD" height="13">
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="30" height="13" uuid="9c5d4acb-02d3-4fb5-a9dc-8cb986b01cd6"/>
+								<box leftPadding="2">
+									<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="SansSerif" size="8"/>
+									<paragraph lineSpacing="Single" lineSpacingSize="0.0"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{Septiembre}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="35" uuid="3ce3440a-7ef1-4e3f-a7bf-4684413c49de">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column18"/>
+						<jr:columnHeader style="Table_CH" height="20" rowSpan="1">
+							<property name="com.jaspersoft.studio.unit.height" value="px"/>
+							<staticText>
+								<reportElement x="0" y="0" width="35" height="20" uuid="13a2679d-9550-4400-969e-26f5cedac107"/>
+								<box leftPadding="2"/>
+								<textElement textAlignment="Center">
+									<font fontName="SansSerif" size="12" isBold="true"/>
+								</textElement>
+								<text><![CDATA[Sep]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell style="Table_TD" height="13">
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="35" height="13" uuid="673b6a74-6ed0-4bf6-95e8-f1727f48029d"/>
+								<box leftPadding="2">
+									<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="SansSerif" size="8"/>
+									<paragraph lineSpacing="Single" lineSpacingSize="0.0"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{COLUMN_20}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="29" uuid="c443c4a6-4e38-4c2c-b225-24d91a67c9de">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column19"/>
+						<jr:columnHeader style="Table_CH" height="20" rowSpan="1"/>
+						<jr:detailCell style="Table_TD" height="13">
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="29" height="13" uuid="3a8fedd3-b4f0-4838-aa5a-bd2cd264c147"/>
+								<box leftPadding="2">
+									<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="SansSerif" size="8"/>
+									<paragraph lineSpacing="Single" lineSpacingSize="0.0"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{Octubre}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="35" uuid="9c00d845-36e3-4a5d-9796-3f25a082afbe">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column20"/>
+						<jr:columnHeader style="Table_CH" height="20" rowSpan="1">
+							<staticText>
+								<reportElement x="0" y="0" width="35" height="20" uuid="1cf33131-bfa5-42ca-9692-acb8948df31a"/>
+								<box leftPadding="2"/>
+								<textElement textAlignment="Center">
+									<font fontName="SansSerif" size="12" isBold="true"/>
+								</textElement>
+								<text><![CDATA[Oct]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell style="Table_TD" height="13">
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="35" height="13" uuid="fa16eb9f-b6e9-4524-84c6-919dc1b781ff"/>
+								<box leftPadding="2">
+									<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="SansSerif" size="8"/>
+									<paragraph lineSpacing="Single" lineSpacingSize="0.0"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{COLUMN_22}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="28" uuid="98106b0b-3eff-4d4d-b4df-a3a0f20db2ec">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column21"/>
+						<jr:columnHeader style="Table_CH" height="20" rowSpan="1"/>
+						<jr:detailCell style="Table_TD" height="13">
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="28" height="13" uuid="231d84b7-fd71-4f62-87f3-8cb8719ba035"/>
+								<box leftPadding="2">
+									<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="SansSerif" size="8"/>
+									<paragraph lineSpacing="Single" lineSpacingSize="0.0"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{Noviembre}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="35" uuid="f3acc156-8119-495b-a29a-499468f8edbe">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column22"/>
+						<jr:columnHeader style="Table_CH" height="20" rowSpan="1">
+							<staticText>
+								<reportElement x="0" y="0" width="35" height="20" uuid="603608e2-b7ef-4b55-8fa9-312b157edb29"/>
+								<box leftPadding="2"/>
+								<textElement textAlignment="Center">
+									<font fontName="SansSerif" size="12" isBold="true"/>
+								</textElement>
+								<text><![CDATA[Nov]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell style="Table_TD" height="13">
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="35" height="13" uuid="110958de-122a-4a5d-b466-80b57cb20c3b"/>
+								<box leftPadding="2">
+									<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="SansSerif" size="8"/>
+									<paragraph lineSpacing="Single" lineSpacingSize="0.0"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{COLUMN_24}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="30" uuid="7efa6e04-f1b0-4b65-b4f2-ff1dfa35237f">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column23"/>
+						<jr:columnHeader style="Table_CH" height="20" rowSpan="1"/>
+						<jr:detailCell style="Table_TD" height="13">
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="30" height="13" uuid="9380b6e3-3dfd-406c-b529-d4f2eb45e8bb"/>
+								<box leftPadding="2">
+									<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="SansSerif" size="8"/>
+									<paragraph lineSpacing="Single" lineSpacingSize="0.0"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{Diciembre}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="36" uuid="787205cc-09ea-4974-a2d7-eda00b7ecd36">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column24"/>
+						<jr:columnHeader style="Table_CH" height="20" rowSpan="1">
+							<staticText>
+								<reportElement x="0" y="0" width="36" height="20" uuid="5eab1fa4-a167-499b-a6d7-08e6be23e7f5"/>
+								<box leftPadding="2"/>
+								<textElement textAlignment="Center">
+									<font fontName="SansSerif" size="12" isBold="true"/>
+								</textElement>
+								<text><![CDATA[Dic]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell style="Table_TD" height="13">
+							<textField textAdjust="ScaleFont" isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="36" height="13" uuid="fa48a8fb-8996-4d08-b165-653ba7ee7ade"/>
+								<box leftPadding="2">
+									<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="SansSerif" size="8"/>
+									<paragraph lineSpacing="Single" lineSpacingSize="0.0"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{COLUMN_26}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+				</jr:table>
+			</componentElement>
+		</band>
+	</summary>
+</jasperReport>

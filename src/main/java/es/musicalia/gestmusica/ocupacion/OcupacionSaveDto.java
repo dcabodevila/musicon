@@ -36,6 +36,8 @@ public class OcupacionSaveDto {
 
     private Boolean matinal= Boolean.FALSE;
 
+    private Boolean soloMatinal= Boolean.FALSE;
+
     private Boolean activo = Boolean.TRUE;
 
 }

@@ -91,5 +91,9 @@ public class Ocupacion {
     @Column(name = "observaciones")
     private String observaciones;
 
+    @Column(name = "solo_matinal")
+    private boolean soloMatinal;
+
+
 }
 

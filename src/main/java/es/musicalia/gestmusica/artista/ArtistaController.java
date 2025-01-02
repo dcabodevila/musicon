@@ -7,6 +7,7 @@ import es.musicalia.gestmusica.file.FileService;
 import es.musicalia.gestmusica.incremento.IncrementoService;
 import es.musicalia.gestmusica.localizacion.LocalizacionService;
 import es.musicalia.gestmusica.ocupacion.OcupacionService;
+import es.musicalia.gestmusica.tarifa.TarifaAnualDto;
 import es.musicalia.gestmusica.tarifa.TarifaSaveDto;
 import es.musicalia.gestmusica.usuario.UserService;
 import es.musicalia.gestmusica.usuario.Usuario;
@@ -95,6 +96,14 @@ public class ArtistaController {
         model.addAttribute("artistaDto", artistaDto);
         getModelAttributeDetail(model);
         getModelAttributeArtistaOcupacion(model, artistaDto);
+
+        TarifaAnualDto tarifaAnualDto = new TarifaAnualDto();
+        tarifaAnualDto.setIdArtista(idArtista);
+        tarifaAnualDto.setAno(Year.now().getValue());
+
+        model.addAttribute("tarifaAnualDto", tarifaAnualDto);
+
+
         return "artista-detail";
     }
 
