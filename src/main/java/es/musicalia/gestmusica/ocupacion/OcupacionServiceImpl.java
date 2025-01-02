@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -71,7 +70,7 @@ public class OcupacionServiceImpl implements OcupacionService {
 		ocupacion.setMunicipio(this.municipioRepository.findById(ocupacionSaveDto.getIdMunicipio()).get());
 		ocupacion.setPoblacion(ocupacionSaveDto.getLocalidad());
 		ocupacion.setLugar(ocupacionSaveDto.getLugar());
-		ocupacion.setTarifa(getTarifa(ocupacionSaveDto, ocupacion));
+		ocupacion.setTarifa(actualizarTarifaSegunOcupacion(ocupacionSaveDto, ocupacion));
 		ocupacion.setObservaciones(ocupacionSaveDto.getObservaciones());
 		ocupacion.setMatinal(ocupacionSaveDto.getMatinal());
 		ocupacion.setSoloMatinal(ocupacionSaveDto.getSoloMatinal());
@@ -109,33 +108,44 @@ public class OcupacionServiceImpl implements OcupacionService {
 		return idEstadoOcupacion;
 	}
 
-	private Tarifa getTarifa(OcupacionSaveDto ocupacionSaveDto, Ocupacion ocupacion) {
-		final List<Tarifa> listaTarifas = this.tarifaRepository.findTarifasByArtistaIdAndDates(ocupacionSaveDto.getIdArtista(), ocupacionSaveDto.getFecha(), ocupacionSaveDto.getFecha());
+	private Tarifa actualizarTarifaSegunOcupacion(OcupacionSaveDto ocupacionSaveDto, Ocupacion ocupacion) {
+
+		Tarifa nuevaTarifa = obtenerTarifaByOcupacion(ocupacionSaveDto,ocupacion);
+
+		nuevaTarifa.setArtista(ocupacion.getArtista());
+		nuevaTarifa.setImporte(ocupacion.getImporte());
+		nuevaTarifa.setFecha(ocupacionSaveDto.getFecha());
+		nuevaTarifa.setActivo(Boolean.TRUE);
+
+		final String userName = this.userService.obtenerUsuarioAutenticado().getUsername();
+
+		if (nuevaTarifa.getFechaCreacion()==null){
+			nuevaTarifa.setFechaCreacion(LocalDateTime.now());
+			nuevaTarifa.setUsuarioCreacion(userName);
+		}
+		else {
+			nuevaTarifa.setFechaModificacion(LocalDateTime.now());
+			nuevaTarifa.setUsuarioModificacion(userName);
+		}
+
+		return this.tarifaRepository.save(nuevaTarifa);
+
+
+	}
+
+	private Tarifa obtenerTarifaByOcupacion(final OcupacionSaveDto ocupacionSaveDto, final Ocupacion ocupacion){
+
+		if (ocupacion.getTarifa()!=null){
+			return ocupacion.getTarifa();
+		}
+
+		final List<Tarifa> listaTarifas = this.tarifaRepository.findTarifasByArtistaIdAndDates(ocupacionSaveDto.getIdArtista(), ocupacionSaveDto.getFecha().withHour(0).withMinute(0).withSecond(0), ocupacionSaveDto.getFecha().withHour(23).withMinute(59).withSecond(59));
 
 		if (listaTarifas!=null && !listaTarifas.isEmpty()){
 			return listaTarifas.get(0);
 		}
-		else {
-			Tarifa nuevaTarifa = new Tarifa();
 
-			nuevaTarifa.setArtista(ocupacion.getArtista());
-			nuevaTarifa.setImporte(ocupacion.getImporte());
-			nuevaTarifa.setFecha(ocupacion.getFecha());
-			nuevaTarifa.setActivo(Boolean.FALSE);
-
-			final String userName = this.userService.obtenerUsuarioAutenticado().getUsername();
-
-			if (nuevaTarifa.getFechaCreacion()==null){
-				nuevaTarifa.setFechaCreacion(LocalDateTime.now());
-				nuevaTarifa.setUsuarioCreacion(userName);
-			}
-			else {
-				nuevaTarifa.setFechaModificacion(LocalDateTime.now());
-				nuevaTarifa.setUsuarioModificacion(userName);
-			}
-
-			return this.tarifaRepository.save(nuevaTarifa);
-		}
-
+		return new Tarifa();
 	}
+
 }

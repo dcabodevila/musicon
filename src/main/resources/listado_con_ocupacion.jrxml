@@ -80,10 +80,10 @@ CASE
 END AS escenario, t.fecha::date, 
    (CASE WHEN p.abreviatura is not null THEN (CASE WHEN o.estado_id=2 THEN ''RESERVA'' WHEN o.solo_matinal THEN ''SMT''|| p.abreviatura WHEN o.matinal THEN ''MT''||p.abreviatura else p.abreviatura END) ELSE  (CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t.importe + COALESCE(ip.incremento,0),''999999'') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t.importe+(t.importe*ip.incremento)/100,''999999'') else TO_CHAR(t.importe,''999999'')  end) end) AS importe
    FROM gestmusica.tarifa t inner join gestmusica.artista a on t.artista_id=a.id inner join gestmusica.agencia ag on a.agencia_id=ag.id
-       LEFT JOIN gestmusica.ocupacion o ON t.artista_id = o.artista_id 
-        AND t.fecha = o.fecha 
+       LEFT JOIN gestmusica.ocupacion o ON (t.artista_id = o.artista_id 
+        AND t.id = o.tarifa_id 
         AND o.activo
-        AND o.estado_id IN (1,2,3)
+        AND o.estado_id IN (1,2,3))
     LEFT JOIN gestmusica.provincia p ON o.provincia_id = p.id
     LEFT JOIN gestmusica.incremento_provincial ip ON (ip.artista_id=a.id AND ip.provincia_id=$P!{idProvincia}::bigint )    
    WHERE  t.fecha BETWEEN $P!{fechaRangoDesde} AND $P!{fechaRangoHasta} AND t.activo

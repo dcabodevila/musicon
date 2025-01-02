@@ -57,14 +57,12 @@ public class ListadoController {
         }
 
         ListadoDto listado = new ListadoDto();
-        listado.setSolicitadoPara("David Cabodevila");
+        listado.setSolicitadoPara(this.userService.obtenerUsuarioAutenticado().getNombreCompleto());
         listado.setIdCcaa(12L);
         listado.setIdProvincia(27L);
-        listado.setIdMunicipio(892L);
-        listado.setLocalidad("Foz");
-        listado.setFechaDesde(LocalDate.now().minusDays(5));
-        listado.setFechaHasta(LocalDate.now());
-        listado.setIdTipoOcupacion(2L);
+        listado.setFechaDesde(LocalDate.now());
+        listado.setFechaHasta(LocalDate.now().plusDays(10));
+        listado.setIdTipoOcupacion(1L);
         model.addAttribute("listadoDto", listado);
         model.addAttribute("listaCcaa", this.localizacionService.findAllComunidades());
         model.addAttribute("listaProvinciasCcaaListado", this.localizacionService.findAllProvinciasByCcaaId(12L));
