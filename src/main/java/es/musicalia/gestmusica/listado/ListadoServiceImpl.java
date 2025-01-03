@@ -39,8 +39,7 @@ public class ListadoServiceImpl implements ListadoService {
 		Map<String, Object> parametros = new HashMap<String, Object>();
 		String fileReport = TipoOcupacionEnum.SIN_OCUPACION.getId().equals(listadoDto.getIdTipoOcupacion()) ?  "listado_sin_ocupacion.jrxml": "listado_con_ocupacion.jrxml";
 
-
-		parametros.put("titulo", "Titulo test");
+		parametros.put("titulo", TipoOcupacionEnum.SIN_OCUPACION.getId().equals(listadoDto.getIdTipoOcupacion()) ? "Listado sin ocupación " : "Listado con ocupación ");
 
 
 		String fileNameToExport = "Listado_".concat(TipoOcupacionEnum.getDescripcionById(listadoDto.getIdTipoOcupacion())).concat(DateUtils.getDateStr(new Date(), "ddMMyyyyHHmmss")).concat(".pdf");

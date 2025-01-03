@@ -97,14 +97,18 @@ public class ArtistaController {
         getModelAttributeDetail(model);
         getModelAttributeArtistaOcupacion(model, artistaDto);
 
+        addTarifaAnualModelAttribute(model, idArtista);
+
+
+        return "artista-detail";
+    }
+
+    private static void addTarifaAnualModelAttribute(Model model, Long idArtista) {
         TarifaAnualDto tarifaAnualDto = new TarifaAnualDto();
         tarifaAnualDto.setIdArtista(idArtista);
         tarifaAnualDto.setAno(Year.now().getValue());
 
         model.addAttribute("tarifaAnualDto", tarifaAnualDto);
-
-
-        return "artista-detail";
     }
 
     @GetMapping("/edit/{id}")
@@ -126,8 +130,7 @@ public class ArtistaController {
         try {
             final Artista artista = this.artistaService.saveArtista(artistaDto);
             artistaDto.setId(artista.getId());
-            String uploadDir = "image/artista-photos/" + artista.getId();
-            final String uploadedFile = this.fileService.guardarFichero(multipartFile, uploadDir);
+            final String uploadedFile = this.fileService.guardarFichero(multipartFile);
 
             if (uploadedFile!=null){
                 artistaDto.setLogo(uploadedFile);
@@ -142,7 +145,9 @@ public class ArtistaController {
             logger.error("Error guardando artista", e);
             model.addAttribute("message", "Error guardando artista");
             model.addAttribute("alertClass", "danger");
+            addTarifaAnualModelAttribute(model, artistaDto.getId());
             getModelAttributeDetail(model);
+
             return "artista-detail";
         }
 

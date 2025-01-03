@@ -158,3 +158,6 @@ SET nombre='La Rioja', id_ccaa=17, abreviatura='RIOJ'
 WHERE id=26;
 
 ALTER TABLE gestmusica.ocupacion ADD CONSTRAINT ocupacion_tarifa_fk FOREIGN KEY (tarifa_id) REFERENCES gestmusica.tarifa(id);
+
+ALTER TABLE gestmusica.artista ALTER COLUMN logo TYPE varchar(255) USING logo::varchar(255);
+
