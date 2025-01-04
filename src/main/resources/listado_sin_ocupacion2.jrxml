@@ -930,7 +930,9 @@ END AS escenario, t.fecha::date, (CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR
 						<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
 							<staticText>
 								<reportElement x="0" y="0" width="34" height="30" uuid="be7c434a-e30e-4985-a3d4-4a29219dff9c"/>
-								<textElement textAlignment="Center" verticalAlignment="Middle"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font size="8"/>
+								</textElement>
 								<text><![CDATA[MAT]]></text>
 							</staticText>
 						</jr:columnHeader>
@@ -959,7 +961,9 @@ END AS escenario, t.fecha::date, (CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR
 						<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
 							<staticText>
 								<reportElement x="0" y="0" width="36" height="30" uuid="bb8ec02c-0e1a-402f-bb71-a35c7debb219"/>
-								<textElement textAlignment="Center" verticalAlignment="Middle"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font size="8"/>
+								</textElement>
 								<text><![CDATA[COMP]]></text>
 							</staticText>
 						</jr:columnHeader>
@@ -989,7 +993,9 @@ END AS escenario, t.fecha::date, (CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR
 						<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
 							<staticText>
 								<reportElement x="0" y="0" width="38" height="30" uuid="18d4c667-4707-42f2-82b1-30efbadd7fb6"/>
-								<textElement textAlignment="Center" verticalAlignment="Middle"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font size="8"/>
+								</textElement>
 								<text><![CDATA[ESC]]></text>
 							</staticText>
 						</jr:columnHeader>
