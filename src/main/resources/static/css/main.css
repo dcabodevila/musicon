@@ -58,3 +58,24 @@
 .sticky button:hover {
     background-color: #0056b3;
 }
+
+    .input-wrapper {
+        display: flex; /* Flexbox para alinear elementos en una fila */
+        align-items: center; /* Centrar verticalmente el botón y el input */
+        position: relative; /* Posicionamiento relativo para ajustar el botón */
+    }
+
+    /* Ajuste del botón */
+    .clear-btn {
+        position: absolute; /* Botón posicionado absolutamente */
+        right: 0px; /* Siempre a la derecha del input */
+        top: 50%; /* Centrar verticalmente */
+        transform: translateY(-50%); /* Ajustar la posición vertical */
+        padding: 5px 10px; /* Tamaño cómodo del botón */
+        z-index: 1; /* Asegurar que esté encima del input */
+    }
+
+    /* Evitar que el input se superponga al botón */
+    .input-wrapper input {
+        padding-right: 40px; /* Espacio para el botón de borrar */
+    }

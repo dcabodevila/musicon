@@ -38,7 +38,7 @@ public class InformeServiceImpl implements InformeService {
 			// Se compila una sola vez
 			compiledReportTarifaAnual = JasperCompileManager.compileReport(reportStream);
 		}
-		try (InputStream reportStream = getClass().getResourceAsStream("/listado_sin_ocupacion.jrxml")) {
+		try (InputStream reportStream = getClass().getResourceAsStream("/listado_sin_ocupacion2.jrxml")) {
 			if (reportStream == null) {
 				throw new FileNotFoundException("No se encontró el reporte en el classpath");
 			}
@@ -58,7 +58,7 @@ public class InformeServiceImpl implements InformeService {
 		switch (fileReport) {
 			case "tarifa_anual_horizontal_ocupacion.jrxml":
 				return compiledReportTarifaAnual;
-			case "listado_sin_ocupacion.jrxml":
+			case "listado_sin_ocupacion2.jrxml":
 				return compiledReportListadoSinOcupacion;
 			case "listado_con_ocupacion.jrxml":
 				return compiledReportListadoConOcupacion;

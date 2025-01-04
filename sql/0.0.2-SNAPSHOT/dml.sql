@@ -161,3 +161,79 @@ ALTER TABLE gestmusica.ocupacion ADD CONSTRAINT ocupacion_tarifa_fk FOREIGN KEY 
 
 ALTER TABLE gestmusica.artista ALTER COLUMN logo TYPE varchar(255) USING logo::varchar(255);
 
+CREATE OR REPLACE FUNCTION gestmusica.fecha_crosstab_distintas(
+    fecha1 date,
+    fecha2 date,
+    fecha3 date,
+    fecha4 date,
+    fecha5 date,
+    fecha6 date,
+    fecha7 date,
+    fecha8 date,
+    fecha9 date,
+    fecha10 date,
+    fecha11 date,
+    fecha12 date,
+    fecha13 date,
+    fecha14 date,
+    fecha15 date
+)
+RETURNS text[]
+LANGUAGE plpgsql
+AS $function$
+DECLARE
+    dates text[] := ARRAY[]::text[]; -- Inicializamos el arreglo vacío
+BEGIN
+    -- Agregar cada fecha al arreglo si no es NULL
+    IF fecha1 IS NOT NULL THEN
+        dates := array_append(dates, to_char(fecha1, 'YYYY-MM-DD'));
+    END IF;
+    IF fecha2 IS NOT NULL THEN
+        dates := array_append(dates, to_char(fecha2, 'YYYY-MM-DD'));
+    END IF;
+    IF fecha3 IS NOT NULL THEN
+        dates := array_append(dates, to_char(fecha3, 'YYYY-MM-DD'));
+    END IF;
+    IF fecha4 IS NOT NULL THEN
+        dates := array_append(dates, to_char(fecha4, 'YYYY-MM-DD'));
+    END IF;
+    IF fecha5 IS NOT NULL THEN
+        dates := array_append(dates, to_char(fecha5, 'YYYY-MM-DD'));
+    END IF;
+    IF fecha6 IS NOT NULL THEN
+        dates := array_append(dates, to_char(fecha6, 'YYYY-MM-DD'));
+    END IF;
+    IF fecha7 IS NOT NULL THEN
+        dates := array_append(dates, to_char(fecha7, 'YYYY-MM-DD'));
+    END IF;
+    IF fecha8 IS NOT NULL THEN
+        dates := array_append(dates, to_char(fecha8, 'YYYY-MM-DD'));
+    END IF;
+    IF fecha9 IS NOT NULL THEN
+        dates := array_append(dates, to_char(fecha9, 'YYYY-MM-DD'));
+    END IF;
+    IF fecha10 IS NOT NULL THEN
+        dates := array_append(dates, to_char(fecha10, 'YYYY-MM-DD'));
+    END IF;
+    IF fecha11 IS NOT NULL THEN
+        dates := array_append(dates, to_char(fecha11, 'YYYY-MM-DD'));
+    END IF;
+    IF fecha12 IS NOT NULL THEN
+        dates := array_append(dates, to_char(fecha12, 'YYYY-MM-DD'));
+    END IF;
+    IF fecha13 IS NOT NULL THEN
+        dates := array_append(dates, to_char(fecha13, 'YYYY-MM-DD'));
+    END IF;
+    IF fecha14 IS NOT NULL THEN
+        dates := array_append(dates, to_char(fecha14, 'YYYY-MM-DD'));
+    END IF;
+    IF fecha15 IS NOT NULL THEN
+        dates := array_append(dates, to_char(fecha15, 'YYYY-MM-DD'));
+    END IF;
+
+    -- Retornar el arreglo con las fechas
+    RETURN dates;
+END;
+$function$
+;
+

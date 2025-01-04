@@ -37,7 +37,7 @@ public class ListadoServiceImpl implements ListadoService {
 	@Override
 	public byte[] generarInformeListado(ListadoDto listadoDto){
 		Map<String, Object> parametros = new HashMap<String, Object>();
-		String fileReport = TipoOcupacionEnum.SIN_OCUPACION.getId().equals(listadoDto.getIdTipoOcupacion()) ?  "listado_sin_ocupacion.jrxml": "listado_con_ocupacion.jrxml";
+		String fileReport = TipoOcupacionEnum.SIN_OCUPACION.getId().equals(listadoDto.getIdTipoOcupacion()) ?  "listado_sin_ocupacion2.jrxml": "listado_con_ocupacion.jrxml";
 
 		parametros.put("titulo", TipoOcupacionEnum.SIN_OCUPACION.getId().equals(listadoDto.getIdTipoOcupacion()) ? "Listado sin ocupación " : "Listado con ocupación ");
 
@@ -46,19 +46,21 @@ public class ListadoServiceImpl implements ListadoService {
 
 		List<LocalDate> dateList = sortDates(listadoDto.getFecha1(), listadoDto.getFecha2(), listadoDto.getFecha3(), listadoDto.getFecha4(), listadoDto.getFecha5(), listadoDto.getFecha6(), listadoDto.getFecha7());
 
-		parametros.put("colNames", getColNamesListadoFechas(listadoDto.getFechaDesde(), listadoDto.getFechaHasta(), dateList));
+		parametros.put("colNames", getColNamesListadoFechas());
 
-		parametros.put("fechaRangoDesde", getFechaRangoDesde(listadoDto.getFechaDesde(), dateList));
-		parametros.put("fechaRangoHasta", getFechaRangoHasta(listadoDto.getFechaDesde(), dateList));
+
 
 		parametros.put("fechaListIn", getFechaListFechas(listadoDto.getFechaDesde(), listadoDto.getFechaHasta(), dateList));
 
 		parametros.put("idProvincia",listadoDto.getIdProvincia().intValue());
 
 		List<Map.Entry<String, String>> diaList = generateDiaListFechas(listadoDto.getFechaDesde(), listadoDto.getFechaHasta(), dateList);
-
 		// Agregar cada par clave-valor de la lista al mapa de parámetros
 		for (Map.Entry<String, String> entry : diaList) {
+			parametros.put(entry.getKey(), entry.getValue());
+		}
+		List<Map.Entry<String, String>> listFechas = generateListFechas(listadoDto.getFechaDesde(), listadoDto.getFechaHasta(), dateList);
+		for (Map.Entry<String, String> entry : listFechas) {
 			parametros.put(entry.getKey(), entry.getValue());
 		}
 		return this.informeService.imprimirInforme(parametros, fileNameToExport, fileReport);
@@ -114,23 +116,21 @@ public class ListadoServiceImpl implements ListadoService {
 	}
 
 
-	private String getColNamesListadoFechas(LocalDate fechaIni, LocalDate fechaFin, List<LocalDate> dateList){
-
-		if (fechaIni!=null && fechaFin!=null){
-			return getColNamesListadoFechaDesdeHasta(fechaIni, fechaFin);
-		}
+	private String getColNamesListadoFechas(){
 
 		StringBuilder colNamesBuilder = new StringBuilder();
 		colNamesBuilder.append("\"Artista\" text, \"Agencia\" text, \"Componentes\" text,\"Escenario\" text,");
 		int index = 1;
-		for (LocalDate date :dateList) {
+		// Completar hasta dia16 si faltan
+		while (index <= 15) {
 			colNamesBuilder.append("\"dia")
 					.append(index)
 					.append("val\" text");
-			index++;
-			if (index < dateList.size()) {
+
+			if (index < 15) {
 				colNamesBuilder.append(", ");
 			}
+			index++;
 		}
 		return colNamesBuilder.toString();
 
@@ -177,9 +177,10 @@ public class ListadoServiceImpl implements ListadoService {
 					.append(date.format(formatter))
 					.append("''");
 
-			if (index < dateList.size()) {
+			if (index <= dateList.size()-1) {
 				dateListBuilder.append(", ");
 			}
+			index++;
 		}
 
 		return dateListBuilder.toString();
@@ -209,6 +210,50 @@ public class ListadoServiceImpl implements ListadoService {
 			diaCounter++;
 			currentDate = currentDate.plusDays(1);
 		}
+
+		return diaList;
+	}
+
+	private List<Map.Entry<String, String>> generateListFechas(LocalDate fechaDesde, LocalDate fechaHasta, List<LocalDate> dateList) {
+		int diaCounter = 1;
+
+		List<Map.Entry<String, String>> diaList = new ArrayList<>();
+
+
+		if (fechaDesde!=null && fechaHasta!=null){
+
+			LocalDate currentDate = fechaDesde;
+			while (!currentDate.isAfter(fechaHasta) || diaCounter <= 15) {
+				String key = "fecha" + diaCounter;
+				String value = formatDateForSQL( currentDate);
+				diaList.add(new AbstractMap.SimpleEntry<>(key, value));
+				currentDate = currentDate.plusDays(1);
+				diaCounter++;
+
+			}
+
+		}
+		else {
+			for(LocalDate date : dateList) {
+				String key = "fecha" + diaCounter;
+				String value = formatDateForSQL(date);
+				diaList.add(new AbstractMap.SimpleEntry<>(key, value));
+				diaCounter++;
+			}
+			// Completar hasta dia16 si faltan
+			LocalDate lastDate = dateList.get(dateList.size() - 1).plusDays(1);
+			while (diaCounter <= 15) {
+				String key = "fecha" + diaCounter;
+				String value = formatDateForSQL(lastDate);
+				diaList.add(new AbstractMap.SimpleEntry<>(key, value));
+				diaCounter++;
+				lastDate = lastDate.plusDays(1);
+			}
+		}
+
+
+
+
 
 		return diaList;
 	}

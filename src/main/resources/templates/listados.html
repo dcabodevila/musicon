@@ -33,7 +33,7 @@
                 <div class="row">
 
                     <div class="col-12 col-lg-6 order-1 order-lg-2">
-                        <form method="POST" th:object="${listadoDto}" th:action=@{/listado/generar} autocomplete="off">
+                        <form id="formGenerarListado" method="POST" th:object="${listadoDto}" th:action=@{/listado/generar} autocomplete="off">
 
                             <div class="card">
                                 <div class="card-header">
@@ -46,6 +46,7 @@
                                                 <label class="col-form-label col-sm-3 text-sm-end">Solicitado para</label>
                                                 <div class="col-sm-9">
                                                     <input class="form-control" th:field="*{solicitadoPara}" placeholder="Solicitado para" id="solicitado-listado" required>
+
                                                 </div>
                                             </div>
 
@@ -114,55 +115,83 @@
                                         <div class="mb-3 row">
                                             <label class="col-form-label col-sm-3 text-sm-end">Fecha inicial</label>
                                             <div class="col-sm-9">
-                                                <input id="idFechaDesdeListado" th:field="*{fechaDesde}" type="text" required class="form-control flatpickr flatpickr-minimum flatpickr-input active" placeholder="Fecha inicial" readonly="readonly">
+                                                <div class="input-wrapper">
+                                                    <input id="idFechaDesdeListado" th:field="*{fechaDesde}" type="text" required class="form-control flatpickr flatpickr-minimum" placeholder="Fecha inicial" readonly="readonly">
+                                                    <button type="button" class="btn btn-outline-secondary clear-btn" onclick="clearFlatpickrDate('idFechaDesdeListado')">X</button>
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="mb-3 row">
                                             <label class="col-form-label col-sm-3 text-sm-end">Fecha final</label>
                                             <div class="col-sm-9">
-                                                <input id="idFechaHastaListado" th:field="*{fechaHasta}" type="text" required class="form-control flatpickr flatpickr-minimum flatpickr-input active" placeholder="Fecha final" readonly="readonly">
+                                                <div class="input-wrapper">
+                                                    <input id="idFechaHastaListado" th:field="*{fechaHasta}" type="text" required class="form-control flatpickr flatpickr-minimum flatpickr-input active" placeholder="Fecha final" readonly="readonly">
+                                                    <button type="button" class="btn btn-outline-secondary clear-btn" onclick="clearFlatpickrDate('idFechaHastaListado')">X</button>
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="mb-3 row">
                                             <label class="col-form-label col-sm-3 text-sm-end">Fecha individual</label>
                                             <div class="col-sm-9">
-                                                <input id="idFecha1" th:field="*{fecha1}" type="text" required class="form-control flatpickr flatpickr-minimum flatpickr-input active" placeholder="Fecha individual" readonly="readonly">
+                                                <div class="input-wrapper">
+                                                    <input id="idFecha1" th:field="*{fecha1}" type="text" required class="form-control flatpickr flatpickr-minimum flatpickr-input active" placeholder="Fecha individual" readonly="readonly">
+                                                    <button type="button" class="btn btn-outline-secondary clear-btn" onclick="clearFlatpickrDate('idFecha1')">X</button>
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="mb-3 row">
                                             <label class="col-form-label col-sm-3 text-sm-end">Fecha individual</label>
                                             <div class="col-sm-9">
-                                                <input id="idFecha2" th:field="*{fecha2}" type="text" required class="form-control flatpickr flatpickr-minimum flatpickr-input active" placeholder="Fecha individual" readonly="readonly">
+                                                <div class="input-wrapper">
+                                                    <input id="idFecha2" th:field="*{fecha2}" type="text" required class="form-control flatpickr flatpickr-minimum flatpickr-input active" placeholder="Fecha individual" readonly="readonly">
+                                                    <button type="button" class="btn btn-outline-secondary clear-btn" onclick="clearFlatpickrDate('idFecha2')">X</button>
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="mb-3 row">
                                             <label class="col-form-label col-sm-3 text-sm-end">Fecha individual</label>
                                             <div class="col-sm-9">
-                                                <input id="idFecha3" th:field="*{fecha3}" type="text" required class="form-control flatpickr flatpickr-minimum flatpickr-input active" placeholder="Fecha individual" readonly="readonly">
+                                                <div class="input-wrapper">
+                                                    <input id="idFecha3" th:field="*{fecha3}" type="text" required class="form-control flatpickr flatpickr-minimum flatpickr-input active" placeholder="Fecha individual" readonly="readonly">
+                                                    <button type="button" class="btn btn-outline-secondary clear-btn" onclick="clearFlatpickrDate('idFecha3')">X</button>
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="mb-3 row">
                                             <label class="col-form-label col-sm-3 text-sm-end">Fecha individual</label>
                                             <div class="col-sm-9">
-                                                <input id="idFecha4" th:field="*{fecha4}" type="text" required class="form-control flatpickr flatpickr-minimum flatpickr-input active" placeholder="Fecha individual" readonly="readonly">
+                                                <div class="input-wrapper">
+                                                    <input id="idFecha4" th:field="*{fecha4}" type="text" required class="form-control flatpickr flatpickr-minimum flatpickr-input active" placeholder="Fecha individual" readonly="readonly">
+                                                    <button type="button" class="btn btn-outline-secondary clear-btn" onclick="clearFlatpickrDate('idFecha4')">X</button>
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="mb-3 row">
                                             <label class="col-form-label col-sm-3 text-sm-end">Fecha individual</label>
                                             <div class="col-sm-9">
-                                                <input id="idFecha5" th:field="*{fecha5}" type="text" required class="form-control flatpickr flatpickr-minimum flatpickr-input active" placeholder="Fecha individual" readonly="readonly">
+                                                <div class="input-wrapper">
+                                                    <input id="idFecha5" th:field="*{fecha5}" type="text" required class="form-control flatpickr flatpickr-minimum flatpickr-input active" placeholder="Fecha individual" readonly="readonly">
+                                                    <button type="button" class="btn btn-outline-secondary clear-btn" onclick="clearFlatpickrDate('idFecha5')">X</button>
+                                                </div>
+
                                             </div>
                                         </div>
                                         <div class="mb-3 row">
                                             <label class="col-form-label col-sm-3 text-sm-end">Fecha individual</label>
                                             <div class="col-sm-9">
-                                                <input id="idFecha6" th:field="*{fecha6}" type="text" required class="form-control flatpickr flatpickr-minimum flatpickr-input active" placeholder="Fecha individual" readonly="readonly">
+                                                <div class="input-wrapper">
+                                                    <input id="idFecha6" th:field="*{fecha6}" type="text" required class="form-control flatpickr flatpickr-minimum flatpickr-input active" placeholder="Fecha individual" readonly="readonly">
+                                                    <button type="button" class="btn btn-outline-secondary clear-btn" onclick="clearFlatpickrDate('idFecha6')">X</button>
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="mb-3 row">
                                             <label class="col-form-label col-sm-3 text-sm-end">Fecha individual</label>
                                             <div class="col-sm-9">
-                                                <input id="idFecha7" th:field="*{fecha7}" type="text" required class="form-control flatpickr flatpickr-minimum flatpickr-input active" placeholder="Fecha individual" readonly="readonly">
+                                                <div class="input-wrapper">
+                                                    <input id="idFecha7" th:field="*{fecha7}" type="text" required class="form-control flatpickr flatpickr-minimum flatpickr-input active" placeholder="Fecha individual" readonly="readonly">
+                                                    <button type="button" class="btn btn-outline-secondary clear-btn" onclick="clearFlatpickrDate('idFecha7')">X</button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
