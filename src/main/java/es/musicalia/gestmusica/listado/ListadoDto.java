@@ -30,5 +30,24 @@ public class ListadoDto {
     @NotNull
     @DateTimeFormat(pattern = "dd-MM-yyyy")
     private LocalDate fechaHasta;
+    @DateTimeFormat(pattern = "dd-MM-yyyy")
+    private LocalDate fecha1;
+    @DateTimeFormat(pattern = "dd-MM-yyyy")
+    private LocalDate fecha2;
+    @DateTimeFormat(pattern = "dd-MM-yyyy")
+    private LocalDate fecha3;
+    @DateTimeFormat(pattern = "dd-MM-yyyy")
+    private LocalDate fecha4;
+    @DateTimeFormat(pattern = "dd-MM-yyyy")
+    private LocalDate fecha5;
+    @DateTimeFormat(pattern = "dd-MM-yyyy")
+    private LocalDate fecha6;
+    @DateTimeFormat(pattern = "dd-MM-yyyy")
+    private LocalDate fecha7;
+
+
+
+
+
 
 }

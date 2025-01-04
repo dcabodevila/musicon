@@ -60,8 +60,6 @@ public class ListadoController {
         listado.setSolicitadoPara(this.userService.obtenerUsuarioAutenticado().getNombreCompleto());
         listado.setIdCcaa(12L);
         listado.setIdProvincia(27L);
-        listado.setFechaDesde(LocalDate.now());
-        listado.setFechaHasta(LocalDate.now().plusDays(10));
         listado.setIdTipoOcupacion(1L);
         model.addAttribute("listadoDto", listado);
         model.addAttribute("listaCcaa", this.localizacionService.findAllComunidades());

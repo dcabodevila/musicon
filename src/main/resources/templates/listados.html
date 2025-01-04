@@ -20,7 +20,7 @@
         <main class="content">
             <div class="container-fluid p-0">
                 <div class="mb-3">
-                    <h1 class="h3 d-inline align-middle">Listados</h1>
+                    <h1 class="h3 d-inline align-middle">Presupuestos</h1>
                 </div>
 
                 <div th:if="${message}" th:class="${'alert alert-' + alertClass+ ' alert-dismissible fade show'}" role="alert">
@@ -33,10 +33,14 @@
                 <div class="row">
 
                     <div class="col-12 col-lg-6 order-1 order-lg-2">
-                        <div class="card">
-                            <div class="card-body text-center">
+                        <form method="POST" th:object="${listadoDto}" th:action=@{/listado/generar} autocomplete="off">
+
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Presupuesto para</h5>
+                                </div>
+                                <div class="card-body text-center">
                                 <div class="mb-3">
-                                    <form method="POST" th:object="${listadoDto}" th:action=@{/listado/generar} autocomplete="off">
                                         <div class="modal-body m-3">
                                             <div class="mb-3 row">
                                                 <label class="col-form-label col-sm-3 text-sm-end">Solicitado para</label>
@@ -90,30 +94,81 @@
                                                     </select>
                                                 </div>
                                             </div>
-                                            <div class="mb-3 row">
-                                                <label class="col-form-label col-sm-3 text-sm-end">Fecha inicial</label>
-                                                <div class="col-sm-9">
-                                                    <input id="idFechaDesdeListado" th:field="*{fechaDesde}" type="text" required class="form-control flatpickr flatpickr-minimum flatpickr-input active" placeholder="Fecha inicial" readonly="readonly">
-                                                </div>
-                                            </div>
-                                            <div class="mb-3 row">
-                                                <label class="col-form-label col-sm-3 text-sm-end">Fecha final</label>
-                                                <div class="col-sm-9">
-                                                    <input id="idFechaHastaListado" th:field="*{fechaHasta}" type="text" required class="form-control flatpickr flatpickr-minimum flatpickr-input active" placeholder="Fecha final" readonly="readonly">
-                                                </div>
-                                            </div>
+
 
 
                                         </div>
-                                        <div class="modal-footer">
+                                        <div class="sticky">
                                             <button type="submit" id="btn-generar-listado" class="btn btn-primary">Generar presupuesto</button>
                                         </div>
-                                    </form>
+
                                 </div>
                             </div>
-                        </div>
-
-
+                            </div>
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Fechas presupuesto</h5>
+                                </div>
+                                <div class="card-body text-center">
+                                    <div class="mb-3">
+                                        <div class="mb-3 row">
+                                            <label class="col-form-label col-sm-3 text-sm-end">Fecha inicial</label>
+                                            <div class="col-sm-9">
+                                                <input id="idFechaDesdeListado" th:field="*{fechaDesde}" type="text" required class="form-control flatpickr flatpickr-minimum flatpickr-input active" placeholder="Fecha inicial" readonly="readonly">
+                                            </div>
+                                        </div>
+                                        <div class="mb-3 row">
+                                            <label class="col-form-label col-sm-3 text-sm-end">Fecha final</label>
+                                            <div class="col-sm-9">
+                                                <input id="idFechaHastaListado" th:field="*{fechaHasta}" type="text" required class="form-control flatpickr flatpickr-minimum flatpickr-input active" placeholder="Fecha final" readonly="readonly">
+                                            </div>
+                                        </div>
+                                        <div class="mb-3 row">
+                                            <label class="col-form-label col-sm-3 text-sm-end">Fecha individual</label>
+                                            <div class="col-sm-9">
+                                                <input id="idFecha1" th:field="*{fecha1}" type="text" required class="form-control flatpickr flatpickr-minimum flatpickr-input active" placeholder="Fecha individual" readonly="readonly">
+                                            </div>
+                                        </div>
+                                        <div class="mb-3 row">
+                                            <label class="col-form-label col-sm-3 text-sm-end">Fecha individual</label>
+                                            <div class="col-sm-9">
+                                                <input id="idFecha2" th:field="*{fecha2}" type="text" required class="form-control flatpickr flatpickr-minimum flatpickr-input active" placeholder="Fecha individual" readonly="readonly">
+                                            </div>
+                                        </div>
+                                        <div class="mb-3 row">
+                                            <label class="col-form-label col-sm-3 text-sm-end">Fecha individual</label>
+                                            <div class="col-sm-9">
+                                                <input id="idFecha3" th:field="*{fecha3}" type="text" required class="form-control flatpickr flatpickr-minimum flatpickr-input active" placeholder="Fecha individual" readonly="readonly">
+                                            </div>
+                                        </div>
+                                        <div class="mb-3 row">
+                                            <label class="col-form-label col-sm-3 text-sm-end">Fecha individual</label>
+                                            <div class="col-sm-9">
+                                                <input id="idFecha4" th:field="*{fecha4}" type="text" required class="form-control flatpickr flatpickr-minimum flatpickr-input active" placeholder="Fecha individual" readonly="readonly">
+                                            </div>
+                                        </div>
+                                        <div class="mb-3 row">
+                                            <label class="col-form-label col-sm-3 text-sm-end">Fecha individual</label>
+                                            <div class="col-sm-9">
+                                                <input id="idFecha5" th:field="*{fecha5}" type="text" required class="form-control flatpickr flatpickr-minimum flatpickr-input active" placeholder="Fecha individual" readonly="readonly">
+                                            </div>
+                                        </div>
+                                        <div class="mb-3 row">
+                                            <label class="col-form-label col-sm-3 text-sm-end">Fecha individual</label>
+                                            <div class="col-sm-9">
+                                                <input id="idFecha6" th:field="*{fecha6}" type="text" required class="form-control flatpickr flatpickr-minimum flatpickr-input active" placeholder="Fecha individual" readonly="readonly">
+                                            </div>
+                                        </div>
+                                        <div class="mb-3 row">
+                                            <label class="col-form-label col-sm-3 text-sm-end">Fecha individual</label>
+                                            <div class="col-sm-9">
+                                                <input id="idFecha7" th:field="*{fecha7}" type="text" required class="form-control flatpickr flatpickr-minimum flatpickr-input active" placeholder="Fecha individual" readonly="readonly">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
                     </div>
 
                 </div>
