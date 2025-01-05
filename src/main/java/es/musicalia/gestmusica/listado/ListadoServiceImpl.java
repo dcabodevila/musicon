@@ -21,10 +21,15 @@ public class ListadoServiceImpl implements ListadoService {
 
 	private final InformeService informeService;
 	private Logger logger = LoggerFactory.getLogger(ListadoServiceImpl.class);
+	private final ProvinciaRepository provinciaRepository;
+	private final MunicipioRepository municipioRepository;
 
-	public ListadoServiceImpl(InformeService informeService){
-        this.informeService = informeService;
-    }
+	public ListadoServiceImpl(InformeService informeService, ProvinciaRepository provinciaRepository, MunicipioRepository municipioRepository) {
+		this.informeService = informeService;
+
+		this.provinciaRepository = provinciaRepository;
+		this.municipioRepository = municipioRepository;
+	}
 
 	@Override
 	public List<CodigoNombreDto> findAllTiposOcupacion() {
@@ -35,9 +40,9 @@ public class ListadoServiceImpl implements ListadoService {
 
 
 	@Override
-	public byte[] generarInformeListado(ListadoDto listadoDto){
+	public byte[] generarInformeListado(ListadoDto listadoDto) {
 		Map<String, Object> parametros = new HashMap<String, Object>();
-		String fileReport = TipoOcupacionEnum.SIN_OCUPACION.getId().equals(listadoDto.getIdTipoOcupacion()) ?  "listado_sin_ocupacion2.jrxml": "listado_con_ocupacion.jrxml";
+		String fileReport = TipoOcupacionEnum.SIN_OCUPACION.getId().equals(listadoDto.getIdTipoOcupacion()) ? "listado_sin_ocupacion2.jrxml" : "listado_con_ocupacion.jrxml";
 
 		parametros.put("titulo", TipoOcupacionEnum.SIN_OCUPACION.getId().equals(listadoDto.getIdTipoOcupacion()) ? "Listado sin ocupación " : "Listado con ocupación ");
 
@@ -49,10 +54,17 @@ public class ListadoServiceImpl implements ListadoService {
 		parametros.put("colNames", getColNamesListadoFechas());
 
 
-
 		parametros.put("fechaListIn", getFechaListFechas(listadoDto.getFechaDesde(), listadoDto.getFechaHasta(), dateList));
 
-		parametros.put("idProvincia",listadoDto.getIdProvincia().intValue());
+		parametros.put("idProvincia", listadoDto.getIdProvincia().intValue());
+
+		parametros.put("observaciones", listadoDto.getComentario());
+
+		parametros.put("solicitante", listadoDto.getSolicitadoPara());
+		parametros.put("provincia", this.provinciaRepository.findById(listadoDto.getIdProvincia()).get().getNombre());
+		parametros.put("municipio", listadoDto.getIdMunicipio() != null ? this.municipioRepository.findById(listadoDto.getIdMunicipio()).get().getNombre() : "");
+		parametros.put("lugar", listadoDto.getLocalidad() != null ? listadoDto.getLocalidad() : "");
+
 
 		List<Map.Entry<String, String>> diaList = generateDiaListFechas(listadoDto.getFechaDesde(), listadoDto.getFechaHasta(), dateList);
 		// Agregar cada par clave-valor de la lista al mapa de parámetros
@@ -66,12 +78,11 @@ public class ListadoServiceImpl implements ListadoService {
 		return this.informeService.imprimirInforme(parametros, fileNameToExport, fileReport);
 	}
 
-	private String getFechaRangoDesde(final LocalDate fechaDesde, List<LocalDate> dateList){
-		if (fechaDesde!=null){
+	private String getFechaRangoDesde(final LocalDate fechaDesde, List<LocalDate> dateList) {
+		if (fechaDesde != null) {
 			return formatDateForSQL(fechaDesde);
-		}
-		else {
-			if (!dateList.isEmpty()){
+		} else {
+			if (!dateList.isEmpty()) {
 				return formatDateForSQL(dateList.get(0));
 			}
 		}
@@ -79,20 +90,19 @@ public class ListadoServiceImpl implements ListadoService {
 
 	}
 
-	private String getFechaRangoHasta(final LocalDate fechaDesde, List<LocalDate> dateList){
-		if (fechaDesde!=null){
+	private String getFechaRangoHasta(final LocalDate fechaDesde, List<LocalDate> dateList) {
+		if (fechaDesde != null) {
 			return formatDateForSQL(fechaDesde.plusDays(15));
-		}
-		else {
-			if (!dateList.isEmpty()){
-				return formatDateForSQL(dateList.get(dateList.size()-1));
+		} else {
+			if (!dateList.isEmpty()) {
+				return formatDateForSQL(dateList.get(dateList.size() - 1));
 			}
 		}
 		return null;
 
 	}
 
-	private String getColNamesListadoFechaDesdeHasta(final LocalDate fechaIni,final LocalDate fechaFin){
+	private String getColNamesListadoFechaDesdeHasta(final LocalDate fechaIni, final LocalDate fechaFin) {
 		if (fechaFin.isBefore(fechaIni)) {
 			throw new IllegalArgumentException("La fecha de fin no puede ser anterior a la fecha de inicio.");
 		}
@@ -116,7 +126,7 @@ public class ListadoServiceImpl implements ListadoService {
 	}
 
 
-	private String getColNamesListadoFechas(){
+	private String getColNamesListadoFechas() {
 
 		StringBuilder colNamesBuilder = new StringBuilder();
 		colNamesBuilder.append("\"Artista\" text, \"Agencia\" text, \"Componentes\" text,\"Escenario\" text,");
@@ -137,8 +147,7 @@ public class ListadoServiceImpl implements ListadoService {
 	}
 
 
-
-	private String getFechaListIn(LocalDate fechaIni, LocalDate fechaFin){
+	private String getFechaListIn(LocalDate fechaIni, LocalDate fechaFin) {
 
 		if (fechaFin.isBefore(fechaIni)) {
 			throw new IllegalArgumentException("La fecha de fin no puede ser anterior a la fecha de inicio.");
@@ -163,8 +172,8 @@ public class ListadoServiceImpl implements ListadoService {
 
 	}
 
-	private String getFechaListFechas(LocalDate fechaIni, LocalDate fechaFin, List<LocalDate> dateList){
-		if (fechaFin!=null && fechaFin!=null){
+	private String getFechaListFechas(LocalDate fechaIni, LocalDate fechaFin, List<LocalDate> dateList) {
+		if (fechaFin != null && fechaFin != null) {
 			return getFechaListIn(fechaIni, fechaFin);
 		}
 
@@ -177,7 +186,7 @@ public class ListadoServiceImpl implements ListadoService {
 					.append(date.format(formatter))
 					.append("''");
 
-			if (index <= dateList.size()-1) {
+			if (index <= dateList.size() - 1) {
 				dateListBuilder.append(", ");
 			}
 			index++;
@@ -220,21 +229,20 @@ public class ListadoServiceImpl implements ListadoService {
 		List<Map.Entry<String, String>> diaList = new ArrayList<>();
 
 
-		if (fechaDesde!=null && fechaHasta!=null){
+		if (fechaDesde != null && fechaHasta != null) {
 
 			LocalDate currentDate = fechaDesde;
 			while (!currentDate.isAfter(fechaHasta) || diaCounter <= 15) {
 				String key = "fecha" + diaCounter;
-				String value = formatDateForSQL( currentDate);
+				String value = formatDateForSQL(currentDate);
 				diaList.add(new AbstractMap.SimpleEntry<>(key, value));
 				currentDate = currentDate.plusDays(1);
 				diaCounter++;
 
 			}
 
-		}
-		else {
-			for(LocalDate date : dateList) {
+		} else {
+			for (LocalDate date : dateList) {
 				String key = "fecha" + diaCounter;
 				String value = formatDateForSQL(date);
 				diaList.add(new AbstractMap.SimpleEntry<>(key, value));
@@ -252,15 +260,12 @@ public class ListadoServiceImpl implements ListadoService {
 		}
 
 
-
-
-
 		return diaList;
 	}
 
 	private List<Map.Entry<String, String>> generateDiaListFechas(LocalDate fechaDesde, LocalDate fechaHasta, List<LocalDate> dateList) {
 
-		if (fechaDesde!=null && fechaHasta!=null){
+		if (fechaDesde != null && fechaHasta != null) {
 			return generateDiaList(fechaDesde, fechaHasta);
 		}
 
@@ -269,7 +274,7 @@ public class ListadoServiceImpl implements ListadoService {
 
 		int diaCounter = 1;
 
-		for(LocalDate date : dateList) {
+		for (LocalDate date : dateList) {
 			String key = "dia" + diaCounter;
 			String value = date.format(formatter);
 			diaList.add(new AbstractMap.SimpleEntry<>(key, value));
@@ -294,4 +299,5 @@ public class ListadoServiceImpl implements ListadoService {
 
 		return dateList;
 	}
+
 }

@@ -212,26 +212,133 @@ END AS escenario, t.fecha::date,
 	<parameter name="fecha13" class="java.lang.String"/>
 	<parameter name="fecha14" class="java.lang.String"/>
 	<parameter name="fecha15" class="java.lang.String"/>
+	<parameter name="provincia" class="java.lang.String"/>
+	<parameter name="observaciones" class="java.lang.String"/>
+	<parameter name="municipio" class="java.lang.String"/>
+	<parameter name="lugar" class="java.lang.String"/>
+	<parameter name="solicitante" class="java.lang.String"/>
 	<queryString>
 		<![CDATA[]]>
 	</queryString>
 	<title>
-		<band height="47" splitType="Stretch">
+		<band height="32" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 			<textField>
-				<reportElement x="0" y="0" width="802" height="47" uuid="a4676890-9119-497a-bc0c-584535b0ccae"/>
+				<reportElement x="0" y="0" width="802" height="32" uuid="a4676890-9119-497a-bc0c-584535b0ccae"/>
 				<textElement textAlignment="Center">
-					<font fontName="SansSerif" size="20"/>
+					<font fontName="SansSerif" size="14"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{titulo}]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>
-	<pageFooter>
-		<band height="55" splitType="Stretch">
+	<pageHeader>
+		<band height="60">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 			<textField isBlankWhenNull="true">
-				<reportElement x="0" y="0" width="400" height="40" uuid="1e324847-75ee-4936-85bf-ffa44edffac2"/>
-				<textFieldExpression><![CDATA[$P{datosAgencia}]]></textFieldExpression>
+				<reportElement x="80" y="0" width="320" height="14" uuid="e8c2da84-bc2f-49f1-999b-093659668276"/>
+				<textFieldExpression><![CDATA[$P{solicitante}]]></textFieldExpression>
 			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="480" y="0" width="322" height="56" uuid="448fa279-ad1e-47f0-a127-d3ca0dfab6f2"/>
+				<textFieldExpression><![CDATA[$P{observaciones}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="0" width="81" height="14" uuid="be1acd60-fa3d-4842-9a05-4433d7945ca0"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Agente solicitante:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="14" width="81" height="14" uuid="bc8d53fb-c827-43fb-ad2e-752b941840e7"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Provincia:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="28" width="81" height="14" uuid="6edbfb33-476e-4e6e-9d0f-f0ce2a31df6d"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Municipio:]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="81" y="14" width="320" height="14" uuid="3dc932c4-d399-458f-8e1b-acddd344a1bd"/>
+				<textFieldExpression><![CDATA[$P{provincia}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="80" y="28" width="320" height="14" uuid="0878fab1-678a-494f-b9b4-095ce6e6b89e"/>
+				<textFieldExpression><![CDATA[$P{municipio}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="42" width="81" height="14" uuid="3ce09507-3b6b-4179-a801-7b0b363fb4a6"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Lugar]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="80" y="42" width="320" height="14" uuid="2bf5a4cc-c268-47a2-9666-e18ecea3b64b"/>
+				<textFieldExpression><![CDATA[$P{lugar}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="399" y="0" width="81" height="14" uuid="aad52031-1d8b-4b4d-bd17-8d607fc8b514"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Observaciones:]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<pageFooter>
+		<band height="59" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<textField>
+				<reportElement x="642" y="28" width="160" height="28" uuid="072b4409-a038-42b3-8feb-a492c1d9dbe6"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField pattern="MMMMM dd, yyyy">
+				<reportElement x="0" y="31" width="92" height="28" uuid="c87d2171-518b-45de-a4da-afda31d6f010"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="401" y="10" width="100" height="46" uuid="175de349-2de7-430b-85f2-20eaae6c0af4"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<text><![CDATA[NO = Sin escenario
+R = Rígido
+T = Trailer]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="500" y="14" width="120" height="42" uuid="b1e24629-c557-40d4-8d3d-a28fd9c68e73"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<text><![CDATA[MT = Sesión Matinal
+SMT = Solo sesión Matinal
+]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="401" y="0" width="100" height="14" uuid="40d63143-130d-45fc-a227-13391c6eb514"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Lectura escenario]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="500" y="0" width="120" height="14" uuid="ffd2f3ad-9e50-4d44-86d3-6930f255c646"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Lectura ocupaciones]]></text>
+			</staticText>
 		</band>
 	</pageFooter>
 	<summary>
@@ -350,8 +457,9 @@ END AS escenario, t.fecha::date,
 					</datasetRun>
 					<jr:column width="65" uuid="63a43719-cd99-4ea7-985d-b6b60108591b">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column1"/>
-						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
+						<jr:tableHeader style="Table_TH" height="1" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
+							<property name="com.jaspersoft.studio.unit.height" value="px"/>
 						</jr:tableHeader>
 						<jr:groupHeader groupName="Group1">
 							<jr:cell style="Style1" height="20" rowSpan="1">
@@ -368,9 +476,10 @@ END AS escenario, t.fecha::date,
 								</textField>
 							</jr:cell>
 						</jr:groupHeader>
-						<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+						<jr:columnHeader style="Table_CH" height="25" rowSpan="1">
+							<property name="com.jaspersoft.studio.unit.height" value="px"/>
 							<staticText>
-								<reportElement x="0" y="0" width="65" height="30" uuid="baf07eb2-d8dd-4124-a784-236b0521697b"/>
+								<reportElement x="0" y="0" width="65" height="25" uuid="baf07eb2-d8dd-4124-a784-236b0521697b"/>
 								<box padding="5"/>
 								<textElement verticalAlignment="Middle"/>
 								<text><![CDATA[]]></text>
@@ -397,15 +506,15 @@ END AS escenario, t.fecha::date,
 					<jr:column width="42" uuid="0771221f-c00d-49ae-9fe3-4c81ce1e2cc8">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column2"/>
 						<printWhenExpression><![CDATA[$P{dia1} !=null]]></printWhenExpression>
-						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
+						<jr:tableHeader style="Table_TH" height="1" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 						</jr:tableHeader>
 						<jr:groupHeader groupName="Group1">
 							<jr:cell style="Style1" height="20" rowSpan="1"/>
 						</jr:groupHeader>
-						<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+						<jr:columnHeader style="Table_CH" height="25" rowSpan="1">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="42" height="30" uuid="acc1d79b-8af1-43f9-b1aa-f0c35480cec8"/>
+								<reportElement x="0" y="0" width="42" height="25" uuid="acc1d79b-8af1-43f9-b1aa-f0c35480cec8"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
 									<font size="8"/>
@@ -433,15 +542,15 @@ END AS escenario, t.fecha::date,
 					<jr:column width="41" uuid="aaa4118c-d515-4fee-8815-3af49a91b9db">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column3"/>
 						<printWhenExpression><![CDATA[$P{dia2} !=null]]></printWhenExpression>
-						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
+						<jr:tableHeader style="Table_TH" height="1" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 						</jr:tableHeader>
 						<jr:groupHeader groupName="Group1">
 							<jr:cell style="Style1" height="20" rowSpan="1"/>
 						</jr:groupHeader>
-						<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+						<jr:columnHeader style="Table_CH" height="25" rowSpan="1">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="41" height="30" uuid="ce78282b-f98a-4395-8d1d-4136c1233c27"/>
+								<reportElement x="0" y="0" width="41" height="25" uuid="ce78282b-f98a-4395-8d1d-4136c1233c27"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
 									<font size="8"/>
@@ -469,15 +578,15 @@ END AS escenario, t.fecha::date,
 					<jr:column width="45" uuid="48a66557-a895-4934-9690-2f7783c37057">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column4"/>
 						<printWhenExpression><![CDATA[$P{dia3} !=null]]></printWhenExpression>
-						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
+						<jr:tableHeader style="Table_TH" height="1" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 						</jr:tableHeader>
 						<jr:groupHeader groupName="Group1">
 							<jr:cell style="Style1" height="20" rowSpan="1"/>
 						</jr:groupHeader>
-						<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+						<jr:columnHeader style="Table_CH" height="25" rowSpan="1">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="45" height="30" uuid="c42dd875-6740-4dbf-8298-813e752c1436"/>
+								<reportElement x="0" y="0" width="45" height="25" uuid="c42dd875-6740-4dbf-8298-813e752c1436"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
 									<font size="8"/>
@@ -505,15 +614,15 @@ END AS escenario, t.fecha::date,
 					<jr:column width="45" uuid="d4e48713-e7df-4d23-9ace-d7413f70cf2a">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column5"/>
 						<printWhenExpression><![CDATA[$P{dia4} !=null]]></printWhenExpression>
-						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
+						<jr:tableHeader style="Table_TH" height="1" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 						</jr:tableHeader>
 						<jr:groupHeader groupName="Group1">
 							<jr:cell style="Style1" height="20" rowSpan="1"/>
 						</jr:groupHeader>
-						<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+						<jr:columnHeader style="Table_CH" height="25" rowSpan="1">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="45" height="30" uuid="0829230a-2886-45d7-8954-8145d9dba543"/>
+								<reportElement x="0" y="0" width="45" height="25" uuid="0829230a-2886-45d7-8954-8145d9dba543"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
 									<font size="8"/>
@@ -541,15 +650,15 @@ END AS escenario, t.fecha::date,
 					<jr:column width="44" uuid="7308da64-e12d-4608-aead-6353d7c6d377">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column6"/>
 						<printWhenExpression><![CDATA[$P{dia5} !=null]]></printWhenExpression>
-						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
+						<jr:tableHeader style="Table_TH" height="1" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 						</jr:tableHeader>
 						<jr:groupHeader groupName="Group1">
 							<jr:cell style="Style1" height="20" rowSpan="1"/>
 						</jr:groupHeader>
-						<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+						<jr:columnHeader style="Table_CH" height="25" rowSpan="1">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="44" height="30" uuid="b3cf2da0-e524-4a67-93d9-89ec33006a0a"/>
+								<reportElement x="0" y="0" width="44" height="25" uuid="b3cf2da0-e524-4a67-93d9-89ec33006a0a"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
 									<font size="8"/>
@@ -577,15 +686,15 @@ END AS escenario, t.fecha::date,
 					<jr:column width="44" uuid="4ca681c1-eac5-4602-aef2-5c636e02039d">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column7"/>
 						<printWhenExpression><![CDATA[$P{dia6} !=null]]></printWhenExpression>
-						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
+						<jr:tableHeader style="Table_TH" height="1" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 						</jr:tableHeader>
 						<jr:groupHeader groupName="Group1">
 							<jr:cell style="Style1" height="20" rowSpan="1"/>
 						</jr:groupHeader>
-						<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+						<jr:columnHeader style="Table_CH" height="25" rowSpan="1">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="44" height="30" uuid="9a62ecd4-9c47-4ac6-8b67-76c11199d0cf"/>
+								<reportElement x="0" y="0" width="44" height="25" uuid="9a62ecd4-9c47-4ac6-8b67-76c11199d0cf"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
 									<font size="8"/>
@@ -613,15 +722,15 @@ END AS escenario, t.fecha::date,
 					<jr:column width="43" uuid="f0c19488-c178-4b9d-8a7d-e68539675dcc">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column8"/>
 						<printWhenExpression><![CDATA[$P{dia7} !=null]]></printWhenExpression>
-						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
+						<jr:tableHeader style="Table_TH" height="1" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 						</jr:tableHeader>
 						<jr:groupHeader groupName="Group1">
 							<jr:cell style="Style1" height="20" rowSpan="1"/>
 						</jr:groupHeader>
-						<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+						<jr:columnHeader style="Table_CH" height="25" rowSpan="1">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="43" height="30" uuid="5e348a4b-cc58-479e-8a26-fa6d59b21f13"/>
+								<reportElement x="0" y="0" width="43" height="25" uuid="5e348a4b-cc58-479e-8a26-fa6d59b21f13"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
 									<font size="8"/>
@@ -649,15 +758,15 @@ END AS escenario, t.fecha::date,
 					<jr:column width="42" uuid="f4e7414c-dcdc-4e0a-8415-7abfc593366a">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column9"/>
 						<printWhenExpression><![CDATA[$P{dia8} !=null]]></printWhenExpression>
-						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
+						<jr:tableHeader style="Table_TH" height="1" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 						</jr:tableHeader>
 						<jr:groupHeader groupName="Group1">
 							<jr:cell style="Style1" height="20" rowSpan="1"/>
 						</jr:groupHeader>
-						<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+						<jr:columnHeader style="Table_CH" height="25" rowSpan="1">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="42" height="30" uuid="60e38e4b-d585-49bd-9346-7a17c00d1997"/>
+								<reportElement x="0" y="0" width="42" height="25" uuid="60e38e4b-d585-49bd-9346-7a17c00d1997"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
 									<font size="8"/>
@@ -685,15 +794,15 @@ END AS escenario, t.fecha::date,
 					<jr:column width="41" uuid="9142c25e-2dc1-4e16-ac5c-7fe735c94fb0">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column10"/>
 						<printWhenExpression><![CDATA[$P{dia9} !=null]]></printWhenExpression>
-						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
+						<jr:tableHeader style="Table_TH" height="1" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 						</jr:tableHeader>
 						<jr:groupHeader groupName="Group1">
 							<jr:cell style="Style1" height="20" rowSpan="1"/>
 						</jr:groupHeader>
-						<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+						<jr:columnHeader style="Table_CH" height="25" rowSpan="1">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="41" height="30" uuid="a2752505-25e2-4fa4-b783-d17d1ab0291e"/>
+								<reportElement x="0" y="0" width="41" height="25" uuid="a2752505-25e2-4fa4-b783-d17d1ab0291e"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
 									<font size="8"/>
@@ -721,15 +830,15 @@ END AS escenario, t.fecha::date,
 					<jr:column width="41" uuid="5eac7e54-6e4b-45e3-98cb-d4670c253e5b">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column11"/>
 						<printWhenExpression><![CDATA[$P{dia10} !=null]]></printWhenExpression>
-						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
+						<jr:tableHeader style="Table_TH" height="1" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 						</jr:tableHeader>
 						<jr:groupHeader groupName="Group1">
 							<jr:cell style="Style1" height="20" rowSpan="1"/>
 						</jr:groupHeader>
-						<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+						<jr:columnHeader style="Table_CH" height="25" rowSpan="1">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="41" height="30" uuid="9f4ede5e-b781-4572-b227-c42bd618759e"/>
+								<reportElement x="0" y="0" width="41" height="25" uuid="9f4ede5e-b781-4572-b227-c42bd618759e"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
 									<font size="8"/>
@@ -757,15 +866,15 @@ END AS escenario, t.fecha::date,
 					<jr:column width="41" uuid="88d807cc-c748-4a0f-9c23-71f846cf9f18">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column12"/>
 						<printWhenExpression><![CDATA[$P{dia11} !=null]]></printWhenExpression>
-						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
+						<jr:tableHeader style="Table_TH" height="1" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 						</jr:tableHeader>
 						<jr:groupHeader groupName="Group1">
 							<jr:cell style="Style1" height="20" rowSpan="1"/>
 						</jr:groupHeader>
-						<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+						<jr:columnHeader style="Table_CH" height="25" rowSpan="1">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="41" height="30" uuid="eab9f28c-e3f4-4fc0-bc5d-d638d11dc896"/>
+								<reportElement x="0" y="0" width="41" height="25" uuid="eab9f28c-e3f4-4fc0-bc5d-d638d11dc896"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
 									<font size="8"/>
@@ -793,15 +902,15 @@ END AS escenario, t.fecha::date,
 					<jr:column width="41" uuid="dda85216-d371-4469-814f-2c80ca9cdcaf">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column13"/>
 						<printWhenExpression><![CDATA[$P{dia12} !=null]]></printWhenExpression>
-						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
+						<jr:tableHeader style="Table_TH" height="1" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 						</jr:tableHeader>
 						<jr:groupHeader groupName="Group1">
 							<jr:cell style="Style1" height="20" rowSpan="1"/>
 						</jr:groupHeader>
-						<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+						<jr:columnHeader style="Table_CH" height="25" rowSpan="1">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="41" height="30" uuid="1d39a48c-8009-4738-b730-fb28c78d631c">
+								<reportElement x="0" y="0" width="41" height="25" uuid="1d39a48c-8009-4738-b730-fb28c78d631c">
 									<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
 								</reportElement>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
@@ -833,15 +942,15 @@ END AS escenario, t.fecha::date,
 					<jr:column width="41" uuid="f048c5f0-8702-4932-a473-710ea0a78084">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column14"/>
 						<printWhenExpression><![CDATA[$P{dia13} !=null]]></printWhenExpression>
-						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
+						<jr:tableHeader style="Table_TH" height="1" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 						</jr:tableHeader>
 						<jr:groupHeader groupName="Group1">
 							<jr:cell style="Style1" height="20" rowSpan="1"/>
 						</jr:groupHeader>
-						<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+						<jr:columnHeader style="Table_CH" height="25" rowSpan="1">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="41" height="30" uuid="05d024eb-ed36-41b5-8d9b-b42684a28740"/>
+								<reportElement x="0" y="0" width="41" height="25" uuid="05d024eb-ed36-41b5-8d9b-b42684a28740"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
 									<font size="8"/>
@@ -869,15 +978,15 @@ END AS escenario, t.fecha::date,
 					<jr:column width="41" uuid="59f6d74d-e944-4040-b6fb-476c6e76b9c6">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column15"/>
 						<printWhenExpression><![CDATA[$P{dia14} !=null]]></printWhenExpression>
-						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
+						<jr:tableHeader style="Table_TH" height="1" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 						</jr:tableHeader>
 						<jr:groupHeader groupName="Group1">
 							<jr:cell style="Style1" height="20" rowSpan="1"/>
 						</jr:groupHeader>
-						<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+						<jr:columnHeader style="Table_CH" height="25" rowSpan="1">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="41" height="30" uuid="1126e15a-effc-400c-8367-61742a1f4cea"/>
+								<reportElement x="0" y="0" width="41" height="25" uuid="1126e15a-effc-400c-8367-61742a1f4cea"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
 									<font size="8"/>
@@ -905,15 +1014,15 @@ END AS escenario, t.fecha::date,
 					<jr:column width="40" uuid="cc386026-6199-4637-819f-e24645cdd21d">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column16"/>
 						<printWhenExpression><![CDATA[$P{dia15} !=null]]></printWhenExpression>
-						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
+						<jr:tableHeader style="Table_TH" height="1" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 						</jr:tableHeader>
 						<jr:groupHeader groupName="Group1">
 							<jr:cell style="Style1" height="20" rowSpan="1"/>
 						</jr:groupHeader>
-						<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+						<jr:columnHeader style="Table_CH" height="25" rowSpan="1">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="40" height="30" uuid="a02bad86-c2a6-4331-aec8-a7874e101945"/>
+								<reportElement x="0" y="0" width="40" height="25" uuid="a02bad86-c2a6-4331-aec8-a7874e101945"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
 									<font size="8"/>
@@ -940,13 +1049,13 @@ END AS escenario, t.fecha::date,
 					</jr:column>
 					<jr:column width="34" uuid="5f0c7130-92f7-4557-8d9b-bef56fa83f35">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column17"/>
-						<jr:tableHeader style="Table_TH" height="30" rowSpan="1"/>
+						<jr:tableHeader style="Table_TH" height="1" rowSpan="1"/>
 						<jr:groupHeader groupName="Group1">
 							<jr:cell style="Style1" height="20" rowSpan="1"/>
 						</jr:groupHeader>
-						<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+						<jr:columnHeader style="Table_CH" height="25" rowSpan="1">
 							<staticText>
-								<reportElement x="0" y="0" width="34" height="30" uuid="be7c434a-e30e-4985-a3d4-4a29219dff9c"/>
+								<reportElement x="0" y="0" width="34" height="25" uuid="be7c434a-e30e-4985-a3d4-4a29219dff9c"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="8"/>
 								</textElement>
@@ -971,13 +1080,13 @@ END AS escenario, t.fecha::date,
 					</jr:column>
 					<jr:column width="35" uuid="b7b5c12e-5e94-44eb-970f-db3edd8002ce">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column18"/>
-						<jr:tableHeader style="Table_TH" height="30" rowSpan="1"/>
+						<jr:tableHeader style="Table_TH" height="1" rowSpan="1"/>
 						<jr:groupHeader groupName="Group1">
 							<jr:cell style="Style1" height="20" rowSpan="1"/>
 						</jr:groupHeader>
-						<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+						<jr:columnHeader style="Table_CH" height="25" rowSpan="1">
 							<staticText>
-								<reportElement x="0" y="0" width="35" height="30" uuid="bb8ec02c-0e1a-402f-bb71-a35c7debb219"/>
+								<reportElement x="0" y="0" width="35" height="25" uuid="bb8ec02c-0e1a-402f-bb71-a35c7debb219"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="8"/>
 								</textElement>
@@ -1001,13 +1110,13 @@ END AS escenario, t.fecha::date,
 					</jr:column>
 					<jr:column width="36" uuid="3c44e6cd-c4f3-4f1d-a045-c9b09e111a80">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column19"/>
-						<jr:tableHeader style="Table_TH" height="30" rowSpan="1"/>
+						<jr:tableHeader style="Table_TH" height="1" rowSpan="1"/>
 						<jr:groupHeader groupName="Group1">
 							<jr:cell style="Style1" height="20" rowSpan="1"/>
 						</jr:groupHeader>
-						<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+						<jr:columnHeader style="Table_CH" height="25" rowSpan="1">
 							<staticText>
-								<reportElement x="0" y="0" width="36" height="30" uuid="18d4c667-4707-42f2-82b1-30efbadd7fb6"/>
+								<reportElement x="0" y="0" width="36" height="25" uuid="18d4c667-4707-42f2-82b1-30efbadd7fb6"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="8"/>
 								</textElement>
