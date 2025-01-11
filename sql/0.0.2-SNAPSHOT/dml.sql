@@ -240,3 +240,5 @@ $function$
 ALTER TABLE gestmusica.contacto ADD telefono2 varchar(15) NULL;
 ALTER TABLE gestmusica.contacto ADD telefono3 varchar(15) NULL;
 ALTER TABLE gestmusica.contacto ADD youtube varchar(200) NULL;
+
+--Ejecutado
