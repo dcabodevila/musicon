@@ -12,6 +12,7 @@ import es.musicalia.gestmusica.tipoescenario.TipoEscenario;
 import es.musicalia.gestmusica.tipoescenario.TipoEscenarioRepository;
 import es.musicalia.gestmusica.usuario.Usuario;
 import es.musicalia.gestmusica.usuario.UsuarioRepository;
+import es.musicalia.gestmusica.util.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,18 +48,13 @@ public class ArtistaServiceImpl implements ArtistaService {
 
 	}
 
+	@Override
 	public List<ArtistaDto> findAllArtistasForUser(final Usuario usuario){
-		final List<Artista> listaArtistas = this.artistaRepository.findAllArtistasOrderedByName();
-		List<ArtistaDto> listaArtistasDto = getArtistaDtos(listaArtistas);
-
-		return listaArtistasDto;
+		return getArtistaDtos(this.artistaRepository.findAllArtistasOrderedByName());
 	}
-
+	@Override
 	public List<ArtistaDto> findAllArtistasByAgenciaId(final Long idAgencia){
-		final List<Artista> listaArtistas = this.artistaRepository.findAllArtistasByIdAgencia(idAgencia);
-		List<ArtistaDto> listaArtistasDto = getArtistaDtos(listaArtistas);
-
-		return listaArtistasDto;
+		return getArtistaDtos(this.artistaRepository.findAllArtistasByIdAgencia(idAgencia));
 	}
 
 	private static List<ArtistaDto> getArtistaDtos(List<Artista> listaArtistas) {
@@ -71,14 +67,9 @@ public class ArtistaServiceImpl implements ArtistaService {
 		}
 		return listaArtistasDto;
 	}
-
+	@Override
 	public ArtistaDto findArtistaDtoById(Long idArtista){
-		final Artista artista = this.artistaRepository.findById(idArtista).get();
-
-		ArtistaDto artistaDto = getArtistaDto(artista);
-
-		return artistaDto;
-
+		return getArtistaDto(this.artistaRepository.findById(idArtista).get());
 	}
 
 	private static ArtistaDto getArtistaDto(Artista artista) {
@@ -94,10 +85,14 @@ public class ArtistaServiceImpl implements ArtistaService {
 			artistaDto.setInstagram(contacto.getInstagram());
 			artistaDto.setFacebook(contacto.getFacebook());
 			artistaDto.setTelefono(contacto.getTelefono());
+			artistaDto.setTelefono2(contacto.getTelefono2());
+			artistaDto.setTelefono3(contacto.getTelefono3());
+			artistaDto.setYoutube(contacto.getYoutube());
 		}
 		return artistaDto;
 	}
 
+	@Override
 	@Transactional(readOnly = false)
 	public Artista saveArtista(ArtistaDto artistaDto){
 
@@ -125,7 +120,7 @@ public class ArtistaServiceImpl implements ArtistaService {
 		if (artistaDto.getIdTipoEscenario()!=null){
 			artista.setTipoEscenario(this.tipoEscenarioRepository.findById(artistaDto.getIdTipoEscenario()).get());
 		}
-
+		artista.setTipoArtista(this.tipoArtistaRepository.findById(artistaDto.getIdTipoArtista()).get());
 		artista.setComponentes(artistaDto.getComponentes());
 		artista.setMedidasEscenario(artistaDto.getMedidasEscenario());
 		artista.setRitmo(artistaDto.getRitmo());
@@ -138,22 +133,26 @@ public class ArtistaServiceImpl implements ArtistaService {
 
 
 		Contacto contacto = artista.getContacto() != null ? artista.getContacto() : new Contacto();
-		contacto.setFacebook(artistaDto.getFacebook());
+		contacto.setFacebook(StringUtils.removeHttp(artistaDto.getFacebook()));
 		contacto.setEmail(artistaDto.getEmail());
 		contacto.setFax(artistaDto.getFax());
 		contacto.setTelefono(artistaDto.getTelefono());
-		contacto.setInstagram(artistaDto.getInstagram());
-		contacto.setWeb(artistaDto.getWeb());
+		contacto.setTelefono2(artistaDto.getTelefono2());
+		contacto.setTelefono3(artistaDto.getTelefono3());
+		contacto.setInstagram(StringUtils.removeHttp(artistaDto.getInstagram()));
+		contacto.setYoutube(StringUtils.removeHttp(artistaDto.getYoutube()));
+		contacto.setWeb(StringUtils.removeHttp(artistaDto.getWeb()));
 		contacto = this.agenciaContactoRepository.save(contacto);
 		artista.setContacto(contacto);
 
 		return this.artistaRepository.save(artista);
 
 	}
-
+	@Override
 	public List<TipoEscenario> listaTipoEscenario(){
 		return this.tipoEscenarioRepository.findAll();
 	}
+	@Override
 	public List<TipoArtista> listaTipoArtista(){
 		return this.tipoArtistaRepository.findAll();
 	}

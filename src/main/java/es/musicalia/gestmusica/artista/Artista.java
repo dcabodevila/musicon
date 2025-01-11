@@ -7,9 +7,13 @@ import es.musicalia.gestmusica.tipoartista.TipoArtista;
 import es.musicalia.gestmusica.tipoescenario.TipoEscenario;
 import es.musicalia.gestmusica.usuario.Usuario;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "artista", schema="gestmusica")
+@Getter
+@Setter
 public class Artista {
 
     @Id
@@ -78,163 +82,4 @@ public class Artista {
     @Column(name = "activo")
     private boolean activo;
 
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public Ccaa getCcaa() {
-        return ccaa;
-    }
-
-    public void setCcaa(Ccaa ccaa) {
-        this.ccaa = ccaa;
-    }
-
-    public int getComponentes() {
-        return componentes;
-    }
-
-    public void setComponentes(int componentes) {
-        this.componentes = componentes;
-    }
-
-    public int getViento() {
-        return viento;
-    }
-
-    public void setViento(int viento) {
-        this.viento = viento;
-    }
-
-    public String getCif() {
-        return cif;
-    }
-
-    public void setCif(String cif) {
-        this.cif = cif;
-    }
-
-    public int getBailarinas() {
-        return bailarinas;
-    }
-
-    public void setBailarinas(int bailarinas) {
-        this.bailarinas = bailarinas;
-    }
-
-    public Contacto getContacto() {
-        return contacto;
-    }
-
-    public void setContacto(Contacto contacto) {
-        this.contacto = contacto;
-    }
-
-    public boolean isEscenario() {
-        return escenario;
-    }
-
-    public void setEscenario(boolean escenario) {
-        this.escenario = escenario;
-    }
-
-    public String getMedidasEscenario() {
-        return medidasEscenario;
-    }
-
-    public void setMedidasEscenario(String medidasEscenario) {
-        this.medidasEscenario = medidasEscenario;
-    }
-
-    public int getRitmo() {
-        return ritmo;
-    }
-
-    public void setRitmo(int ritmo) {
-        this.ritmo = ritmo;
-    }
-
-    public int getSolistas() {
-        return solistas;
-    }
-
-    public void setSolistas(int solistas) {
-        this.solistas = solistas;
-    }
-
-    public int getLuz() {
-        return luz;
-    }
-
-    public void setLuz(int luz) {
-        this.luz = luz;
-    }
-
-    public int getSonido() {
-        return sonido;
-    }
-
-    public void setSonido(int sonido) {
-        this.sonido = sonido;
-    }
-
-    public TipoEscenario getTipoEscenario() {
-        return tipoEscenario;
-    }
-
-    public void setTipoEscenario(TipoEscenario tipoEscenario) {
-        this.tipoEscenario = tipoEscenario;
-    }
-
-    public Usuario getUsuario() {
-        return usuario;
-    }
-
-    public void setUsuario(Usuario usuario) {
-        this.usuario = usuario;
-    }
-
-    public TipoArtista getTipoArtista() {
-        return tipoArtista;
-    }
-
-    public void setTipoArtista(TipoArtista tipoArtista) {
-        this.tipoArtista = tipoArtista;
-    }
-
-    public Agencia getAgencia() {
-        return agencia;
-    }
-
-    public void setAgencia(Agencia agencia) {
-        this.agencia = agencia;
-    }
-
-    public String getLogo() {
-        return logo;
-    }
-
-    public void setLogo(String logo) {
-        this.logo = logo;
-    }
-
-    public boolean isActivo() {
-        return activo;
-    }
-
-    public void setActivo(boolean activo) {
-        this.activo = activo;
-    }
 }

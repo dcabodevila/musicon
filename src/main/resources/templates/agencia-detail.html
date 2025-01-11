@@ -46,6 +46,8 @@
                                 <ul class="list-unstyled mb-0">
                                     <li class="mb-1"><span class="fas fa-user fa-fw me-1"></span> <a th:href="@{/usuario/__${agenciaDto.idUsuario}__}"  th:text="${agenciaDto.nombreUsuario}"></a></li>
                                     <li class="mb-1" th:if="${agenciaDto.telefono!=null && agenciaDto.telefono!=''}"><span class="fas fa-phone fa-fw me-1"></span> <a th:href="${'tel:'+ agenciaDto.telefono}"  th:text="${agenciaDto.telefono}"></a></li>
+                                    <li class="mb-1" th:if="${agenciaDto.telefono2!=null && agenciaDto.telefono2!=''}"><span class="fas fa-phone fa-fw me-1"></span> <a th:href="${'tel:'+ agenciaDto.telefono2}"  th:text="${agenciaDto.telefono2}"></a></li>
+                                    <li class="mb-1" th:if="${agenciaDto.telefono3!=null && agenciaDto.telefono3!=''}"><span class="fas fa-phone fa-fw me-1"></span> <a th:href="${'tel:'+ agenciaDto.telefono3}"  th:text="${agenciaDto.telefono3}"></a></li>
                                     <li class="mb-1" th:if="${agenciaDto.email!=null && agenciaDto.email!=''}"><span class="fas fa-envelope fa-fw me-1"></span> <a th:href="${'mailto:'+ agenciaDto.email}"  th:text="${agenciaDto.email}"></a></li>
                                     <li class="mb-1" th:if="${agenciaDto.direccion!=null && agenciaDto.direccion!=''}"><span class="fas fa-map-marker fa-fw me-1"></span> <span href="#"  th:text="${agenciaDto.direccion}"></span></li>
                                     <li class="mb-1" th:if="${agenciaDto.nombreProvincia!=null && agenciaDto.nombreProvincia!=''}"><span class="fas fa-map-marked fa-fw me-1"></span> <span href="#"  th:text="${agenciaDto.nombreProvincia}"></span></li>
@@ -57,6 +59,7 @@
                                     <li class="mb-1" th:if="${agenciaDto.web!=null && agenciaDto.web!=''}"><span class="fas fa-globe fa-fw me-1"></span> <a th:href="${'http://'+agenciaDto.web}" th:target="_blank" th:text="${agenciaDto.web}" ></a></li>
                                     <li class="mb-1" th:if="${agenciaDto.facebook!=null && agenciaDto.facebook!=''}"><span class="fab fa-fw fa-facebook" ></span> <a th:text="${agenciaDto.facebook}" th:href="${'http://'+agenciaDto.facebook}" th:target="_blank"></a></li>
                                     <li class="mb-1" th:if="${agenciaDto.instagram!=null  && agenciaDto.instagram!=''}"><span class="fab fa-fw fa-instagram" ></span> <a th:text="${agenciaDto.instagram}" th:href="${'http://'+agenciaDto.instagram}" th:target="_blank"></a></li>
+                                    <li class="mb-1" th:if="${agenciaDto.youtube!=null  && agenciaDto.youtube!=''}"><span class="fab fa-fw fa-youtube" ></span> <a th:text="${agenciaDto.youtube}" th:href="${'http://'+agenciaDto.youtube}" th:target="_blank"></a></li>
                                 </ul>
                             </div>
 
