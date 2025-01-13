@@ -87,7 +87,7 @@ CASE
              ELSE ''/R''
          END
 END AS escenario, t.fecha::date, 
-   (CASE WHEN p.abreviatura is not null THEN (CASE WHEN o.estado_id=2 THEN ''RESERVA'' WHEN o.solo_matinal THEN ''SMT''|| p.abreviatura WHEN o.matinal THEN ''MT''||p.abreviatura else p.abreviatura END) ELSE  (CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t.importe + COALESCE(ip.incremento,0),''999999'') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t.importe+(t.importe*ip.incremento)/100,''999999'') else TO_CHAR(t.importe,''999999'')  end) end) AS importe
+   (CASE WHEN p.abreviatura is not null THEN (CASE WHEN o.estado_id=2 THEN ''RESER'' WHEN o.estado_id=3 THEN ''PEND'' WHEN o.solo_matinal THEN ''SMT''|| p.abreviatura WHEN o.matinal THEN ''MT''||p.abreviatura else p.abreviatura END) ELSE  (CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t.importe + COALESCE(ip.incremento,0),''999999'') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t.importe+(t.importe*ip.incremento)/100,''999999'') else TO_CHAR(t.importe,''999999'')  end) end) AS importe
    FROM gestmusica.tarifa t inner join gestmusica.artista a on t.artista_id=a.id inner join gestmusica.agencia ag on a.agencia_id=ag.id
        LEFT JOIN gestmusica.ocupacion o ON (t.artista_id = o.artista_id 
         AND t.id = o.tarifa_id 
@@ -302,7 +302,7 @@ END AS escenario, t.fecha::date,
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER} ]]></textFieldExpression>
+				<textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 			<textField pattern="dd/MM/yyyy">
 				<reportElement x="0" y="39" width="92" height="20" uuid="c87d2171-518b-45de-a4da-afda31d6f010">

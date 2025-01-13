@@ -132,8 +132,14 @@ $(document).ready(function(){
 
     $("#modal-tarifa-eliminar").click(function (event) {
 
+    showConfirmationModal(function (confirmed) {
+        if (confirmed) {
         eliminar_tarifas();
         calendar.refetchEvents();
+        }
+    });
+
+
 
     });
 
@@ -159,6 +165,27 @@ $(document).ready(function(){
 
     });
 
+    $("#btn-confirmar-ocupacion").click(function (event) {
+        showConfirmationModal(function (confirmed) {
+            if (confirmed) {
+                confirmarOcupacion($('#id-ocupacion').val());
+                calendar.refetchEvents();
+            }
+        });
+
+
+    });
+
+    $("#btn-anular-ocupacion").click(function (event) {
+        showConfirmationModal(function (confirmed) {
+            if (confirmed) {
+                anularOcupacion($('#id-ocupacion').val());
+                calendar.refetchEvents();
+            }
+        });
+    });
+
+
     $('#ccaa-ocupacion').on('change', function() {
         cargarProvincias('#provincia-ocupacion', $(this).val(), null)
         .done(function() {
@@ -177,8 +204,10 @@ $(document).ready(function(){
         $('#matinal-ocupacion').prop('checked', false);
         $('#solo-matinal-ocupacion').prop('checked', false);
         $("#observaciones-ocupacion").val('');
-
+        mostrarOcultarBotonesModalOcupacion();
     });
+
+
 
     $('#provincia-ocupacion').on('change', function() {
         cargarMunicipios('#municipio-ocupacion',$(this).val(), null);
@@ -398,6 +427,62 @@ function sendOcupacionPost(ocupacionSaveDto){
     });
 }
 
+function anularOcupacion(idOcupacion){
+    $.ajax({
+        type: "GET",
+        contentType: "application/json; charset=utf-8",
+        url: "/ocupacion/anular/"+idOcupacion,
+        dataType: 'json',
+        cache: false,
+        timeout: 600000,
+        async: false,
+        success: function (data) {
+            $("#btn-anular-ocupacion").prop("disabled", false);
+            if (data.success){
+                notif("success", data.message);
+            }
+            else {
+                notif("error", data.message);
+            }
+        },
+        error: function (e) {
+            $("#btn-anular-ocupacion").prop("disabled", false);
+            console.log(e);
+            notyf.error(e);
+        }
+    });
+
+    $('#modalNuevaOcupacion').modal('toggle');
+}
+
+function confirmarOcupacion(idOcupacion){
+    $.ajax({
+        type: "GET",
+        contentType: "application/json; charset=utf-8",
+        url: "/ocupacion/confirmar/"+idOcupacion,
+        dataType: 'json',
+        cache: false,
+        timeout: 600000,
+        async: false,
+        success: function (data) {
+            $("#btn-confirmar-ocupacion").prop("disabled", false);
+            if (data.success){
+                notif("success", data.message);
+            }
+            else {
+                notif("error", data.message);
+            }
+        },
+        error: function (e) {
+            $("#btn-confirmar-ocupacion").prop("disabled", false);
+            console.log(e);
+            notyf.error(e);
+        }
+    });
+
+    $('#modalNuevaOcupacion').modal('toggle');
+}
+
 function crearIncrementoDto() {
     let incrementoDto = {}
 
@@ -508,6 +593,7 @@ function obtenerOcupacionDto(idOcupacion){
             actualizarBadgeEstado(ocupacionDto.estado);
 
             $('#divEstadoOcupacion').show();
+            mostrarOcultarBotonesModalOcupacion(ocupacionDto.estado);
             $('#modalNuevaOcupacion').modal('toggle');
         },
         error: function(error) {
@@ -553,4 +639,30 @@ function actualizarBadgeEstado(estado) {
     }
 
 
+
 }
+
+    // Al mostrar la modal
+    function mostrarOcultarBotonesModalOcupacion(estado) {
+        const $ocupacionInput = $('#id-ocupacion');
+        const $btnAnular = $('#btn-anular-ocupacion');
+        const $btnConfirmar = $('#btn-confirmar-ocupacion');
+
+        // Verificar el valor del input al mostrar la modal
+        if ($ocupacionInput.val().trim() !== "") {
+            $btnAnular.show();
+            $btnConfirmar.show();
+        } else {
+            $btnAnular.hide();
+            $btnConfirmar.hide();
+        }
+
+        if (estado!=null && estado!='Ocupado'){
+            $btnConfirmar.show();
+        }
+        else {
+            $btnConfirmar.hide();
+        }
+
+
+    }

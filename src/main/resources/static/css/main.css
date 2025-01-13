@@ -79,3 +79,13 @@
     .input-wrapper input {
         padding-right: 40px; /* Espacio para el botón de borrar */
     }
+
+    .modal-dialog.modal-xl.modal-full-height {
+      max-height: 90vh; /* Ajusta el alto máximo al 90% de la altura de la pantalla */
+    }
+    .modal-content {
+      height: 100%; /* Asegúrate de que el contenido use toda la altura disponible */
+    }
+    .modal-body {
+      overflow-y: auto; /* Habilitar desplazamiento en el contenido si es necesario */
+    }

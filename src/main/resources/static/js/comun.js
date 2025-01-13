@@ -78,3 +78,20 @@ function notif(type, message){
         }
     });
 }
+
+  function showConfirmationModal(callback) {
+      // Mostrar la modal
+      const modalElement = document.getElementById('modalConfirmacion');
+      const modal = new bootstrap.Modal(modalElement);
+      modal.show();
+
+      // Responder a la confirmación
+      document.getElementById('btnConfirmar').onclick = () => {
+          modal.hide(); // Ocultar la modal
+          callback(true); // Usuario aceptó
+      };
+
+      modalElement.addEventListener('hidden.bs.modal', () => {
+          callback(false); // Usuario canceló si cerró la modal sin confirmar
+      }, { once: true });
+  }

@@ -11,6 +11,10 @@ public interface OcupacionService {
     List<CodigoNombreDto> listarTiposOcupacion();
 
     OcupacionEditDto findOcupacionEditDtoByArtistaIdAndDates(long id);
+    @Transactional(readOnly = false)
+    Void anularOcupacion(long id);
+    @Transactional(readOnly = false)
+    Void confirmarOcupacion(long id);
 
     @Transactional(readOnly = false)
     Ocupacion saveOcupacion(OcupacionSaveDto ocupacionSaveDto);

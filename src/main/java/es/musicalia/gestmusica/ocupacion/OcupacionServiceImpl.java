@@ -54,6 +54,27 @@ public class OcupacionServiceImpl implements OcupacionService {
 
 	@Override
 	@Transactional(readOnly = false)
+	public Void anularOcupacion(long id){
+		final Ocupacion ocupacion =  this.ocupacionRepository.findById(id).get();
+
+		ocupacion.setOcupacionEstado(this.ocupacionEstadoRepository.findById(OcupacionEstadoEnum.ANULADO.getId()).get());
+		this.ocupacionRepository.save(ocupacion);
+		return null;
+
+	}
+
+	@Override
+	@Transactional(readOnly = false)
+	public Void confirmarOcupacion(long id){
+		final Ocupacion ocupacion =  this.ocupacionRepository.findById(id).get();
+		ocupacion.setOcupacionEstado(this.ocupacionEstadoRepository.findById(OcupacionEstadoEnum.OCUPADO.getId()).get());
+		this.ocupacionRepository.save(ocupacion);
+		return null;
+
+	}
+
+	@Override
+	@Transactional(readOnly = false)
 	public Ocupacion saveOcupacion(OcupacionSaveDto ocupacionSaveDto){
 
 		final Ocupacion ocupacion = ocupacionSaveDto.getId()!=null? this.ocupacionRepository.findById(ocupacionSaveDto.getId()).orElse(new Ocupacion())  : new Ocupacion();

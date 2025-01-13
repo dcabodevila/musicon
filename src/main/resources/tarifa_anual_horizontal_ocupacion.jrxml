@@ -50,7 +50,7 @@
         WHEN 4 THEN 'J'
         WHEN 5 THEN 'V'
         WHEN 6 THEN 'S'
-    END ||  EXTRACT(day FROM d.enero::date)	  as "Enero",  case when o1.estado_id=2 then 'RESERVA' else  coalesce(p1.abreviatura, CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t1.importe + COALESCE(ip.incremento,0),'999999') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t1.importe+(t1.importe*ip.incremento)/100,'999999') else TO_CHAR(t1.importe,'999999')  end) end as to_char,
+    END ||  EXTRACT(day FROM d.enero::date)	  as "Enero",  case when o1.estado_id=2 then 'RESER' when o1.estado_id=3 then 'PEND' else  coalesce(p1.abreviatura, CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t1.importe + COALESCE(ip.incremento,0),'999999') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t1.importe+(t1.importe*ip.incremento)/100,'999999') else TO_CHAR(t1.importe,'999999')  end) end as to_char,
        CASE extract(dow from d.febrero)
         WHEN 0 THEN 'D'
         WHEN 1 THEN 'L'
@@ -59,7 +59,7 @@
         WHEN 4 THEN 'J'
         WHEN 5 THEN 'V'
         WHEN 6 THEN 'S'
-    END || EXTRACT(day FROM d.febrero::date) as "Febrero", case when o2.estado_id=2 then 'RESERVA' else  coalesce(p2.abreviatura, CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t2.importe + COALESCE(ip.incremento,0),'999999') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t2.importe+(t2.importe*ip.incremento)/100,'999999') else TO_CHAR(t2.importe,'999999')  end) end as Marzo1, 
+    END || EXTRACT(day FROM d.febrero::date) as "Febrero", case when o2.estado_id=2 then 'RESER' when o1.estado_id=3 then 'PEND' else  coalesce(p2.abreviatura, CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t2.importe + COALESCE(ip.incremento,0),'999999') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t2.importe+(t2.importe*ip.incremento)/100,'999999') else TO_CHAR(t2.importe,'999999')  end) end as Marzo1, 
               CASE extract(dow from d.marzo)
         WHEN 0 THEN 'D'
         WHEN 1 THEN 'L'
@@ -68,7 +68,7 @@
         WHEN 4 THEN 'J'
         WHEN 5 THEN 'V'
         WHEN 6 THEN 'S'
-    END || EXTRACT(day FROM d.marzo::date) as "Marzo", case when o3.estado_id=2 then 'RESERVA' else  coalesce(p3.abreviatura, CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t3.importe + COALESCE(ip.incremento,0),'999999') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t3.importe+(t3.importe*ip.incremento)/100,'999999') else TO_CHAR(t3.importe,'999999')  end) end,
+    END || EXTRACT(day FROM d.marzo::date) as "Marzo", case when o3.estado_id=2 then 'RESER' when o1.estado_id=3 then 'PEND' else  coalesce(p3.abreviatura, CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t3.importe + COALESCE(ip.incremento,0),'999999') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t3.importe+(t3.importe*ip.incremento)/100,'999999') else TO_CHAR(t3.importe,'999999')  end) end,
               CASE extract(dow from d.abril)
         WHEN 0 THEN 'D'
         WHEN 1 THEN 'L'
@@ -77,7 +77,7 @@
         WHEN 4 THEN 'J'
         WHEN 5 THEN 'V'
         WHEN 6 THEN 'S'
-    END || EXTRACT(day FROM d.abril::date) as "Abril", case when o4.estado_id=2 then 'RESERVA' else  coalesce(p4.abreviatura, CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t4.importe + COALESCE(ip.incremento,0),'999999') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t4.importe+(t4.importe*ip.incremento)/100,'999999') else TO_CHAR(t4.importe,'999999')  end) end,
+    END || EXTRACT(day FROM d.abril::date) as "Abril", case when o4.estado_id=2 then 'RESER' when o1.estado_id=3 then 'PEND' else  coalesce(p4.abreviatura, CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t4.importe + COALESCE(ip.incremento,0),'999999') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t4.importe+(t4.importe*ip.incremento)/100,'999999') else TO_CHAR(t4.importe,'999999')  end) end,
               CASE extract(dow from d.mayo)
         WHEN 0 THEN 'D'
         WHEN 1 THEN 'L'
@@ -86,7 +86,7 @@
         WHEN 4 THEN 'J'
         WHEN 5 THEN 'V'
         WHEN 6 THEN 'S'
-    END ||EXTRACT(day FROM d.mayo::date) as "Mayo", case when o5.estado_id=2 then 'RESERVA' else  coalesce(p5.abreviatura, CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t5.importe + COALESCE(ip.incremento,0),'999999') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t5.importe+(t5.importe*ip.incremento)/100,'999999') else TO_CHAR(t5.importe,'999999')  end) end,
+    END ||EXTRACT(day FROM d.mayo::date) as "Mayo", case when o5.estado_id=2 then 'RESER' when o1.estado_id=3 then 'PEND' else  coalesce(p5.abreviatura, CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t5.importe + COALESCE(ip.incremento,0),'999999') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t5.importe+(t5.importe*ip.incremento)/100,'999999') else TO_CHAR(t5.importe,'999999')  end) end,
               CASE extract(dow from d.junio)
         WHEN 0 THEN 'D'
         WHEN 1 THEN 'L'
@@ -95,7 +95,7 @@
         WHEN 4 THEN 'J'
         WHEN 5 THEN 'V'
         WHEN 6 THEN 'S'
-    END ||EXTRACT(day FROM d.junio::date) as "Junio", case when o6.estado_id=2 then 'RESERVA' else  coalesce(p6.abreviatura, CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t6.importe + COALESCE(ip.incremento,0),'999999') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t6.importe+(t6.importe*ip.incremento)/100,'999999') else TO_CHAR(t6.importe,'999999')  end) end,
+    END ||EXTRACT(day FROM d.junio::date) as "Junio", case when o6.estado_id=2 then 'RESER' when o1.estado_id=3 then 'PEND' else  coalesce(p6.abreviatura, CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t6.importe + COALESCE(ip.incremento,0),'999999') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t6.importe+(t6.importe*ip.incremento)/100,'999999') else TO_CHAR(t6.importe,'999999')  end) end,
               CASE extract(dow from d.julio)
         WHEN 0 THEN 'D'
         WHEN 1 THEN 'L'
@@ -104,7 +104,7 @@
         WHEN 4 THEN 'J'
         WHEN 5 THEN 'V'
         WHEN 6 THEN 'S'
-    END ||EXTRACT(day FROM d.julio::date) as "Julio", case when o7.estado_id=2 then 'RESERVA' else  coalesce(p7.abreviatura, CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t7.importe + COALESCE(ip.incremento,0),'999999') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t7.importe+(t7.importe*ip.incremento)/100,'999999') else TO_CHAR(t7.importe,'999999')  end) end,
+    END ||EXTRACT(day FROM d.julio::date) as "Julio", case when o7.estado_id=2 then 'RESER' when o1.estado_id=3 then 'PEND' else  coalesce(p7.abreviatura, CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t7.importe + COALESCE(ip.incremento,0),'999999') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t7.importe+(t7.importe*ip.incremento)/100,'999999') else TO_CHAR(t7.importe,'999999')  end) end,
               CASE extract(dow from d.agosto)
         WHEN 0 THEN 'D'
         WHEN 1 THEN 'L'
@@ -113,7 +113,7 @@
         WHEN 4 THEN 'J'
         WHEN 5 THEN 'V'
         WHEN 6 THEN 'S'
-    END ||EXTRACT(day FROM d.agosto::date) as "Agosto", case when o8.estado_id=2 then 'RESERVA' else  coalesce(p8.abreviatura, CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t8.importe + COALESCE(ip.incremento,0),'999999') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t8.importe+(t8.importe*ip.incremento)/100,'999999') else TO_CHAR(t8.importe,'999999')  end) end,
+    END ||EXTRACT(day FROM d.agosto::date) as "Agosto", case when o8.estado_id=2 then 'RESER' when o1.estado_id=3 then 'PEND' else  coalesce(p8.abreviatura, CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t8.importe + COALESCE(ip.incremento,0),'999999') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t8.importe+(t8.importe*ip.incremento)/100,'999999') else TO_CHAR(t8.importe,'999999')  end) end,
               CASE extract(dow from d.septiembre)
         WHEN 0 THEN 'D'
         WHEN 1 THEN 'L'
@@ -122,7 +122,7 @@
         WHEN 4 THEN 'J'
         WHEN 5 THEN 'V'
         WHEN 6 THEN 'S'
-    END ||EXTRACT(day FROM d.septiembre::date) as "Septiembre", case when o9.estado_id=2 then 'RESERVA' else  coalesce(p9.abreviatura, CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t9.importe + COALESCE(ip.incremento,0),'999999') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t9.importe+(t9.importe*ip.incremento)/100,'999999') else TO_CHAR(t9.importe,'999999')  end) end,
+    END ||EXTRACT(day FROM d.septiembre::date) as "Septiembre", case when o9.estado_id=2 then 'RESER' when o1.estado_id=3 then 'PEND' else  coalesce(p9.abreviatura, CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t9.importe + COALESCE(ip.incremento,0),'999999') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t9.importe+(t9.importe*ip.incremento)/100,'999999') else TO_CHAR(t9.importe,'999999')  end) end,
               CASE extract(dow from d.octubre)
         WHEN 0 THEN 'D'
         WHEN 1 THEN 'L'
@@ -131,7 +131,7 @@
         WHEN 4 THEN 'J'
         WHEN 5 THEN 'V'
         WHEN 6 THEN 'S'
-    END ||EXTRACT(day FROM d.octubre::date) as "Octubre", case when o10.estado_id=2 then 'RESERVA' else  coalesce(p10.abreviatura, CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t10.importe + COALESCE(ip.incremento,0),'999999') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t10.importe+(t10.importe*ip.incremento)/100,'999999') else TO_CHAR(t10.importe,'999999')  end) end,
+    END ||EXTRACT(day FROM d.octubre::date) as "Octubre", case when o10.estado_id=2 then 'RESER' when o1.estado_id=3 then 'PEND' else  coalesce(p10.abreviatura, CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t10.importe + COALESCE(ip.incremento,0),'999999') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t10.importe+(t10.importe*ip.incremento)/100,'999999') else TO_CHAR(t10.importe,'999999')  end) end,
               CASE extract(dow from d.noviembre)
         WHEN 0 THEN 'D'
         WHEN 1 THEN 'L'
@@ -140,7 +140,7 @@
         WHEN 4 THEN 'J'
         WHEN 5 THEN 'V'
         WHEN 6 THEN 'S'
-    END ||EXTRACT(day FROM d.noviembre::date) as "Noviembre", case when o11.estado_id=2 then 'RESERVA' else  coalesce(p11.abreviatura, CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t11.importe + COALESCE(ip.incremento,0),'999999') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t11.importe+(t11.importe*ip.incremento)/100,'999999') else TO_CHAR(t11.importe,'999999')  end) end,
+    END ||EXTRACT(day FROM d.noviembre::date) as "Noviembre", case when o11.estado_id=2 then 'RESER' when o1.estado_id=3 then 'PEND' else  coalesce(p11.abreviatura, CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t11.importe + COALESCE(ip.incremento,0),'999999') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t11.importe+(t11.importe*ip.incremento)/100,'999999') else TO_CHAR(t11.importe,'999999')  end) end,
               CASE extract(dow from d.diciembre)
         WHEN 0 THEN 'D'
         WHEN 1 THEN 'L'
@@ -149,7 +149,7 @@
         WHEN 4 THEN 'J'
         WHEN 5 THEN 'V'
         WHEN 6 THEN 'S'
-    END ||EXTRACT(day FROM d.diciembre::date) as "Diciembre", case when o12.estado_id=2 then 'RESERVA' else  coalesce(p12.abreviatura, CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t12.importe + COALESCE(ip.incremento,0),'999999') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t12.importe+(t12.importe*ip.incremento)/100,'999999') else TO_CHAR(t12.importe,'999999')  end) end 
+    END ||EXTRACT(day FROM d.diciembre::date) as "Diciembre", case when o12.estado_id=2 then 'RESER' when o1.estado_id=3 then 'PEND' else  coalesce(p12.abreviatura, CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t12.importe + COALESCE(ip.incremento,0),'999999') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t12.importe+(t12.importe*ip.incremento)/100,'999999') else TO_CHAR(t12.importe,'999999')  end) end 
 FROM (
 	SELECT 
 		generate_series('$P!{ano}-01-01'::date, '$P!{ano}-01-31'::date, '1 day') AS enero,

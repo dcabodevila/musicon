@@ -36,6 +36,32 @@ public class OcupacionController {
 
     }
 
+    @GetMapping("/anular/{id}")
+    public ResponseEntity<DefaultResponseBody> anularOcupacion(@PathVariable long id) {
+        DefaultResponseBody result = new DefaultResponseBody();
+
+        this.ocupacionService.anularOcupacion(id);
+        result.setSuccess(true);
+        result.setMessage("Ocupación anulada");
+        result.setMessageType("success");
+
+        return ResponseEntity.ok(result);
+
+    }
+
+    @GetMapping("/confirmar/{id}")
+    public ResponseEntity<DefaultResponseBody> confirmarOcupacion(@PathVariable long id) {
+        DefaultResponseBody result = new DefaultResponseBody();
+
+        this.ocupacionService.confirmarOcupacion(id);
+        result.setSuccess(true);
+        result.setMessage("Ocupación confirmada");
+        result.setMessageType("success");
+
+        return ResponseEntity.ok(result);
+
+    }
+
     @PostMapping("/save")
     public ResponseEntity<?> saveOcupacion(
             @RequestBody OcupacionSaveDto ocupacionSaveDto) {
