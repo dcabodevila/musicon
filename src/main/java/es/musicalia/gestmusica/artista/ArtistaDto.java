@@ -4,6 +4,9 @@ import lombok.Data;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 @Data
 public class ArtistaDto {
@@ -37,7 +40,7 @@ public class ArtistaDto {
     private String nombreTipoEscenario;
 
     @NotNull
-    private Long idTipoArtista;
+    private List<Long> idsTipoArtista = new ArrayList<>();
     @NotNull
     @NotEmpty
     private Long idAgencia;

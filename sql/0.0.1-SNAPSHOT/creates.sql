@@ -10581,3 +10581,81 @@ BEGIN
 END;
 $function$
 ;
+
+
+CREATE TABLE gestmusica.artista_tipo_artista (
+    artista_id bigint NOT NULL,
+    tipo_artista_id bigint NOT NULL
+);
+
+
+ALTER TABLE gestmusica.artista_tipo_artista
+    ADD CONSTRAINT fk_artista_tipo_artista_artista FOREIGN KEY (artista_id) REFERENCES gestmusica.artista(id) NOT VALID;
+
+ALTER TABLE gestmusica.artista_tipo_artista
+    ADD CONSTRAINT fk_artista_tipo_artista_tipo FOREIGN KEY (tipo_artista_id) REFERENCES gestmusica.tipo_artista(id) NOT VALID;
+
+
+--Ajustes
+
+CREATE TABLE gestmusica.ajustes (
+    id bigint NOT NULL,
+    usuario_id bigint,
+    activo boolean DEFAULT true
+);
+
+ALTER TABLE gestmusica.ajustes ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME gestmusica.ajustes_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+ALTER TABLE ONLY gestmusica.ajustes
+    ADD CONSTRAINT ajustes_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY gestmusica.ajustes
+    ADD CONSTRAINT fk_ajustes_usuaro_fk FOREIGN KEY (usuario_id) REFERENCES gestmusica.usuario(id) NOT VALID;
+
+
+CREATE TABLE gestmusica.ajustes_tipo_artista (
+    ajuste_id bigint NOT NULL,
+    tipo_artista_id bigint NOT NULL
+);
+
+ALTER TABLE gestmusica.ajustes_tipo_artista
+    ADD CONSTRAINT fk_ajustes_ajuste FOREIGN KEY (ajuste_id) REFERENCES gestmusica.ajustes(id) NOT VALID;
+
+
+ALTER TABLE gestmusica.ajustes_tipo_artista
+    ADD CONSTRAINT fk_ajustes_tipo_artista FOREIGN KEY (tipo_artista_id) REFERENCES gestmusica.tipo_artista(id) NOT VALID;
+
+
+CREATE TABLE gestmusica.ajustes_agencias (
+    ajuste_id bigint NOT NULL,
+    agencia_id bigint NOT NULL
+);
+
+ALTER TABLE gestmusica.ajustes_agencias
+    ADD CONSTRAINT fk_ajustes_agencias_ajuste FOREIGN KEY (ajuste_id) REFERENCES gestmusica.ajustes(id) NOT VALID;
+
+
+ALTER TABLE gestmusica.ajustes_agencias
+    ADD CONSTRAINT fk_ajustes_agencias_agencia FOREIGN KEY (agencia_id) REFERENCES gestmusica.agencia(id) NOT VALID;
+
+
+CREATE TABLE gestmusica.ajustes_comunidades (
+    ajuste_id bigint NOT NULL,
+    ccaa_id bigint NOT NULL
+);
+
+ALTER TABLE gestmusica.ajustes_comunidades
+    ADD CONSTRAINT fk_ajustes_comunidades_ajuste FOREIGN KEY (ajuste_id) REFERENCES gestmusica.ajustes(id) NOT VALID;
+
+
+ALTER TABLE gestmusica.ajustes_comunidades
+    ADD CONSTRAINT fk_ajustes_comunidades_comunidad FOREIGN KEY (ccaa_id) REFERENCES gestmusica.ccaa(id) NOT VALID;
+
+-- Ejecutado

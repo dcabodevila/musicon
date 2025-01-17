@@ -81,8 +81,6 @@ public class ArtistaController {
         model.addAttribute("anoTarifa", Year.now());
         model.addAttribute("listaProvincias", this.localizacionService.findAllProvincias());
         model.addAttribute("listaTiposOcupacion", this.ocupacionService.listarTiposOcupacion());
-
-
         model.addAttribute("listaTiposIncremento", this.incrementoService.listTipoIncremento());
     }
 

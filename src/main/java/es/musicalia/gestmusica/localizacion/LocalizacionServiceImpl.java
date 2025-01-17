@@ -1,5 +1,6 @@
 package es.musicalia.gestmusica.localizacion;
 
+import es.musicalia.gestmusica.generic.CodigoNombreRecord;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,43 +21,26 @@ public class LocalizacionServiceImpl implements LocalizacionService {
 		this.provinciaRepository = provinciaRepository;
 		this.ccaaRepository = ccaaRepository;
 	}
+
 	@Override
-	public List<Municipio> findMunicipioByProvinciaId(long idProvincia){
-		return this.municipioRepository.findMunicipioByProvinciaId(idProvincia);
-	}
-	@Override
-	public List<Provincia> findAllProvincias(){
+	public List<CodigoNombreRecord> findAllProvincias(){
 		return this.provinciaRepository.findProvinciasOrderByName();
 	}
 	@Override
-	public List<CodigoNombreDto> findAllProvinciasByCcaaId(Long idCcaa){
+	public List<CodigoNombreRecord> findAllProvinciasByCcaaId(Long idCcaa){
 		// Llamada al repositorio que devuelve List<Provincia>
-		List<Provincia> provincias = this.provinciaRepository.findProvinciaByIdCcaa(idCcaa);
-
-		// Mapeo de Provincia a ProvinciaDto
-		return provincias.stream()
-				.map(provincia -> {
-					return new CodigoNombreDto(provincia.getId(), provincia.getNombre());
-				})
-				.collect(Collectors.toList());
+		return this.provinciaRepository.findProvinciaByIdCcaa(idCcaa);
 	}
 
 	@Override
-	public List<CodigoNombreDto> findAllMunicipiosByIdProvincia(Long idProvincia){
+	public List<CodigoNombreRecord> findAllMunicipiosByIdProvincia(Long idProvincia){
 		// Llamada al repositorio que devuelve List<Provincia>
-		List<Municipio> municipios = this.municipioRepository.findMunicipioByProvinciaId(idProvincia);
-		// Mapeo de Provincia a ProvinciaDto
-		return municipios.stream()
-				.map(municipio -> {
-					return new CodigoNombreDto(municipio.getId(), municipio.getNombre());
-
-				})
-				.collect(Collectors.toList());
+		return this.municipioRepository.findMunicipioByProvinciaId(idProvincia);
 	}
 
 	@Override
-	public List<Ccaa> findAllComunidades(){
-		return this.ccaaRepository.findAll();
+	public List<CodigoNombreRecord> findAllComunidades(){
+		return this.ccaaRepository.findAllCcaaOrderedByName();
 	}
 
 }

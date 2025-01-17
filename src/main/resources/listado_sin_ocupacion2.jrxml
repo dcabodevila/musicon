@@ -73,6 +73,9 @@
 		<parameter name="fecha13" class="java.lang.String"/>
 		<parameter name="fecha14" class="java.lang.String"/>
 		<parameter name="fecha15" class="java.lang.String"/>
+		<parameter name="idsTipoArtista" class="java.lang.String"/>
+		<parameter name="idsAgencias" class="java.lang.String"/>
+		<parameter name="idsComunidades" class="java.lang.String"/>
 		<queryString language="SQL">
 			<![CDATA[SELECT *
 FROM crosstab(
@@ -85,10 +88,13 @@ CASE
              ELSE ''/R''
          END
 END AS escenario, t.fecha::date, (CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t.importe + COALESCE(ip.incremento,0),''999999'') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t.importe+(t.importe*ip.incremento)/100,''999999'') else TO_CHAR(t.importe,''999999'')  end) as importe
-   FROM gestmusica.tarifa t inner join gestmusica.artista a on t.artista_id=a.id inner join gestmusica.agencia ag on a.agencia_id=ag.id
+   FROM gestmusica.tarifa t inner join gestmusica.artista a on t.artista_id=a.id inner join gestmusica.artista_tipo_artista ata on a.id=ata.artista_id inner join gestmusica.agencia ag on a.agencia_id=ag.id
    LEFT JOIN gestmusica.incremento_provincial ip ON (ip.artista_id=a.id AND ip.provincia_id=$P!{idProvincia}::bigint )
    WHERE t.activo 
    AND t.fecha in ($P!{fechaListIn})   	 
+   AND ata.tipo_artista_id in ($P!{idsTipoArtista})
+   AND a.agencia_id in ($P!{idsAgencias})
+   AND a.id_ccaa in ($P!{idsComunidades})
    AND a.activo
    ORDER BY 1, 2',
   'SELECT unnest(gestmusica.fecha_crosstab_distintas($P!{fecha1}::date, $P!{fecha2}::date, $P!{fecha3}::date, $P!{fecha4}::date, $P!{fecha5}::date, $P!{fecha6}::date, $P!{fecha7}::date, $P!{fecha8}::date, $P!{fecha9}::date, $P!{fecha10}::date, $P!{fecha11}::date, $P!{fecha12}::date, $P!{fecha13}::date, $P!{fecha14}::date, $P!{fecha15}::date))'
@@ -207,6 +213,9 @@ END AS escenario, t.fecha::date, (CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR
 	<parameter name="observaciones" class="java.lang.String"/>
 	<parameter name="municipio" class="java.lang.String"/>
 	<parameter name="lugar" class="java.lang.String"/>
+	<parameter name="idsTipoArtista" class="java.lang.String"/>
+	<parameter name="idsAgencias" class="java.lang.String"/>
+	<parameter name="idsComunidades" class="java.lang.String"/>
 	<queryString>
 		<![CDATA[]]>
 	</queryString>
@@ -382,6 +391,15 @@ T = Trailer]]></text>
 						</datasetParameter>
 						<datasetParameter name="fechaListIn">
 							<datasetParameterExpression><![CDATA[$P{fechaListIn}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="idsTipoArtista">
+							<datasetParameterExpression><![CDATA[$P{idsTipoArtista}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="idsAgencias">
+							<datasetParameterExpression><![CDATA[$P{idsAgencias}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="idsComunidades">
+							<datasetParameterExpression><![CDATA[$P{idsComunidades}]]></datasetParameterExpression>
 						</datasetParameter>
 						<datasetParameter name="idProvincia">
 							<datasetParameterExpression><![CDATA[$P{idProvincia}]]></datasetParameterExpression>

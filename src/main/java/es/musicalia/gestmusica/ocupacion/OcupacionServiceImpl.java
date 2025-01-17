@@ -68,6 +68,7 @@ public class OcupacionServiceImpl implements OcupacionService {
 	public Void confirmarOcupacion(long id){
 		final Ocupacion ocupacion =  this.ocupacionRepository.findById(id).get();
 		ocupacion.setOcupacionEstado(this.ocupacionEstadoRepository.findById(OcupacionEstadoEnum.OCUPADO.getId()).get());
+		ocupacion.setTipoOcupacion(this.tipoOcupacionRepository.findById(TipoOcupacionEnum.OCUPADO.getId()).get());
 		this.ocupacionRepository.save(ocupacion);
 		return null;
 

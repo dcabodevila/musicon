@@ -4,9 +4,13 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "tipo_artista", schema="gestmusica")
+@Getter
+@Setter
 public class TipoArtista {
     @Id
     @Column(name = "id")
@@ -15,19 +19,4 @@ public class TipoArtista {
     @Column(name = "NOMBRE")
     private String nombre;
 
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
 }

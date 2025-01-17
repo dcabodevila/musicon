@@ -51,8 +51,7 @@ public class AgenciasController {
     @GetMapping
     public String agencias(Model model) {
         if (userService.isUserAutheticated()){
-            final Usuario usuario = userService.obtenerUsuarioAutenticado();
-            model.addAttribute("listaAgencias", this.agenciaService.findAllAgenciasForUser(usuario));
+            model.addAttribute("listaAgencias", this.agenciaService.findAllAgenciasForUser(userService.obtenerUsuarioAutenticado()));
         }
         return "agencias";
     }

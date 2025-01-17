@@ -1,12 +1,13 @@
 package es.musicalia.gestmusica.localizacion;
 
 
+import es.musicalia.gestmusica.generic.CodigoNombreRecord;
+
 import java.util.List;
 
 public interface LocalizacionService {
-    List<Municipio> findMunicipioByProvinciaId(long idProvincia);
-    List<Provincia> findAllProvincias();
-    List<Ccaa> findAllComunidades();
-    List<CodigoNombreDto> findAllProvinciasByCcaaId(Long idCcaa);
-    List<CodigoNombreDto> findAllMunicipiosByIdProvincia(Long idProvincia);
+    List<CodigoNombreRecord> findAllProvincias();
+    List<CodigoNombreRecord> findAllComunidades();
+    List<CodigoNombreRecord> findAllProvinciasByCcaaId(Long idCcaa);
+    List<CodigoNombreRecord> findAllMunicipiosByIdProvincia(Long idProvincia);
     }

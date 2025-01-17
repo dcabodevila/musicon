@@ -1,26 +1,23 @@
 package es.musicalia.gestmusica.artista;
 
 
-import es.musicalia.gestmusica.agencia.Agencia;
 import es.musicalia.gestmusica.agencia.AgenciaRepository;
 import es.musicalia.gestmusica.contacto.Contacto;
 import es.musicalia.gestmusica.contacto.ContactoRepository;
 import es.musicalia.gestmusica.localizacion.*;
 import es.musicalia.gestmusica.tipoartista.TipoArtista;
 import es.musicalia.gestmusica.tipoartista.TipoArtistaRepository;
-import es.musicalia.gestmusica.tipoescenario.TipoEscenario;
 import es.musicalia.gestmusica.tipoescenario.TipoEscenarioRepository;
 import es.musicalia.gestmusica.usuario.Usuario;
 import es.musicalia.gestmusica.usuario.UsuarioRepository;
 import es.musicalia.gestmusica.util.StringUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -76,6 +73,17 @@ public class ArtistaServiceImpl implements ArtistaService {
 		ModelMapper modelMapper = new ModelMapper();
 		ArtistaDto artistaDto = modelMapper.map(artista, ArtistaDto.class);
 		artistaDto.setNombreUsuario(artista.getUsuario().getNombreCompleto());
+
+		if (CollectionUtils.isNotEmpty(artista.getTiposArtista())) {
+			artistaDto.getIdsTipoArtista().addAll(
+					artista.getTiposArtista().stream()
+							.map(TipoArtista::getId)
+							.collect(Collectors.toList())
+			);
+		}
+
+
+
 		final Contacto contacto = artista.getContacto();
 
 		if (contacto!=null){
@@ -120,7 +128,6 @@ public class ArtistaServiceImpl implements ArtistaService {
 		if (artistaDto.getIdTipoEscenario()!=null){
 			artista.setTipoEscenario(this.tipoEscenarioRepository.findById(artistaDto.getIdTipoEscenario()).get());
 		}
-		artista.setTipoArtista(this.tipoArtistaRepository.findById(artistaDto.getIdTipoArtista()).get());
 		artista.setComponentes(artistaDto.getComponentes());
 		artista.setMedidasEscenario(artistaDto.getMedidasEscenario());
 		artista.setRitmo(artistaDto.getRitmo());
@@ -131,6 +138,15 @@ public class ArtistaServiceImpl implements ArtistaService {
 		artista.setLuz(artistaDto.getLuz());
 		artista.setSonido(artistaDto.getSonido());
 
+		if (CollectionUtils.isNotEmpty(artistaDto.getIdsTipoArtista())){
+			if (artista.getTiposArtista()==null){
+				artista.setTiposArtista(new HashSet<>());
+			}
+
+			for (Long idTipoArtista : artistaDto.getIdsTipoArtista()){
+				artista.getTiposArtista().add(this.tipoArtistaRepository.findById(idTipoArtista).get());
+			}
+		}
 
 		Contacto contacto = artista.getContacto() != null ? artista.getContacto() : new Contacto();
 		contacto.setFacebook(StringUtils.removeHttp(artistaDto.getFacebook()));
@@ -149,13 +165,25 @@ public class ArtistaServiceImpl implements ArtistaService {
 
 	}
 	@Override
-	public List<TipoEscenario> listaTipoEscenario(){
-		return this.tipoEscenarioRepository.findAll();
+	public List<CodigoNombreDto> listaTipoEscenario(){
+		return this.tipoEscenarioRepository.findAll().stream()
+				.map(tipo -> {
+					return new CodigoNombreDto(tipo.getId(), tipo.getNombre());
+				})
+				.collect(Collectors.toList());
+
 	}
 	@Override
-	public List<TipoArtista> listaTipoArtista(){
-		return this.tipoArtistaRepository.findAll();
+	public List<CodigoNombreDto> listaTipoArtista(){
+
+		return this.tipoArtistaRepository.findAll().stream()
+				.map(tipo -> {
+					return new CodigoNombreDto(tipo.getId(), tipo.getNombre());
+				})
+				.collect(Collectors.toList());
 	}
+
+
 	private Artista newArtista(Long idArtista) {
 
 		if (idArtista!=null) {

@@ -3,10 +3,7 @@ package es.musicalia.gestmusica.agencia;
 
 import es.musicalia.gestmusica.contacto.ContactoRepository;
 import es.musicalia.gestmusica.contacto.Contacto;
-import es.musicalia.gestmusica.localizacion.Municipio;
-import es.musicalia.gestmusica.localizacion.MunicipioRepository;
-import es.musicalia.gestmusica.localizacion.Provincia;
-import es.musicalia.gestmusica.localizacion.ProvinciaRepository;
+import es.musicalia.gestmusica.localizacion.*;
 import es.musicalia.gestmusica.rol.RolEnum;
 import es.musicalia.gestmusica.usuario.Usuario;
 import es.musicalia.gestmusica.usuario.UsuarioRepository;
@@ -18,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 
 
 @Service
@@ -81,6 +77,12 @@ public class AgenciaServiceImpl implements AgenciaService {
 		}
 		return agenciaDto;
 	}
+
+	@Override
+	public List<AgenciaRecord> listaAgenciasRecordActivasTarifasPublicas(){
+		return this.agenciaRepository.findAllAgenciasRecordActivasTarifasPublicasByIdUsuario();
+	}
+
 	@Override
 	@Transactional(readOnly = false)
 	public Agencia saveAgencia(AgenciaDto agenciaDto){

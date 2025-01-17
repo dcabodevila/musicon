@@ -1,10 +1,5 @@
 $(document).ready(function(){
     let pickerFechaHasta = flatpickr("#idFechaHastaListado", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
-            ,
-            onChange: function(selectedDates, dateStr, instance) {
-//                pickerFechaDesde.set("maxDate", dateStr);
-            }
-
     });
     let pickerFechaDesde = flatpickr("#idFechaDesdeListado", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
         ,
@@ -12,27 +7,61 @@ $(document).ready(function(){
             pickerFechaHasta.set("minDate", dateStr);
         },
         onMonthChange: function(selectedDates, dateStr, instance) {
-
+            pickerFechaHasta.clear();
             pickerFechaHasta.changeMonth(instance.currentMonth);
+        }
+    });
+
+    let pickerFecha7 = flatpickr("#idFecha7", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
+    });
+    let pickerFecha6 = flatpickr("#idFecha6", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
+        ,
+        onMonthChange: function(selectedDates, dateStr, instance) {
+            pickerFecha7.clear();
+            pickerFecha7.changeMonth(instance.currentMonth);
+        }
+    });
+    let pickerFecha5 = flatpickr("#idFecha5", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
+        ,
+        onMonthChange: function(selectedDates, dateStr, instance) {
+            pickerFecha6.clear();
+            pickerFecha6.changeMonth(instance.currentMonth);
+        }
+    });
+    let pickerFecha4 = flatpickr("#idFecha4", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
+        ,
+        onMonthChange: function(selectedDates, dateStr, instance) {
+            pickerFecha5.clear();
+            pickerFecha5.changeMonth(instance.currentMonth);
+        }
+    });
+    let pickerFecha3 = flatpickr("#idFecha3", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
+        ,
+        onMonthChange: function(selectedDates, dateStr, instance) {
+            pickerFecha4.clear();
+            pickerFecha4.changeMonth(instance.currentMonth);
+        }
+    });
+    let pickerFecha2 = flatpickr("#idFecha2", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
+        ,
+        onMonthChange: function(selectedDates, dateStr, instance) {
+            pickerFecha3.clear();
+            pickerFecha3.changeMonth(instance.currentMonth);
+        }
+    });
+    let pickerFecha1 = flatpickr("#idFecha1", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
+        ,
+        onMonthChange: function(selectedDates, dateStr, instance) {
+            pickerFecha2.clear();
+            pickerFecha2.changeMonth(instance.currentMonth);
         }
     });
 
 
 
-    let pickerFecha1 = flatpickr("#idFecha1", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
-    });
-    let pickerFecha2 = flatpickr("#idFecha2", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
-    });
-    let pickerFecha3 = flatpickr("#idFecha3", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
-    });
-    let pickerFecha4 = flatpickr("#idFecha4", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
-    });
-    let pickerFecha5 = flatpickr("#idFecha5", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
-    });
-    let pickerFecha6 = flatpickr("#idFecha6", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
-    });
-    let pickerFecha7 = flatpickr("#idFecha7", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
-    });
+
+
+
 
 
 
@@ -93,6 +122,24 @@ $(document).ready(function(){
             notif('error','Las fechas no pueden ser iguales. Por favor, corrige los campos.');
         }
     });
+    const artistasSelect = document.querySelector('#tiposArtista');
+
+    new Choices(artistasSelect, {
+            removeItemButton: true
+    });
+
+    const agenciasSelect = document.querySelector('#agencias');
+
+    new Choices(agenciasSelect, {
+            removeItemButton: true
+    });
+
+    const ccaaSelect = document.querySelector('#ccaa');
+
+    new Choices(ccaaSelect, {
+            removeItemButton: true
+    });
+
 });
 
 

@@ -10,6 +10,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Set;
+
 @Entity
 @Table(name = "artista", schema="gestmusica")
 @Getter
@@ -68,9 +70,14 @@ public class Artista {
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tipo_artista_id")
-    private TipoArtista tipoArtista;
+    @ManyToMany
+    @JoinTable(
+            name = "artista_tipo_artista", // Nombre de la tabla intermedia
+            schema = "gestmusica", // Esquema
+            joinColumns = @JoinColumn(name = "artista_id"), // Llave foránea hacia esta entidad
+            inverseJoinColumns = @JoinColumn(name = "tipo_artista_id") // Llave foránea hacia la otra entidad
+    )
+    private Set<TipoArtista> tiposArtista;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "agencia_id")

@@ -1,6 +1,7 @@
 package es.musicalia.gestmusica.localizacion;
 
 
+import es.musicalia.gestmusica.generic.CodigoNombreRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -24,14 +25,14 @@ public class LocalizacionController {
 
 
     @GetMapping("/provincias/{idCcaa}")
-    public ResponseEntity<List<CodigoNombreDto>> listProvinciasByIdCcaa(@PathVariable("idCcaa") Long idCcaa) {
+    public ResponseEntity<List<CodigoNombreRecord>> listProvinciasByIdCcaa(@PathVariable("idCcaa") Long idCcaa) {
 
         return ResponseEntity.ok(this.localizacionService.findAllProvinciasByCcaaId(idCcaa));
 
     }
 
     @GetMapping("/municipios/{idProvincia}")
-    public ResponseEntity<List<CodigoNombreDto>> listMunicipiosByIdProvincia(@PathVariable("idProvincia") Long idProvincia) {
+    public ResponseEntity<List<CodigoNombreRecord>> listMunicipiosByIdProvincia(@PathVariable("idProvincia") Long idProvincia) {
 
         return ResponseEntity.ok(this.localizacionService.findAllMunicipiosByIdProvincia(idProvincia));
 

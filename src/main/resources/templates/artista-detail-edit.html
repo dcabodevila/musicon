@@ -38,7 +38,7 @@
                                 <h5 class="card-title" th:text="${artistaDto.id==null ? 'Crear nueva artista' : 'Editar artista' }"></h5>
                             </div>
                             <div class="card-body">
-                                <form method="POST" th:object="${artistaDto}" th:action=@{/artista/guardar} enctype="multipart/form-data">
+                                <form method="POST" id="artista-detail-edit-form" th:object="${artistaDto}" th:action=@{/artista/guardar} enctype="multipart/form-data">
 
                                     <input hidden th:field="*{id}">
                                     <div class="mb-3 row required">
@@ -66,7 +66,7 @@
                                     <div class="mb-3 row">
                                         <label class="col-form-label col-sm-3 text-sm-end">Tipo de artista</label>
                                         <div class="col-sm-9">
-                                            <select id="tipoArtista" th:field="*{idTipoArtista}" class="form-control choices-single" required>
+                                            <select id="tiposArtista" th:field="*{idsTipoArtista}" class="form-control choices-multiple" multiple>
                                                 <option th:each="tipoArtista : ${listaTipoArtista}" th:value="${tipoArtista.id}" th:text="${tipoArtista.nombre}"></option>
                                             </select>
                                         </div>
@@ -225,7 +225,9 @@
 </div>
 
 </body>
-<script type="text/javascript" th:src="@{/js/artistas.js}"></script>
+<script type="text/javascript" th:src="@{/js/comun.js}"></script>
+
+<script type="text/javascript" th:src="@{/js/artistas-edit.js}"></script>
 
 </body>
 </html>

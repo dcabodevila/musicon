@@ -64,6 +64,10 @@ public class ListadoServiceImpl implements ListadoService {
 		parametros.put("provincia", this.provinciaRepository.findById(listadoDto.getIdProvincia()).get().getNombre());
 		parametros.put("municipio", listadoDto.getIdMunicipio() != null ? this.municipioRepository.findById(listadoDto.getIdMunicipio()).get().getNombre() : "");
 		parametros.put("lugar", listadoDto.getLocalidad() != null ? listadoDto.getLocalidad() : "");
+		parametros.put("idsTipoArtista", convertListLongToString(listadoDto.getIdsTipoArtista()));
+		parametros.put("idsAgencias", convertListLongToString(listadoDto.getIdsAgencias()));
+		parametros.put("idsComunidades", convertListLongToString(listadoDto.getIdsComunidades()));
+
 
 
 		List<Map.Entry<String, String>> diaList = generateDiaListFechas(listadoDto.getFechaDesde(), listadoDto.getFechaHasta(), dateList);
@@ -194,6 +198,22 @@ public class ListadoServiceImpl implements ListadoService {
 
 		return dateListBuilder.toString();
 
+	}
+
+	private String convertListLongToString(List<Long> listIds){
+		StringBuilder dateListBuilder = new StringBuilder();
+		int index = 1;
+		for (Long id : listIds) {
+
+			dateListBuilder.append(id);
+
+			if (index <= listIds.size() - 1) {
+				dateListBuilder.append(", ");
+			}
+			index++;
+		}
+
+		return dateListBuilder.toString();
 	}
 
 	private String formatDateForSQL(LocalDate date) {

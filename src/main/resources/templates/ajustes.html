@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content=""><head>
+    <div th:replace="~{fragments/main-template :: header-css}"/>
+
+</head>
+<body>
+<body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
+<div class="wrapper">
+
+    <div th:replace="~{fragments/main-template :: sidebar}"/>
+    <div class="main">
+
+        <div th:replace="~{fragments/main-template :: navbar}"/>
+        <main class="content">
+            <div class="container-fluid p-0">
+                <div class="mb-3">
+                    <h1 class="h3 d-inline align-middle">Ajustes</h1>
+                </div>
+
+                <div th:if="${message}" th:class="${'alert alert-' + alertClass+ ' alert-dismissible fade show'}" role="alert">
+                    <div class="alert-message">
+                        <strong th:text="${message}">Hello there!</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+                <form id="formAjustes" method="POST" th:object="${ajustesDto}" th:action=@{/ajustes/guardar} autocomplete="off">
+
+                    <input hidden th:field="*{id}">
+
+                    <div class="row">
+                    <div class="col-12 col-lg-12 order-1 order-lg-2">
+
+
+                        <div class="col-12 col-lg-12 order-2 order-lg-2">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Opciones de listados predeterminadas</h5>
+                                </div>
+                                <div class="card-body text-center">
+                                    <div class="mb-3 row">
+                                        <label class="col-form-label col-sm-3 text-sm-end">Agencias</label>
+                                        <div class="col-sm-9">
+                                            <select id="agencias"  th:field="*{idsAgencias}" class="form-control choices-multiple selectMultiple" multiple>
+                                                <option th:each="agencia : ${listaAgencias}" th:value="${agencia.id}" th:text="${agencia.nombre}"></option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="mb-3 row">
+                                            <label class="col-form-label col-sm-3 text-sm-end">Tipo de artista</label>
+                                            <div class="col-sm-9">
+                                                <select id="tiposArtista"  th:field="*{idsTipoArtista}" class="form-control choices-multiple selectMultiple" multiple>
+                                                    <option th:each="tipoArtista : ${listaTipoArtista}" th:value="${tipoArtista.id}" th:text="${tipoArtista.nombre}"></option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="mb-3 row">
+                                            <label class="col-form-label col-sm-3 text-sm-end">Comunidades</label>
+                                            <div class="col-sm-9">
+                                                <select id="ccaa"  th:field="*{idsComunidades}" class="form-control choices-multiple selectMultiple" multiple>
+                                                    <option th:each="ccaa : ${listaCcaa}" th:value="${ccaa.id}" th:text="${ccaa.nombre}"></option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+                    </div>
+                    <button type="submit" class="btn btn-primary">Guardar ajustes</button>
+                </form>
+            </div>
+        </main>
+        <div th:replace="~{fragments/main-template :: footer}"/>
+
+    </div>
+</div>
+
+</body>
+
+<script type="text/javascript" th:src="@{/js/comun.js}"></script>
+<script type="text/javascript" th:src="@{/js/ajustes.js}"></script>
+
+</body>
+</html>
