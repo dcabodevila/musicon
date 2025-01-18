@@ -1,6 +1,7 @@
 package es.musicalia.gestmusica.agencia;
 
 
+import es.musicalia.gestmusica.acceso.AccesoService;
 import es.musicalia.gestmusica.contacto.ContactoRepository;
 import es.musicalia.gestmusica.contacto.Contacto;
 import es.musicalia.gestmusica.localizacion.*;
@@ -13,43 +14,41 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Service
 @Transactional(readOnly = true)
 public class AgenciaServiceImpl implements AgenciaService {
 
-	private AgenciaRepository agenciaRepository;
-	private MunicipioRepository municipioRepository;
-	private ProvinciaRepository provinciaRepository;
-	private UsuarioRepository usuarioRepository;
-	private ContactoRepository agenciaContactoRepository;
+	private final AgenciaRepository agenciaRepository;
+	private final MunicipioRepository municipioRepository;
+	private final ProvinciaRepository provinciaRepository;
+	private final UsuarioRepository usuarioRepository;
+	private final ContactoRepository agenciaContactoRepository;
+	private final AccesoService accesoService;
 
-	public AgenciaServiceImpl(AgenciaRepository agenciaRepository, MunicipioRepository municipioRepository, ProvinciaRepository provinciaRepository, UsuarioRepository usuarioRepository, ContactoRepository agenciaContactoRepository){
+	public AgenciaServiceImpl(AgenciaRepository agenciaRepository, MunicipioRepository municipioRepository, ProvinciaRepository provinciaRepository, UsuarioRepository usuarioRepository, ContactoRepository agenciaContactoRepository, AccesoService accesoService){
 		this.agenciaRepository = agenciaRepository;
 		this.municipioRepository = municipioRepository;
 		this.provinciaRepository = provinciaRepository;
 		this.usuarioRepository = usuarioRepository;
 		this.agenciaContactoRepository = agenciaContactoRepository;
-	}
+        this.accesoService = accesoService;
+    }
 	@Override
 	public List<AgenciaDto> findAllAgenciasForUser(final Usuario usuario){
 
-		final boolean isUsuarioRolAdministrador = usuario.getRol()!=null && RolEnum.ROL_ADMINISTRADOR.getId().equals(usuario.getRol().getId());
-
-		final List<Agencia> listaAgencias = isUsuarioRolAdministrador ? this.agenciaRepository.findAllAgenciasOrderedByName() : this.agenciaRepository.findAllAgenciasByIdUsuario(usuario.getId());
-		List<AgenciaDto> listaAgenciasDto = new ArrayList<>();
-
-		if (listaAgencias!=null && !listaAgencias.isEmpty()){
-			for (Agencia agencia : listaAgencias){
-				listaAgenciasDto.add(getAgenciaDto(agencia));
-			}
+		List<Agencia> agencias = agenciaRepository.findAllAgenciasOrderedByName();
+		if (agencias == null || agencias.isEmpty()) {
+			return Collections.emptyList();
 		}
-
-		return listaAgenciasDto;
-
+		return agencias.stream()
+				.map(this::getAgenciaDto)
+				.collect(Collectors.toList());
 	}
 
 	@Override
@@ -57,7 +56,7 @@ public class AgenciaServiceImpl implements AgenciaService {
 		return getAgenciaDto(this.agenciaRepository.findById(idAgencia).orElseThrow());
 	}
 
-	private static AgenciaDto getAgenciaDto(Agencia agencia) {
+	private AgenciaDto getAgenciaDto(Agencia agencia) {
 		ModelMapper modelMapper = new ModelMapper();
 		AgenciaDto agenciaDto = modelMapper.map(agencia, AgenciaDto.class);
 		agenciaDto.setNombreUsuario(agencia.getUsuario().getNombre().concat(" ").concat(agencia.getUsuario().getApellidos()));
@@ -139,7 +138,11 @@ public class AgenciaServiceImpl implements AgenciaService {
 		agenciaContacto = this.agenciaContactoRepository.save(agenciaContacto);
 		agencia.setAgenciaContacto(agenciaContacto);
 
-		return this.agenciaRepository.save(agencia);
+		agencia = this.agenciaRepository.save(agencia);
+
+		this.accesoService.crearAccesoUsuarioAgenciaRol(agencia.getUsuario().getId(), agencia.getId(), RolEnum.ROL_REPRESENTANTE.getId());
+
+		return agencia;
 
 	}
 

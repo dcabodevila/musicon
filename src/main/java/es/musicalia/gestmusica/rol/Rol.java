@@ -2,6 +2,8 @@ package es.musicalia.gestmusica.rol;
 
 import es.musicalia.gestmusica.permiso.Permiso;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Set;
 
@@ -11,7 +13,8 @@ import java.util.Set;
  */
 @Entity
 @Table(name = "rol", schema="gestmusica")
-
+@Getter
+@Setter
 public class Rol {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,31 +31,6 @@ public class Rol {
 			inverseJoinColumns = @JoinColumn(name = "permiso_id"))
 	private Set<Permiso> permisos;
 
-	public long getId() {
-		return id;
-	}
-
-	public String getNombre() {
-		return nombre;
-	}
-
-	public void setNombre(String nombre) {
-		this.nombre = nombre;
-	}
-
-	public String getDescripcion() {
-		return descripcion;
-	}
-
-	public void setDescripcion(String descripcion) {
-		this.descripcion = descripcion;
-	}
-
-	public Set<Permiso> getPermisos() {
-		return permisos;
-	}
-
-	public void setPermisos(Set<Permiso> permisos) {
-		this.permisos = permisos;
-	}
+	@Column(name = "TIPO_ROL")
+	private Integer tipoRol;
 }

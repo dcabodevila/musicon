@@ -158,7 +158,7 @@
                                         </div>
                                     </div>
 
-                                    <button type="submit" class="btn btn-primary" th:text="${agenciaDto.id==null ? 'Crear agencia' : 'Guardar' }">Botón</button>
+                                    <button type="submit" th:if="${#authorization.expression('hasPermission(' + agenciaDto.id + ', ''AGENCIA'', ''AGENCIA_EDITAR'')')}" class="btn btn-primary" th:text="${agenciaDto.id==null ? 'Crear agencia' : 'Guardar' }">Botón</button>
                                 </form>
                             </div>
                         </div>

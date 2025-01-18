@@ -21,8 +21,8 @@ public interface UserService {
 	Usuario saveRegistration(RegistrationForm registrationForm);
 
 	List<UsuarioRecord> findAllUsuarioRecords();
+
 	Usuario obtenerUsuarioAutenticado();
 
 	boolean usernameExists(final String username);
-
 }

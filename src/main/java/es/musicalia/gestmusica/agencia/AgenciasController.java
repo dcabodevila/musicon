@@ -1,6 +1,7 @@
 package es.musicalia.gestmusica.agencia;
 
 
+import es.musicalia.gestmusica.acceso.AccesoService;
 import es.musicalia.gestmusica.artista.ArtistaService;
 import es.musicalia.gestmusica.auth.model.SecurityService;
 import es.musicalia.gestmusica.file.FileService;
@@ -28,17 +29,18 @@ import java.io.IOException;
 public class AgenciasController {
 
 
-    private UserService userService;
-    private SecurityService securityService;
-    private LocalizacionService localizacionService;
-    private FileService fileService;
-    private AgenciaService agenciaService;
-    private ArtistaService artistaService;
+    private final UserService userService;
+    private final SecurityService securityService;
+    private final LocalizacionService localizacionService;
+    private final FileService fileService;
+    private final AgenciaService agenciaService;
+    private final ArtistaService artistaService;
+    private final AccesoService accesoService;
 
     private Logger logger = LoggerFactory.getLogger(AgenciasController.class);
 
     public AgenciasController(UserService userService, SecurityService securityService, LocalizacionService localizacionService, AgenciaService agenciaService, FileService fileService,
-                              ArtistaService artistaService){
+                              ArtistaService artistaService, AccesoService accesoService){
         this.userService = userService;
         this.securityService = securityService;
         this.localizacionService = localizacionService;
@@ -46,6 +48,7 @@ public class AgenciasController {
         this.fileService = fileService;
         this.artistaService = artistaService;
 
+        this.accesoService = accesoService;
     }
 
     @GetMapping
@@ -75,6 +78,7 @@ public class AgenciasController {
     @GetMapping("/{id}")
     public String detalleAgencia(Model model, @PathVariable("id") Long idAgencia) {
         model.addAttribute("agenciaDto", this.agenciaService.findAgenciaDtoById(idAgencia));
+        model.addAttribute("listaAccesos", this.accesoService.listaAccesosAgencia(idAgencia));
         model.addAttribute("listaArtistas", this.artistaService.findAllArtistasByAgenciaId(idAgencia));
         return "agencia-detail";
     }

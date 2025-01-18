@@ -69,19 +69,30 @@ $(document).ready(function(){
         const tipoOcupacion = info.event.extendedProps.tipoOcupacion;
 
         if (tipoFecha === 'Tarifa') {
-            $("#id-tarifa").val(info.event.id);
-            $("#modal-tarifa-eliminar").show();
-            pickerFechaDesde.setDate(moment(info.event.start).format('DD-MM-YYYY'));
-            pickerFechaHasta.setDate(moment(info.event.start).format('DD-MM-YYYY'));
-            $("#importe").val(info.event.title);
-            $('#modalNuevaTarifa').modal('show');
+            checkPermission( $("#idAgencia").val(), 'AGENCIA', 'GESTION_TARIFAS')
+                .done(function(hasPermission) {
+                    if (hasPermission) {
+                        $("#id-tarifa").val(info.event.id);
+                        $("#modal-tarifa-eliminar").show();
+                        pickerFechaDesde.setDate(moment(info.event.start).format('DD-MM-YYYY'));
+                        pickerFechaHasta.setDate(moment(info.event.start).format('DD-MM-YYYY'));
+                        $("#importe").val(info.event.title);
+                        $('#modalNuevaTarifa').modal('show');
+                    }
+                })
+
         }
         else if (tipoFecha === 'Ocupacion') {
-            const id = info.event.id;
-            pickerFechaOcupacion.setDate(moment(info.event.start).format('DD-MM-YYYY'));
 
-            let ocupacionDto = obtenerOcupacionDto(info.event.id);
+              checkPermission( $("#idAgencia").val(), 'AGENCIA', 'OCUPACIONES')
+                  .done(function(hasPermission) {
+                      if (hasPermission) {
+                        const id = info.event.id;
+                        pickerFechaOcupacion.setDate(moment(info.event.start).format('DD-MM-YYYY'));
 
+                        let ocupacionDto = obtenerOcupacionDto(info.event.id);
+                      }
+                  })
 
         }
 
@@ -109,11 +120,19 @@ $(document).ready(function(){
 
         },
       dateClick: function(info) {
-        $("#id-tarifa").val("");
-        $("#modal-tarifa-eliminar").hide();
-        pickerFechaDesde.setDate(moment(info.date).format('DD-MM-YYYY'));
-        pickerFechaHasta.setDate(moment(info.date).format('DD-MM-YYYY'));
-        $('#modalNuevaTarifa').modal('show');
+
+          checkPermission( $("#idAgencia").val(), 'AGENCIA', 'GESTION_TARIFAS')
+              .done(function(hasPermission) {
+                  if (hasPermission) {
+                    $("#id-tarifa").val("");
+                    $("#modal-tarifa-eliminar").hide();
+                    pickerFechaDesde.setDate(moment(info.date).format('DD-MM-YYYY'));
+                    pickerFechaHasta.setDate(moment(info.date).format('DD-MM-YYYY'));
+                    $('#modalNuevaTarifa').modal('show');
+                  }
+              })
+
+
       }
     });
     calendar.render();
@@ -316,18 +335,35 @@ function eliminar_tarifas() {
     $('#modalNuevaTarifa').modal('toggle');
 
 }
-
-function guardar_ocupacion() {
-
-    let ocupacionSaveDto = crearOcupacionSaveDto();
-
-    $("#btn-guardar-ocupacion").prop("disabled", true);
-
-    sendOcupacionPost(ocupacionSaveDto);
-
-    $('#modalNuevaOcupacion').modal('toggle');
+function validar_guardar_ocupacion(){
+    if (document.getElementById('idFechaOcupacion').value ==''){
+        notif('error','Selecciona la fecha de la ocupación');
+        return false;
+    }
+    if (document.getElementById('municipio-ocupacion').value ==''){
+        notif('error','Selecciona el municipio de la ocupación');
+        return false;
+    }
+    return true;
 
 }
+function guardar_ocupacion() {
+
+    if (validar_guardar_ocupacion()){
+        let ocupacionSaveDto = crearOcupacionSaveDto();
+
+        $("#btn-guardar-ocupacion").prop("disabled", true);
+
+        sendOcupacionPost(ocupacionSaveDto);
+
+        $('#modalNuevaOcupacion').modal('toggle');
+
+    }
+
+
+}
+
+
 
 function crearTarifaSaveDto() {
     let tarifaSaveDto = {}

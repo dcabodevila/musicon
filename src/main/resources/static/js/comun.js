@@ -95,3 +95,15 @@ function notif(type, message){
           callback(false); // Usuario canceló si cerró la modal sin confirmar
       }, { once: true });
   }
+
+  function checkPermission(targetId, targetType, permission) {
+      return $.ajax({
+          url: '/permisos/hasPermission',
+          method: 'GET',
+          data: {
+              targetId: targetId,
+              targetType: targetType,
+              permission: permission
+          }
+      });
+  }

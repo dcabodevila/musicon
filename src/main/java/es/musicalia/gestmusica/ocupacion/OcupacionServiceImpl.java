@@ -42,6 +42,7 @@ public class OcupacionServiceImpl implements OcupacionService {
 
 	@Override
 	public List<CodigoNombreDto> listarTiposOcupacion() {
+
 		return Arrays.stream(TipoOcupacionEnum.values())
 				.map(e -> new CodigoNombreDto(e.getId(), e.getDescripcion()))
 				.collect(Collectors.toList());

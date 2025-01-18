@@ -1,0 +1,24 @@
+package es.musicalia.gestmusica.acceso;
+
+import es.musicalia.gestmusica.usuario.Usuario;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public interface AccesoRepository extends JpaRepository<Acceso, Long> {
+
+    @Query("select a from Acceso a where a.usuario.id = ?1 ")
+    Optional<List<Acceso>> findAllAccesosByIdUsuario(Long idUsuario);
+
+
+    @Query("select a from Acceso a where a.usuario.id = ?1 and a.agencia.id= ?2")
+    Optional<Acceso> findAccesoByIdUsuarioAndIdAgencia(Long idUsuario, Long idAgencia);
+
+    @Query("select a from Acceso a where a.agencia.id = ?1 order by a.id")
+    Optional<List<Acceso>> findAllAccesosByIdAgencia(Long idAgencia);
+
+}

@@ -1,9 +1,14 @@
 package es.musicalia.gestmusica.usuario;
 
 import java.sql.Timestamp;
+import java.util.Set;
 
+import es.musicalia.gestmusica.acceso.Acceso;
 import es.musicalia.gestmusica.rol.Rol;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
@@ -14,7 +19,9 @@ import javax.validation.constraints.NotEmpty;
  */
 @Entity
 @Table(name = "usuario", schema="gestmusica")
-
+@Getter
+@Setter
+@NoArgsConstructor
 public class Usuario {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,128 +54,17 @@ public class Usuario {
 	private String recover;
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "id_rol")
-	private Rol rol;
+	private Rol rolGeneral;
+	@OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	private Set<Acceso> accesos;
 
-	public Usuario() {
-		// TODO Auto-generated constructor stub
-	}
 
 	public Usuario(String nombre, String password) {
 		this.nombre = nombre;
 		this.password = password;
-//		this.activateKey = "";
 	}
-
-	public long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public String getNombre() {
-		return nombre;
-	}
-
-	public void setNombre(String nombre) {
-		this.nombre = nombre;
-	}
-
-	public String getApellidos() {
-		return apellidos;
-	}
-
-	public void setApellidos(String apellidos) {
-		this.apellidos = apellidos;
-	}
-
-	public String getApodo() {
-		return apodo;
-	}
-
-	public void setApodo(String apodo) {
-		this.apodo = apodo;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
-	public String getActivateKey() {
-		return activateKey;
-	}
-
-	public void setActivateKey(String activateKey) {
-		this.activateKey = activateKey;
-	}
-
-	public Timestamp getFechaRegistro() {
-		return fechaRegistro;
-	}
-
-	public void setFechaRegistro(Timestamp fechaRegistro) {
-		this.fechaRegistro = fechaRegistro;
-	}
-
-	public Timestamp getFechaUltimoAcceso() {
-		return fechaUltimoAcceso;
-	}
-
-	public void setFechaUltimoAcceso(Timestamp fechaUltimoAcceso) {
-		this.fechaUltimoAcceso = fechaUltimoAcceso;
-	}
-
-	public boolean isActivo() {
-		return activo;
-	}
-
-	public void setActivo(boolean activo) {
-		this.activo = activo;
-	}
-
-	public String getUsername() {
-		return username;
-	}
-
-	public void setUsername(String username) {
-		this.username = username;
-	}
-
-	public boolean equals(Object o) {
-		Usuario usuario = (Usuario) o;
-		return (this.id == usuario.id);
-	}
-
-	public String getRecover() {
-		return recover;
-	}
-
-	public void setRecover(String recover) {
-		this.recover = recover;
-	}
-
-	public Rol getRol() {
-		return rol;
-	}
-
-	public void setRol(Rol rol) {
-		this.rol = rol;
-	}
-
 	public String getNombreCompleto(){
 		return this.getApellidos()!=null ? this.getNombre().concat(" ").concat(this.getApellidos()) : this.getNombre();
 	}
+
 }

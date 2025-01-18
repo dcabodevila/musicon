@@ -65,8 +65,12 @@
 
                             <div class="card-body text-center">
 
-                                <div>
-                                    <a th:href="@{/agencia/edit/__${agenciaDto.id}__}" class="btn btn-primary">Editar datos agencia</a>
+                                <div th:with="idAgencia=${agenciaDto.id}">
+                                    <a th:if="${#authorization.expression('hasPermission(' + agenciaDto.id + ', ''AGENCIA'', ''AGENCIA_EDITAR'')')}"
+                                       th:href="@{/agencia/edit/__${agenciaDto.id}__}"
+                                       class="btn btn-primary">
+                                        Editar datos agencia
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -120,6 +124,46 @@
                             </table></div></div>
 
                             </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div th:if="${#authorization.expression('hasPermission(' + agenciaDto.id + ', ''AGENCIA'', ''GESTION_ACCESOS'')')}" class="col-12 col-md-9 col-lg-9" th:unless="${#lists.isEmpty(listaAccesos)}">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">Permisos de acceso a la agencia</h5>
+                            </div>
+                            <div class="card-body">
+                                <td><button type="button" id="btnNuevoAcceso" class="btn btn-primary mb-1" data-bs-toggle="modal" data-bs-target="#modalAcceso">
+                                    Crear acceso
+                                    <i class="far fa-plus"></i>
+                                </button></td>
+                                <div id="datatables-reponsive_accesos" class="dataTables_wrapper dt-bootstrap5 no-footer">
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <table id="datatables-reponsive-accesos" class="table table-striped dataTable no-footer dtr-inline collapsed" style="width: 100%;" aria-describedby="datatables-reponsive_info">
+                                                <thead>
+                                                <tr>
+                                                    <th  tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Usuario</th>
+                                                    <th  tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Rol</th>
+                                                    <th> Editar</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+
+                                                <tr th:each="acceso : ${listaAccesos}">
+                                                    <td th:text="${acceso.nombreUsuario}">Responsable</td>
+                                                    <td th:text="${acceso.rol}">Componentes</td>
+                                                    <td><button type="button" id="btnModalAcceso" class="btn btn-primary mb-1" data-bs-toggle="modal" data-bs-target="#modalAcceso">
+                                                        <i class="far fa-edit"></i>
+                                                    </button></td>
+                                                </tr>
+
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                </div>
                             </div>
                         </div>
                     </div>

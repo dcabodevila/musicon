@@ -10,9 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @Transactional(readOnly = true)
@@ -22,7 +20,7 @@ public class UserServiceImpl implements UserService {
 	private UsuarioRepository userRepository;
 	@Autowired
 	private PasswordEncoder passwordEncoder;
-
+	@Override
 	public Usuario save(Usuario usuario) {
 		usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
 		return userRepository.save(usuario);
@@ -48,11 +46,11 @@ public class UserServiceImpl implements UserService {
 		user.setActivo(false);
 		return user;
 	}
-
+	@Override
 	public Usuario findByUsername(String username) {
 		return userRepository.findByUsername(username);
 	}
-
+	@Override
 	public boolean usernameExists(final String username) {
 		return userRepository.existsUsuarioByUsername(username);
 	}
@@ -64,15 +62,16 @@ public class UserServiceImpl implements UserService {
 		usuario.setPassword(passwordEncoder.encode(pwd));
 		return this.userRepository.save(usuario);
 	}
-
+	@Override
 	public Usuario findByToken(String token) {
 		return userRepository.findByToken(token);
 	}
 
+	@Override
 	public boolean isUserAutheticated() {
 		return !SecurityContextHolder.getContext().getAuthentication().getName().equals("anonymousUser");
 	}
-
+	@Override
 	public UserDetails obtenerUserDetails() {
 		Object userDetails = SecurityContextHolder.getContext().getAuthentication().getDetails();
 		if (userDetails instanceof UserDetails) {
@@ -81,12 +80,12 @@ public class UserServiceImpl implements UserService {
 		return null;
 
 	}
-
+	@Override
 	public List<UsuarioRecord> findAllUsuarioRecords(){
 		return this.userRepository.findAllUsuarioRecords();
 	}
 
-
+	@Override
 	public Usuario obtenerUsuarioAutenticado() {
 
 		if (isUserAutheticated()) {

@@ -1,6 +1,8 @@
 package es.musicalia.gestmusica.permiso;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  *
@@ -8,7 +10,8 @@ import jakarta.persistence.*;
  */
 @Entity
 @Table(name = "permiso", schema="gestmusica")
-
+@Getter
+@Setter
 public class Permiso {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,20 +20,8 @@ public class Permiso {
 	private String codigo;
 	@Column(name = "DESCRIPCION")
 	private String descripcion;
+	@Column(name = "TIPO_PERMISO")
+	private Integer tipoPermiso;
 
-	public String getCodigo() {
-		return codigo;
-	}
 
-	public void setCodigo(String codigo) {
-		this.codigo = codigo;
-	}
-
-	public String getDescripcion() {
-		return descripcion;
-	}
-
-	public void setDescripcion(String descripcion) {
-		this.descripcion = descripcion;
-	}
 }

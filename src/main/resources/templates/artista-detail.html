@@ -47,6 +47,7 @@
                             </div>
                             <div class="card-body">
                                 <input hidden id="idArtista" th:value="${artistaDto.id}"/>
+                                <input hidden id="idAgencia" th:value="${artistaDto.idAgencia}"/>
                                 <input hidden id="anoTarifa" th:value="${anoTarifa}"/>
                                 <h5 class="card-text" th:if="${artistaDto.cif!=null}" th:text="${'CIF: '+ artistaDto.cif}">CIF</h5>
 
@@ -62,6 +63,17 @@
                             </div>
                             <hr class="my-0">
                             <div class="card-body">
+
+                                <ul class="list-unstyled mb-0">
+                                    <li class="mb-1" th:if="${artistaDto.nombreTipoEscenario!=null && artistaDto.nombreTipoEscenario!=''}"><span title="Tipo escenario" class="fas fa-truck fa-fw me-1" ></span> <a th:text="${artistaDto.nombreTipoEscenario}"></a></li>
+                                    <li class="mb-1" th:if="${artistaDto.medidasEscenario!=null && artistaDto.medidasEscenario!=''}"><span title="Medidas escenario" class="fas fa-arrows fa-fw me-1" ></span> <a th:text="${artistaDto.medidasEscenario}"></a></li>
+                                    <li class="mb-1" th:if="${artistaDto.componentes!=null && artistaDto.componentes!='' && artistaDto.componentes!=0}"><span title="Componentes" class="fas fa-users fa-fw me-1" ></span> <a th:text="${artistaDto.componentes}"></a></li>
+                                    <li class="mb-1" th:if="${artistaDto.sonido!=null && artistaDto.sonido!='' && artistaDto.sonido!=0}"><span title="Sonido" class="fas fa-volume-up fa-fw me-1" ></span> <a th:text="${artistaDto.sonido}"></a></li>
+                                    <li class="mb-1" th:if="${artistaDto.luz!=null && artistaDto.luz!='' && artistaDto.luz!=0}"><span title="Luz" class="fas fa-bolt fa-fw me-1" ></span> <a th:text="${artistaDto.luz}"></a></li>
+                                </ul>
+                            </div>
+                            <hr class="my-0">
+                            <div class="card-body">
                                 <ul class="list-unstyled mb-0">
                                     <li class="mb-1" th:if="${artistaDto.web!=null && artistaDto.web!=''}"><span class="fas fa-globe fa-fw me-1" ></span> <a th:href="${'http://'+artistaDto.web}" th:target="_blank" th:text="${artistaDto.web}"></a></li>
                                     <li class="mb-1" th:if="${artistaDto.facebook!=null && artistaDto.facebook!=''}"><span class="fab fa-fw fa-facebook" ></span> <a th:text="${artistaDto.facebook}" th:href="${'http://'+artistaDto.facebook}" th:target="_blank"></a></li>
@@ -70,7 +82,7 @@
                                 </ul>
                             </div>
                             <div class="card-body text-center">
-                                <a th:href="@{/artista/edit/__${artistaDto.id}__}" class="btn btn-primary">Editar</a>
+                                <a th:if="${#authorization.expression('hasPermission(' + artistaDto.idAgencia + ', ''AGENCIA'', ''ARTISTAS_EDITAR'')')}" th:href="@{/artista/edit/__${artistaDto.id}__}" class="btn btn-primary">Editar</a>
                             </div>
                         </div>
 
@@ -82,16 +94,16 @@
                         <div class="card">
                             <div class="card-body text-center">
                                 <div class="mb-3">
-                                    <button type="button" class="btn btn-primary mb-1" data-bs-toggle="modal" data-bs-target="#modalNuevaTarifa">
+                                    <button th:if="${#authorization.expression('hasPermission(' + artistaDto.idAgencia + ', ''AGENCIA'', ''GESTION_TARIFAS'')')}" type="button" class="btn btn-primary mb-1" data-bs-toggle="modal" data-bs-target="#modalNuevaTarifa">
                                         <i class="far fa-calendar"></i> Nueva tarifa
                                     </button>
-                                    <button type="button" id="btnModalNuevaOcupacion" class="btn btn-success mb-1" data-bs-toggle="modal" data-bs-target="#modalNuevaOcupacion">
+                                    <button th:if="${#authorization.expression('hasPermission(' + artistaDto.idAgencia + ', ''AGENCIA'', ''OCUPACIONES'')')}" type="button" id="btnModalNuevaOcupacion" class="btn btn-success mb-1" data-bs-toggle="modal" data-bs-target="#modalNuevaOcupacion">
                                         <i class="far fa-calendar-plus"></i> Nueva ocupación
                                     </button>
-                                    <button id="btn-incrementos" type="button" class="btn btn-secondary mb-1" data-bs-toggle="modal" data-bs-target="#modalIncrementos">
+                                    <button th:if="${#authorization.expression('hasPermission(' + artistaDto.idAgencia + ', ''AGENCIA'', ''GESTION_TARIFAS'')')}" id="btn-incrementos" type="button" class="btn btn-secondary mb-1" data-bs-toggle="modal" data-bs-target="#modalIncrementos">
                                         <i class="fa fa-eur"></i> Incrementos provinciales
                                     </button>
-                                    <a type="button" id="btn-tarifa-anual" data-bs-toggle="modal" data-bs-target="#modalTarifaAnual" class="btn btn-info mb-1">
+                                    <a th:if="${#authorization.expression('hasPermission(' + artistaDto.idAgencia + ', ''AGENCIA'', ''TARIFA_ANUAL'')')}" type="button" id="btn-tarifa-anual" data-bs-toggle="modal" data-bs-target="#modalTarifaAnual" class="btn btn-info mb-1">
                                         <i class="far fa-calendar-plus"></i> Tarifa anual
                                     </a>
                                 </div>
