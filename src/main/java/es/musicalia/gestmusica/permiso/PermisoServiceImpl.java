@@ -74,28 +74,21 @@ public class PermisoServiceImpl implements PermisoService {
 	}
 
 	@Override
-	public Map<Long, Set<String>> obtenerMapPermisosAgencia(Long idUsuario){
-
-		Map<Long, Set<String>> mapPermisosAgencia = new HashMap<>();
-
-		final List<Acceso> listaAccesos = this.accesoRepository.findAllAccesosByIdUsuario(idUsuario).orElse(new ArrayList<>());
-		for(Acceso acceso : listaAccesos){
-
-			final Set<Permiso> setPermisos = acceso.getRol().getPermisos();
-
-			if (acceso.getRol()!=null && CollectionUtils.isNotEmpty(setPermisos)){
-
-				mapPermisosAgencia.put(acceso.getAgencia().getId(), new HashSet<>(setPermisos.stream()
-						.map(Permiso::getCodigo) // Extrae el atributo `codigo` de cada permiso
-						.collect(Collectors.toList())));
-			}
-
-		}
-
-		return mapPermisosAgencia;
-
-
-
+	public Map<Long, Set<String>> obtenerMapPermisosAgencia(Long idUsuario) {
+		return accesoRepository.findAllAccesosByIdUsuario(idUsuario)
+				.orElseGet(Collections::emptyList) // Evitar inicializaciones manuales
+				.stream()
+				.filter(acceso -> acceso.getRol() != null && CollectionUtils.isNotEmpty(acceso.getRol().getPermisos())) // Filtrar roles nulos y permisos vacíos
+				.collect(Collectors.toMap(
+						acceso -> acceso.getAgencia().getId(), // Clave: ID de la agencia
+						acceso -> acceso.getRol().getPermisos().stream()
+								.map(Permiso::getCodigo) // Extraer códigos de permisos
+								.collect(Collectors.toSet()), // Convertir a Set
+						(existing, replacement) -> {
+							existing.addAll(replacement); // Combinar permisos en caso de colisión
+							return existing;
+						}
+				));
 	}
 
 

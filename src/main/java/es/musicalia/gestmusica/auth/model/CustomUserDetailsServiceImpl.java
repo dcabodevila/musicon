@@ -51,9 +51,7 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService {
 		//TODO: obtenerPermisosArtista
 		Map<Long, Set<String>> mapPermisosArtista = new HashMap<>();
 
-		final Map<Long, Set<String>> mapPermisosAgencia = this.permisoService.obtenerMapPermisosAgencia(usuario.getId());
-
-		final UserDetails userDetails = new CustomAuthenticatedUser(usuario, true, true, true, true, auth, mapPermisosArtista, mapPermisosAgencia);
+		final UserDetails userDetails = new CustomAuthenticatedUser(usuario, true, true, true, true, auth, mapPermisosArtista, this.permisoService.obtenerMapPermisosAgencia(usuario.getId()));
 		final Date date = new Date();
 		usuario.setFechaUltimoAcceso(new Timestamp(date.getTime()));
 		this.usuarioRepository.save(usuario);
