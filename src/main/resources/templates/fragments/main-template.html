@@ -210,7 +210,7 @@
 				<li class="sidebar-header">
 					Agencia
 				</li>
-				<li class="sidebar-item">
+				<li class="sidebar-item" sec:authorize="hasAuthority('GESTION_AGENCIAS')">
 					<a class="sidebar-link" href="/agencia">
 						<i class="align-middle me-2 fas fa-fw fa-suitcase" ></i> <span class="align-middle">Agencias</span>
 					</a>
@@ -228,7 +228,7 @@
 				<li class="sidebar-header">
 					Fechas
 				</li>
-				<li class="sidebar-item">
+				<li class="sidebar-item" >
 					<a class="sidebar-link" href="/listado">
 						<i class="align-middle me-2 fas fa-fw fa-calendar-alt" ></i> <span class="align-middle">Listado presupuestos</span>
 					</a>

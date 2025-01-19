@@ -32,6 +32,11 @@ public class OcupacionSaveDto {
     private String lugar;
     @NotNull
     private BigDecimal importe;
+    @NotNull
+    private BigDecimal porcentajeRepre;
+    @NotNull
+    private BigDecimal iva;
+
     private String observaciones;
 
     private Boolean matinal= Boolean.FALSE;

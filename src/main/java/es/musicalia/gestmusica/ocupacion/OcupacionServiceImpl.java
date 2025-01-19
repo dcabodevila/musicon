@@ -84,6 +84,8 @@ public class OcupacionServiceImpl implements OcupacionService {
 		ocupacion.setArtista(this.artistaRepository.findById(ocupacionSaveDto.getIdArtista()).get());
 		ocupacion.setFecha(ocupacionSaveDto.getFecha());
 		ocupacion.setImporte(ocupacionSaveDto.getImporte());
+		ocupacion.setPorcentajeRepre(ocupacionSaveDto.getPorcentajeRepre());
+		ocupacion.setIva(ocupacionSaveDto.getIva());
 		ocupacion.setTipoOcupacion(this.tipoOcupacionRepository.findById(ocupacionSaveDto.getIdTipoOcupacion()).get());
 
 		Long idEstadoOcupacion = getIdEstadoOcupacion(ocupacionSaveDto.getIdTipoOcupacion());

@@ -215,7 +215,9 @@ $(document).ready(function(){
         $("#ccaa-ocupacion").change();
         $("#localidad-ocupacion").val('');
         $("#lugar-ocupacion").val('');
-        $("#importe-ocupacion").val('');
+        $("#importe-ocupacion").val(0);
+        $("#porcentaje-repre-ocupacion").val(0);
+        $("#iva-ocupacion").val(0);
         $('#matinal-ocupacion').prop('checked', false);
         $('#solo-matinal-ocupacion').prop('checked', false);
         $("#observaciones-ocupacion").val('');
@@ -424,6 +426,8 @@ function crearOcupacionSaveDto() {
     ocupacionSaveDto["localidad"] = $("#localidad-ocupacion").val();
     ocupacionSaveDto["lugar"] = $("#lugar-ocupacion").val();
     ocupacionSaveDto["importe"] = $("#importe-ocupacion").val();
+    ocupacionSaveDto["porcentajeRepre"] = $("#porcentaje-repre-ocupacion").val();
+    ocupacionSaveDto["iva"] = $("#iva-ocupacion").val();
     ocupacionSaveDto["matinal"] = $('#matinal-ocupacion').is(':checked');
     ocupacionSaveDto["soloMatinal"] = $('#solo-matinal-ocupacion').is(':checked');
     ocupacionSaveDto["observaciones"] = $("#observaciones-ocupacion").val();
@@ -618,6 +622,8 @@ function obtenerOcupacionDto(idOcupacion){
             $("#localidad-ocupacion").val(ocupacionDto.localidad);
             $("#lugar-ocupacion").val(ocupacionDto.lugar);
             $("#importe-ocupacion").val(ocupacionDto.importe);
+            $("#porcentaje-repre-ocupacion").val(ocupacionDto.porcentajeRepre);
+            $("#iva-ocupacion").val(ocupacionDto.iva);
             $('#matinal-ocupacion').prop('checked', ocupacionDto.matinal);
             $('#solo-matinal-ocupacion').prop('checked', ocupacionDto.soloMatinal);
             $("#observaciones-ocupacion").val(ocupacionDto.observaciones);

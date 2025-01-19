@@ -127,7 +127,7 @@
                             </div>
                         </div>
                     </div>
-                    <div th:if="${#authorization.expression('hasPermission(' + agenciaDto.id + ', ''AGENCIA'', ''GESTION_ACCESOS'')')}" class="col-12 col-md-9 col-lg-9" th:unless="${#lists.isEmpty(listaAccesos)}">
+                    <div th:if="${#authorization.expression('hasPermission(' + agenciaDto.id + ', ''AGENCIA'', ''GESTION_ACCESOS'')')}" class="col-12 col-md-6 col-lg-6" th:unless="${#lists.isEmpty(listaAccesos)}">
                         <div class="card">
                             <div class="card-header">
                                 <h5 class="card-title">Permisos de acceso a la agencia</h5>
@@ -145,7 +145,7 @@
                                                 <tr>
                                                     <th  tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Usuario</th>
                                                     <th  tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Rol</th>
-                                                    <th> Editar</th>
+                                                    <th>Editar</th>
                                                 </tr>
                                                 </thead>
                                                 <tbody>
@@ -156,6 +156,7 @@
                                                     <td><button type="button" id="btnModalAcceso" class="btn btn-primary mb-1" data-bs-toggle="modal" data-bs-target="#modalAcceso">
                                                         <i class="far fa-edit"></i>
                                                     </button></td>
+
                                                 </tr>
 
                                                 </tbody>

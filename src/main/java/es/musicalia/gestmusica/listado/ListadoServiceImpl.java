@@ -41,6 +41,8 @@ public class ListadoServiceImpl implements ListadoService {
 
 	@Override
 	public byte[] generarInformeListado(ListadoDto listadoDto) {
+
+		logger.info("Generando listado");
 		Map<String, Object> parametros = new HashMap<String, Object>();
 		String fileReport = TipoOcupacionEnum.SIN_OCUPACION.getId().equals(listadoDto.getIdTipoOcupacion()) ? "listado_sin_ocupacion2.jrxml" : "listado_con_ocupacion.jrxml";
 

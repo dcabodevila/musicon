@@ -67,8 +67,19 @@ public class Ocupacion {
     @NotNull
     private LocalDateTime fecha;
 
+    @NotNull
     @Column(name = "importe")
     private BigDecimal importe;
+
+    @NotNull
+    @Column(name = "porcentaje_repre")
+    private BigDecimal porcentajeRepre;
+
+    @NotNull
+    @Column(name = "iva")
+    private BigDecimal iva;
+
+
     @Column(name = "activo")
     private boolean activo;
 

@@ -29,5 +29,7 @@ public class Acceso {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "rol_id")
 	private Rol rol;
+	@Column(name = "activo")
+	private Boolean activo;
 
 }
