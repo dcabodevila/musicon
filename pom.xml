@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>es.musicalia</groupId>
 	<artifactId>gestmusica</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.4-SNAPSHOT</version>
 	<packaging>war</packaging>
 	<name>gestmusica</name>
 	<description>Aplicación web para gestión de agrupaciones</description>
@@ -136,15 +136,11 @@
 	</dependencies>
 
 	<build>
+		<finalName>gestmusica</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-<!--				<configuration>-->
-<!--					<jvmArguments>-->
-<!--						-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005-->
-<!--					</jvmArguments>-->
-<!--				</configuration>-->
 			</plugin>
 		</plugins>
 	</build>

@@ -1,1 +1,1 @@
-web: java -XX:+UseG1GC -XX:+UseContainerSupport -XX:MetaspaceSize=64m -XX:MaxMetaspaceSize=128m -Xmx256m -Xms128m -jar target/gestmusica-0.0.1-SNAPSHOT.war
+web: java -XX:+UseG1GC -XX:+UseContainerSupport -XX:MetaspaceSize=64m -XX:MaxMetaspaceSize=128m -Xmx256m -Xms128m -jar target/gestmusica.war
