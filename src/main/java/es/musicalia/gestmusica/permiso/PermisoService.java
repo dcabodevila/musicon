@@ -15,7 +15,7 @@ public interface PermisoService {
 
 	boolean existePermisoUsuarioArtista(Long idArtista, String codigoPermiso);
 
-	boolean existePermisoUsuarioAgencia(Long idArtista, String codigoPermiso);
+	boolean existePermisoUsuarioAgencia(Long idAgencia, String codigoPermiso);
 
 	Map<Long, Set<String>> obtenerMapPermisosAgencia(Long idUsuario);
 }

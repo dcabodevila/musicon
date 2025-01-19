@@ -58,7 +58,7 @@ public class PermisoServiceImpl implements PermisoService {
 	}
 
 	@Override
-	public boolean existePermisoUsuarioAgencia(Long idArtista, String codigoPermiso) {
+	public boolean existePermisoUsuarioAgencia(Long idAgencia, String codigoPermiso) {
 		if (!GestmusicaUtils.isUserAutheticated()) {
 			return false;
 		}
@@ -70,7 +70,7 @@ public class PermisoServiceImpl implements PermisoService {
 
 		// Verifica si el mapa contiene el idArtista y si el permiso existe
 		return mapPermisosAgencia != null &&
-				mapPermisosAgencia.getOrDefault(idArtista, Set.of()).contains(codigoPermiso);
+				mapPermisosAgencia.getOrDefault(idAgencia, Set.of()).contains(codigoPermiso);
 	}
 
 	@Override
