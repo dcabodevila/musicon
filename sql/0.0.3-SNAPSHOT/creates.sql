@@ -1,32 +1,6 @@
 ALTER TABLE gestmusica.rol ADD tipo_rol int DEFAULT 0 NOT NULL;
 ALTER TABLE gestmusica.permiso ADD tipo_permiso int DEFAULT 0 NOT NULL;
 
-CREATE TABLE gestmusica.usuario_agencia_rol (
-	id bigint not null,
-    usuario_id bigint NOT NULL,
-    agencia_id bigint NOT null,
-    rol_id bigint NOT null
-);
-
-ALTER TABLE gestmusica.usuario_agencia_rol ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
-    SEQUENCE NAME gestmusica.usuario_agencia_rol_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1
-);
-
-ALTER TABLE gestmusica.usuario_agencia_rol
-    ADD CONSTRAINT fk_usuario_agencia_rol_usu FOREIGN KEY (usuario_id) REFERENCES gestmusica.usuario(id) NOT VALID;
-
-ALTER TABLE gestmusica.usuario_agencia_rol
-    ADD CONSTRAINT fk_usuario_agencia_rol_age FOREIGN KEY (agencia_id) REFERENCES gestmusica.agencia(id) NOT VALID;
-
-ALTER TABLE gestmusica.usuario_agencia_rol
-    ADD CONSTRAINT fk_usuario_agencia_rol_rol FOREIGN KEY (rol_id) REFERENCES gestmusica.rol(id) NOT VALID;
-
-
 CREATE TABLE gestmusica.restricciones_usuario_artista_permiso (
 	id bigint not null,
     usuario_id bigint NOT NULL,

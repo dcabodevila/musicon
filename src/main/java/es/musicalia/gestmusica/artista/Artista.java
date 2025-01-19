@@ -89,4 +89,6 @@ public class Artista {
     @Column(name = "activo")
     private boolean activo;
 
+    @Column(name = "tarifas_publicas")
+    private boolean tarifasPublicas;
 }

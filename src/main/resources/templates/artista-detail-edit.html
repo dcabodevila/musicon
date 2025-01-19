@@ -211,6 +211,15 @@
                                         </div>
                                     </div>
 
+                                    <div class="mb-3 row">
+                                        <label class="col-form-label col-sm-3 text-sm-end pt-sm-0" for="flexSwitchCheckChecked">Tarifas públicas</label>
+                                        <div class="col-sm-9">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" th:field="*{tarifasPublicas}" id="tarifasPublicas" checked="" wfd-id="id17">
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <button type="submit" class="btn btn-primary" th:text="${artistaDto.id==null ? 'Crear artista' : 'Guardar' }">Botón</button>
                                 </form>
                             </div>

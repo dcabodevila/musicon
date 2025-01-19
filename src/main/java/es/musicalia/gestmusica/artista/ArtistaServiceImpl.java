@@ -147,7 +147,7 @@ public class ArtistaServiceImpl implements ArtistaService {
 				artista.getTiposArtista().add(this.tipoArtistaRepository.findById(idTipoArtista).get());
 			}
 		}
-
+		artista.setTarifasPublicas(artistaDto.getTarifasPublicas());
 		Contacto contacto = artista.getContacto() != null ? artista.getContacto() : new Contacto();
 		contacto.setFacebook(StringUtils.removeHttp(artistaDto.getFacebook()));
 		contacto.setEmail(artistaDto.getEmail());
