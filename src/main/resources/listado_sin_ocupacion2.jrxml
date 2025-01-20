@@ -97,7 +97,7 @@ END AS escenario, t.fecha::date, (CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR
    AND a.id_ccaa in ($P!{idsComunidades})
    AND a.activo
    AND a.tarifas_publicas  
-   ORDER BY 1, 2',
+   ORDER BY 2, 1',
   'SELECT unnest(gestmusica.fecha_crosstab_distintas($P!{fecha1}::date, $P!{fecha2}::date, $P!{fecha3}::date, $P!{fecha4}::date, $P!{fecha5}::date, $P!{fecha6}::date, $P!{fecha7}::date, $P!{fecha8}::date, $P!{fecha9}::date, $P!{fecha10}::date, $P!{fecha11}::date, $P!{fecha12}::date, $P!{fecha13}::date, $P!{fecha14}::date, $P!{fecha15}::date))'
 ) AS ct ($P!{colNames});]]>
 		</queryString>
