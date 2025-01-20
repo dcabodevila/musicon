@@ -1,1 +1,1 @@
-web: java target/gestmusica.war
+web: java -jar target/gestmusica.war
