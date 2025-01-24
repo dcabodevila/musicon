@@ -3,6 +3,11 @@ package es.musicalia.gestmusica.home;
 import es.musicalia.gestmusica.agencia.AgenciasController;
 import es.musicalia.gestmusica.auth.model.RegistrationForm;
 import es.musicalia.gestmusica.auth.model.SecurityService;
+import es.musicalia.gestmusica.ocupacion.OcupacionDto;
+import es.musicalia.gestmusica.ocupacion.OcupacionService;
+import es.musicalia.gestmusica.permiso.PermisoAgenciaEnum;
+import es.musicalia.gestmusica.permiso.PermisoGeneralEnum;
+import es.musicalia.gestmusica.permiso.PermisoService;
 import es.musicalia.gestmusica.usuario.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,22 +22,29 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import javax.validation.Valid;
+import java.util.List;
+import java.util.Set;
 
 @Controller
 public class HomeController {
-
-
-    private UserService userService;
-    private SecurityService securityService;
     private Logger logger = LoggerFactory.getLogger(AgenciasController.class);
-    public HomeController(UserService userService, SecurityService securityService){
+
+    private final UserService userService;
+    private final SecurityService securityService;
+    private final OcupacionService ocupacionService;
+    private final PermisoService permisoService;
+    public HomeController(UserService userService, SecurityService securityService, OcupacionService ocupacionService, PermisoService permisoService){
         this.userService = userService;
         this.securityService = securityService;
-
+        this.ocupacionService = ocupacionService;
+        this.permisoService = permisoService;
     }
 
     @GetMapping("/")
-    public String home() {
+    public String home(Model model) {
+        final Set<Long> idsAgenciasConfirmarOcupacion = this.permisoService.obtenerIdsAgenciaPorPermiso(this.userService.obtenerUsuarioAutenticado().getId(), PermisoAgenciaEnum.CONFIRMAR_OCUPACION.getDescripcion());
+        List<OcupacionDto> listaOcupacion = this.ocupacionService.findOcupacionesDtoByAgenciaPendientes(idsAgenciasConfirmarOcupacion);
+        model.addAttribute("listaOcupacionPendiente", listaOcupacion);
         return "main.html";
     }
 

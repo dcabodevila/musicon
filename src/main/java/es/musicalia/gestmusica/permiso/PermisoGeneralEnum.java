@@ -9,8 +9,8 @@ import java.util.Arrays;
 @AllArgsConstructor
 public enum PermisoGeneralEnum {
     ACCESO_PANEL_ADMIN(1, "ACCESO_PANEL_ADMIN"),
-    AGENCIA(1, "AGENCIA"),
-    ARTISTA(2, "ARTISTA");
+    GESTION_AGENCIAS(2, "GESTION_AGENCIAS"),
+    GESTION_AGRUPACION(3, "GESTION_AGRUPACION");
 
     private final Integer id;
     private final String descripcion;
