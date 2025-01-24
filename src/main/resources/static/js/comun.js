@@ -107,3 +107,59 @@ function notif(type, message){
           }
       });
   }
+
+  function confirmarOcupacion(idOcupacion){
+      $.ajax({
+          type: "GET",
+          contentType: "application/json; charset=utf-8",
+          url: "/ocupacion/confirmar/"+idOcupacion,
+          dataType: 'json',
+          cache: false,
+          timeout: 600000,
+          async: false,
+          success: function (data) {
+              $("#btn-confirmar-ocupacion").prop("disabled", false);
+              if (data.success){
+                  notif("success", data.message);
+              }
+              else {
+                  notif("error", data.message);
+              }
+          },
+          error: function (e) {
+              $("#btn-confirmar-ocupacion").prop("disabled", false);
+              console.log(e);
+              notyf.error(e);
+          }
+      });
+
+      $('#modalNuevaOcupacion').modal('toggle');
+  }
+
+  function anularOcupacion(idOcupacion){
+      $.ajax({
+          type: "GET",
+          contentType: "application/json; charset=utf-8",
+          url: "/ocupacion/anular/"+idOcupacion,
+          dataType: 'json',
+          cache: false,
+          timeout: 600000,
+          async: false,
+          success: function (data) {
+              $("#btn-anular-ocupacion").prop("disabled", false);
+              if (data.success){
+                  notif("success", data.message);
+              }
+              else {
+                  notif("error", data.message);
+              }
+          },
+          error: function (e) {
+              $("#btn-anular-ocupacion").prop("disabled", false);
+              console.log(e);
+              notyf.error(e);
+          }
+      });
+
+      $('#modalNuevaOcupacion').modal('toggle');
+  }

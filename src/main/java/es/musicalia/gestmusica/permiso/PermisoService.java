@@ -18,4 +18,6 @@ public interface PermisoService {
 	boolean existePermisoUsuarioAgencia(Long idAgencia, String codigoPermiso);
 
 	Map<Long, Set<String>> obtenerMapPermisosAgencia(Long idUsuario);
+
+	Set<Long> obtenerIdsAgenciaPorPermiso(Long idUsuario, String permisoBuscado);
 }

@@ -1,6 +1,5 @@
 package es.musicalia.gestmusica.permiso;
 
-import es.musicalia.gestmusica.acceso.Acceso;
 import es.musicalia.gestmusica.acceso.AccesoRepository;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.util.GestmusicaUtils;
@@ -90,6 +89,20 @@ public class PermisoServiceImpl implements PermisoService {
 						}
 				));
 	}
+
+	@Override
+	public Set<Long> obtenerIdsAgenciaPorPermiso(Long idUsuario, String permisoBuscado) {
+		return accesoRepository.findAllAccesosByIdUsuario(idUsuario)
+				.orElseGet(Collections::emptyList) // Evitar inicializaciones manuales
+				.stream()
+				.filter(acceso -> acceso.getRol() != null
+						&& CollectionUtils.isNotEmpty(acceso.getRol().getPermisos())) // Filtrar roles nulos y permisos vacíos
+				.filter(acceso -> acceso.getRol().getPermisos().stream()
+						.anyMatch(permiso -> permiso.getCodigo().equals(permisoBuscado))) // Verificar si el permiso está presente
+				.map(acceso -> acceso.getAgencia().getId()) // Extraer IDs de agencias
+				.collect(Collectors.toSet()); // Convertir a Set para evitar duplicados
+	}
+
 
 
 
