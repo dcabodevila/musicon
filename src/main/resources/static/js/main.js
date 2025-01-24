@@ -1,5 +1,5 @@
 $(document).ready(function(){
-    $("#btn-confirmar-ocupacion").click(function (event) {
+    $(".confirmar-ocupacion").click(function (event) {
         let idOcupacion = $(this).data("idocupacion");
         showConfirmationModal(function (confirmed) {
             if (confirmed) {
@@ -11,7 +11,7 @@ $(document).ready(function(){
 
     });
 
-    $("#btn-anular-ocupacion").click(function (event) {
+    $(".anular-ocupacion").click(function (event) {
         let idOcupacion = $(this).data("idocupacion");
         showConfirmationModal(function (confirmed) {
             if (confirmed) {
