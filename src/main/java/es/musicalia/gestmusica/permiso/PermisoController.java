@@ -20,8 +20,14 @@ import java.util.List;
 public class PermisoController {
 
 
-    @Autowired
-    private PermissionEvaluator permissionEvaluator;
+
+    private final PermissionEvaluator permissionEvaluator;
+    private final PermisoService permisoService;
+
+    public PermisoController(PermissionEvaluator permissionEvaluator, PermisoService permisoService) {
+        this.permissionEvaluator = permissionEvaluator;
+        this.permisoService = permisoService;
+    }
 
     @GetMapping("/hasPermission")
     public ResponseEntity<Boolean> hasPermission(
@@ -34,5 +40,15 @@ public class PermisoController {
 
         return ResponseEntity.ok(hasPermission);
     }
+
+    @GetMapping("/rol/{idRol}")
+    public ResponseEntity<List<PermisoRecord>> obtenerPermisosByIdRol(@PathVariable Long idRol) {
+        List<PermisoRecord> permisos = permisoService.obtenerPermisosByIdRol(idRol);
+        if (permisos.isEmpty()) {
+            return ResponseEntity.noContent().build(); // Devuelve 204 si no hay permisos
+        }
+        return ResponseEntity.ok(permisos);
+    }
+
 
 }

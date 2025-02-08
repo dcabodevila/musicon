@@ -1,11 +1,13 @@
 package es.musicalia.gestmusica.agencia;
 
 
+import es.musicalia.gestmusica.acceso.AccesoDto;
 import es.musicalia.gestmusica.acceso.AccesoService;
 import es.musicalia.gestmusica.artista.ArtistaService;
 import es.musicalia.gestmusica.auth.model.SecurityService;
 import es.musicalia.gestmusica.file.FileService;
 import es.musicalia.gestmusica.localizacion.LocalizacionService;
+import es.musicalia.gestmusica.rol.RolRecord;
 import es.musicalia.gestmusica.usuario.UserService;
 import es.musicalia.gestmusica.usuario.Usuario;
 import es.musicalia.gestmusica.util.FileUploadUtil;
@@ -22,6 +24,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
 import java.io.IOException;
+import java.util.List;
 
 
 @Controller
@@ -35,26 +38,24 @@ public class AgenciasController {
     private final FileService fileService;
     private final AgenciaService agenciaService;
     private final ArtistaService artistaService;
-    private final AccesoService accesoService;
 
     private Logger logger = LoggerFactory.getLogger(AgenciasController.class);
 
     public AgenciasController(UserService userService, SecurityService securityService, LocalizacionService localizacionService, AgenciaService agenciaService, FileService fileService,
-                              ArtistaService artistaService, AccesoService accesoService){
+                              ArtistaService artistaService){
         this.userService = userService;
         this.securityService = securityService;
         this.localizacionService = localizacionService;
         this.agenciaService = agenciaService;
         this.fileService = fileService;
         this.artistaService = artistaService;
-
-        this.accesoService = accesoService;
     }
 
     @GetMapping
     public String agencias(Model model) {
         if (userService.isUserAutheticated()){
             model.addAttribute("listaAgencias", this.agenciaService.findAllAgenciasForUser(userService.obtenerUsuarioAutenticado()));
+
         }
         return "agencias";
     }
@@ -78,8 +79,9 @@ public class AgenciasController {
     @GetMapping("/{id}")
     public String detalleAgencia(Model model, @PathVariable("id") Long idAgencia) {
         model.addAttribute("agenciaDto", this.agenciaService.findAgenciaDtoById(idAgencia));
-        model.addAttribute("listaAccesos", this.accesoService.listaAccesosAgencia(idAgencia));
         model.addAttribute("listaArtistas", this.artistaService.findAllArtistasByAgenciaId(idAgencia));
+
+
         return "agencia-detail";
     }
 

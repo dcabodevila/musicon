@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<div th:fragment="modal-accesos">
+  <div class="modal fade" id="modalAccesos" tabindex="-1" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content" >
+        <div class="modal-header">
+          <h5 class="modal-title"> Accesos</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form method="POST" th:action="@{/accesos/guardar}" th:object="${accesoDto}" autocomplete="off">
+          <div class="modal-body m-3">
+            <input hidden id="id-acceso" th:field="*{id}"/>
+            <input hidden th:field="*{idAgencia}"/>
+
+            <div class="mb-3 row">
+              <label class="col-form-label col-sm-3 text-sm-end">Usuario</label>
+              <div class="col-sm-9">
+                <select id="usuarios-accesos" th:field="*{idUsuario}" class="form-control choices-single" required>
+                  <option th:each="usuario : ${listaUsuarios}" th:value="${usuario.id}" th:text="${usuario.nombreApellidos}"></option>
+                </select>
+              </div>
+            </div>
+            <div class="mb-3 row">
+              <label class="col-form-label col-sm-3 text-sm-end">Rol</label>
+              <div class="col-sm-9">
+                <select id="rol-accesos" th:field="*{idRol}" class="form-control choices-single" required>
+                  <option th:each="rol : ${listaRoles}" th:value="${rol.id}" th:text="${rol.nombre}"></option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mb-3 row">
+              <label class="col-form-label col-sm-3 text-sm-end">Permisos</label>
+              <div class="col-sm-9">
+                <div id="lista-permisos" class="form-control form-control-plaintext border rounded p-2" style="min-height: 40px;">
+                  <span class="text-muted">Selecciona un rol para ver los permisos</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            <button type="button" id="btn-eliminar-acceso" class="btn btn-danger d-none" >Eliminar</button>
+            <button type="submit" id="btn-guardar-acceso" class="btn btn-primary">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

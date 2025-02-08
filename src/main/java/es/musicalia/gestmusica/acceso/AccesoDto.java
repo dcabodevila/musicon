@@ -1,5 +1,6 @@
 package es.musicalia.gestmusica.acceso;
 
+import es.musicalia.gestmusica.permiso.PermisoRecord;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,10 +17,13 @@ import java.util.List;
 public class AccesoDto {
 
     private Long id;
+    @NotNull
     private Long idUsuario;
     private String nombreUsuario;
+    @NotNull
     private Long idAgencia;
     private String agencia;
+    @NotNull
     private Long idRol;
     private String rol;
 

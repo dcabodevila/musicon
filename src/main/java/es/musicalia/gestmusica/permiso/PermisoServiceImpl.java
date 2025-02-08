@@ -17,10 +17,12 @@ import java.util.stream.Collectors;
 public class PermisoServiceImpl implements PermisoService {
 
 	private final AccesoRepository accesoRepository;
+	private final PermisoRepository permisoRepository;
 
-	public PermisoServiceImpl(AccesoRepository accesoRepository){
+	public PermisoServiceImpl(AccesoRepository accesoRepository, PermisoRepository permisoRepository){
 		this.accesoRepository = accesoRepository;
-	}
+        this.permisoRepository = permisoRepository;
+    }
 
 	@Override
 	public boolean existePermisoGeneral(String codigoPermiso) {
@@ -101,6 +103,11 @@ public class PermisoServiceImpl implements PermisoService {
 						.anyMatch(permiso -> permiso.getCodigo().equals(permisoBuscado))) // Verificar si el permiso está presente
 				.map(acceso -> acceso.getAgencia().getId()) // Extraer IDs de agencias
 				.collect(Collectors.toSet()); // Convertir a Set para evitar duplicados
+	}
+
+	@Override
+	public List<PermisoRecord> obtenerPermisosByIdRol(Long idRol){
+		return this.permisoRepository.findAllPermisoRecordByRol(idRol);
 	}
 
 

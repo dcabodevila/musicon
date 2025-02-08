@@ -61,6 +61,7 @@ public class ArtistaDto {
 
     public ArtistaDto(){
         activo=true;
+        tarifasPublicas = true;
     }
 
  }

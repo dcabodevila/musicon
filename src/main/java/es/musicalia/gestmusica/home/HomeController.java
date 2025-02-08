@@ -43,8 +43,8 @@ public class HomeController {
     @GetMapping("/")
     public String home(Model model) {
         final Set<Long> idsAgenciasConfirmarOcupacion = this.permisoService.obtenerIdsAgenciaPorPermiso(this.userService.obtenerUsuarioAutenticado().getId(), PermisoAgenciaEnum.CONFIRMAR_OCUPACION.getDescripcion());
-        List<OcupacionDto> listaOcupacion = this.ocupacionService.findOcupacionesDtoByAgenciaPendientes(idsAgenciasConfirmarOcupacion);
-        model.addAttribute("listaOcupacionPendiente", listaOcupacion);
+
+        model.addAttribute("listaOcupacionPendiente", this.ocupacionService.findOcupacionesDtoByAgenciaPendientes(idsAgenciasConfirmarOcupacion));
         return "main.html";
     }
 

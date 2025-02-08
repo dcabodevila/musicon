@@ -20,4 +20,6 @@ public interface PermisoService {
 	Map<Long, Set<String>> obtenerMapPermisosAgencia(Long idUsuario);
 
 	Set<Long> obtenerIdsAgenciaPorPermiso(Long idUsuario, String permisoBuscado);
+
+    List<PermisoRecord> obtenerPermisosByIdRol(Long idRol);
 }
