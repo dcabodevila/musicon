@@ -14,6 +14,7 @@ public class TarifaAnualDto implements Serializable {
     private Long idArtista;
     private Long idProvincia;
     private Integer ano;
+    private Boolean conOcupacion;
 
 
 

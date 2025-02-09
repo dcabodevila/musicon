@@ -75,6 +75,7 @@ public class TarifaServiceImpl implements TarifaService {
 		parametros.put("idArtista", tarifaAnualDto.getIdArtista());
 		parametros.put("ano", tarifaAnualDto.getAno().toString());
 		parametros.put("idProvincia", tarifaAnualDto.getIdProvincia().intValue());
+		parametros.put("conOcupacion", tarifaAnualDto.getConOcupacion());
 
 		String fileNameToExport = artista.getNombre().concat(DateUtils.getDateStr(new Date(), "ddMMyyyyHHmmss")).concat(".pdf");
 		String fileReport = "tarifa_anual_horizontal_ocupacion.jrxml";

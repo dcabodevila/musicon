@@ -29,6 +29,16 @@
               </div>
             </div>
 
+            <div class="mb-3 row">
+              <label class="col-form-label col-sm-3 text-sm-end">Ocupación</label>
+              <div class="col-sm-9">
+                <select id="rol-accesos" th:field="*{conOcupacion}" class="form-control choices-single" required>
+                  <option value="false">Sin ocupación</option>
+                  <option th:if="${#authorization.expression('hasPermission(' + artistaDto.idAgencia + ', ''AGENCIA'', ''TARIFA_ANAL_CON_OCUPACION'')')}" value="true">Con ocupación</option>
+                </select>
+              </div>
+            </div>
+
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>

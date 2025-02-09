@@ -41,6 +41,7 @@
 		<parameter name="idArtista" class="java.lang.Long"/>
 		<parameter name="ano" class="java.lang.String"/>
 		<parameter name="idProvincia" class="java.lang.Integer"/>
+		<parameter name="conOcupacion" class="java.lang.Boolean"/>
 		<queryString language="SQL">
 			<![CDATA[SELECT a.nombre as "Nombre", ag.nombre as "Agencia",  CASE extract(dow from d.enero)
         WHEN 0 THEN 'D'
@@ -168,40 +169,40 @@ FROM (
 ) d
 CROSS JOIN gestmusica.artista a inner join gestmusica.agencia ag on a.agencia_id=ag.id
 LEFT JOIN gestmusica.tarifa t1 ON t1.artista_id = a.id AND t1.fecha::date = d.enero::date AND t1.activo
-LEFT JOIN gestmusica.ocupacion o1 ON o1.artista_id = a.id AND o1.fecha::date = d.enero::date  AND o1.activo and o1.estado_id in (1,2,3)
+LEFT JOIN gestmusica.ocupacion o1 ON o1.artista_id = a.id AND o1.fecha::date = d.enero::date  AND o1.activo and o1.estado_id in (1,2,3) and $P{conOcupacion}
 left join gestmusica.provincia p1 on o1.provincia_id = p1.id
 LEFT JOIN gestmusica.tarifa t2 ON t2.artista_id = a.id AND t2.fecha::date = d.febrero::date AND t2.activo
-LEFT JOIN gestmusica.ocupacion o2 ON o2.artista_id = a.id AND o2.fecha::date = d.febrero::date  AND o2.activo and o2.estado_id in (1,2,3)
+LEFT JOIN gestmusica.ocupacion o2 ON o2.artista_id = a.id AND o2.fecha::date = d.febrero::date  AND o2.activo and o2.estado_id in (1,2,3) and $P{conOcupacion}
 left join gestmusica.provincia p2 on o2.provincia_id = p2.id
 LEFT JOIN gestmusica.tarifa t3 ON t3.artista_id = a.id AND t3.fecha::date = d.marzo::date AND t3.activo
-LEFT JOIN gestmusica.ocupacion o3 ON o3.artista_id = a.id AND o3.fecha::date = d.marzo::date  AND o3.activo and o3.estado_id in (1,2,3)
+LEFT JOIN gestmusica.ocupacion o3 ON o3.artista_id = a.id AND o3.fecha::date = d.marzo::date  AND o3.activo and o3.estado_id in (1,2,3) and $P{conOcupacion}
 left join gestmusica.provincia p3 on o3.provincia_id = p3.id
 LEFT JOIN gestmusica.tarifa t4 ON t4.artista_id = a.id AND t4.fecha::date = d.abril::date AND t4.activo
-LEFT JOIN gestmusica.ocupacion o4 ON o4.artista_id = a.id AND o4.fecha::date = d.abril::date  AND o4.activo and o4.estado_id in (1,2,3)
+LEFT JOIN gestmusica.ocupacion o4 ON o4.artista_id = a.id AND o4.fecha::date = d.abril::date  AND o4.activo and o4.estado_id in (1,2,3) and $P{conOcupacion}
 left join gestmusica.provincia p4 on o4.provincia_id = p4.id
 LEFT JOIN gestmusica.tarifa t5 ON t5.artista_id = a.id AND t5.fecha::date = d.mayo::date AND t5.activo
-LEFT JOIN gestmusica.ocupacion o5 ON o5.artista_id = a.id AND o5.fecha::date = d.mayo::date  AND o5.activo and o5.estado_id in (1,2,3)
+LEFT JOIN gestmusica.ocupacion o5 ON o5.artista_id = a.id AND o5.fecha::date = d.mayo::date  AND o5.activo and o5.estado_id in (1,2,3) and $P{conOcupacion}
 left join gestmusica.provincia p5 on o5.provincia_id = p5.id
 LEFT JOIN gestmusica.tarifa t6 ON t6.artista_id = a.id AND t6.fecha::date = d.junio::date AND t6.activo
-LEFT JOIN gestmusica.ocupacion o6 ON o6.artista_id = a.id AND o6.fecha::date = d.junio::date  AND o6.activo and o6.estado_id in (1,2,3)
+LEFT JOIN gestmusica.ocupacion o6 ON o6.artista_id = a.id AND o6.fecha::date = d.junio::date  AND o6.activo and o6.estado_id in (1,2,3) and $P{conOcupacion}
 left join gestmusica.provincia p6 on o6.provincia_id = p6.id
 LEFT JOIN gestmusica.tarifa t7 ON t7.artista_id = a.id AND t7.fecha::date = d.julio::date AND t7.activo
-LEFT JOIN gestmusica.ocupacion o7 ON o7.artista_id = a.id AND o7.fecha::date = d.julio::date  AND o7.activo and o7.estado_id in (1,2,3)
+LEFT JOIN gestmusica.ocupacion o7 ON o7.artista_id = a.id AND o7.fecha::date = d.julio::date  AND o7.activo and o7.estado_id in (1,2,3) and $P{conOcupacion}
 left join gestmusica.provincia p7 on o7.provincia_id = p7.id
 LEFT JOIN gestmusica.tarifa t8 ON t8.artista_id = a.id AND t8.fecha::date = d.agosto::date AND t8.activo
-LEFT JOIN gestmusica.ocupacion o8 ON o8.artista_id = a.id AND o8.fecha::date = d.agosto::date  AND o8.activo and o8.estado_id in (1,2,3)
+LEFT JOIN gestmusica.ocupacion o8 ON o8.artista_id = a.id AND o8.fecha::date = d.agosto::date  AND o8.activo and o8.estado_id in (1,2,3) and $P{conOcupacion}
 left join gestmusica.provincia p8 on o8.provincia_id = p8.id
 LEFT JOIN gestmusica.tarifa t9 ON t9.artista_id = a.id AND t9.fecha::date = d.septiembre::date AND t9.activo
-LEFT JOIN gestmusica.ocupacion o9 ON o9.artista_id = a.id AND o9.fecha::date = d.septiembre::date  AND o9.activo and o9.estado_id in (1,2,3)
+LEFT JOIN gestmusica.ocupacion o9 ON o9.artista_id = a.id AND o9.fecha::date = d.septiembre::date  AND o9.activo and o9.estado_id in (1,2,3) and $P{conOcupacion}
 left join gestmusica.provincia p9 on o9.provincia_id = p9.id
 LEFT JOIN gestmusica.tarifa t10 ON t10.artista_id = a.id AND t10.fecha::date = d.octubre::date AND t10.activo
-LEFT JOIN gestmusica.ocupacion o10 ON o10.artista_id = a.id AND o10.fecha::date = d.octubre::date  AND o10.activo and o10.estado_id in (1,2,3)
+LEFT JOIN gestmusica.ocupacion o10 ON o10.artista_id = a.id AND o10.fecha::date = d.octubre::date  AND o10.activo and o10.estado_id in (1,2,3) and $P{conOcupacion}
 left join gestmusica.provincia p10 on o10.provincia_id = p10.id
 LEFT JOIN gestmusica.tarifa t11 ON t11.artista_id = a.id AND t11.fecha::date = d.noviembre::date AND t11.activo
-LEFT JOIN gestmusica.ocupacion o11 ON o11.artista_id = a.id AND o11.fecha::date = d.noviembre::date  AND o11.activo and o11.estado_id in (1,2,3)
+LEFT JOIN gestmusica.ocupacion o11 ON o11.artista_id = a.id AND o11.fecha::date = d.noviembre::date  AND o11.activo and o11.estado_id in (1,2,3) and $P{conOcupacion}
 left join gestmusica.provincia p11 on o11.provincia_id = p11.id
 LEFT JOIN gestmusica.tarifa t12 ON t12.artista_id = a.id AND t12.fecha::date = d.diciembre::date AND t12.activo 
-LEFT JOIN gestmusica.ocupacion o12 ON o12.artista_id = a.id AND o12.fecha::date = d.diciembre::date  AND o12.activo and o12.estado_id in (1,2,3)
+LEFT JOIN gestmusica.ocupacion o12 ON o12.artista_id = a.id AND o12.fecha::date = d.diciembre::date  AND o12.activo and o12.estado_id in (1,2,3) and $P{conOcupacion}
 left join gestmusica.provincia p12 on o12.provincia_id = p12.id
 LEFT JOIN gestmusica.incremento_provincial ip ON (ip.artista_id=a.id AND ip.provincia_id=$P{idProvincia}::bigint )    
 WHERE a.id = $P{idArtista} ORDER BY 1, 2]]>
@@ -323,6 +324,7 @@ WHERE a.id = $P{idArtista} ORDER BY 1, 2]]>
 	<parameter name="datosAgrupacion" class="java.lang.String"/>
 	<parameter name="datosAgencia" class="java.lang.String"/>
 	<parameter name="idProvincia" class="java.lang.Integer"/>
+	<parameter name="conOcupacion" class="java.lang.Boolean"/>
 	<queryString>
 		<![CDATA[]]>
 	</queryString>
@@ -370,6 +372,9 @@ WHERE a.id = $P{idArtista} ORDER BY 1, 2]]>
 						</datasetParameter>
 						<datasetParameter name="idProvincia">
 							<datasetParameterExpression><![CDATA[$P{idProvincia}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="conOcupacion">
+							<datasetParameterExpression><![CDATA[$P{conOcupacion}]]></datasetParameterExpression>
 						</datasetParameter>
 						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 					</datasetRun>

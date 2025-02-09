@@ -31,111 +31,117 @@ $(document).ready(function(){
 
     let calendarEl = document.getElementById('calendar');
     let idArtista = document.getElementById('idArtista').value;
-    $("#modal-tarifa-eliminar").hide();
-    var calendar = new FullCalendar.Calendar(calendarEl, {
-      initialView: 'dayGridMonth',
-      locale: 'es',
-      timeZone: 'UTC',
-      height:'auto',
-      selectable: true,
-      unselectAuto: true,
-      headerToolbar: {
-          start: 'title',
-          center: '',
-          end: 'prev,next'
-      },
-      firstDay : 1,
-      events: {
-          url: "/fecha/list/" + idArtista,
-          method: 'GET',
-          failure: function() {
-              alert('Hubo un error al cargar los eventos.');
+    if (calendarEl){
+        $("#modal-tarifa-eliminar").hide();
+
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+          initialView: 'dayGridMonth',
+          locale: 'es',
+          timeZone: 'UTC',
+          height:'auto',
+          selectable: true,
+          unselectAuto: true,
+          headerToolbar: {
+              start: 'title',
+              center: '',
+              end: 'prev,next'
           },
+          firstDay : 1,
+          events: {
+              url: "/fecha/list/" + idArtista,
+              method: 'GET',
+              failure: function() {
+                  alert('Hubo un error al cargar los eventos.');
+              },
 
-          eventDataTransform: function(event) {
-              // Asignar una clase personalizada basada en el tipo
-              let tipoFecha = event.tipoFecha || 'otro';
-              let tipoOcupacion = event.tipoOcupacion || 'otro';
-              let className = (tipoFecha === 'Ocupacion') ? `tipo-${tipoOcupacion}` : `tipo-${tipoFecha}`;
+              eventDataTransform: function(event) {
+                  // Asignar una clase personalizada basada en el tipo
+                  let tipoFecha = event.tipoFecha || 'otro';
+                  let tipoOcupacion = event.tipoOcupacion || 'otro';
+                  let className = (tipoFecha === 'Ocupacion') ? `tipo-${tipoOcupacion}` : `tipo-${tipoFecha}`;
 
-              return {
-                  ...event,
-                  classNames: [className]
-              };
-          }
-      },
-      eventClick: function(info) {
-        const tipoFecha = info.event.extendedProps.tipoFecha; // Accede al tipo
-        const tipoOcupacion = info.event.extendedProps.tipoOcupacion;
+                  return {
+                      ...event,
+                      classNames: [className]
+                  };
+              }
+          },
+          eventClick: function(info) {
+            const tipoFecha = info.event.extendedProps.tipoFecha; // Accede al tipo
+            const tipoOcupacion = info.event.extendedProps.tipoOcupacion;
 
-        if (tipoFecha === 'Tarifa') {
-            checkPermission( $("#idAgencia").val(), 'AGENCIA', 'GESTION_TARIFAS')
-                .done(function(hasPermission) {
-                    if (hasPermission) {
-                        $("#id-tarifa").val(info.event.id);
-                        $("#modal-tarifa-eliminar").show();
-                        pickerFechaDesde.setDate(moment(info.event.start).format('DD-MM-YYYY'));
-                        pickerFechaHasta.setDate(moment(info.event.start).format('DD-MM-YYYY'));
-                        $("#importe").val(info.event.title);
-                        $('#modalNuevaTarifa').modal('show');
-                    }
-                })
+            if (tipoFecha === 'Tarifa') {
+                checkPermission( $("#idAgencia").val(), 'AGENCIA', 'GESTION_TARIFAS')
+                    .done(function(hasPermission) {
+                        if (hasPermission) {
+                            $("#id-tarifa").val(info.event.id);
+                            $("#modal-tarifa-eliminar").show();
+                            pickerFechaDesde.setDate(moment(info.event.start).format('DD-MM-YYYY'));
+                            pickerFechaHasta.setDate(moment(info.event.start).format('DD-MM-YYYY'));
+                            $("#importe").val(info.event.title);
+                            $('#modalNuevaTarifa').modal('show');
+                        }
+                    })
 
-        }
-        else if (tipoFecha === 'Ocupacion') {
+            }
+            else if (tipoFecha === 'Ocupacion') {
 
-              checkPermission( $("#idAgencia").val(), 'AGENCIA', 'OCUPACIONES')
+                  checkPermission( $("#idAgencia").val(), 'AGENCIA', 'OCUPACIONES')
+                      .done(function(hasPermission) {
+                          if (hasPermission) {
+                            const id = info.event.id;
+                            pickerFechaOcupacion.setDate(moment(info.event.start).format('DD-MM-YYYY'));
+
+                            let ocupacionDto = obtenerOcupacionDto(info.event.id);
+                          }
+                      })
+
+            }
+
+          },
+            eventDidMount: function(info) {
+
+                const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+                if (!isTouchDevice) {
+                    // Inicializar el tooltip si no es un dispositivo táctil
+                    const tipoFecha = info.event.extendedProps.tipoFecha || 'otro';
+                    const tooltipEvent = info.event.extendedProps.tooltip || 'otro';
+
+                    // Asignar el atributo 'title' para el tooltip
+                    info.el.setAttribute('title', tooltipEvent);
+
+                    // Inicializar el tooltip de Bootstrap
+                    var tooltip = new bootstrap.Tooltip(info.el, {
+                        container: 'body',
+                        placement: 'top',
+                        trigger: 'hover',
+                        html: true
+                    });
+                }
+
+
+            },
+          dateClick: function(info) {
+
+              checkPermission( $("#idAgencia").val(), 'AGENCIA', 'GESTION_TARIFAS')
                   .done(function(hasPermission) {
                       if (hasPermission) {
-                        const id = info.event.id;
-                        pickerFechaOcupacion.setDate(moment(info.event.start).format('DD-MM-YYYY'));
-
-                        let ocupacionDto = obtenerOcupacionDto(info.event.id);
+                        $("#id-tarifa").val("");
+                        $("#modal-tarifa-eliminar").hide();
+                        pickerFechaDesde.setDate(moment(info.date).format('DD-MM-YYYY'));
+                        pickerFechaHasta.setDate(moment(info.date).format('DD-MM-YYYY'));
+                        $('#modalNuevaTarifa').modal('show');
                       }
                   })
 
-        }
 
-      },
-        eventDidMount: function(info) {
+          }
+        });
+        calendar.render();
 
-            const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-            if (!isTouchDevice) {
-                // Inicializar el tooltip si no es un dispositivo táctil
-                const tipoFecha = info.event.extendedProps.tipoFecha || 'otro';
-                const tooltipEvent = info.event.extendedProps.tooltip || 'otro';
-
-                // Asignar el atributo 'title' para el tooltip
-                info.el.setAttribute('title', tooltipEvent);
-
-                // Inicializar el tooltip de Bootstrap
-                var tooltip = new bootstrap.Tooltip(info.el, {
-                    container: 'body',
-                    placement: 'top',
-                    trigger: 'hover',
-                    html: true
-                });
-            }
+    }
 
 
-        },
-      dateClick: function(info) {
-
-          checkPermission( $("#idAgencia").val(), 'AGENCIA', 'GESTION_TARIFAS')
-              .done(function(hasPermission) {
-                  if (hasPermission) {
-                    $("#id-tarifa").val("");
-                    $("#modal-tarifa-eliminar").hide();
-                    pickerFechaDesde.setDate(moment(info.date).format('DD-MM-YYYY'));
-                    pickerFechaHasta.setDate(moment(info.date).format('DD-MM-YYYY'));
-                    $('#modalNuevaTarifa').modal('show');
-                  }
-              })
-
-
-      }
-    });
-    calendar.render();
 
     $("#modalNuevaTarifa").submit(function (event) {
 

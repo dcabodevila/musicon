@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.PermissionEvaluator;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -37,6 +38,7 @@ public class AccesoController {
         this.userService = userService;
     }
 
+    @PreAuthorize("hasPermission(#idAgencia, 'AGENCIA', 'GESTION_ACCESOS')")
     @GetMapping("/{idAgencia}")
     public String getAccesos(Model model, @PathVariable("idAgencia") Long idAgencia){
         model.addAttribute("listaAccesos", this.accesoService.listaAccesosAgencia(idAgencia));
@@ -48,7 +50,7 @@ public class AccesoController {
         model.addAttribute("listaRoles", listaRoles);
         return "accesos";
     }
-
+    @PreAuthorize("hasPermission(#accesoDto.idAgencia, 'AGENCIA', 'GESTION_ACCESOS')")
     @PostMapping("/guardar")
     public String guardarAcceso(@Valid @ModelAttribute AccesoDto accesoDto, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
 
@@ -58,7 +60,6 @@ public class AccesoController {
         return "redirect:/accesos/"+ accesoDto.getIdAgencia();
 
     }
-
     @GetMapping("/eliminar/{idAcceso}")
     public ResponseEntity<String> eliminarAcceso(@PathVariable("idAcceso") Long idAcceso) {
         try {
