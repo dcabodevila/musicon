@@ -1,7 +1,11 @@
 package es.musicalia.gestmusica.acceso;
 
 
+import es.musicalia.gestmusica.accesoartista.AccesoArtista;
+import es.musicalia.gestmusica.accesoartista.AccesoArtistaDto;
+import es.musicalia.gestmusica.accesoartista.AccesoArtistaService;
 import es.musicalia.gestmusica.agencia.AgenciasController;
+import es.musicalia.gestmusica.artista.ArtistaService;
 import es.musicalia.gestmusica.permiso.PermisoRecord;
 import es.musicalia.gestmusica.permiso.PermisoService;
 import es.musicalia.gestmusica.rol.RolRecord;
@@ -31,11 +35,14 @@ public class AccesoController {
 
     private final AccesoService accesoService;
     private final UserService userService;
+    private final AccesoArtistaService accesoPermisoService;
+    private final ArtistaService artistaService;
 
-
-    public AccesoController(AccesoService accesoService, UserService userService) {
+    public AccesoController(AccesoService accesoService, UserService userService, AccesoArtistaService accesoPermisoService, ArtistaService artistaService) {
         this.accesoService = accesoService;
         this.userService = userService;
+        this.accesoPermisoService = accesoPermisoService;
+        this.artistaService = artistaService;
     }
 
     @PreAuthorize("hasPermission(#idAgencia, 'AGENCIA', 'GESTION_ACCESOS')")
@@ -48,6 +55,12 @@ public class AccesoController {
         model.addAttribute("listaUsuarios", this.userService.findAllUsuarioRecords());
         final List<RolRecord> listaRoles = this.accesoService.obtenerRolesAgencia();
         model.addAttribute("listaRoles", listaRoles);
+
+        model.addAttribute("listaAccesosArtista", this.accesoPermisoService.listaAccesosArtistaAgencia(idAgencia));
+        model.addAttribute("accesoArtistaDto", new AccesoArtistaDto());
+        model.addAttribute("listaPermisos", this.accesoPermisoService.obtenerPermisosTipoArtista());
+        model.addAttribute("listaArtistas", this.artistaService.listaArtistaRecordByIdAgencia(idAgencia));
+
         return "accesos";
     }
     @PreAuthorize("hasPermission(#accesoDto.idAgencia, 'AGENCIA', 'GESTION_ACCESOS')")
@@ -64,6 +77,29 @@ public class AccesoController {
     public ResponseEntity<String> eliminarAcceso(@PathVariable("idAcceso") Long idAcceso) {
         try {
             accesoService.eliminarAcceso(idAcceso);
+            return ResponseEntity.ok("Acceso eliminado correctamente.");
+        } catch (Exception e){
+            logger.error("Error elminando el acceso {}", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al eliminar el acceso");
+        }
+
+    }
+
+    //@PreAuthorize("hasPermission(#accesoDto.idAgencia, 'AGENCIA', 'GESTION_ACCESOS')")
+    @PostMapping("/guardar-acceso-artista")
+    public String guardarAccesoArtista(@Valid @ModelAttribute AccesoArtistaDto accesoDto, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
+
+        final AccesoArtista accesoArtista = accesoPermisoService.guardarAcceso(accesoDto);
+        redirectAttributes.addFlashAttribute("message", "Acceso guardado correctamente");
+
+        return "redirect:/accesos/"+ accesoArtista.getArtista().getAgencia().getId();
+
+    }
+    @GetMapping("/eliminar-acceso-artista/{idAccesoArtista}")
+    public ResponseEntity<String> eliminarAccesoArtista(@PathVariable("idAccesoArtista") Long idAccesoArtista) {
+        try {
+            accesoPermisoService.eliminarAccesoArtista(idAccesoArtista);
             return ResponseEntity.ok("Acceso eliminado correctamente.");
         } catch (Exception e){
             logger.error("Error elminando el acceso {}", e);

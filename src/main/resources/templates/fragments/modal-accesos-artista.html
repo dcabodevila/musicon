@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<div th:fragment="modal-accesos-artista">
+  <div class="modal fade" id="modalAccesosArtista" tabindex="-1" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content" >
+        <div class="modal-header">
+          <h5 class="modal-title"> Accesos Artista</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form method="POST" th:action="@{/accesos/guardar-acceso-artista}" th:object="${accesoArtistaDto}" autocomplete="off">
+          <div class="modal-body m-3">
+            <input hidden id="id-acceso-artista" th:field="*{id}"/>
+
+            <div class="mb-3 row">
+              <label class="col-form-label col-sm-3 text-sm-end">Usuario</label>
+              <div class="col-sm-9">
+                <select id="usuarios-accesos-artista" th:field="*{idUsuario}" class="form-control choices-single" required>
+                  <option th:each="usuario : ${listaUsuarios}" th:value="${usuario.id}" th:text="${usuario.nombreApellidos}"></option>
+                </select>
+              </div>
+            </div>
+            <div class="mb-3 row">
+              <label class="col-form-label col-sm-3 text-sm-end">Artista</label>
+              <div class="col-sm-9">
+                <select id="artista-accesos-artista" th:field="*{idArtista}" class="form-control choices-single" required>
+                  <option th:each="artista : ${listaArtistas}" th:value="${artista.id}" th:text="${artista.nombre}"></option>
+                </select>
+              </div>
+            </div>
+            <div class="mb-3 row">
+              <label class="col-form-label col-sm-3 text-sm-end">Permiso</label>
+              <div class="col-sm-9">
+                <select id="permiso-accesos-artista" th:field="*{idPermiso}" class="form-control choices-single" required>
+                  <option th:each="permiso : ${listaPermisos}" th:value="${permiso.id}" th:text="${permiso.descripcion}"></option>
+                </select>
+              </div>
+            </div>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            <button type="button" id="btn-eliminar-acceso-artista" class="btn btn-danger d-none" >Eliminar</button>
+            <button type="submit" id="btn-guardar-acceso-artista" class="btn btn-primary">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

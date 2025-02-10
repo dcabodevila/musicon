@@ -1,0 +1,82 @@
+package es.musicalia.gestmusica.accesoartista;
+
+import es.musicalia.gestmusica.agencia.AgenciaRepository;
+import es.musicalia.gestmusica.artista.ArtistaRepository;
+import es.musicalia.gestmusica.permiso.PermisoRecord;
+import es.musicalia.gestmusica.permiso.PermisoRepository;
+import es.musicalia.gestmusica.permiso.TipoPermisoEnum;
+import es.musicalia.gestmusica.usuario.UsuarioRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+@Transactional(readOnly = true)
+public class AccesoArtistaServiceImpl implements AccesoArtistaService {
+
+	private final AccesoArtistaRepository accesoArtistaRepository;
+	private final PermisoRepository permisoRepository;
+	private final UsuarioRepository usuarioRepository;
+	private final ArtistaRepository artistaRepository;
+
+	public AccesoArtistaServiceImpl(AccesoArtistaRepository accesoRepository, PermisoRepository permisoRepository, UsuarioRepository usuarioRepository, ArtistaRepository artistaRepository){
+		this.accesoArtistaRepository = accesoRepository;
+        this.permisoRepository = permisoRepository;
+		this.usuarioRepository = usuarioRepository;
+        this.artistaRepository = artistaRepository;
+    }
+
+	@Override
+	public List<AccesoArtistaDto> listaAccesosArtistaAgencia(Long idAgencia){
+		return accesoArtistaRepository.findAllAccesosByIdAgencia(idAgencia)
+				.orElseGet(Collections::emptyList) // Retorna una lista vacía si el Optional está vacío
+				.stream() // Convierte la lista en un Stream
+				.map(this::getAccesoArtistaDto) // Transforma cada Acceso en un AccesoDto
+				.collect(Collectors.toList()); // Recoge el resultado en una lista
+	}
+
+	private AccesoArtistaDto getAccesoArtistaDto(AccesoArtista acceso) {
+		AccesoArtistaDto accesoDto = new AccesoArtistaDto();
+		accesoDto.setId(acceso.getId());
+		accesoDto.setIdUsuario(acceso.getUsuario().getId());
+		accesoDto.setNombreUsuario(acceso.getUsuario().getNombreCompleto());
+		accesoDto.setArtista(acceso.getArtista().getNombre());
+		accesoDto.setIdPermiso(acceso.getPermiso().getId());
+		accesoDto.setPermiso(acceso.getPermiso().getDescripcion());
+
+		return accesoDto;
+	}
+
+	@Override
+	public List<PermisoRecord> obtenerPermisosTipoArtista(){
+		return this.permisoRepository.findAllPermisoRecordByTipo(TipoPermisoEnum.ARTISTA.getId());
+	}
+
+	@Transactional
+	@Override
+	public AccesoArtista guardarAcceso(AccesoArtistaDto accesoDto){
+
+		AccesoArtista acceso = accesoDto.getId()!=null ? this.accesoArtistaRepository.findById(accesoDto.getId()).orElse(new AccesoArtista()) : new AccesoArtista();
+
+		acceso.setUsuario(this.usuarioRepository.findById(accesoDto.getIdUsuario()).get());
+		acceso.setArtista(this.artistaRepository.findById(accesoDto.getIdArtista()).get());
+		acceso.setPermiso(this.permisoRepository.findById(accesoDto.getIdPermiso()).get());
+		acceso.setActivo(Boolean.TRUE);
+		return this.accesoArtistaRepository.save(acceso);
+
+	}
+
+	@Transactional
+	@Override
+	public AccesoArtista eliminarAccesoArtista(Long idAccesoArtista){
+
+		AccesoArtista acceso = this.accesoArtistaRepository.findById(idAccesoArtista).get();
+		acceso.setActivo(Boolean.FALSE);
+		return this.accesoArtistaRepository.save(acceso);
+
+	}
+
+}

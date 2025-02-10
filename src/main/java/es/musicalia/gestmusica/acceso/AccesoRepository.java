@@ -17,7 +17,7 @@ public interface AccesoRepository extends JpaRepository<Acceso, Long> {
     @Query("select a from Acceso a where a.usuario.id = ?1 and a.agencia.id= ?2 and a.activo")
     Optional<Acceso> findAccesoByIdUsuarioAndIdAgencia(Long idUsuario, Long idAgencia);
 
-    @Query("select a from Acceso a where a.agencia.id = ?1 and a.activo order by a.id")
+    @Query("select a from Acceso a where a.agencia.id = ?1 and a.activo order by a.usuario.nombre, a.usuario.apellidos, a.rol.descripcion")
     Optional<List<Acceso>> findAllAccesosByIdAgencia(Long idAgencia);
 
 }

@@ -1,30 +1,8 @@
 ALTER TABLE gestmusica.rol ADD tipo_rol int DEFAULT 0 NOT NULL;
 ALTER TABLE gestmusica.permiso ADD tipo_permiso int DEFAULT 0 NOT NULL;
 
-CREATE TABLE gestmusica.restricciones_usuario_artista_permiso (
-	id bigint not null,
-    usuario_id bigint NOT NULL,
-    artista_id bigint NOT null,
-    permiso_id bigint NOT null
-);
 
-ALTER TABLE gestmusica.restricciones_usuario_artista_permiso ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
-    SEQUENCE NAME gestmusica.restricciones_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1
-);
 
-ALTER TABLE gestmusica.restricciones_usuario_artista_permiso
-    ADD CONSTRAINT fk_restricciones_usuario FOREIGN KEY (usuario_id) REFERENCES gestmusica.usuario(id) NOT VALID;
-
-ALTER TABLE gestmusica.restricciones_usuario_artista_permiso
-    ADD CONSTRAINT fk_restricciones_artista FOREIGN KEY (artista_id) REFERENCES gestmusica.artista(id) NOT VALID;
-
-ALTER TABLE gestmusica.restricciones_usuario_artista_permiso
-    ADD CONSTRAINT fk_restricciones_permiso FOREIGN KEY (permiso_id) REFERENCES gestmusica.permiso(id) NOT VALID;
 
 ALTER TABLE gestmusica.acceso ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
     SEQUENCE NAME gestmusica.acceso_id_seq

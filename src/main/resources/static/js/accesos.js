@@ -8,6 +8,12 @@ $(document).ready(function () {
             removeItemButton: true
     });
 
+    const usuariosArtistaSelect = document.querySelector('#usuarios-accesos-artista');
+
+    const choicesUsuariosArtista = new Choices(usuariosArtistaSelect, {
+            removeItemButton: true
+    });
+
     // Evento cuando se muestra la modal
     $('#modalAccesos').on('shown.bs.modal', function () {
         let idRol = $('#rol-accesos').val(); // Obtiene el ID del rol seleccionado
@@ -39,9 +45,34 @@ $(document).ready(function () {
 
 
     });
+
+    $('.btnModalAccesoArtista').click(function () {
+        let idUsuario = $(this).data('idusuario'); // Obtiene el idUsuario del botón
+        let idArtista = $(this).data('idartista'); // Obtiene el idRol del botón
+        let idAcceso = $(this).data('idacceso'); // Obtiene el idacceso del botón
+        let idPermiso = $(this).data('idpermiso');
+        $('#id-acceso-artista').val(idAcceso).trigger('change'); // Actualiza el select de rol
+        // Asigna los valores a los selects en la modal
+        choicesUsuariosArtista.setChoiceByValue(idUsuario.toString());
+        $('#permiso-accesos-artista').val(idPermiso).trigger('change'); // Actualiza el select de rol
+        // Si existe un ID, mostrar botón de eliminar
+        if (idAcceso) {
+            $('#btn-eliminar-acceso-artista').removeClass('d-none').attr('data-id', idAcceso);
+        } else {
+            $('#btn-eliminar-acceso-artista').addClass('d-none');
+        }
+
+
+    });
+
     $('#btnNuevoAcceso').click(function () {
         $('#id-acceso').val(''); // Limpia el valor del campo hidden id-acceso
         $('#btn-eliminar-acceso').addClass('d-none');
+    });
+
+    $('#btnNuevoAccesoArtista').click(function () {
+        $('#id-acceso-artista').val(''); // Limpia el valor del campo hidden id-acceso
+        $('#btn-eliminar-acceso-artista').addClass('d-none');
     });
 
         // Manejar eliminación de acceso usando GET
@@ -53,8 +84,15 @@ $(document).ready(function () {
                 eliminarAcceso(idAcceso);
             }
         });
+    });
+    $('#btn-eliminar-acceso-artista').click(function () {
+        let idAccesoArtista = $(this).attr('data-id');
 
-
+        showConfirmationModal(function (confirmed) {
+            if (confirmed) {
+                eliminarAccesoArtista(idAccesoArtista);
+            }
+        });
 
 
     });
@@ -69,6 +107,22 @@ $(document).ready(function () {
             success: function (response) {
                 notif("success", response);
                 $('#modalAccesos').modal('hide'); // Cierra la modal
+                location.reload(); // Recargar la página para reflejar cambios
+            },
+            error: function () {
+                notif("error", 'Error al eliminar el acceso');
+            }
+        });
+    }
+
+    function eliminarAccesoArtista(idAccesoArtista){
+
+        $.ajax({
+            url: '/accesos/eliminar-acceso-artista/' + idAccesoArtista,
+            type: 'GET',
+            success: function (response) {
+                notif("success", response);
+                $('#modalAccesosArtista').modal('hide'); // Cierra la modal
                 location.reload(); // Recargar la página para reflejar cambios
             },
             error: function () {

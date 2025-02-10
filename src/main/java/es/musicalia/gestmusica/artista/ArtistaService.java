@@ -14,4 +14,5 @@ public interface ArtistaService {
 
     List<ArtistaDto> findAllArtistasByAgenciaId(final Long idAgencia);
 
+    List<ArtistaRecord> listaArtistaRecordByIdAgencia(Long idAgencia);
 }

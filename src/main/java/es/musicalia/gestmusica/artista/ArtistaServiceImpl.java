@@ -183,6 +183,11 @@ public class ArtistaServiceImpl implements ArtistaService {
 				.collect(Collectors.toList());
 	}
 
+	@Override
+	public List<ArtistaRecord> listaArtistaRecordByIdAgencia(Long idAgencia){
+		return this.artistaRepository.findAllArtistasRecordByIdAgencia(idAgencia);
+	}
+
 
 	private Artista newArtista(Long idArtista) {
 
