@@ -69,7 +69,7 @@ public class PermisoServiceImpl implements PermisoService {
 				((CustomAuthenticatedUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
 						.getMapPermisosAgencia();
 
-		// Verifica si el mapa contiene el idArtista y si el permiso existe
+		// Verifica si el mapa contiene el idAgencia y si el permiso existe
 		return mapPermisosAgencia != null &&
 				mapPermisosAgencia.getOrDefault(idAgencia, Set.of()).contains(codigoPermiso);
 	}

@@ -1,19 +1,16 @@
 package es.musicalia.gestmusica.config;
 
-import es.musicalia.gestmusica.listado.ListadoServiceImpl;
 import es.musicalia.gestmusica.permiso.PermisoService;
 import es.musicalia.gestmusica.permiso.TipoPermisoEnum;
 import es.musicalia.gestmusica.rol.RolEnum;
 import es.musicalia.gestmusica.usuario.UserService;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
 
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
-import java.util.logging.Logger;
 
 @Component
 public class CustomPermissionEvaluator implements PermissionEvaluator {
@@ -63,27 +60,26 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
             return this.permisoService.existePermisoGeneral(permission.toString());
         }
         else if (TipoPermisoEnum.AGENCIA.getDescripcion().equalsIgnoreCase(targetType)){
-            Long idAgencia;
-            try {
-                idAgencia = Long.valueOf(targetId.toString());
-            } catch (NumberFormatException e) {
-                logger.info("NumberFormatException evaluando permiso de "+ targetId.toString());
-                return false;
-            }
+            final Long idAgencia = getIdTargetPermiso(targetId);
+            if (idAgencia == null) return false;
             return this.permisoService.existePermisoUsuarioAgencia(idAgencia,permission.toString());
         }
         else if (TipoPermisoEnum.ARTISTA.getDescripcion().equalsIgnoreCase(targetType)){
-            Long idArtista;
-            try {
-                idArtista = Long.valueOf(targetId.toString());
-            } catch (NumberFormatException e) {
-                logger.info("NumberFormatException evaluando permiso de "+ targetId.toString());
-                return false;
-            }
+            final Long idArtista = getIdTargetPermiso(targetId);
+            if (idArtista == null) return false;
             return this.permisoService.existePermisoUsuarioArtista(idArtista,permission.toString());
         }
 
 
         return false;
+    }
+
+    private Long getIdTargetPermiso(Serializable targetId) {
+        try {
+            return Long.valueOf(targetId.toString());
+        } catch (NumberFormatException e) {
+            logger.error("NumberFormatException evaluando permiso de {}", targetId.toString());
+            return null;
+        }
     }
 }
