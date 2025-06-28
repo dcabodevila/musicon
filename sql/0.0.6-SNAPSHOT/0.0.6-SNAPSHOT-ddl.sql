@@ -6,7 +6,7 @@ CREATE TABLE gestmusica.acceso_artista (
 );
 
 ALTER TABLE gestmusica.acceso_artista ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
-    SEQUENCE NAME gestmusica.restricciones_id_seq
+    SEQUENCE NAME gestmusica.acceso_artista_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
