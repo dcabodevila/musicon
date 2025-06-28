@@ -1,13 +1,11 @@
 package es.musicalia.gestmusica.home;
 
 import es.musicalia.gestmusica.agencia.AgenciasController;
+import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.auth.model.RegistrationForm;
 import es.musicalia.gestmusica.auth.model.SecurityService;
-import es.musicalia.gestmusica.ocupacion.OcupacionDto;
 import es.musicalia.gestmusica.ocupacion.OcupacionService;
 import es.musicalia.gestmusica.permiso.PermisoAgenciaEnum;
-import es.musicalia.gestmusica.permiso.PermisoGeneralEnum;
-import es.musicalia.gestmusica.permiso.PermisoService;
 import es.musicalia.gestmusica.usuario.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,14 +14,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import javax.validation.Valid;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Controller
 public class HomeController {
@@ -32,19 +30,23 @@ public class HomeController {
     private final UserService userService;
     private final SecurityService securityService;
     private final OcupacionService ocupacionService;
-    private final PermisoService permisoService;
-    public HomeController(UserService userService, SecurityService securityService, OcupacionService ocupacionService, PermisoService permisoService){
+
+    public HomeController(UserService userService, SecurityService securityService, OcupacionService ocupacionService){
         this.userService = userService;
         this.securityService = securityService;
         this.ocupacionService = ocupacionService;
-        this.permisoService = permisoService;
+
     }
 
     @GetMapping("/")
     public String home(Model model) {
-        final Set<Long> idsAgenciasConfirmarOcupacion = this.permisoService.obtenerIdsAgenciaPorPermiso(this.userService.obtenerUsuarioAutenticado().getId(), PermisoAgenciaEnum.CONFIRMAR_OCUPACION.getDescripcion());
+        final Map<Long, Set<String>> mapPermisosAgencia =
+                ((CustomAuthenticatedUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
+                        .getMapPermisosAgencia().entrySet().stream()
+                        .filter(entry -> entry.getValue().contains(PermisoAgenciaEnum.CONFIRMAR_OCUPACION.name()))
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        model.addAttribute("listaOcupacionPendiente", this.ocupacionService.findOcupacionesDtoByAgenciaPendientes(idsAgenciasConfirmarOcupacion));
+        model.addAttribute("listaOcupacionPendiente", this.ocupacionService.findOcupacionesDtoByAgenciaPendientes(mapPermisosAgencia.keySet()));
         return "main.html";
     }
 

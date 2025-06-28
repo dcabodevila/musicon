@@ -10,7 +10,7 @@
     <script th:src="@{/js/jquery.min.js}"></script>
     <script th:src="@{/adminkit/js/datatables.js}"></script>
 </head>
-<body>
+
 
 <body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
 <div class="wrapper">
@@ -39,16 +39,20 @@
 
                 <div class="row">
 
-                    <div th:if="${#authorization.expression('hasPermission(' + accesoDto.idAgencia + ', ''AGENCIA'', ''GESTION_ACCESOS'')')}" class="col-12 col-md-6 col-lg-6" >
+                    <div th:if="${#authorization.expression('hasPermission(' + accesoDto.idAgencia + ', ''AGENCIA'', ''GESTION_ACCESOS'')')}" class="col-12 col-sm-12 col-md-12 col-lg-6" >
                         <div class="card">
                             <div class="card-header">
                                 <h5 class="card-title">Permisos de acceso a la agencia</h5>
-                            </div>
-                            <div class="card-body">
-                                <td><button type="button" id="btnNuevoAcceso" class="btn btn-primary mb-1" data-bs-toggle="modal" data-bs-target="#modalAccesos">
+                                <div><button type="button" id="btnNuevoAcceso" class="btn btn-primary mb-1" data-bs-toggle="modal" data-bs-target="#modalAccesos">
                                     Crear acceso
                                     <i class="far fa-plus"></i>
-                                </button></td>
+                                </button></div>
+                            </div>
+                            <div class="card-body">
+
+
+
+
                                 <div id="datatables-reponsive_accesos" class="dataTables_wrapper dt-bootstrap5 no-footer">
                                     <div class="row">
                                         <div class="col-sm-12">
@@ -84,54 +88,55 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="col-12 col-md-12 col-lg-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title">Permisos de acceso a artistas</h5>
+                                    <div class="col-xs-12"><button type="button" id="btnNuevoAccesoArtista" class="btn btn-primary mb-1" data-bs-toggle="modal" data-bs-target="#modalAccesosArtista">
+                                        Crear acceso artista
+                                        <i class="far fa-plus"></i>
+                                    </button></div>
+                                </div>
+                                <div class="card-body">
 
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title">Permisos de acceso a artistas</h5>
-                            </div>
-                            <div class="card-body">
-                                <td><button type="button" id="btnNuevoAccesoArtista" class="btn btn-primary mb-1" data-bs-toggle="modal" data-bs-target="#modalAccesosArtista">
-                                    Crear acceso artista
-                                    <i class="far fa-plus"></i>
-                                </button></td>
-                                <div id="datatables-reponsive_accesos-artista" class="dataTables_wrapper dt-bootstrap5 no-footer">
-                                    <div class="row">
-                                        <div class="col-sm-12">
-                                            <table id="datatables-reponsive-accesos-artista" class="table table-striped dataTable no-footer dtr-inline collapsed" style="width: 100%;" aria-describedby="datatables-reponsive_info">
-                                                <thead>
-                                                <tr>
-                                                    <th tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Artista</th>
-                                                    <th tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Usuario</th>
-                                                    <th tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Permiso</th>
-                                                    <th>Editar</th>
-                                                </tr>
-                                                </thead>
-                                                <tbody>
+                                    <div id="datatables-reponsive_wrapper" class="dataTables_wrapper dt-bootstrap5 no-footer">
+                                        <div class="row">
+                                            <div class="col-sm-12">
+                                                <table id="datatables-reponsive_accesos-artista" class="table table-striped dataTable no-footer dtr-inline collapsed" style="width: 100%;" aria-describedby="datatables-reponsive_info">
+                                                    <thead>
+                                                    <tr>
+                                                        <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Usuario</th>
+                                                        <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Artista</th>
+                                                        <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Permiso</th>
+                                                        <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Editar</th>
 
-                                                <tr th:each="accesoArtista : ${listaAccesosArtista}">
-                                                    <td th:text="${accesoArtista.artista}">Artista</td>
-                                                    <td th:text="${accesoArtista.nombreUsuario}">Usuario</td>
-                                                    <td th:text="${accesoArtista.permiso}">Permiso</td>
-                                                    <td>        <button type="button" class="btn btn-primary mb-1 btnModalAccesoArtista"
-                                                                        th:data-idacceso="${accesoArtista.id}"
-                                                                        th:data-idartista="${accesoArtista.idArtista}"
-                                                                        th:data-idusuario="${accesoArtista.idUsuario}"
-                                                                        th:data-idpermiso="${accesoArtista.idPermiso}"
-                                                                        data-bs-toggle="modal"
-                                                                        data-bs-target="#modalAccesosArtista">
-                                                        <i class="far fa-edit"></i>
-                                                    </button></td>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
 
-                                                </tr>
+                                                    <tr th:each="accesoArtista : ${listaAccesosArtista}">
 
-                                                </tbody>
-                                            </table>
-                                        </div>
+                                                        <td class="dtr-control sorting_1" tabindex="0" th:text="${accesoArtista.nombreUsuario}" ></td>
+                                                        <td class="dtr-control sorting_1" tabindex="0" th:text="${accesoArtista.artista}"></td>
+                                                        <td class="dtr-control sorting_1" tabindex="0" th:text="${accesoArtista.permiso}"></td>
+                                                        <td class="dtr-control sorting_1" tabindex="0">
+                                                            <button type="button" class="btn btn-primary mb-1 btnModalAccesoArtista" th:data-idacceso="${accesoArtista.id}" th:data-idartista="${accesoArtista.idArtista}"
+                                                                            th:data-idusuario="${accesoArtista.idUsuario}"
+                                                                            th:data-idpermiso="${accesoArtista.idPermiso}"
+                                                                            data-bs-toggle="modal"
+                                                                            >
+                                                            <i class="far fa-edit"></i>
+                                                        </button></td>
+                                                    </tr>
+
+                                                    </tbody>
+                                                </table></div></div>
+
                                     </div>
-
                                 </div>
                             </div>
                         </div>
+
                     </div>
                 </div>
             </div>
@@ -145,5 +150,5 @@
 <script type="text/javascript" th:src="@{/js/comun.js}"></script>
 <script type="text/javascript" th:src="@{/js/accesos.js}"></script>
 
-</body>
+
 </html>

@@ -58,7 +58,7 @@ $(document).ready(function(){
                   // Asignar una clase personalizada basada en el tipo
                   let tipoFecha = event.tipoFecha || 'otro';
                   let tipoOcupacion = event.tipoOcupacion || 'otro';
-                  let className = (tipoFecha === 'Ocupacion') ? `tipo-${tipoOcupacion}` : `tipo-${tipoFecha}`;
+                  let className = event.estado === 'Pendiente' ? 'estado-pendiente' : ((tipoFecha === 'Ocupacion') ? `tipo-${tipoOcupacion}` : `tipo-${tipoFecha}`);
 
                   return {
                       ...event,
@@ -71,7 +71,7 @@ $(document).ready(function(){
             const tipoOcupacion = info.event.extendedProps.tipoOcupacion;
 
             if (tipoFecha === 'Tarifa') {
-                checkPermission( $("#idAgencia").val(), 'AGENCIA', 'GESTION_TARIFAS')
+                checkPermission( idArtista, 'ARTISTA', 'CREAR_TARIFAS')
                     .done(function(hasPermission) {
                         if (hasPermission) {
                             $("#id-tarifa").val(info.event.id);
@@ -86,7 +86,7 @@ $(document).ready(function(){
             }
             else if (tipoFecha === 'Ocupacion') {
 
-                  checkPermission( $("#idAgencia").val(), 'AGENCIA', 'OCUPACIONES')
+                  checkPermission( idArtista, 'ARTISTA', 'OCUPACIONES')
                       .done(function(hasPermission) {
                           if (hasPermission) {
                             const id = info.event.id;
@@ -123,7 +123,7 @@ $(document).ready(function(){
             },
           dateClick: function(info) {
 
-              checkPermission( $("#idAgencia").val(), 'AGENCIA', 'GESTION_TARIFAS')
+              checkPermission( idArtista, 'ARTISTA', 'CREAR_TARIFAS')
                   .done(function(hasPermission) {
                       if (hasPermission) {
                         $("#id-tarifa").val("");
@@ -597,7 +597,7 @@ function obtenerOcupacionDto(idOcupacion){
 function actualizarBadgeEstado(estado) {
     // Mapeo de estados a clases de fondo
     const estadoMap = {
-        'Pendiente': 'bg-primary',   // Azul
+        'Pendiente': 'bg-secondary',   // Azul
         'Ocupado': 'bg-success',     // Verde
         'Reservado': 'bg-warning',   // Amarillo
         'Anulado': 'bg-danger'       // Rojo

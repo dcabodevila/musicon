@@ -80,15 +80,23 @@ public class PermisoServiceImpl implements PermisoService {
 				.orElseGet(Collections::emptyList) // Evitar inicializaciones manuales
 				.stream()
 				.filter(acceso -> acceso.getRol() != null && CollectionUtils.isNotEmpty(acceso.getRol().getPermisos())) // Filtrar roles nulos y permisos vacíos
+				.collect(Collectors.groupingBy(
+						acceso -> acceso.getAgencia().getId(),
+						Collectors.flatMapping(
+								acceso -> acceso.getRol().getPermisos().stream()
+										.filter(permiso -> TipoPermisoEnum.AGENCIA.getId().equals(permiso.getTipoPermiso())) // Filtrar permisos de tipo AGENCIA
+										.map(Permiso::getCodigo),
+								Collectors.collectingAndThen(
+										Collectors.toSet(),
+										set -> set.isEmpty() ? null : set
+								)
+						)
+				))
+				.entrySet().stream()
+				.filter(entry -> entry.getValue() != null)
 				.collect(Collectors.toMap(
-						acceso -> acceso.getAgencia().getId(), // Clave: ID de la agencia
-						acceso -> acceso.getRol().getPermisos().stream()
-								.map(Permiso::getCodigo) // Extraer códigos de permisos
-								.collect(Collectors.toSet()), // Convertir a Set
-						(existing, replacement) -> {
-							existing.addAll(replacement); // Combinar permisos en caso de colisión
-							return existing;
-						}
+						Map.Entry::getKey,
+						Map.Entry::getValue
 				));
 	}
 

@@ -16,18 +16,27 @@
             <input hidden th:field="*{idAgencia}"/>
 
             <div class="mb-3 row">
-              <label class="col-form-label col-sm-3 text-sm-end">Usuario</label>
+              <label class="col-form-label col-sm-3 text-sm-end" for="usuarios-accesos">Usuario</label>
               <div class="col-sm-9">
                 <select id="usuarios-accesos" th:field="*{idUsuario}" class="form-control choices-single" required>
                   <option th:each="usuario : ${listaUsuarios}" th:value="${usuario.id}" th:text="${usuario.nombreApellidos}"></option>
                 </select>
               </div>
             </div>
-            <div class="mb-3 row">
-              <label class="col-form-label col-sm-3 text-sm-end">Rol</label>
+            <div class="mb-3 row"  >
+              <label class="col-form-label col-sm-3 text-sm-end" for="rol-accesos">Rol</label>
               <div class="col-sm-9">
                 <select id="rol-accesos" th:field="*{idRol}" class="form-control choices-single" required>
                   <option th:each="rol : ${listaRoles}" th:value="${rol.id}" th:text="${rol.nombre}"></option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mb-3 row " id="div-acceso-artista" style="display: none;">
+              <label class="col-form-label col-sm-3 text-sm-end" for="acceso-artista">Artista</label>
+              <div class="col-sm-9">
+                <select id="acceso-artista" th:field="*{idArtista}" class="form-control choices-single">
+                  <option th:each="artista : ${listaArtistas}" th:value="${artista.id}" th:text="${artista.nombre}"></option>
                 </select>
               </div>
             </div>

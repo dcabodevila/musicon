@@ -33,4 +33,6 @@ public class Rol {
 
 	@Column(name = "TIPO_ROL")
 	private Integer tipoRol;
+	@Column(name= "CODIGO")
+	private String codigo;
 }

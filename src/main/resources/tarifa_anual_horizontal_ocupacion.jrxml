@@ -205,7 +205,15 @@ LEFT JOIN gestmusica.tarifa t12 ON t12.artista_id = a.id AND t12.fecha::date = d
 LEFT JOIN gestmusica.ocupacion o12 ON o12.artista_id = a.id AND o12.fecha::date = d.diciembre::date  AND o12.activo and o12.estado_id in (1,2,3) and $P{conOcupacion}
 left join gestmusica.provincia p12 on o12.provincia_id = p12.id
 LEFT JOIN gestmusica.incremento_provincial ip ON (ip.artista_id=a.id AND ip.provincia_id=$P{idProvincia}::bigint )    
-WHERE a.id = $P{idArtista} ORDER BY 1, 2]]>
+WHERE a.id = $P{idArtista} ORDER BY 1, 2, CAST(SUBSTRING((CASE extract(dow from d.enero)
+        WHEN 0 THEN 'D'
+        WHEN 1 THEN 'L'
+        WHEN 2 THEN 'M'
+        WHEN 3 THEN 'X'
+        WHEN 4 THEN 'J'
+        WHEN 5 THEN 'V'
+        WHEN 6 THEN 'S'
+    END || EXTRACT(day FROM d.enero::date)::text) FROM 2) AS INTEGER)]]>
 		</queryString>
 		<field name="Nombre" class="java.lang.String">
 			<property name="com.jaspersoft.studio.field.name" value="Nombre"/>

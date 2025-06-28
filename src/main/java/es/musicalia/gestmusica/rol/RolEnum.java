@@ -1,18 +1,21 @@
 package es.musicalia.gestmusica.rol;
 
+import lombok.Getter;
+
+@Getter
 public enum RolEnum {
 
-    ROL_ADMINISTRADOR(1L),
-    ROL_REPRESENTANTE(2L),
-    ROL_AGENTE(3L);
+    ROL_ADMINISTRADOR("ADMIN"),
+    ROL_REPRESENTANTE( "REPRE"),
+    ROL_AGENTE("AGENTE"),
+    ROL_AGENCIA( "AGENCIA"),
+    ROL_ARTISTA( "ARTISTA");
 
-    private Long id;
+    private String codigo;
 
-    RolEnum (Long id){
-        this.id = id;
+    RolEnum (String codigo) {
+        this.codigo = codigo;
     }
 
-    public Long getId() {
-        return id;
-    }
+
 }

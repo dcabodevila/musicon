@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.*;
 
 import es.musicalia.gestmusica.acceso.AccesoService;
+import es.musicalia.gestmusica.accesoartista.AccesoArtistaService;
 import es.musicalia.gestmusica.permiso.Permiso;
 import es.musicalia.gestmusica.permiso.PermisoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,11 +26,13 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService {
 
 	private final UsuarioRepository usuarioRepository;
 	private final PermisoService permisoService;
+	private final AccesoArtistaService accesoArtistaService;
 
-	public CustomUserDetailsServiceImpl(PermisoService permisoService, UsuarioRepository usuarioRepository){
+	public CustomUserDetailsServiceImpl(PermisoService permisoService, UsuarioRepository usuarioRepository, AccesoArtistaService accesoArtistaService){
 		this.usuarioRepository = usuarioRepository;
 		this.permisoService = permisoService;
-	}
+        this.accesoArtistaService = accesoArtistaService;
+    }
 
 	@Override
 	@Transactional(readOnly = false)
@@ -48,10 +51,11 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService {
 				auth.add(authority);
 			}
 		}
-		//TODO: obtenerPermisosArtista
-		Map<Long, Set<String>> mapPermisosArtista = new HashMap<>();
 
-		final UserDetails userDetails = new CustomAuthenticatedUser(usuario, true, true, true, true, auth, mapPermisosArtista, this.permisoService.obtenerMapPermisosAgencia(usuario.getId()));
+		final Map<Long, Set<String>> mapPermisosArtista = this.accesoArtistaService.obtenerMapPermisosArtista(usuario.getId());
+		final Map<Long, Set<String>> mapPermisosAgencia = this.permisoService.obtenerMapPermisosAgencia(usuario.getId());
+
+		final UserDetails userDetails = new CustomAuthenticatedUser(usuario, true, true, true, true, auth, mapPermisosArtista, mapPermisosAgencia);
 		final Date date = new Date();
 		usuario.setFechaUltimoAcceso(new Timestamp(date.getTime()));
 		this.usuarioRepository.save(usuario);

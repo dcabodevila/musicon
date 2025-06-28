@@ -4,6 +4,8 @@ import es.musicalia.gestmusica.permiso.PermisoRecord;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public interface AccesoArtistaService {
 
@@ -12,8 +14,10 @@ public interface AccesoArtistaService {
 	List<PermisoRecord> obtenerPermisosTipoArtista();
 
 	@Transactional
-	AccesoArtista guardarAcceso(AccesoArtistaDto accesoDto);
+	AccesoArtista guardarAccesoArtista(AccesoArtistaDto accesoDto);
 
 	@Transactional
 	AccesoArtista eliminarAccesoArtista(Long idAccesoArtista);
+
+	Map<Long, Set<String>> obtenerMapPermisosArtista(Long idUsuario);
 }

@@ -65,29 +65,27 @@
                 <input class="form-control" placeholder="Localidad" id="localidad-ocupacion" autocomplete="off" required>
               </div>
             </div>
-            <div class="mb-3 row">
-              <label class="col-form-label col-sm-3 text-sm-end">Lugar</label>
-              <div class="col-sm-9">
-                <input class="form-control" placeholder="Lugar" id="lugar-ocupacion" autocomplete="off">
+
+            <div th:if="${#authorization.expression('hasPermission(' + artistaDto.idAgencia + ', ''AGENCIA'', ''VER_DATOS_ECONOMICOS'')')}">
+              <div class="mb-3 row">
+                <label class="col-form-label col-sm-3 text-sm-end">Importe</label>
+                <div class="col-sm-9">
+                  <input id="importe-ocupacion" type="number" required class="form-control" placeholder="Importe" autocomplete="off" step="1">
+                </div>
               </div>
-            </div>
-            <div class="mb-3 row">
-              <label class="col-form-label col-sm-3 text-sm-end">Importe</label>
-              <div class="col-sm-9">
-                <input id="importe-ocupacion" type="number" required class="form-control" placeholder="Importe" autocomplete="off" step="1">
+              <div class="mb-3 row">
+                <label class="col-form-label col-sm-3 text-sm-end">Porcentaje representante</label>
+                <div class="col-sm-9">
+                  <input id="porcentaje-repre-ocupacion" type="number" required class="form-control" placeholder="Importe" autocomplete="off" step="1">
+                </div>
               </div>
-            </div>
-            <div class="mb-3 row">
-              <label class="col-form-label col-sm-3 text-sm-end">Porcentaje representante</label>
-              <div class="col-sm-9">
-                <input id="porcentaje-repre-ocupacion" type="number" required class="form-control" placeholder="Importe" autocomplete="off" step="1">
+              <div class="mb-3 row">
+                <label class="col-form-label col-sm-3 text-sm-end">IVA</label>
+                <div class="col-sm-9">
+                  <input id="iva-ocupacion" type="number" required class="form-control" placeholder="Importe" autocomplete="off" step="1">
+                </div>
               </div>
-            </div>
-            <div class="mb-3 row">
-              <label class="col-form-label col-sm-3 text-sm-end">IVA</label>
-              <div class="col-sm-9">
-                <input id="iva-ocupacion" type="number" required class="form-control" placeholder="Importe" autocomplete="off" step="1">
-              </div>
+
             </div>
 
             <div class="mb-3 row">
@@ -106,20 +104,29 @@
                 </div>
               </div>
             </div>
-            <div class="mb-3 row">
-              <label class="col-form-label col-sm-3 text-sm-end">Observaciones</label>
-              <div class="col-sm-9">
-                <input class="form-control" placeholder="Observaciones" id="observaciones-ocupacion" autocomplete="off">
+
+            <div th:if="${#authorization.expression('hasPermission(' + artistaDto.idAgencia + ', ''AGENCIA'', ''VER_DATOS_ACTUACION'')')}">
+              <div class="mb-3 row">
+                <label class="col-form-label col-sm-3 text-sm-end">Lugar</label>
+                <div class="col-sm-9">
+                  <input class="form-control" placeholder="Lugar" id="lugar-ocupacion" autocomplete="off">
+                </div>
+              </div>
+              <div class="mb-3 row">
+                <label class="col-form-label col-sm-3 text-sm-end">Observaciones</label>
+                <div class="col-sm-9">
+                  <textarea class="form-control" placeholder="Observaciones" id="observaciones-ocupacion"
+                            autocomplete="off" maxlength="1800"></textarea>
+                </div>
               </div>
             </div>
-
 
 
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-            <button type="button" th:if="${#authorization.expression('hasPermission(' + artistaDto.idAgencia + ', ''AGENCIA'', ''ANULAR_OCUPACION'')')}" id="btn-anular-ocupacion" class="btn btn-danger">Anular</button>
-            <button type="button" th:if="${#authorization.expression('hasPermission(' + artistaDto.idAgencia + ', ''AGENCIA'', ''CONFIRMAR_OCUPACION'')')}" id="btn-confirmar-ocupacion" class="btn btn-success">Confirmar</button>
+            <button type="button" th:if="${#authorization.expression('hasPermission(' + artistaDto.id + ', ''ARTISTA'', ''ANULAR_OCUPACION'')')}" id="btn-anular-ocupacion" class="btn btn-danger">Anular</button>
+            <button type="button" th:if="${#authorization.expression('hasPermission(' + artistaDto.id + ', ''ARTISTA'', ''CONFIRMAR_OCUPACION'')')}" id="btn-confirmar-ocupacion" class="btn btn-success">Confirmar</button>
             <button type="submit" id="btn-guardar-ocupacion" class="btn btn-primary">Guardar</button>
           </div>
         </form>

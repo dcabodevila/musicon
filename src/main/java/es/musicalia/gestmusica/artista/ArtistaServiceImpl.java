@@ -1,10 +1,15 @@
 package es.musicalia.gestmusica.artista;
 
 
+import es.musicalia.gestmusica.acceso.Acceso;
+import es.musicalia.gestmusica.acceso.AccesoRepository;
+import es.musicalia.gestmusica.acceso.AccesoService;
 import es.musicalia.gestmusica.agencia.AgenciaRepository;
 import es.musicalia.gestmusica.contacto.Contacto;
 import es.musicalia.gestmusica.contacto.ContactoRepository;
 import es.musicalia.gestmusica.localizacion.*;
+import es.musicalia.gestmusica.rol.RolEnum;
+import es.musicalia.gestmusica.rol.RolRepository;
 import es.musicalia.gestmusica.tipoartista.TipoArtista;
 import es.musicalia.gestmusica.tipoartista.TipoArtistaRepository;
 import es.musicalia.gestmusica.tipoescenario.TipoEscenarioRepository;
@@ -24,17 +29,21 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class ArtistaServiceImpl implements ArtistaService {
 
-	private ArtistaRepository artistaRepository;
-	private UsuarioRepository usuarioRepository;
-	private ContactoRepository agenciaContactoRepository;
-	private TipoEscenarioRepository tipoEscenarioRepository;
-	private TipoArtistaRepository tipoArtistaRepository;
-	private CcaaRepository ccaaRepository;
-	private AgenciaRepository agenciaRepository;
+	private final ArtistaRepository artistaRepository;
+	private final UsuarioRepository usuarioRepository;
+	private final ContactoRepository agenciaContactoRepository;
+	private final TipoEscenarioRepository tipoEscenarioRepository;
+	private final TipoArtistaRepository tipoArtistaRepository;
+	private final CcaaRepository ccaaRepository;
+	private final AgenciaRepository agenciaRepository;
+	private final AccesoService accesoService;
+	private final RolRepository rolRepository;
+	private final AccesoRepository accesoRepository;
+
 	public ArtistaServiceImpl(ArtistaRepository artistaRepository, UsuarioRepository usuarioRepository, ContactoRepository agenciaContactoRepository,
-							  TipoEscenarioRepository tipoEscenarioRepository,
-							  TipoArtistaRepository tipoArtistaRepository,
-							  CcaaRepository ccaaRepository, AgenciaRepository agenciaRepository){
+                              TipoEscenarioRepository tipoEscenarioRepository,
+                              TipoArtistaRepository tipoArtistaRepository,
+                              CcaaRepository ccaaRepository, AgenciaRepository agenciaRepository, AccesoService accesoService, RolRepository rolRepository, AccesoRepository accesoRepository){
 		this.artistaRepository = artistaRepository;
 		this.usuarioRepository = usuarioRepository;
 		this.agenciaContactoRepository = agenciaContactoRepository;
@@ -43,12 +52,25 @@ public class ArtistaServiceImpl implements ArtistaService {
 		this.ccaaRepository = ccaaRepository;
 		this.agenciaRepository = agenciaRepository;
 
-	}
+        this.accesoService = accesoService;
+        this.rolRepository = rolRepository;
+        this.accesoRepository = accesoRepository;
+    }
 
 	@Override
 	public List<ArtistaDto> findAllArtistasForUser(final Usuario usuario){
 		return getArtistaDtos(this.artistaRepository.findAllArtistasOrderedByName());
 	}
+	@Override
+	public List<ArtistaDto> findMisArtistas(Set<Long> idsMisArtistas) {
+		return getArtistaDtos(this.artistaRepository.findMisArtistas(idsMisArtistas));
+	}
+	@Override
+	public List<ArtistaDto> findOtrosArtistas(Set<Long> idsMisArtistas) {
+		return getArtistaDtos(this.artistaRepository.findOtrosArtistas(idsMisArtistas));
+	}
+
+
 	@Override
 	public List<ArtistaDto> findAllArtistasByAgenciaId(final Long idAgencia){
 		return getArtistaDtos(this.artistaRepository.findAllArtistasByIdAgencia(idAgencia));
@@ -100,70 +122,94 @@ public class ArtistaServiceImpl implements ArtistaService {
 		return artistaDto;
 	}
 
-	@Override
-	@Transactional(readOnly = false)
-	public Artista saveArtista(ArtistaDto artistaDto){
+    @Override
+    @Transactional(readOnly = false)
+    public Artista saveArtista(ArtistaDto artistaDto) {
+        Artista artista = findOrCreateArtista(artistaDto.getId());
 
-		Artista artista = newArtista(artistaDto.getId());
-		artista.setNombre(artistaDto.getNombre());
+        // Actualizar datos básicos
+        actualizarDatosBasicos(artista, artistaDto);
 
-		if (artistaDto.getIdUsuario()!=null){
-			final Optional<Usuario> optionalUsuario = this.usuarioRepository.findById(artistaDto.getIdUsuario());
-			if (optionalUsuario.isPresent()){
-				artista.setUsuario(optionalUsuario.get());
-			}
-		}
+        // Actualizar tipos de artista
+        actualizarTiposArtista(artista, artistaDto.getIdsTipoArtista());
 
+        // Actualizar contacto
+        Contacto contacto = actualizarContacto(artista.getContacto(), artistaDto);
+        contacto = agenciaContactoRepository.save(contacto);
+        artista.setContacto(contacto);
 
-		artista.setActivo(artistaDto.getActivo());
+		artista = artistaRepository.save(artista);
+        // Crear accesos si es nuevo artista
+        if (artistaDto.getId() == null) {
+            crearAccesosUsuarioArtista(artista.getUsuario(), artistaDto.getIdAgencia(), artista.getId());
+        }
 
-		if (artistaDto.getLogo()!=null && !artistaDto.getLogo().isEmpty()){
-			artista.setLogo(artistaDto.getLogo());
-		}
+        return artista;
+    }
 
-		artista.setCcaa(this.ccaaRepository.findById(artistaDto.getIdCcaa()).get());
-		artista.setAgencia(this.agenciaRepository.findById(artistaDto.getIdAgencia()).get());
+    private void actualizarDatosBasicos(Artista artista, ArtistaDto dto) {
+        artista.setNombre(dto.getNombre());
+        artista.setUsuario(usuarioRepository.findById(dto.getIdUsuario()).orElseThrow());
+        artista.setActivo(dto.getActivo());
+        Optional.ofNullable(dto.getLogo())
+                .filter(logo -> !logo.isEmpty())
+                .ifPresent(artista::setLogo);
+        artista.setCcaa(ccaaRepository.findById(dto.getIdCcaa()).orElseThrow());
+        artista.setAgencia(agenciaRepository.findById(dto.getIdAgencia()).orElseThrow());
+        artista.setEscenario(dto.isEscenario());
+        Optional.ofNullable(dto.getIdTipoEscenario())
+                .ifPresent(id -> artista.setTipoEscenario(tipoEscenarioRepository.findById(id).orElseThrow()));
+        artista.setComponentes(dto.getComponentes());
+        artista.setMedidasEscenario(dto.getMedidasEscenario());
+        artista.setRitmo(dto.getRitmo());
+        artista.setViento(dto.getViento());
+        artista.setBailarinas(dto.getBailarinas());
+        artista.setSolistas(dto.getSolistas());
+        artista.setLuz(dto.getLuz());
+        artista.setSonido(dto.getSonido());
+        artista.setTarifasPublicas(dto.getTarifasPublicas());
+    }
 
-		artista.setEscenario(artistaDto.isEscenario());
-		if (artistaDto.getIdTipoEscenario()!=null){
-			artista.setTipoEscenario(this.tipoEscenarioRepository.findById(artistaDto.getIdTipoEscenario()).get());
-		}
-		artista.setComponentes(artistaDto.getComponentes());
-		artista.setMedidasEscenario(artistaDto.getMedidasEscenario());
-		artista.setRitmo(artistaDto.getRitmo());
-		artista.setViento(artistaDto.getViento());
-		artista.setBailarinas(artistaDto.getBailarinas());
-		artista.setSolistas(artistaDto.getSolistas());
-		artista.setActivo(artistaDto.getActivo());
-		artista.setLuz(artistaDto.getLuz());
-		artista.setSonido(artistaDto.getSonido());
+    private void actualizarTiposArtista(Artista artista, List<Long> idsTipoArtista) {
+        if (CollectionUtils.isNotEmpty(idsTipoArtista)) {
+            if (artista.getTiposArtista() == null) {
+                artista.setTiposArtista(new HashSet<>());
+            }
+            idsTipoArtista.forEach(id ->
+                    artista.getTiposArtista().add(tipoArtistaRepository.findById(id).orElseThrow())
+            );
+        }
+    }
 
-		if (CollectionUtils.isNotEmpty(artistaDto.getIdsTipoArtista())){
-			if (artista.getTiposArtista()==null){
-				artista.setTiposArtista(new HashSet<>());
-			}
+    private Contacto actualizarContacto(Contacto contacto, ArtistaDto dto) {
+        contacto = contacto != null ? contacto : new Contacto();
+        contacto.setFacebook(StringUtils.removeHttp(dto.getFacebook()));
+        contacto.setEmail(dto.getEmail());
+        contacto.setFax(dto.getFax());
+        contacto.setTelefono(dto.getTelefono());
+        contacto.setTelefono2(dto.getTelefono2());
+        contacto.setTelefono3(dto.getTelefono3());
+        contacto.setInstagram(StringUtils.removeHttp(dto.getInstagram()));
+        contacto.setYoutube(StringUtils.removeHttp(dto.getYoutube()));
+        contacto.setWeb(StringUtils.removeHttp(dto.getWeb()));
+        return contacto;
+    }
 
-			for (Long idTipoArtista : artistaDto.getIdsTipoArtista()){
-				artista.getTiposArtista().add(this.tipoArtistaRepository.findById(idTipoArtista).get());
-			}
-		}
-		artista.setTarifasPublicas(artistaDto.getTarifasPublicas());
-		Contacto contacto = artista.getContacto() != null ? artista.getContacto() : new Contacto();
-		contacto.setFacebook(StringUtils.removeHttp(artistaDto.getFacebook()));
-		contacto.setEmail(artistaDto.getEmail());
-		contacto.setFax(artistaDto.getFax());
-		contacto.setTelefono(artistaDto.getTelefono());
-		contacto.setTelefono2(artistaDto.getTelefono2());
-		contacto.setTelefono3(artistaDto.getTelefono3());
-		contacto.setInstagram(StringUtils.removeHttp(artistaDto.getInstagram()));
-		contacto.setYoutube(StringUtils.removeHttp(artistaDto.getYoutube()));
-		contacto.setWeb(StringUtils.removeHttp(artistaDto.getWeb()));
-		contacto = this.agenciaContactoRepository.save(contacto);
-		artista.setContacto(contacto);
+    private void crearAccesosUsuarioArtista(Usuario usuario, Long idAgencia, Long idArtista) {
 
-		return this.artistaRepository.save(artista);
+        accesoService.crearAccesoUsuarioAgenciaRol(usuario.getId(), idAgencia, rolRepository.findRolByCodigo(RolEnum.ROL_ARTISTA.getCodigo()).id(), idArtista);
 
-	}
+        Set<String> rolesPermitidos = Set.of(
+                RolEnum.ROL_REPRESENTANTE.getCodigo(),
+                RolEnum.ROL_AGENCIA.getCodigo()
+        );
+
+		Optional<List<Acceso>> accesosUsuario = accesoRepository.findAllAccesosByAndIdAgenciaAndCodigoRolAndActivo(rolesPermitidos, idAgencia);
+
+		accesosUsuario.ifPresent(accesos ->
+				accesos.forEach(acceso -> accesoService.guardarPermisosArtistas(acceso, idArtista))
+		);
+    }
 	@Override
 	public List<CodigoNombreDto> listaTipoEscenario(){
 		return this.tipoEscenarioRepository.findAll().stream()
@@ -189,15 +235,11 @@ public class ArtistaServiceImpl implements ArtistaService {
 	}
 
 
-	private Artista newArtista(Long idArtista) {
-
-		if (idArtista!=null) {
-			final Optional<Artista> agenciaSearched = this.artistaRepository.findById(idArtista);
-			return agenciaSearched.isPresent() ? agenciaSearched.get() : new Artista();
-		}
-		return new Artista();
-
-	}
+    private Artista findOrCreateArtista(Long idArtista) {
+        return Optional.ofNullable(idArtista)
+                .flatMap(artistaRepository::findById)
+                .orElse(new Artista());
+    }
 
 
 }

@@ -21,5 +21,7 @@ public class AccesoDto {
     private Long idRol;
     private String rol;
 
+    private Long idArtista;
+
 
 }

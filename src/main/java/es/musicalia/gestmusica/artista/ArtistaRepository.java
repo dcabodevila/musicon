@@ -3,6 +3,7 @@ package es.musicalia.gestmusica.artista;
 import es.musicalia.gestmusica.agencia.Agencia;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -22,5 +23,11 @@ public interface ArtistaRepository extends JpaRepository<Artista, Long> {
 
 	@Query("select new es.musicalia.gestmusica.artista.ArtistaRecord(a.id, a.nombre) from Artista a where a.agencia.id=?1 and a.activo order by a.nombre")
 	List<ArtistaRecord> findAllArtistasRecordByIdAgencia(Long idAgencia);
+
+	@Query("select a from Artista a where a.id in (:idsMisArtistas) and a.activo order by a.nombre")
+	List<Artista> findMisArtistas(@Param("idsMisArtistas") Set<Long> idsMisArtistas);
+
+	@Query("select a from Artista a where a.id not in (:idsMisArtistas) and a.activo order by a.nombre")
+	List<Artista> findOtrosArtistas(@Param("idsMisArtistas") Set<Long> idsMisArtistas);
 
 }

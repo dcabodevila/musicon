@@ -1,6 +1,5 @@
 package es.musicalia.gestmusica.accesoartista;
 
-import es.musicalia.gestmusica.agencia.AgenciaRepository;
 import es.musicalia.gestmusica.artista.ArtistaRepository;
 import es.musicalia.gestmusica.permiso.PermisoRecord;
 import es.musicalia.gestmusica.permiso.PermisoRepository;
@@ -11,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -57,13 +58,13 @@ public class AccesoArtistaServiceImpl implements AccesoArtistaService {
 
 	@Transactional
 	@Override
-	public AccesoArtista guardarAcceso(AccesoArtistaDto accesoDto){
+	public AccesoArtista guardarAccesoArtista(AccesoArtistaDto accesoDto){
 
 		AccesoArtista acceso = accesoDto.getId()!=null ? this.accesoArtistaRepository.findById(accesoDto.getId()).orElse(new AccesoArtista()) : new AccesoArtista();
 
-		acceso.setUsuario(this.usuarioRepository.findById(accesoDto.getIdUsuario()).get());
-		acceso.setArtista(this.artistaRepository.findById(accesoDto.getIdArtista()).get());
-		acceso.setPermiso(this.permisoRepository.findById(accesoDto.getIdPermiso()).get());
+		acceso.setUsuario(this.usuarioRepository.findById(accesoDto.getIdUsuario()).orElseThrow());
+		acceso.setArtista(this.artistaRepository.findById(accesoDto.getIdArtista()).orElseThrow());
+		acceso.setPermiso(this.permisoRepository.findById(accesoDto.getIdPermiso()).orElseThrow());
 		acceso.setActivo(Boolean.TRUE);
 		return this.accesoArtistaRepository.save(acceso);
 
@@ -73,10 +74,27 @@ public class AccesoArtistaServiceImpl implements AccesoArtistaService {
 	@Override
 	public AccesoArtista eliminarAccesoArtista(Long idAccesoArtista){
 
-		AccesoArtista acceso = this.accesoArtistaRepository.findById(idAccesoArtista).get();
+		AccesoArtista acceso = this.accesoArtistaRepository.findById(idAccesoArtista).orElseThrow();
 		acceso.setActivo(Boolean.FALSE);
 		return this.accesoArtistaRepository.save(acceso);
 
+	}
+	@Override
+	public Map<Long, Set<String>> obtenerMapPermisosArtista(Long idUsuario) {
+		return accesoArtistaRepository.findAllAccesosArtistaByIdUsuario(idUsuario)
+			.orElse(Collections.emptyList())
+			.stream()
+			.filter(accesoArtista ->
+				accesoArtista != null &&
+				accesoArtista.getPermiso() != null &&
+				accesoArtista.getArtista() != null)
+			.collect(Collectors.groupingBy(
+				accesoArtista -> accesoArtista.getArtista().getId(),
+				Collectors.mapping(
+					accesoArtista -> accesoArtista.getPermiso().getCodigo(),
+					Collectors.toSet()
+				)
+			));
 	}
 
 }

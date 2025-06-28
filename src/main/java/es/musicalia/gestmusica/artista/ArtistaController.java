@@ -2,17 +2,17 @@ package es.musicalia.gestmusica.artista;
 
 
 import es.musicalia.gestmusica.agencia.AgenciaService;
-import es.musicalia.gestmusica.auth.model.SecurityService;
+import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.file.FileService;
 import es.musicalia.gestmusica.incremento.IncrementoService;
 import es.musicalia.gestmusica.localizacion.LocalizacionService;
 import es.musicalia.gestmusica.ocupacion.OcupacionService;
 import es.musicalia.gestmusica.tarifa.TarifaAnualDto;
-import es.musicalia.gestmusica.tarifa.TarifaSaveDto;
 import es.musicalia.gestmusica.usuario.UserService;
 import es.musicalia.gestmusica.usuario.Usuario;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -23,6 +23,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
 import java.time.Year;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.Set;
 
 
 @Controller
@@ -30,22 +33,20 @@ import java.time.Year;
 public class ArtistaController {
 
 
-    private UserService userService;
-    private SecurityService securityService;
-    private FileService fileService;
-    private ArtistaService artistaService;
-    private AgenciaService agenciaService;
-    private LocalizacionService localizacionService;
-    private IncrementoService incrementoService;
-    private OcupacionService ocupacionService;
+    private final UserService userService;
+    private final FileService fileService;
+    private final ArtistaService artistaService;
+    private final AgenciaService agenciaService;
+    private final LocalizacionService localizacionService;
+    private final IncrementoService incrementoService;
+    private final OcupacionService ocupacionService;
 
 
     private Logger logger = LoggerFactory.getLogger(ArtistaController.class);
 
-    public ArtistaController(UserService userService, SecurityService securityService, ArtistaService artistaService, FileService fileService, AgenciaService agenciaService,
+    public ArtistaController(UserService userService, ArtistaService artistaService, FileService fileService, AgenciaService agenciaService,
                              LocalizacionService localizacionService, IncrementoService incrementoService, OcupacionService ocupacionService){
         this.userService = userService;
-        this.securityService = securityService;
         this.artistaService = artistaService;
         this.fileService = fileService;
         this.agenciaService = agenciaService;
@@ -59,28 +60,39 @@ public class ArtistaController {
     public String artistas(Model model) {
         if (userService.isUserAutheticated()){
             final Usuario usuario = userService.obtenerUsuarioAutenticado();
-            model.addAttribute("listaArtistas", this.artistaService.findAllArtistasForUser(usuario));
+
+            final Map<Long, Set<String>> mapPermisosArtista =
+                    ((CustomAuthenticatedUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
+                            .getMapPermisosArtista();
+
+            model.addAttribute("listaArtistas", mapPermisosArtista.isEmpty() ? this.artistaService.findAllArtistasForUser(usuario) : new ArrayList<>());
+            model.addAttribute("listaMisArtistas", mapPermisosArtista.isEmpty() ? new ArrayList<>() : this.artistaService.findMisArtistas(mapPermisosArtista.keySet()));
+            model.addAttribute("listaOtrosArtistas", mapPermisosArtista.isEmpty() ? new ArrayList<>() : this.artistaService.findOtrosArtistas(mapPermisosArtista.keySet()));
         }
         return "artistas";
     }
 
-    @GetMapping("/crear")
-    public String crearArtistas(Model model) {
-        model.addAttribute("artistaDto", new ArtistaDto());
-        getModelAttributeDetail(model);
+    @GetMapping("/crear/{idAgencia}")
+    public String crearArtistas(Model model, @PathVariable("idAgencia") Long idAgencia) {
+
+        final ArtistaDto artistaDto = new ArtistaDto();
+        artistaDto.setIdAgencia(idAgencia);
+
+        getModelAttributeDetail(model, artistaDto);
         return "artista-detail-edit";
     }
 
-    private void getModelAttributeDetail(Model model) {
+    private void getModelAttributeDetail(Model model, ArtistaDto artistaDto) {
+        model.addAttribute("artistaDto", artistaDto);
 
         model.addAttribute("listaUsuarios", this.userService.findAllUsuarioRecords());
-        model.addAttribute("listaAgencias", this.agenciaService.findAllAgenciasForUser(userService.obtenerUsuarioAutenticado()));
+        model.addAttribute("listaAgencias", artistaDto.getIdAgencia() != null ? this.agenciaService.findAgenciaDtoById(artistaDto.getIdAgencia()) : this.agenciaService.findAllAgenciasForUser(userService.obtenerUsuarioAutenticado()));
         model.addAttribute("listaTipoArtista", this.artistaService.listaTipoArtista());
         model.addAttribute("listaTipoEscenario", this.artistaService.listaTipoEscenario());
         model.addAttribute("listaCcaa", this.localizacionService.findAllComunidades());
         model.addAttribute("anoTarifa", Year.now());
         model.addAttribute("listaProvincias", this.localizacionService.findAllProvincias());
-        model.addAttribute("listaTiposOcupacion", this.ocupacionService.listarTiposOcupacion());
+        model.addAttribute("listaTiposOcupacion", this.ocupacionService.listarTiposOcupacion(artistaDto.getId()));
         model.addAttribute("listaTiposIncremento", this.incrementoService.listTipoIncremento());
     }
 
@@ -91,8 +103,7 @@ public class ArtistaController {
     @GetMapping("/{id}")
     public String detalleArtista(Model model, @PathVariable("id") Long idArtista) {
         final ArtistaDto artistaDto = this.artistaService.findArtistaDtoById(idArtista);
-        model.addAttribute("artistaDto", artistaDto);
-        getModelAttributeDetail(model);
+        getModelAttributeDetail(model, artistaDto);
         getModelAttributeArtistaOcupacion(model, artistaDto);
 
         addTarifaAnualModelAttribute(model, idArtista);
@@ -111,8 +122,9 @@ public class ArtistaController {
 
     @GetMapping("/edit/{id}")
     public String editArtista(Model model, @PathVariable("id") Long idArtista) {
-        model.addAttribute("artistaDto", this.artistaService.findArtistaDtoById(idArtista));
-        getModelAttributeDetail(model);
+        final ArtistaDto artistaDto = this.artistaService.findArtistaDtoById(idArtista);
+
+        getModelAttributeDetail(model, artistaDto);
 
         return "artista-detail-edit";
     }
@@ -137,14 +149,14 @@ public class ArtistaController {
 
             redirectAttributes.addFlashAttribute("message", "Artista guardado correctamente");
             redirectAttributes.addFlashAttribute("alertClass", "success");
-            return "redirect:/artista/"+ artista.getId();
+            return "redirect:/agencia/"+ artistaDto.getIdAgencia();
 
         } catch (Exception e){
             logger.error("Error guardando artista", e);
             model.addAttribute("message", "Error guardando artista");
             model.addAttribute("alertClass", "danger");
             addTarifaAnualModelAttribute(model, artistaDto.getId());
-            getModelAttributeDetail(model);
+            getModelAttributeDetail(model, artistaDto);
 
             return "artista-detail";
         }

@@ -2,21 +2,21 @@ package es.musicalia.gestmusica.agencia;
 
 
 import es.musicalia.gestmusica.acceso.AccesoService;
+import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.contacto.ContactoRepository;
 import es.musicalia.gestmusica.contacto.Contacto;
 import es.musicalia.gestmusica.localizacion.*;
 import es.musicalia.gestmusica.rol.RolEnum;
+import es.musicalia.gestmusica.rol.RolRepository;
 import es.musicalia.gestmusica.usuario.Usuario;
 import es.musicalia.gestmusica.usuario.UsuarioRepository;
 import es.musicalia.gestmusica.util.StringUtils;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -30,19 +30,47 @@ public class AgenciaServiceImpl implements AgenciaService {
 	private final UsuarioRepository usuarioRepository;
 	private final ContactoRepository agenciaContactoRepository;
 	private final AccesoService accesoService;
+	private final RolRepository rolRepository;
 
-	public AgenciaServiceImpl(AgenciaRepository agenciaRepository, MunicipioRepository municipioRepository, ProvinciaRepository provinciaRepository, UsuarioRepository usuarioRepository, ContactoRepository agenciaContactoRepository, AccesoService accesoService){
+	public AgenciaServiceImpl(AgenciaRepository agenciaRepository, MunicipioRepository municipioRepository, ProvinciaRepository provinciaRepository, UsuarioRepository usuarioRepository, ContactoRepository agenciaContactoRepository, AccesoService accesoService, RolRepository rolRepository){
 		this.agenciaRepository = agenciaRepository;
 		this.municipioRepository = municipioRepository;
 		this.provinciaRepository = provinciaRepository;
 		this.usuarioRepository = usuarioRepository;
 		this.agenciaContactoRepository = agenciaContactoRepository;
         this.accesoService = accesoService;
+        this.rolRepository = rolRepository;
     }
 	@Override
 	public List<AgenciaDto> findAllAgenciasForUser(final Usuario usuario){
 
 		List<Agencia> agencias = agenciaRepository.findAllAgenciasOrderedByName();
+		if (agencias == null || agencias.isEmpty()) {
+			return Collections.emptyList();
+		}
+		return agencias.stream()
+				.map(this::getAgenciaDto)
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public List<AgenciaDto> findMisAgencias(Set<Long> idsMisAgencias){
+
+
+
+		List<Agencia> agencias = agenciaRepository.findAllAgenciasByIds(idsMisAgencias);
+		if (agencias == null || agencias.isEmpty()) {
+			return Collections.emptyList();
+		}
+		return agencias.stream()
+				.map(this::getAgenciaDto)
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public List<AgenciaDto> findOtrasAgencias(Set<Long> idsMisAgencias){
+
+		List<Agencia> agencias = agenciaRepository.findAllAgenciasNotByIds(idsMisAgencias);
 		if (agencias == null || agencias.isEmpty()) {
 			return Collections.emptyList();
 		}
@@ -140,7 +168,7 @@ public class AgenciaServiceImpl implements AgenciaService {
 
 		agencia = this.agenciaRepository.save(agencia);
 
-		this.accesoService.crearAccesoUsuarioAgenciaRol(agencia.getUsuario().getId(), agencia.getId(), RolEnum.ROL_REPRESENTANTE.getId());
+		this.accesoService.crearAccesoUsuarioAgenciaRol(agencia.getUsuario().getId(), agencia.getId(), this.rolRepository.findRolByCodigo(RolEnum.ROL_AGENCIA.getCodigo()).id(), null);
 
 		return agencia;
 

@@ -9,7 +9,7 @@ import java.util.Set;
 
 public interface OcupacionService {
 
-    List<CodigoNombreDto> listarTiposOcupacion();
+    List<CodigoNombreDto> listarTiposOcupacion(Long idArtista);
 
     OcupacionEditDto findOcupacionEditDtoByArtistaIdAndDates(long id);
     @Transactional(readOnly = false)
@@ -18,7 +18,7 @@ public interface OcupacionService {
     Void confirmarOcupacion(long id);
 
     @Transactional(readOnly = false)
-    Ocupacion saveOcupacion(OcupacionSaveDto ocupacionSaveDto);
+    Ocupacion saveOcupacion(OcupacionSaveDto ocupacionSaveDto) throws ModificacionOcupacionException;
 
     boolean existeOcupacionFecha(OcupacionSaveDto ocupacionSaveDto);
 

@@ -1,15 +1,22 @@
 package es.musicalia.gestmusica.acceso;
 
+import es.musicalia.gestmusica.accesoartista.AccesoArtista;
+import es.musicalia.gestmusica.accesoartista.AccesoArtistaRepository;
+import es.musicalia.gestmusica.agencia.Agencia;
 import es.musicalia.gestmusica.agencia.AgenciaRepository;
+import es.musicalia.gestmusica.artista.Artista;
+import es.musicalia.gestmusica.artista.ArtistaRepository;
+import es.musicalia.gestmusica.permiso.Permiso;
 import es.musicalia.gestmusica.permiso.PermisoRecord;
 import es.musicalia.gestmusica.permiso.PermisoRepository;
-import es.musicalia.gestmusica.rol.RolRecord;
-import es.musicalia.gestmusica.rol.RolRepository;
-import es.musicalia.gestmusica.rol.TipoRolEnum;
+import es.musicalia.gestmusica.permiso.TipoPermisoEnum;
+import es.musicalia.gestmusica.rol.*;
+import es.musicalia.gestmusica.usuario.Usuario;
 import es.musicalia.gestmusica.usuario.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -22,31 +29,32 @@ public class AccesoServiceImpl implements AccesoService {
 	private final PermisoRepository permisoRepository;
 	private final AgenciaRepository agenciaRepository;
 	private final UsuarioRepository usuarioRepository;
+	private final AccesoArtistaRepository accesoArtistaRepository;
+	private final ArtistaRepository artistaRepository;
 
-	public AccesoServiceImpl(AccesoRepository accesoRepository, RolRepository rolRepository, PermisoRepository permisoRepository, AgenciaRepository agenciaRepository, UsuarioRepository usuarioRepository){
+	public AccesoServiceImpl(AccesoRepository accesoRepository, RolRepository rolRepository, PermisoRepository permisoRepository, AgenciaRepository agenciaRepository, UsuarioRepository usuarioRepository, AccesoArtistaRepository accesoArtistaRepository, ArtistaRepository artistaRepository){
 		this.accesoRepository = accesoRepository;
         this.rolRepository = rolRepository;
         this.permisoRepository = permisoRepository;
         this.agenciaRepository = agenciaRepository;
 		this.usuarioRepository = usuarioRepository;
+        this.accesoArtistaRepository = accesoArtistaRepository;
+        this.artistaRepository = artistaRepository;
     }
 
 	@Override
-	public Acceso crearAccesoUsuarioAgenciaRol(Long idUsuario, Long idAgencia, Long idRol){
+	public Acceso crearAccesoUsuarioAgenciaRol(Long idUsuario, Long idAgencia, Long idRol, Long idArtista){
 
-		final Acceso acceso = this.accesoRepository
-				.findAccesoByIdUsuarioAndIdAgencia(idUsuario, idAgencia)
-				.orElseGet(Acceso::new);
+		Acceso acceso = obtenerOCrearAcceso(idUsuario, idAgencia, idRol);
+		AccesoDto accesoDto = getAccesoDto(acceso);
+		accesoDto.setIdArtista(idArtista);
+		guardarAcceso(accesoDto);
 
-		acceso.setUsuario(this.usuarioRepository.findById(idUsuario).get());
-		acceso.setAgencia(this.agenciaRepository.findById(idAgencia)
-				.orElseThrow(() -> new EntityNotFoundException("Agencia no encontrada con ID: " + idAgencia)));
-		acceso.setRol(this.rolRepository.findById(idRol)
-				.orElseThrow(() -> new EntityNotFoundException("Rol no encontrado con ID: " + idRol)));
-		acceso.setActivo(Boolean.TRUE);
-		return this.accesoRepository.save(acceso);
+		return acceso;
 
 	}
+
+
 
 
 	@Override
@@ -84,26 +92,152 @@ public class AccesoServiceImpl implements AccesoService {
 
 	@Transactional
 	@Override
-	public Acceso guardarAcceso(AccesoDto accesoDto){
+	public Acceso guardarAcceso(AccesoDto accesoDto) {
+		Acceso acceso = getAcceso(accesoDto);
 
-		Acceso acceso = accesoDto.getId()!=null ? this.accesoRepository.findById(accesoDto.getId()).orElse(new Acceso()) : new Acceso();
+		guardarPermisosArtistas(acceso, accesoDto.getIdArtista());
 
-		acceso.setUsuario(this.usuarioRepository.findById(accesoDto.getIdUsuario()).get());
-		acceso.setAgencia(this.agenciaRepository.findById(accesoDto.getIdAgencia()).get());
-		acceso.setRol(this.rolRepository.findById(accesoDto.getIdRol()).get());
+		return acceso;
+	}
+
+	private Acceso getAcceso(AccesoDto accesoDto) {
+		Acceso acceso = obtenerOCrearAcceso(accesoDto);
+		Usuario usuario = obtenerUsuario(accesoDto.getIdUsuario());
+
+		acceso.setUsuario(usuario);
+		acceso.setAgencia(obtenerAgencia(accesoDto.getIdAgencia()));
+		acceso.setRol(obtenerRol(accesoDto.getIdRol()));
 		acceso.setActivo(Boolean.TRUE);
-		return this.accesoRepository.save(acceso);
 
+		acceso = accesoRepository.save(acceso);
+		return acceso;
+	}
+
+	private Acceso obtenerOCrearAcceso(Long idUsuario, Long idAgencia, Long idRol) {
+		Acceso acceso = this.accesoRepository
+				.findAccesoByIdUsuarioAndIdAgencia(idUsuario, idAgencia)
+				.orElseGet(Acceso::new);
+
+		acceso.setUsuario(this.usuarioRepository.findById(idUsuario).orElseThrow());
+		acceso.setAgencia(this.agenciaRepository.findById(idAgencia)
+				.orElseThrow(() -> new EntityNotFoundException("Agencia no encontrada con ID: " + idAgencia)));
+		acceso.setRol(this.rolRepository.findById(idRol)
+				.orElseThrow(() -> new EntityNotFoundException("Rol no encontrado con ID: " + idRol)));
+		acceso.setActivo(Boolean.TRUE);
+
+		acceso = this.accesoRepository.save(acceso);
+		return acceso;
+	}
+
+	private Acceso obtenerOCrearAcceso(AccesoDto accesoDto) {
+		return accesoDto.getId() != null
+				? accesoRepository.findById(accesoDto.getId()).orElse(new Acceso())
+				: new Acceso();
+	}
+
+	private Usuario obtenerUsuario(Long idUsuario) {
+		return usuarioRepository.findById(idUsuario)
+				.orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con ID: " + idUsuario));
+	}
+
+	private Agencia obtenerAgencia(Long idAgencia) {
+		return agenciaRepository.findById(idAgencia)
+				.orElseThrow(() -> new EntityNotFoundException("Agencia no encontrada con ID: " + idAgencia));
+	}
+
+	private Rol obtenerRol(Long idRol) {
+		return rolRepository.findById(idRol)
+				.orElseThrow(() -> new EntityNotFoundException("Rol no encontrado con ID: " + idRol));
+	}
+
+	@Transactional(readOnly = false)
+	public void guardarPermisosArtistas(Acceso acceso, Long idArtista) {
+		Set<Permiso> permisosArtista = obtenerPermisosArtista(acceso.getRol().getId());
+
+		List<Artista> artistasAgencia = idArtista != null ?
+				artistaRepository.findById(idArtista)
+						.map(List::of)
+						.orElse(Collections.emptyList()) :
+				artistaRepository.findAllArtistasByIdAgencia(acceso.getAgencia().getId());
+
+		// Procesar y guardar los accesos
+		artistasAgencia.forEach(artista ->
+				permisosArtista.forEach(permiso ->
+						crearOActualizarAccesoArtista(artista, acceso.getUsuario(), permiso)
+				)
+		);
 	}
 
 	@Transactional
-	@Override
-	public Acceso eliminarAcceso(Long idAcceso){
+	public void eliminarPermisosArtistas(Long idAgencia, Long idUsuario, Long idRol) {
+		Set<Permiso> permisosArtista = permisoRepository.findAllPermisosByIdRolAndTipoPermiso(
+				idRol,
+				TipoPermisoEnum.ARTISTA.getId()
+		).orElseThrow(() -> new EntityNotFoundException("No se encontraron permisos para el rol especificado"));
 
-		Acceso acceso = this.accesoRepository.findById(idAcceso).get();
-		acceso.setActivo(Boolean.FALSE);
-		return this.accesoRepository.save(acceso);
+		final List<Artista> artistasAgencia = artistaRepository.findAllArtistasByIdAgencia(idAgencia);
+		
+		// Procesamos las eliminaciones directamente sin recolectar resultados
+		artistasAgencia.forEach(artista -> 
+			permisosArtista.forEach(permiso ->
+					revocarPermisoArtista(artista.getId(), idUsuario, permiso.getId())
+			)
+		);
+	}
+
+	private Set<Permiso> obtenerPermisosArtista(Long idRol) {
+		return permisoRepository.findAllPermisosByIdRolAndTipoPermiso(
+				idRol,
+				TipoPermisoEnum.ARTISTA.getId()
+		).orElseThrow();
+	}
+
+	private AccesoArtista crearOActualizarAccesoArtista(Artista artista, Usuario usuario, Permiso permiso) {
+		AccesoArtista accesoArtista = accesoArtistaRepository
+				.findAllAccesosByIdArtistaIdUsuarioIdPermiso(artista.getId(), usuario.getId(), permiso.getId())
+				.orElse(new AccesoArtista());
+
+		accesoArtista.setPermiso(permiso);
+		accesoArtista.setArtista(artista);
+		accesoArtista.setUsuario(usuario);
+		accesoArtista.setActivo(Boolean.TRUE);
+
+		return this.accesoArtistaRepository.save(accesoArtista);
 
 	}
+
+    /**
+     * Revoca el permiso específico de un usuario para acceder a un artista.
+     *
+     * @param idArtista ID del artista del cual se revocará el acceso
+     * @param idUsuario ID del usuario al cual se le revocará el acceso
+     * @param idPermiso ID del permiso específico que será revocado
+     * @throws IllegalArgumentException si cualquiera de los IDs es null
+     * @throws NoSuchElementException   si no se encuentra el acceso especificado
+     */
+    private void revocarPermisoArtista(Long idArtista, Long idUsuario, Long idPermiso) {
+        Objects.requireNonNull(idArtista, "El ID del artista no puede ser null");
+        Objects.requireNonNull(idUsuario, "El ID del usuario no puede ser null");
+        Objects.requireNonNull(idPermiso, "El ID del permiso no puede ser null");
+
+        accesoArtistaRepository
+                .findAllAccesosByIdArtistaIdUsuarioIdPermiso(idArtista, idUsuario, idPermiso).ifPresent(accesoArtistaRepository::delete);
+
+    }
+
+	@Transactional
+	@Override
+	public void eliminarAcceso(Long idAcceso){
+
+		Acceso acceso = this.accesoRepository.findById(idAcceso).orElseThrow();
+
+		this.eliminarPermisosArtistas(acceso.getAgencia().getId(), acceso.getUsuario().getId(),acceso.getRol().getId());
+
+		this.accesoRepository.delete(acceso);
+
+	}
+
+
+
 
 }

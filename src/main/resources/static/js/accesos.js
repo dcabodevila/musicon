@@ -20,13 +20,30 @@ $(document).ready(function () {
         if (idRol) {
             cargarPermisos(idRol);
         }
+        $('#div-acceso-artista').hide();
+        $('#acceso-artista').prop('required', false).val(null);
+
     });
 
     // Evento cuando se cambia el rol seleccionado
     $('#rol-accesos').change(function () {
         let idRol = $(this).val();
+        let rolText = $("#rol-accesos option:selected").text();
+
+        if(rolText === 'Artista') {
+            $('#div-acceso-artista').show();
+            $('#acceso-artista').prop('required', true);
+        } else {
+            $('#div-acceso-artista').hide();
+            $('#acceso-artista').prop('required', false).val(null);
+        }
+
+        
+
         cargarPermisos(idRol);
     });
+
+
 
     $('.btnModalAcceso').click(function () {
         let idUsuario = $(this).data('idusuario'); // Obtiene el idUsuario del botón
@@ -46,7 +63,7 @@ $(document).ready(function () {
 
     });
 
-    $('.btnModalAccesoArtista').click(function () {
+    $(document).on('click', '.btnModalAccesoArtista', function () {
         let idUsuario = $(this).data('idusuario'); // Obtiene el idUsuario del botón
         let idArtista = $(this).data('idartista'); // Obtiene el idRol del botón
         let idAcceso = $(this).data('idacceso'); // Obtiene el idacceso del botón
@@ -61,6 +78,7 @@ $(document).ready(function () {
         } else {
             $('#btn-eliminar-acceso-artista').addClass('d-none');
         }
+        $('#modalAccesosArtista').modal('show');
 
 
     });
@@ -96,7 +114,15 @@ $(document).ready(function () {
 
 
     });
-
+    $('#datatables-reponsive_accesos-artista').DataTable( {
+        responsive: true,
+        searching: true,
+        ordering:  true,
+        paging: true,
+        language: {
+            url: "https://cdn.datatables.net/plug-ins/1.13.1/i18n/es-ES.json"
+        }
+    } );
 });
 
     function eliminarAcceso(idAcceso){

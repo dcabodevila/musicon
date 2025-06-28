@@ -2,20 +2,21 @@ package es.musicalia.gestmusica.ocupacion;
 
 import es.musicalia.gestmusica.artista.Artista;
 import es.musicalia.gestmusica.artista.ArtistaRepository;
-import es.musicalia.gestmusica.incremento.IncrementoController;
 import es.musicalia.gestmusica.localizacion.*;
 import es.musicalia.gestmusica.permiso.PermisoAgenciaEnum;
+import es.musicalia.gestmusica.permiso.PermisoArtistaEnum;
 import es.musicalia.gestmusica.permiso.PermisoService;
-import es.musicalia.gestmusica.permiso.PermisoServiceImpl;
 import es.musicalia.gestmusica.tarifa.Tarifa;
 import es.musicalia.gestmusica.tarifa.TarifaRepository;
 import es.musicalia.gestmusica.usuario.UserService;
 import es.musicalia.gestmusica.usuario.Usuario;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,7 +31,6 @@ public class OcupacionServiceImpl implements OcupacionService {
 
 	private final OcupacionRepository ocupacionRepository;
 	private final ArtistaRepository artistaRepository;
-	private final CcaaRepository comunidadRepository;
 	private final ProvinciaRepository provinciaRepository;
 	private final MunicipioRepository municipioRepository;
 	private final TipoOcupacionRepository tipoOcupacionRepository;
@@ -39,10 +39,9 @@ public class OcupacionServiceImpl implements OcupacionService {
 	private final UserService userService;
 	private final PermisoService permisoService;
 
-	public OcupacionServiceImpl(OcupacionRepository ocupacionRepository, ArtistaRepository artistaRepository, CcaaRepository comunidadRepository, ProvinciaRepository provinciaRepository, MunicipioRepository municipioRepository, TipoOcupacionRepository tipoOcupacionRepository, OcupacionEstadoRepository ocupacionEstadoRepository, TarifaRepository tarifaRepository, UserService userService, PermisoService permisoService){
+	public OcupacionServiceImpl(OcupacionRepository ocupacionRepository, ArtistaRepository artistaRepository, ProvinciaRepository provinciaRepository, MunicipioRepository municipioRepository, TipoOcupacionRepository tipoOcupacionRepository, OcupacionEstadoRepository ocupacionEstadoRepository, TarifaRepository tarifaRepository, UserService userService, PermisoService permisoService){
 		this.ocupacionRepository = ocupacionRepository;
 		this.artistaRepository = artistaRepository;
-        this.comunidadRepository = comunidadRepository;
         this.provinciaRepository = provinciaRepository;
         this.municipioRepository = municipioRepository;
         this.tipoOcupacionRepository = tipoOcupacionRepository;
@@ -53,9 +52,12 @@ public class OcupacionServiceImpl implements OcupacionService {
     }
 
 	@Override
-	public List<CodigoNombreDto> listarTiposOcupacion() {
+	public List<CodigoNombreDto> listarTiposOcupacion(Long idArtista) {
 
 		return Arrays.stream(TipoOcupacionEnum.values())
+				.filter(e -> TipoOcupacionEnum.OCUPADO.getId().equals(e.getId()) ||
+						(TipoOcupacionEnum.RESERVADO.getId().equals(e.getId()) &&
+								permisoService.existePermisoUsuarioArtista(idArtista, PermisoArtistaEnum.RESERVAR_OCUPACION.name())))
 				.map(e -> new CodigoNombreDto(e.getId(), e.getDescripcion()))
 				.collect(Collectors.toList());
 	}
@@ -89,28 +91,45 @@ public class OcupacionServiceImpl implements OcupacionService {
 
 	@Override
 	@Transactional(readOnly = false)
-	public Ocupacion saveOcupacion(OcupacionSaveDto ocupacionSaveDto){
+	public Ocupacion saveOcupacion(OcupacionSaveDto ocupacionSaveDto) throws es.musicalia.gestmusica.ocupacion.ModificacionOcupacionException {
 
 		logger.info("Empezando saveOcupacion: {}", ocupacionSaveDto.toString());
 
 		final Ocupacion ocupacion = ocupacionSaveDto.getId()!=null? this.ocupacionRepository.findById(ocupacionSaveDto.getId()).orElse(new Ocupacion())  : new Ocupacion();
+		final Usuario usuario = this.userService.obtenerUsuarioAutenticado();
 
-		final Artista artista = this.artistaRepository.findById(ocupacionSaveDto.getIdArtista()).get();
+		if (ocupacionSaveDto.getId()!=null){
+			final Usuario usuarioAutenticado = this.userService.obtenerUsuarioAutenticado();
+			if (!(ocupacion.getUsuario().getId()==usuarioAutenticado.getId()) &&
+					!this.permisoService.existePermisoUsuarioAgencia(ocupacion.getArtista().getAgencia().getId(), PermisoAgenciaEnum.MODIFICAR_OCUPACION_OTROS.name())) {
+				throw new es.musicalia.gestmusica.ocupacion.ModificacionOcupacionException("No tiene permisos para modificar ocupaciones de otros usuarios");
+			}
+			ocupacion.setFechaModificacion(LocalDateTime.now());
+			ocupacion.setUsuarioModificacion(usuario.getUsername());
+
+		}else {
+			ocupacion.setUsuario(usuario);
+			ocupacion.setFechaCreacion(LocalDateTime.now());
+			ocupacion.setUsuarioCreacion(usuario.getUsername());
+		}
+
+
+		final Artista artista = this.artistaRepository.findById(ocupacionSaveDto.getIdArtista()).orElseThrow();
 
 		ocupacion.setArtista(artista);
 		ocupacion.setFecha(ocupacionSaveDto.getFecha());
-		ocupacion.setImporte(ocupacionSaveDto.getImporte());
-		ocupacion.setPorcentajeRepre(ocupacionSaveDto.getPorcentajeRepre());
-		ocupacion.setIva(ocupacionSaveDto.getIva());
-		ocupacion.setTipoOcupacion(this.tipoOcupacionRepository.findById(ocupacionSaveDto.getIdTipoOcupacion()).get());
+		ocupacion.setImporte(ocupacionSaveDto.getImporte()!=null? ocupacionSaveDto.getImporte() : BigDecimal.ZERO);
+		ocupacion.setPorcentajeRepre(ocupacionSaveDto.getPorcentajeRepre()!=null ? ocupacionSaveDto.getPorcentajeRepre(): BigDecimal.ZERO);
+		ocupacion.setIva(ocupacionSaveDto.getIva()!=null?ocupacionSaveDto.getIva(): BigDecimal.ZERO);
+		ocupacion.setTipoOcupacion(this.tipoOcupacionRepository.findById(ocupacionSaveDto.getIdTipoOcupacion()).orElseThrow());
 
-		final boolean permisoConfirmarOcupacionAgencia = this.permisoService.existePermisoUsuarioAgencia(artista.getAgencia().getId(), PermisoAgenciaEnum.CONFIRMAR_OCUPACION.getDescripcion());
+		final boolean permisoConfirmarOcupacionAgencia = this.permisoService.existePermisoUsuarioAgencia(artista.getAgencia().getId(), PermisoAgenciaEnum.CONFIRMAR_OCUPACION.name());
 
 		Long idEstadoOcupacion = getIdEstadoOcupacion(ocupacionSaveDto.getIdTipoOcupacion(), permisoConfirmarOcupacionAgencia);
-		ocupacion.setOcupacionEstado(this.ocupacionEstadoRepository.findById(idEstadoOcupacion).get());
+		ocupacion.setOcupacionEstado(this.ocupacionEstadoRepository.findById(idEstadoOcupacion).orElseThrow());
 
-		ocupacion.setProvincia(this.provinciaRepository.findById(ocupacionSaveDto.getIdProvincia()).get());
-		ocupacion.setMunicipio(this.municipioRepository.findById(ocupacionSaveDto.getIdMunicipio()).get());
+		ocupacion.setProvincia(this.provinciaRepository.findById(ocupacionSaveDto.getIdProvincia()).orElseThrow());
+		ocupacion.setMunicipio(this.municipioRepository.findById(ocupacionSaveDto.getIdMunicipio()).orElseThrow());
 		ocupacion.setPoblacion(ocupacionSaveDto.getLocalidad());
 		ocupacion.setLugar(ocupacionSaveDto.getLugar());
 		ocupacion.setTarifa(actualizarTarifaSegunOcupacion(ocupacionSaveDto, ocupacion));
@@ -119,17 +138,9 @@ public class OcupacionServiceImpl implements OcupacionService {
 		ocupacion.setSoloMatinal(ocupacionSaveDto.getSoloMatinal());
 		ocupacion.setActivo(true);
 
-		final Usuario usuario = this.userService.obtenerUsuarioAutenticado();
-		ocupacion.setUsuario(usuario);
 
-		if (ocupacion.getFechaCreacion()==null){
-			ocupacion.setFechaCreacion(LocalDateTime.now());
-			ocupacion.setUsuarioCreacion(usuario.getUsername());
-		}
-		else {
-			ocupacion.setFechaModificacion(LocalDateTime.now());
-			ocupacion.setUsuarioModificacion(usuario.getUsername());
-		}
+
+
 
 		Ocupacion ocupacionSave = this.ocupacionRepository.save(ocupacion);
 
@@ -162,7 +173,7 @@ public class OcupacionServiceImpl implements OcupacionService {
 		Tarifa nuevaTarifa = obtenerTarifaByOcupacion(ocupacionSaveDto,ocupacion);
 
 		nuevaTarifa.setArtista(ocupacion.getArtista());
-		nuevaTarifa.setImporte(ocupacion.getImporte());
+		nuevaTarifa.setImporte(ocupacion.getImporte()!=null ? ocupacion.getImporte() : BigDecimal.ZERO);
 		nuevaTarifa.setFecha(ocupacionSaveDto.getFecha());
 		nuevaTarifa.setActivo(Boolean.TRUE);
 

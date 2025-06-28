@@ -15,11 +15,4 @@ public enum PermisoGeneralEnum {
     private final Integer id;
     private final String descripcion;
 
-    public static String getDescripcionById(Long id) {
-        return Arrays.stream(PermisoGeneralEnum.values())
-                .filter(tipo -> tipo.getId().equals(id))
-                .map(PermisoGeneralEnum::getDescripcion)
-                .findFirst()
-                .orElse(null);
-    }
 }

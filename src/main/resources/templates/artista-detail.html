@@ -19,7 +19,7 @@
         <div th:replace="~{fragments/main-template :: navbar}"/>
         <main class="content">
             <div class="container-fluid p-0">
-                <a th:href="@{/artista}" class="btn btn-primary mt-n1"><i class="fas fa-arrow-left"></i> Volver a artistas</a>
+                <!--<a th:href="@{/artista}" class="btn btn-primary mt-n1"><i class="fas fa-arrow-left"></i> Volver a artistas</a>-->
 
                 <div th:replace="~{fragments/modal-tarifas :: modal-tarifas}"/>
                 <div th:replace="~{fragments/modal-incrementos :: modal-incrementos}"/>
@@ -82,7 +82,7 @@
                                 </ul>
                             </div>
                             <div class="card-body text-center">
-                                <a th:if="${#authorization.expression('hasPermission(' + artistaDto.idAgencia + ', ''AGENCIA'', ''ARTISTAS_EDITAR'')')}" th:href="@{/artista/edit/__${artistaDto.id}__}" class="btn btn-primary">Editar</a>
+                                <a th:if="${#authorization.expression('hasPermission(' + artistaDto.id + ', ''ARTISTA'', ''ARTISTAS_EDITAR'')')}" th:href="@{/artista/edit/__${artistaDto.id}__}" class="btn btn-primary">Editar</a>
                             </div>
                         </div>
 
@@ -90,26 +90,28 @@
 
 
 
-                    <div class="col-12 col-lg-6 order-1 order-lg-2">
-                        <div class="card">
+                    <div class="col-12 col-lg-6 order-1 order-lg-2" th:with="permisoCrearTarifas=${#authorization.expression('hasPermission(' + artistaDto.id + ', ''ARTISTA'', ''CREAR_TARIFAS'')')},
+                                             permisoOcupaciones=${#authorization.expression('hasPermission(' + artistaDto.id + ', ''ARTISTA'', ''OCUPACIONES'')')},
+                                             permisoTarifaAnual=${#authorization.expression('hasPermission(' + artistaDto.id + ', ''ARTISTA'', ''TARIFA_ANUAL'')')}">
+                        <div class="card" th:if="${permisoCrearTarifas or permisoOcupaciones or permisoTarifaAnual}">
                             <div class="card-body text-center">
                                 <div class="mb-3">
-                                    <button th:if="${#authorization.expression('hasPermission(' + artistaDto.idAgencia + ', ''AGENCIA'', ''GESTION_TARIFAS'')')}" type="button" class="btn btn-primary mb-1" data-bs-toggle="modal" data-bs-target="#modalNuevaTarifa">
+                                    <button th:if="${permisoCrearTarifas}" type="button" class="btn btn-primary mb-1" data-bs-toggle="modal" data-bs-target="#modalNuevaTarifa">
                                         <i class="far fa-calendar"></i> Nueva tarifa
                                     </button>
-                                    <button th:if="${#authorization.expression('hasPermission(' + artistaDto.idAgencia + ', ''AGENCIA'', ''OCUPACIONES'')')}" type="button" id="btnModalNuevaOcupacion" class="btn btn-success mb-1" data-bs-toggle="modal" data-bs-target="#modalNuevaOcupacion">
+                                    <button th:if="${permisoOcupaciones}" type="button" id="btnModalNuevaOcupacion" class="btn btn-success mb-1" data-bs-toggle="modal" data-bs-target="#modalNuevaOcupacion">
                                         <i class="far fa-calendar-plus"></i> Nueva ocupación
                                     </button>
-                                    <button th:if="${#authorization.expression('hasPermission(' + artistaDto.idAgencia + ', ''AGENCIA'', ''GESTION_TARIFAS'')')}" id="btn-incrementos" type="button" class="btn btn-secondary mb-1" data-bs-toggle="modal" data-bs-target="#modalIncrementos">
+                                    <button th:if="${permisoCrearTarifas}" id="btn-incrementos" type="button" class="btn btn-secondary mb-1" data-bs-toggle="modal" data-bs-target="#modalIncrementos">
                                         <i class="fa fa-eur"></i> Incrementos provinciales
                                     </button>
-                                    <a th:if="${#authorization.expression('hasPermission(' + artistaDto.idAgencia + ', ''AGENCIA'', ''TARIFA_ANUAL'')')}" type="button" id="btn-tarifa-anual" data-bs-toggle="modal" data-bs-target="#modalTarifaAnual" class="btn btn-info mb-1">
+                                    <a th:if="${permisoTarifaAnual}" type="button" id="btn-tarifa-anual" data-bs-toggle="modal" data-bs-target="#modalTarifaAnual" class="btn btn-info mb-1">
                                         <i class="far fa-calendar-plus"></i> Tarifa anual
                                     </a>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-12 col-lg-12" th:if="${#authorization.expression('hasPermission(' + artistaDto.idAgencia + ', ''AGENCIA'', ''GESTION_TARIFAS'')')}">
+                        <div class="col-12 col-lg-12" th:if="${#authorization.expression('hasPermission(' + artistaDto.id + ', ''ARTISTA'', ''VER_TARIFAS'')')}">
                             <div class="card">
                                 <div class="card-body text-center">
                                     <div id="calendar"></div>

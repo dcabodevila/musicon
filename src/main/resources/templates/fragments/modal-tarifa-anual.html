@@ -34,7 +34,7 @@
               <div class="col-sm-9">
                 <select id="rol-accesos" th:field="*{conOcupacion}" class="form-control choices-single" required>
                   <option value="false">Sin ocupación</option>
-                  <option th:if="${#authorization.expression('hasPermission(' + artistaDto.idAgencia + ', ''AGENCIA'', ''TARIFA_ANAL_CON_OCUPACION'')')}" value="true">Con ocupación</option>
+                  <option th:if="${#authorization.expression('hasPermission(' + artistaDto.id + ', ''ARTISTA'', ''TARIFA_ANUAL_CON_OCUPACION'')')}" value="true">Con ocupación</option>
                 </select>
               </div>
             </div>
@@ -42,7 +42,7 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-            <button type="submit" id="btn-guardar-incremento" class="btn btn-primary">Generar tarifa anual</button>
+            <button type="submit" id="btn-genarar-tarifa-anual" class="btn btn-primary">Generar tarifa anual</button>
           </div>
         </form>
 

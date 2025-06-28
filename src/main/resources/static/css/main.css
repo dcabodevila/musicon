@@ -12,6 +12,7 @@
     --color-reserva: #FCB92C;
     --color-otro: #3788d8;
     --color-texto: #FFFFFF;
+    --color-pendiente: rgb(108, 117, 125); /* Color para eventos pendientes */
 }
 
 .fc-event.tipo-tarifa {
@@ -28,6 +29,11 @@
 .fc-event.tipo-Reservado {
     background-color: var(--color-reserva) !important;
     border-color: var(--color-reserva) !important;
+    color: var(--color-texto) !important;
+}
+.fc-event.estado-pendiente {
+    background-color: var(--color-pendiente) !important;
+    border-color: var(--color-pendiente) !important;
     color: var(--color-texto) !important;
 }
 
@@ -78,14 +84,4 @@
     /* Evitar que el input se superponga al botón */
     .input-wrapper input {
         padding-right: 40px; /* Espacio para el botón de borrar */
-    }
-
-    .modal-dialog.modal-xl.modal-full-height {
-      max-height: 90vh; /* Ajusta el alto máximo al 90% de la altura de la pantalla */
-    }
-    .modal-content {
-      height: 100%; /* Asegúrate de que el contenido use toda la altura disponible */
-    }
-    .modal-body {
-      overflow-y: auto; /* Habilitar desplazamiento en el contenido si es necesario */
     }

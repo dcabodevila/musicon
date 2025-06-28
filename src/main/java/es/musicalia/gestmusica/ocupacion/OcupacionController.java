@@ -75,10 +75,17 @@ public class OcupacionController {
 
         }
         else {
-            ocupacionService.saveOcupacion(ocupacionSaveDto);
-            result.setSuccess(true);
-            result.setMessage("Ocupación guardada");
-            result.setMessageType("success");
+            try {
+                ocupacionService.saveOcupacion(ocupacionSaveDto);
+                result.setSuccess(true);
+                result.setMessage("Ocupación guardada");
+                result.setMessageType("success");
+            } catch (ModificacionOcupacionException e) {
+                result.setSuccess(false);
+                result.setMessage("No tiene permisos para modificar la ocupación de otros usuarios");
+                result.setMessageType("error");
+            }
+
 
 
         }

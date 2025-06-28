@@ -23,7 +23,8 @@
 
             <div class="container-fluid p-0">
 
-                <a th:href="@{/agencia}" class="btn btn-primary mt-n1"><i class="fas fa-arrow-left"></i> Volver a agencias</a>
+                <!--<a th:href="@{/agencia}" class="btn btn-primary mt-n1"><i class="fas fa-arrow-left"></i> Volver a agencias</a>-->
+
                 <div class="mb-3">
                     <h1 class="h3 d-inline align-middle"></h1>
                 </div>
@@ -36,7 +37,7 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-12 col-md-3 col-lg-3">
+                    <div class="col-12 col-md-6 col-lg-3">
                         <div class="card card-max-width">
                             <img class="card-img-top img-max-height" th:if="${agenciaDto.logo!=null}"  th:src="@{${agenciaDto.logo}}" alt="Unsplash">
                             <div class="card-header px-4 pt-4">
@@ -75,7 +76,10 @@
                                         Editar datos agencia
                                     </a>
                                 </div>
+
                             </div>
+
+
 
                             <div class="card-body text-center">
 
@@ -89,13 +93,22 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-12 col-md-9 col-lg-9" th:unless="${#lists.isEmpty(listaArtistas)}">
+                    <div class="col-12 col-md-9 col-lg-9" >
                         <div class="card">
                         <div class="card-header">
                             <h5 class="card-title">Artistas de la agencia</h5>
+                            <div th:with="idAgencia=${agenciaDto.id}">
+                                <a th:if="${#authorization.expression('hasPermission(' + agenciaDto.id + ', ''AGENCIA'', ''ARTISTA_CREAR'')')}"
+                                   th:href="@{/artista/crear/__${agenciaDto.id}__}"
+                                   class="btn btn-primary">
+                                    Nuevo artista
+                                </a>
+                            </div>
                         </div>
                         <div class="card-body">
-                            <div id="datatables-reponsive_wrapper" class="dataTables_wrapper dt-bootstrap5 no-footer">
+
+
+                            <div id="datatables-reponsive_wrapper" class="dataTables_wrapper dt-bootstrap5 no-footer" th:unless="${#lists.isEmpty(listaArtistas)}">
                                 <div class="row">
                                     <div class="col-sm-12">
                                 <table id="datatables-reponsive" class="table table-striped dataTable no-footer dtr-inline collapsed" style="width: 100%;" aria-describedby="datatables-reponsive_info">
@@ -113,7 +126,7 @@
                                         <th class="sorting dtr-hidden dt-head-center" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Escenario</th>
                                         <th class="sorting dtr-hidden" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Tipo escenario</th>
                                         <th class="sorting dtr-hidden" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Medidas escenario</th>
-
+                                        <th></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -132,6 +145,11 @@
                                     <td class="dtr-hidden dt-body-center" th:text="${artista.escenario ? 'Sí' : 'No'}"></td>
                                     <td class="dtr-hidden" th:text="${artista.nombreTipoEscenario}"></td>
                                     <td class="dtr-hidden" th:text="${artista.medidasEscenario}"></td>
+                                    <td class="dtr-control sorting_1" tabindex="0">
+                                        <a type="button" class="btn btn-primary mb-1" th:href="@{/artista/__${artista.id}__}">
+                                            <i class="far fa-edit"></i>
+                                        </a>
+                                    </td>
                                 </tr>
 
                             </tbody>
