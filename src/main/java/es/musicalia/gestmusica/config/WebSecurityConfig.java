@@ -51,7 +51,7 @@ public class WebSecurityConfig {
 		http.csrf().disable()
 				.authorizeHttpRequests()
 				.requestMatchers("/login").permitAll()
-				.requestMatchers("/fragments/**", "/static/**",  "/adminkit/**" , "/img/**").permitAll()
+				.requestMatchers("/fragments/**", "/static/**",  "/adminkit/**" , "/img/**", "/logo/**").permitAll()
 				.requestMatchers("/remember", "/change-pwd/**", "/registration", "/send-remember-mail",
 						"/change-pwd-submit/**", "/js**").permitAll()
 				.anyRequest().authenticated()
@@ -59,8 +59,7 @@ public class WebSecurityConfig {
 				.formLogin().loginPage("/login").permitAll().defaultSuccessUrl("/", true)
 				.and()
 				.logout().invalidateHttpSession(true);
-//				.clearAuthentication(true).
-//				logoutRequestMatcher(new AntPathRequestMatcher("/logout")).logoutSuccessUrl("/logout-success").permitAll();
+
 
 		return http.build();
 	}
