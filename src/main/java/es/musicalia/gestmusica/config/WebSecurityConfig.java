@@ -51,7 +51,7 @@ public class WebSecurityConfig {
 		http.csrf().disable()
 				.authorizeHttpRequests()
 				.requestMatchers("/login").permitAll()
-				.requestMatchers("/fragments/**", "/static/**",  "/adminkit/**" , "/img/**", "/logo/**").permitAll()
+				.requestMatchers("/fragments/**", "/static/**",  "/adminkit/**" , "/img/**", "/logo/**", "/favicon.ico", "/manifest.json").permitAll()
 				.requestMatchers("/remember", "/change-pwd/**", "/registration", "/send-remember-mail",
 						"/change-pwd-submit/**", "/js**").permitAll()
 				.anyRequest().authenticated()
