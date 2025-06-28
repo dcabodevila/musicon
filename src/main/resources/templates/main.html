@@ -6,6 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <meta name="description" content="">
         <meta name="author" content=""><head>
+
         <div th:replace="~{fragments/main-template :: header-css}"/>
     </head>
 
@@ -97,65 +98,5 @@
     <script type="text/javascript" th:src="@{/js/comun.js}"></script>
     <script type="text/javascript" th:src="@{/js/main.js}"></script>
     
-    <!-- Script para detectar el gesto de swipe -->
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Variables para el seguimiento de los eventos táctiles
-        let touchStartX = 0;
-        let touchEndX = 0;
-        let touchStartY = 0;
-        let touchEndY = 0;
-        const swipeThreshold = 100; // Distancia mínima para considerar un swipe
-        const swipeRestraint = 100; // Restricción vertical para evitar confundir con desplazamiento vertical
-        
-        // Detectar el inicio del toque
-        document.addEventListener('touchstart', function(e) {
-            // Solo detectamos swipes que comienzan cerca del borde izquierdo
-            if (e.touches[0].clientX < 50) {
-                touchStartX = e.touches[0].clientX;
-                touchStartY = e.touches[0].clientY;
-            }
-        }, false);
-        
-        // Detectar el final del toque
-        document.addEventListener('touchend', function(e) {
-            touchEndX = e.changedTouches[0].clientX;
-            touchEndY = e.changedTouches[0].clientY;
-            handleSwipe();
-        }, false);
-        
-        // Manejar el gesto de swipe
-        function handleSwipe() {
-            // Calcular distancias
-            const horizontalDistance = touchEndX - touchStartX;
-            const verticalDistance = Math.abs(touchEndY - touchStartY);
-            
-            // Verificar si es un swipe horizontal (de izquierda a derecha) y no un desplazamiento vertical
-            if (horizontalDistance > swipeThreshold && verticalDistance < swipeRestraint && touchStartX < 50) {
-                // Es un swipe válido de izquierda a derecha, activar el botón del sidebar
-                const sidebarToggle = document.querySelector('.sidebar-toggle.js-sidebar-toggle');
-                if (sidebarToggle) {
-                    sidebarToggle.click();
-                }
-            }
-        }
-        
-        // Área de detección para swipe desde el borde
-        const swipeArea = document.getElementById('swipeArea');
-        
-        // Evitar el desplazamiento de página cuando se inicia un toque en el área de swipe
-        swipeArea.addEventListener('touchstart', function(e) {
-            e.preventDefault();
-            touchStartX = e.touches[0].clientX;
-            touchStartY = e.touches[0].clientY;
-        }, { passive: false });
-        
-        swipeArea.addEventListener('touchend', function(e) {
-            touchEndX = e.changedTouches[0].clientX;
-            touchEndY = e.changedTouches[0].clientY;
-            handleSwipe();
-        }, false);
-    });
-    </script>
     </body>
 </html>
