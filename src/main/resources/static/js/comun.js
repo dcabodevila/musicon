@@ -81,7 +81,7 @@ function notif(type, message){
 
 function notifDuration(type, message, duration){
     let ripple = true;
-    let dismissible = false;
+    let dismissible = true;
     window.notyf.open({
         type,
         message,
