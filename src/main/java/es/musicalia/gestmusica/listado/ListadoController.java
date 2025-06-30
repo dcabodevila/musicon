@@ -86,20 +86,20 @@ public class ListadoController {
     public ResponseEntity<byte[]> generarListado(Model model, @ModelAttribute("listadoDto") @Valid ListadoDto listadoDto,
                                  BindingResult bindingResult, RedirectAttributes redirectAttributes, Errors errors) {
 
-
         byte[] informeGenerado = this.listadoService.generarInformeListado(listadoDto);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        headers.setContentType(MediaType.APPLICATION_PDF); // Específico para PDF
         String fileNameToExport = "Listado_".concat(TipoOcupacionEnum.getDescripcionById(listadoDto.getIdTipoOcupacion())).concat(DateUtils.getDateStr(new Date(), "ddMMyyyyHHmmss")).concat(".pdf");
+        
+        // Headers mejorados para compatibilidad móvil
         headers.setContentDispositionFormData("attachment", fileNameToExport);
+        headers.add("Content-Description", "File Transfer");
+        headers.add("Content-Transfer-Encoding", "binary");
+        headers.add("Cache-Control", "must-revalidate, post-check=0, pre-check=0");
+        headers.add("Pragma", "public");
+        headers.setContentLength(informeGenerado.length);
 
-        return new ResponseEntity<byte[]>(informeGenerado,headers, HttpStatus.OK);
-
-
-
+        return new ResponseEntity<byte[]>(informeGenerado, headers, HttpStatus.OK);
     }
-
-
-
 }
