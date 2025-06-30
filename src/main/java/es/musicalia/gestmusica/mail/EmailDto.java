@@ -33,6 +33,7 @@ public class EmailDto {
 
     private String plainContent;
 
+    @Builder.Default
     private boolean isHtml = false;
 
     private List<String> attachments;

@@ -48,19 +48,24 @@ public class WebSecurityConfig {
 	}
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		http.csrf().disable()
-				.authorizeHttpRequests()
-				.requestMatchers("/auth/**").permitAll()
-				.requestMatchers("/fragments/**", "/static/**",  "/adminkit/**" , "/img/**", "/logo/**", "/favicon.ico", "/js**").permitAll()
-//				.requestMatchers("/remember", "/change-pwd/**", "/registration", "/send-remember-mail","/change-pwd-submit/**").permitAll()
-				.anyRequest().authenticated()
-				.and()
-				.formLogin().loginPage("/auth/login").permitAll().defaultSuccessUrl("/", true)
-				.and()
-				.logout().invalidateHttpSession(true);
+        http
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(authz -> authz
+                .requestMatchers("/auth/**").permitAll()
+                .requestMatchers("/fragments/**", "/static/**", "/adminkit/**", "/img/**", "/logo/**", "/favicon.ico", "/js**").permitAll()
+                // .requestMatchers("/remember", "/change-pwd/**", "/registration", "/send-remember-mail","/change-pwd-submit/**").permitAll()
+                .anyRequest().authenticated()
+            )
+            .formLogin(form -> form
+                .loginPage("/auth/login")
+                .permitAll()
+                .defaultSuccessUrl("/", true)
+            )
+            .logout(logout -> logout
+                .invalidateHttpSession(true)
+            );
 
-
-		return http.build();
+        return http.build();
 	}
 	@Bean
 	public MethodSecurityExpressionHandler methodSecurityExpressionHandler(CustomPermissionEvaluator permissionEvaluator) {
