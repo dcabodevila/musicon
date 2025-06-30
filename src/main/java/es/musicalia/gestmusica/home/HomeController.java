@@ -6,36 +6,37 @@ import es.musicalia.gestmusica.auth.model.RegistrationForm;
 import es.musicalia.gestmusica.auth.model.SecurityService;
 import es.musicalia.gestmusica.ocupacion.OcupacionService;
 import es.musicalia.gestmusica.permiso.PermisoAgenciaEnum;
+import es.musicalia.gestmusica.permiso.PermisoGeneralEnum;
+import es.musicalia.gestmusica.usuario.CodigoVerificacion;
+import es.musicalia.gestmusica.usuario.CodigoVerificacionService;
+import es.musicalia.gestmusica.usuario.EmailYaExisteException;
 import es.musicalia.gestmusica.usuario.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Controller
 public class HomeController {
-    private Logger logger = LoggerFactory.getLogger(AgenciasController.class);
 
-    private final UserService userService;
-    private final SecurityService securityService;
     private final OcupacionService ocupacionService;
 
-    public HomeController(UserService userService, SecurityService securityService, OcupacionService ocupacionService){
-        this.userService = userService;
-        this.securityService = securityService;
+    public HomeController(OcupacionService ocupacionService){
         this.ocupacionService = ocupacionService;
-
     }
 
     @GetMapping("/")
@@ -51,73 +52,15 @@ public class HomeController {
     }
 
     @GetMapping("/admin")
+    @PreAuthorize("hasAuthority('ACCESO_PANEL_ADMIN')")
     public String admin() {
         return "/admin";
     }
 
     @GetMapping("/user")
+    @PreAuthorize("hasAuthority('USUARIOS')")
     public String user() {
         return "/user";
-    }
-
-    @GetMapping("/login-redirect")
-    public String loginRedirect() {
-        return "redirect:/";
-    }
-
-    @GetMapping(value = "/login")
-    public String login(Model model, String error, String logout) {
-        if (error != null) {
-            model.addAttribute("error", "Your username and password is invalid.");
-        }
-
-        if (logout != null) {
-            model.addAttribute("message", "You have been logged out successfully.");
-
-        }
-        SecurityContextHolder.clearContext();
-        return "login";
-    }
-
-    @GetMapping("/registration")
-    public String registration(Model model) {
-        model.addAttribute("registrationForm", new RegistrationForm());
-
-        return "registration";
-    }
-
-    @PostMapping("/registration")
-    public String registration(Model model, @ModelAttribute("registrationForm") @Valid RegistrationForm registrationForm,
-                               BindingResult bindingResult, Errors errors) {
-
-
-
-
-        if (userService.usernameExists(registrationForm.getUsername().trim())){
-            bindingResult.rejectValue("username", "error.username-exists", "El nombre de usuario ya existe");
-        }
-        if (!registrationForm.getPassword().equals(registrationForm.getRetryPassword())){
-            bindingResult.rejectValue("password", "error.password-retry", "Las contraseñas no coinciden");
-            bindingResult.rejectValue("retryPassword", "error.password-retry", "Las contraseñas no coinciden");
-        }
-
-        if (bindingResult.hasErrors()) {
-            return "registration";
-        }
-
-        try {
-
-            userService.saveRegistration(registrationForm);
-        }
-        catch (Exception e){
-            bindingResult.rejectValue("error-guardado", "error.error-guardado", "Error en el guardado del registro");
-            model.addAttribute("errors", errors);
-
-            logger.error("Error en el guardado del registro", e);
-
-        }
-
-        return "redirect:/";
     }
 
     @GetMapping("/403")

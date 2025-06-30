@@ -37,11 +37,10 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService {
 	@Override
 	@Transactional(readOnly = false)
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		final String emailPattern = "^[A-Za-z0-9+_.-]+@(.+)$";
+		final String trimmedUsername = username.trim();
+		final Usuario usuario = trimmedUsername.matches(emailPattern) ? this.usuarioRepository.findUsuarioActivoByMail(trimmedUsername).orElseThrow( () -> new UsernameNotFoundException(username)) : this.usuarioRepository.findByUsername(trimmedUsername).orElseThrow(() -> new UsernameNotFoundException(username));
 
-		final Usuario usuario = this.usuarioRepository.findByUsername(username.trim());
-		if (usuario == null) {
-			throw new UsernameNotFoundException(username);
-		}
 		final List<GrantedAuthority> auth = new ArrayList<GrantedAuthority>();
 		if (usuario.getRolGeneral()!=null){
 			final Set<Permiso> permisos = usuario.getRolGeneral().getPermisos();

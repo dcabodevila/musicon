@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificar Email - Gestmusica</title>
+    <div th:replace="~{fragments/main-template :: header-css}"/>
+
+    <style>
+        .verification-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            animation: slideInUp 0.6s ease-out;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .code-input {
+            font-size: 32px;
+            font-weight: bold;
+            letter-spacing: 12px;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            border: 3px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 15px;
+            background: #f7fafc;
+            transition: all 0.3s ease;
+            color: #667eea;
+        }
+
+        .code-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            outline: none;
+            background: white;
+        }
+
+        .email-display {
+            background: linear-gradient(135deg, #f7fafc, #edf2f7);
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 15px;
+            font-weight: 600;
+            color: #2d3748;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body data-theme="default" data-layout="fluid">
+<main class="d-flex w-100 h-100">
+    <div class="container d-flex flex-column">
+        <div class="row vh-100">
+            <div class="col-sm-10 col-md-8 col-lg-6 mx-auto d-table h-100">
+                <div class="d-table-cell align-middle">
+                    <div class="verification-container mx-auto">
+                        
+                        <!-- Header -->
+                        <div class="verification-header mb-4">
+                            <h1 class="h2">Verificar Email</h1>
+                            <p class="lead">Activar Cuenta</p>
+                        </div>
+
+                        <!-- Mensaje de éxito inicial -->
+                        <div th:if="${message}" class="alert alert-success" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <span th:text="${message}"></span>
+                        </div>
+
+                        <!-- Información del email -->
+                        <div class="info-text mb-3">
+                            <p><strong>Se ha enviado un código de verificación a:</strong></p>
+                            <div class="email-display">
+                                <i class="fas fa-envelope me-2"></i>
+                                <span th:text="${email}">email@ejemplo.com</span>
+                            </div>
+                        </div>
+
+                        <!-- Formulario de verificación -->
+                        <form id="verificationForm">
+                            <input type="hidden" id="email" name="email" th:value="${email}">
+
+                            <div class="code-input-container mb-3">
+                                <label for="codigo" class="form-label fw-bold">Código de verificación:</label>
+                                <input type="text"
+                                       class="form-control code-input"
+                                       id="codigo"
+                                       name="codigo"
+                                       maxlength="4"
+                                       pattern="[0-9]{4}"
+                                       placeholder="****"
+                                       required>
+                                <small class="form-text text-muted">Ingresa el código de 4 dígitos</small>
+                            </div>
+
+                            <!-- Mensajes de estado -->
+                            <div id="message-container"></div>
+
+                            <!-- Botón verificar -->
+                            <button type="submit" class="btn btn-primary btn-lg w-100 mb-3" id="verifyBtn">
+                                Verificar Email
+                            </button>
+
+                            <!-- Botón reenviar -->
+                            <button type="button" class="btn btn-outline-secondary w-100 mb-3" id="resendBtn">
+                                Reenviar Código
+                            </button>
+
+                            <!-- Volver -->
+                            <a th:href="@{/auth/registration}" class="btn btn-outline-primary w-100">
+                                Volver al Registro
+                            </a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('verificationForm');
+    const verifyBtn = document.getElementById('verifyBtn');
+    const resendBtn = document.getElementById('resendBtn');
+    const messageContainer = document.getElementById('message-container');
+    const codigoInput = document.getElementById('codigo');
+    const emailInput = document.getElementById('email');
+
+    // Auto-focus en el input del código
+    codigoInput.focus();
+
+    // Solo permitir números en el campo código y auto-submit
+    codigoInput.addEventListener('input', function() {
+        this.value = this.value.replace(/[^0-9]/g, '');
+        
+        if (this.value.length === 4) {
+            setTimeout(() => {
+                form.dispatchEvent(new Event('submit'));
+            }, 300);
+        }
+    });
+
+    // Verificar código
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const email = emailInput.value;
+        const codigo = codigoInput.value;
+
+        if (codigo.length !== 4) {
+            showMessage('El código debe tener 4 dígitos', 'danger');
+            return;
+        }
+
+        verifyBtn.disabled = true;
+        verifyBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Verificando...';
+
+        fetch('/auth/verify-email', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `email=${encodeURIComponent(email)}&codigo=${encodeURIComponent(codigo)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showMessage(data.message, 'success');
+                setTimeout(() => {
+                    window.location.href = data.redirect || '/auth/login';
+                }, 1500);
+            } else {
+                showMessage(data.message, 'danger');
+                codigoInput.value = '';
+                codigoInput.focus();
+            }
+        })
+        .catch(error => {
+            showMessage('Error de conexión. Inténtalo de nuevo.', 'danger');
+        })
+        .finally(() => {
+            verifyBtn.disabled = false;
+            verifyBtn.innerHTML = 'Verificar Email';
+        });
+    });
+
+    // Reenviar código
+    resendBtn.addEventListener('click', function() {
+        const email = emailInput.value;
+        
+        resendBtn.disabled = true;
+        resendBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Reenviando...';
+
+        fetch('/auth/resend-code', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `email=${encodeURIComponent(email)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            showMessage(data.message, data.success ? 'success' : 'warning');
+            
+            if (data.success) {
+                // Deshabilitar botón por 60 segundos
+                let countdown = 60;
+                const interval = setInterval(() => {
+                    resendBtn.innerHTML = `<i class="fas fa-clock me-2"></i>Reenviar (${countdown}s)`;
+                    countdown--;
+
+                    if (countdown < 0) {
+                        clearInterval(interval);
+                        resendBtn.disabled = false;
+                        resendBtn.innerHTML = 'Reenviar Código';
+                    }
+                }, 1000);
+            } else {
+                resendBtn.disabled = false;
+                resendBtn.innerHTML = 'Reenviar Código';
+            }
+        })
+        .catch(error => {
+            showMessage('Error reenviando código.', 'danger');
+            resendBtn.disabled = false;
+            resendBtn.innerHTML = 'Reenviar Código';
+        });
+    });
+
+    function showMessage(message, type) {
+        messageContainer.innerHTML = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+    }
+});
+</script>
+
+</body>
+</html>

@@ -2,16 +2,17 @@ package es.musicalia.gestmusica.usuario;
 
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.auth.model.RegistrationForm;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.*;
-
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
@@ -20,6 +21,10 @@ public class UserServiceImpl implements UserService {
 	private UsuarioRepository userRepository;
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+	@Autowired
+	private CodigoVerificacionService codigoVerificacionService;
+
+
 	@Override
 	public Usuario save(Usuario usuario) {
 		usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
@@ -27,11 +32,33 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Transactional(readOnly = false)
-	public Usuario saveRegistration(RegistrationForm registrationForm) {
+	public Usuario saveRegistration(RegistrationForm registrationForm) throws EmailYaExisteException {
 
-		final Usuario user = registrationFormToUsuario(registrationForm);
-		return userRepository.saveAndFlush(user);
+		if (userRepository.existsUsuarioByEmail(registrationForm.getEmail())) {
+			throw new EmailYaExisteException("El email ya está registrado");
+		}
+		Usuario user = registrationFormToUsuario(registrationForm);
+		userRepository.save(user);
+
+		// Generar y enviar código de verificación
+		try {
+			codigoVerificacionService.generarYEnviarCodigo(
+					registrationForm.getEmail(),
+					CodigoVerificacion.TipoVerificacion.REGISTRO
+			);
+			log.info("Código de verificación enviado a: {}", registrationForm.getEmail());
+		} catch (Exception e) {
+			log.error("Error enviando código de verificación: {}", e.getMessage());
+			// Eliminar usuario si no se pudo enviar el código
+			userRepository.delete(user);
+			throw new RuntimeException("No se pudo enviar el código de verificación. Inténtalo de nuevo.");
+		}
+
+
+		return user;
 	}
+	
+	
 
 
 	private Usuario registrationFormToUsuario(RegistrationForm registrationForm) {
@@ -46,43 +73,37 @@ public class UserServiceImpl implements UserService {
 		user.setActivo(false);
 		return user;
 	}
-	@Override
-	public Usuario findByUsername(String username) {
-		return userRepository.findByUsername(username);
-	}
+
 	@Override
 	public boolean usernameExists(final String username) {
-		return userRepository.existsUsuarioByUsername(username);
+		return userRepository.existsUsuarioActivoByUsername(username);
 	}
 
 
 	@Transactional(readOnly = false)
 	public Usuario changePassword(String userName, String pwd) {
-		final Usuario usuario = this.userRepository.findByUsername(userName);
+		final Usuario usuario = this.userRepository.findByUsername(userName).orElseThrow(() -> new UsernameNotFoundException(userName));
 		usuario.setPassword(passwordEncoder.encode(pwd));
 		return this.userRepository.save(usuario);
 	}
-	@Override
-	public Usuario findByToken(String token) {
-		return userRepository.findByToken(token);
-	}
+
 
 	@Override
 	public boolean isUserAutheticated() {
 		return !SecurityContextHolder.getContext().getAuthentication().getName().equals("anonymousUser");
 	}
-	@Override
-	public UserDetails obtenerUserDetails() {
-		Object userDetails = SecurityContextHolder.getContext().getAuthentication().getDetails();
-		if (userDetails instanceof UserDetails) {
-			return ((UserDetails) userDetails);
-		}
-		return null;
 
-	}
 	@Override
 	public List<UsuarioRecord> findAllUsuarioRecords(){
 		return this.userRepository.findAllUsuarioRecords();
+	}
+
+	@Transactional(readOnly = false)
+	@Override
+	public Usuario activateUserByEmail(String email) throws UsuarioNoEncontradoException {
+		Usuario usuario = userRepository.findUsuarioByMail(email).orElseThrow(() -> new UsuarioNoEncontradoException("No se encontró usuario con email: " + email));
+		usuario.setActivo(true);
+		return userRepository.save(usuario);
 	}
 
 	@Override
@@ -96,6 +117,22 @@ public class UserServiceImpl implements UserService {
 		}
 		return null;
 
+	}
+
+
+	@Transactional(readOnly = false)
+	@Override
+	public Usuario changePasswordByEmail(String email, String newPassword) throws UsuarioNoEncontradoException {
+		final Usuario usuario = this.userRepository.findUsuarioByMail(email)
+				.orElseThrow(() -> new UsuarioNoEncontradoException("No se encontró usuario con email: " + email));
+		usuario.setPassword(passwordEncoder.encode(newPassword));
+		usuario.setActivo(true);
+		return this.userRepository.save(usuario);
+	}
+
+	@Override
+	public boolean existsUsuarioByEmail(String email) {
+		return userRepository.existsUsuarioByEmail(email);
 	}
 
 }

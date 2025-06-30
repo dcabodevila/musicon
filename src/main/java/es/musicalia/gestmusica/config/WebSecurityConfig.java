@@ -50,13 +50,12 @@ public class WebSecurityConfig {
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http.csrf().disable()
 				.authorizeHttpRequests()
-				.requestMatchers("/login").permitAll()
-				.requestMatchers("/fragments/**", "/static/**",  "/adminkit/**" , "/img/**", "/logo/**", "/favicon.ico", "/manifest.json").permitAll()
-				.requestMatchers("/remember", "/change-pwd/**", "/registration", "/send-remember-mail",
-						"/change-pwd-submit/**", "/js**").permitAll()
+				.requestMatchers("/auth/**").permitAll()
+				.requestMatchers("/fragments/**", "/static/**",  "/adminkit/**" , "/img/**", "/logo/**", "/favicon.ico", "/js**").permitAll()
+//				.requestMatchers("/remember", "/change-pwd/**", "/registration", "/send-remember-mail","/change-pwd-submit/**").permitAll()
 				.anyRequest().authenticated()
 				.and()
-				.formLogin().loginPage("/login").permitAll().defaultSuccessUrl("/", true)
+				.formLogin().loginPage("/auth/login").permitAll().defaultSuccessUrl("/", true)
 				.and()
 				.logout().invalidateHttpSession(true);
 
