@@ -25,6 +25,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 
 @Controller
@@ -83,16 +85,27 @@ public class ListadoController {
     }
 
     @PostMapping("/generar")
-    public ResponseEntity<byte[]> generarListado(Model model, @ModelAttribute("listadoDto") @Valid ListadoDto listadoDto,
-                                 BindingResult bindingResult, RedirectAttributes redirectAttributes, Errors errors) {
-
-        byte[] informeGenerado = this.listadoService.generarInformeListado(listadoDto);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_PDF); // Específico para PDF
-        String fileNameToExport = "Listado_".concat(TipoOcupacionEnum.getDescripcionById(listadoDto.getIdTipoOcupacion())).concat(DateUtils.getDateStr(new Date(), "ddMMyyyyHHmmss")).concat(".pdf");
+    public ResponseEntity<?> generarListado(@ModelAttribute("listadoDto") @Valid ListadoDto listadoDto,
+                                       BindingResult bindingResult) {
+    try {
+        // Validar errores de binding
+        if (bindingResult.hasErrors()) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Datos del formulario inválidos");
+            return ResponseEntity.badRequest()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(errorResponse);
+        }
         
-        // Headers mejorados para compatibilidad móvil
+        byte[] informeGenerado = this.listadoService.generarInformeListado(listadoDto);
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        String fileNameToExport = "Listado_"
+            .concat(TipoOcupacionEnum.getDescripcionById(listadoDto.getIdTipoOcupacion()))
+            .concat(DateUtils.getDateStr(new Date(), "ddMMyyyyHHmmss"))
+            .concat(".pdf");
+        
         headers.setContentDispositionFormData("attachment", fileNameToExport);
         headers.add("Content-Description", "File Transfer");
         headers.add("Content-Transfer-Encoding", "binary");
@@ -100,6 +113,15 @@ public class ListadoController {
         headers.add("Pragma", "public");
         headers.setContentLength(informeGenerado.length);
 
-        return new ResponseEntity<byte[]>(informeGenerado, headers, HttpStatus.OK);
+        return new ResponseEntity<>(informeGenerado, headers, HttpStatus.OK);
+        
+    } catch (Exception e) {
+        logger.error("Error generando listado", e);
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("message", "Error al generar el presupuesto: " + e.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(errorResponse);
     }
+}
 }

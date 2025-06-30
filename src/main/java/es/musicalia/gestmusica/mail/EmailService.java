@@ -28,7 +28,7 @@ public class EmailService {
     @Value("${spring.mail.username}")
     private String fromEmail;
 
-    @Value("${spring.mail.sender.name:GestMusica}")
+    @Value("${spring.mail.sender.name:Gestmusica}")
     private String senderName;
 
     /**

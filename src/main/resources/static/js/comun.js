@@ -79,6 +79,22 @@ function notif(type, message){
     });
 }
 
+function notifDuration(type, message, duration){
+    let ripple = true;
+    let dismissible = false;
+    window.notyf.open({
+        type,
+        message,
+        duration,
+        ripple,
+        dismissible,
+        position: {
+            x: "center",
+            y: "top"
+        }
+    });
+}
+
   function showConfirmationModal(callback) {
       // Mostrar la modal
       const modalElement = document.getElementById('modalConfirmacion');

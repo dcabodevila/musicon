@@ -243,6 +243,133 @@ $(document).ready(function(){
     });
 
 
+   // Manejar el submit del formulario de tarifa anual
+    $('#modalTarifaAnual form').on('submit', function(e) {
+        e.preventDefault();
+
+        generarTarifaAnualAjax();
+    });
+
+    function generarTarifaAnualAjax() {
+        // Deshabilitar el botón
+        const $btn = $('#btn-genarar-tarifa-anual');
+        const textoOriginal = $btn.text();
+        $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Generando...');
+
+        const formData = $('#modalTarifaAnual form').serialize();
+        const actionUrl = $('#modalTarifaAnual form').attr('action');
+
+        $.ajax({
+            type: 'POST',
+            url: actionUrl,
+            data: formData,
+            xhrFields: {
+                responseType: 'blob'
+            },
+            success: function(data, status, xhr) {
+                // Rehabilitar el botón
+                $btn.prop('disabled', false).text(textoOriginal);
+
+                // Verificar si la respuesta es realmente un PDF
+                const contentType = xhr.getResponseHeader('Content-Type');
+                if (!contentType || (!contentType.includes('application/pdf') && !contentType.includes('application/octet-stream'))) {
+                    notif('error', 'Error: La respuesta del servidor no es válida');
+                    return;
+                }
+
+                // Obtener el nombre del archivo
+                const contentDisposition = xhr.getResponseHeader('Content-Disposition');
+                let filename = 'tarifa_anual_' + new Date().getTime() + '.pdf';
+
+                if (contentDisposition) {
+                    const matches = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+                    if (matches != null && matches[1]) {
+                        filename = matches[1].replace(/['"]/g, '');
+                    }
+                }
+                // Crear y descargar el archivo
+                const blob = new Blob([data], { type: 'application/pdf' });
+
+                // Para navegadores modernos
+                const url = window.URL.createObjectURL(blob);
+
+                // 1. Descarga automática
+                const downloadLink = document.createElement('a');
+                downloadLink.style.display = 'none';
+                downloadLink.href = url;
+                downloadLink.download = filename;
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+
+                // 2. Mostrar notificación con opción de abrir
+                const notification = notifDuration('success',
+                    `Tarifa anual descargada
+                    <br><button onclick="window.open('${url}', '_blank')" class="btn btn-sm btn-outline-light mt-2">
+                        <i class="fas fa-eye"></i> Abrir PDF
+                    </button>`,15000
+                );
+
+                // Cleanup después de un tiempo
+                setTimeout(() => {
+                    document.body.removeChild(downloadLink);
+                    window.URL.revokeObjectURL(url);
+                }, 5000);
+                // Cerrar el modal y mostrar notificación de éxito
+                $('#modalTarifaAnual').modal('hide');
+            },
+            error: function(xhr, status, error) {
+                // Rehabilitar el botón
+                $btn.prop('disabled', false).text(textoOriginal);
+
+                console.error('Error al generar tarifa anual:', error);
+
+                let errorMessage = 'Error al generar la tarifa anual';
+
+                // Si la respuesta es texto/JSON, intentar leerla
+                if (xhr.responseText) {
+                    try {
+                        const reader = new FileReader();
+                        reader.onload = function() {
+                            try {
+                                const errorData = JSON.parse(reader.result);
+                                if (errorData.message) {
+                                    notif('error', errorData.message);
+                                    return;
+                                }
+                            } catch (e) {
+                                // No es JSON, usar mensaje genérico
+                            }
+                            notif('error', errorMessage);
+                        };
+                        reader.readAsText(new Blob([xhr.response]));
+                        return;
+                    } catch (e) {
+                        // Error al leer la respuesta
+                    }
+                }
+
+                // Mensajes específicos por código de estado
+                switch (xhr.status) {
+                    case 400:
+                        errorMessage = 'Datos del formulario inválidos. Verifica provincia, año y ocupación.';
+                        break;
+                    case 403:
+                        errorMessage = 'No tienes permisos para generar esta tarifa anual';
+                        break;
+                    case 500:
+                        errorMessage = 'Error interno del servidor al generar la tarifa';
+                        break;
+                    case 0:
+                        errorMessage = 'Error de conexión con el servidor';
+                        break;
+                }
+
+                notif('error', errorMessage);
+            }
+        });
+    }
+
+
 });
 
 
@@ -271,16 +398,10 @@ function cargarListaIncrementos(){
             // Agregar eventos click a los botones de editar y eliminar
             $('.editar').click(function() {
                 var id = $(this).data('id');
-                // Aquí puedes implementar la lógica para editar el objeto con el ID proporcionado
-                // Por ejemplo, puedes redirigir a una página de edición o mostrar un formulario emergente.
-                console.log('Editar objeto con ID:', id);
             });
 
             $('.eliminar').click(function() {
                 var id = $(this).data('id');
-                // Aquí puedes implementar la lógica para eliminar el objeto con el ID proporcionado
-                // Por ejemplo, puedes mostrar una confirmación y realizar la eliminación a través de AJAX.
-                console.log('Eliminar objeto con ID:', id);
             });
         },
         error: function(error) {
@@ -293,22 +414,6 @@ function cargarListaIncrementos(){
 
 }
 
-function notif(type, message){
-    let duration = "5000";
-    let ripple = true;
-    let dismissible = false;
-    window.notyf.open({
-        type,
-        message,
-        duration,
-        ripple,
-        dismissible,
-        position: {
-            x: "center",
-            y: "top"
-        }
-    });
-}
 function guardar_tarifas() {
 
     let tarifaSaveDto = crearTarifaSaveDto();
