@@ -3,10 +3,14 @@ package es.musicalia.gestmusica.incremento;
 import es.musicalia.gestmusica.artista.Artista;
 import es.musicalia.gestmusica.localizacion.Provincia;
 import jakarta.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "incremento_provincial", schema="gestmusica")
 public class Incremento {
     @Id
@@ -31,44 +35,4 @@ public class Incremento {
     @NotNull
     private BigDecimal incremento;
 
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-
-    public TipoIncremento getTipoIncremento() {
-        return tipoIncremento;
-    }
-
-    public void setTipoIncremento(TipoIncremento tipoIncremento) {
-        this.tipoIncremento = tipoIncremento;
-    }
-
-    public Artista getArtista() {
-        return artista;
-    }
-
-    public void setArtista(Artista artista) {
-        this.artista = artista;
-    }
-
-    public Provincia getProvincia() {
-        return provincia;
-    }
-
-    public void setProvincia(Provincia provincia) {
-        this.provincia = provincia;
-    }
-
-    public BigDecimal getIncremento() {
-        return incremento;
-    }
-
-    public void setIncremento(BigDecimal incremento) {
-        this.incremento = incremento;
-    }
 }

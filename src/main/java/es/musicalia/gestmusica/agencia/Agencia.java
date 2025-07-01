@@ -6,9 +6,9 @@ import es.musicalia.gestmusica.localizacion.Municipio;
 import es.musicalia.gestmusica.localizacion.Provincia;
 import es.musicalia.gestmusica.usuario.Usuario;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-import javax.validation.constraints.NotNull;
 import java.util.Set;
 
 @Entity

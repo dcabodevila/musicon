@@ -10,6 +10,7 @@ import es.musicalia.gestmusica.localizacion.LocalizacionService;
 import es.musicalia.gestmusica.usuario.UserService;
 import es.musicalia.gestmusica.usuario.Usuario;
 import es.musicalia.gestmusica.util.DateUtils;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -23,7 +24,6 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.validation.Valid;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,17 +38,15 @@ public class ListadoController {
     private final UserService userService;
     private final LocalizacionService localizacionService;
     private final ListadoService listadoService;
-    private final InformeService informeService;
     private final ArtistaService artistaService;
     private final AgenciaService agenciaService;
     private final AjustesService ajustesService;
-    public ListadoController(UserService userService, LocalizacionService localizacionService, ListadoService listadoService, InformeService informeService, ArtistaService artistaService,
+    public ListadoController(UserService userService, LocalizacionService localizacionService, ListadoService listadoService, ArtistaService artistaService,
                              AgenciaService agenciaService, AjustesService ajustesService){
 
         this.userService = userService;
         this.localizacionService = localizacionService;
         this.listadoService = listadoService;
-        this.informeService = informeService;
         this.artistaService = artistaService;
         this.agenciaService = agenciaService;
         this.ajustesService = ajustesService;

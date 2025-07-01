@@ -1,17 +1,12 @@
 package es.musicalia.gestmusica.auth.model;
 
-import es.musicalia.gestmusica.agencia.AgenciasController;
-import es.musicalia.gestmusica.ocupacion.OcupacionService;
-import es.musicalia.gestmusica.permiso.PermisoAgenciaEnum;
 import es.musicalia.gestmusica.usuario.CodigoVerificacion;
 import es.musicalia.gestmusica.usuario.CodigoVerificacionService;
 import es.musicalia.gestmusica.usuario.EmailYaExisteException;
 import es.musicalia.gestmusica.usuario.UserService;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -19,10 +14,8 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.validation.Valid;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+
 @Slf4j
 @Controller
 @RequestMapping(value="auth")

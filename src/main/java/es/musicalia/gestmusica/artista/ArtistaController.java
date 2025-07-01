@@ -1,6 +1,5 @@
 package es.musicalia.gestmusica.artista;
 
-
 import es.musicalia.gestmusica.agencia.AgenciaService;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.file.FileService;
@@ -10,8 +9,8 @@ import es.musicalia.gestmusica.ocupacion.OcupacionService;
 import es.musicalia.gestmusica.tarifa.TarifaAnualDto;
 import es.musicalia.gestmusica.usuario.UserService;
 import es.musicalia.gestmusica.usuario.Usuario;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,13 +20,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.validation.Valid;
 import java.time.Year;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
-
+@Slf4j
 @Controller
 @RequestMapping(value="artista")
 public class ArtistaController {
@@ -41,8 +39,6 @@ public class ArtistaController {
     private final IncrementoService incrementoService;
     private final OcupacionService ocupacionService;
 
-
-    private Logger logger = LoggerFactory.getLogger(ArtistaController.class);
 
     public ArtistaController(UserService userService, ArtistaService artistaService, FileService fileService, AgenciaService agenciaService,
                              LocalizacionService localizacionService, IncrementoService incrementoService, OcupacionService ocupacionService){
@@ -152,7 +148,7 @@ public class ArtistaController {
             return "redirect:/agencia/"+ artistaDto.getIdAgencia();
 
         } catch (Exception e){
-            logger.error("Error guardando artista", e);
+            log.error("Error guardando artista", e);
             model.addAttribute("message", "Error guardando artista");
             model.addAttribute("alertClass", "danger");
             addTarifaAnualModelAttribute(model, artistaDto.getId());

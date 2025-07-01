@@ -4,11 +4,9 @@ import es.musicalia.gestmusica.artista.Artista;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-
-import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
-import java.sql.Date;
 import java.time.LocalDateTime;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "tarifa", schema="gestmusica")

@@ -6,12 +6,12 @@ import java.util.Set;
 import es.musicalia.gestmusica.acceso.Acceso;
 import es.musicalia.gestmusica.rol.Rol;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
 
 /**
  *

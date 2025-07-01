@@ -1,12 +1,11 @@
 package es.musicalia.gestmusica.artista;
 
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Data
 public class ArtistaDto {
@@ -18,7 +17,6 @@ public class ArtistaDto {
     private String cif;
     private String logo;
     @NotNull
-    @NotEmpty
     private Long idUsuario;
 
     private String nombreUsuario;
@@ -42,7 +40,6 @@ public class ArtistaDto {
     @NotNull
     private List<Long> idsTipoArtista = new ArrayList<>();
     @NotNull
-    @NotEmpty
     private Long idAgencia;
 
     private String nombreAgencia;

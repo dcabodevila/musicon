@@ -4,29 +4,24 @@ package es.musicalia.gestmusica.incremento;
 import es.musicalia.gestmusica.auth.model.SecurityService;
 import es.musicalia.gestmusica.util.DefaultResponseBody;
 import es.musicalia.gestmusica.usuario.UserService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.List;
 
-
+@Slf4j
 @RestController
 @RequestMapping(value="incremento")
 public class IncrementoController {
 
 
-    private UserService userService;
-    private SecurityService securityService;
 
-    private IncrementoService incrementoService;
-    private Logger logger = LoggerFactory.getLogger(IncrementoController.class);
+    private final IncrementoService incrementoService;
 
-    public IncrementoController(UserService userService, SecurityService securityService, IncrementoService incrementoService){
-        this.userService = userService;
-        this.securityService = securityService;
+
+    public IncrementoController(IncrementoService incrementoService){
         this.incrementoService = incrementoService;
     }
 

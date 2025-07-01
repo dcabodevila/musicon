@@ -1,11 +1,12 @@
 package es.musicalia.gestmusica.listado;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.validation.constraints.NotNull;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;

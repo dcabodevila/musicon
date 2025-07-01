@@ -1,56 +1,45 @@
 package es.musicalia.gestmusica.agencia;
 
 
-import es.musicalia.gestmusica.acceso.AccesoDto;
-import es.musicalia.gestmusica.acceso.AccesoService;
 import es.musicalia.gestmusica.artista.ArtistaService;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.auth.model.SecurityService;
 import es.musicalia.gestmusica.file.FileService;
 import es.musicalia.gestmusica.localizacion.LocalizacionService;
-import es.musicalia.gestmusica.rol.RolRecord;
 import es.musicalia.gestmusica.usuario.UserService;
-import es.musicalia.gestmusica.usuario.Usuario;
-import es.musicalia.gestmusica.util.FileUploadUtil;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.validation.Valid;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
+@Slf4j
 @Controller
 @RequestMapping(value="agencia")
 public class AgenciasController {
 
 
     private final UserService userService;
-    private final SecurityService securityService;
     private final LocalizacionService localizacionService;
     private final FileService fileService;
     private final AgenciaService agenciaService;
     private final ArtistaService artistaService;
 
-    private Logger logger = LoggerFactory.getLogger(AgenciasController.class);
-
-    public AgenciasController(UserService userService, SecurityService securityService, LocalizacionService localizacionService, AgenciaService agenciaService, FileService fileService,
+    public AgenciasController(UserService userService, LocalizacionService localizacionService, AgenciaService agenciaService, FileService fileService,
                               ArtistaService artistaService){
         this.userService = userService;
-        this.securityService = securityService;
         this.localizacionService = localizacionService;
         this.agenciaService = agenciaService;
         this.fileService = fileService;
@@ -122,7 +111,7 @@ public class AgenciasController {
             return "redirect:/agencia/"+ agencia.getId();
 
         } catch (Exception e){
-            logger.error("Error guardando agencia", e);
+            log.error("Error guardando agencia", e);
             model.addAttribute("message", "Error guardando agencia");
             model.addAttribute("alertClass", "danger");
             return "agencia-detail-edit";

@@ -1,42 +1,29 @@
 package es.musicalia.gestmusica.ajustes;
 
 
-import es.musicalia.gestmusica.agencia.Agencia;
-import es.musicalia.gestmusica.agencia.AgenciaDto;
 import es.musicalia.gestmusica.agencia.AgenciaService;
 import es.musicalia.gestmusica.artista.ArtistaService;
-import es.musicalia.gestmusica.informe.InformeService;
-import es.musicalia.gestmusica.listado.ListadoDto;
-import es.musicalia.gestmusica.listado.ListadoService;
-import es.musicalia.gestmusica.listado.TipoOcupacionEnum;
 import es.musicalia.gestmusica.localizacion.LocalizacionService;
 import es.musicalia.gestmusica.usuario.UserService;
 import es.musicalia.gestmusica.usuario.Usuario;
-import es.musicalia.gestmusica.util.DateUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.validation.Valid;
-import java.util.Date;
-
-
+@Slf4j
 @Controller
 @RequestMapping(value="ajustes")
 public class AjustesController {
 
 
-    private Logger logger = LoggerFactory.getLogger(AjustesController.class);
     private final UserService userService;
     private final LocalizacionService localizacionService;
     private final AgenciaService agenciaService;
@@ -80,7 +67,7 @@ public class AjustesController {
             return "redirect:/ajustes";
 
         } catch (Exception e){
-            logger.error("Error guardando agencia", e);
+            log.error("Error guardando agencia", e);
             model.addAttribute("message", "Error guardando ajustes");
             model.addAttribute("alertClass", "danger");
             return "ajustes";

@@ -1,21 +1,12 @@
 package es.musicalia.gestmusica.tarifa;
 
 
-import es.musicalia.gestmusica.agencia.AgenciaService;
 import es.musicalia.gestmusica.artista.ArtistaDto;
 import es.musicalia.gestmusica.artista.ArtistaService;
-import es.musicalia.gestmusica.auth.model.SecurityService;
-import es.musicalia.gestmusica.incremento.Incremento;
-import es.musicalia.gestmusica.incremento.IncrementoService;
-import es.musicalia.gestmusica.incremento.IncrementoServiceImpl;
-import es.musicalia.gestmusica.informe.InformeService;
-import es.musicalia.gestmusica.listado.ListadoDto;
-import es.musicalia.gestmusica.listado.TipoOcupacionEnum;
-import es.musicalia.gestmusica.usuario.UserService;
 import es.musicalia.gestmusica.util.DateUtils;
 import es.musicalia.gestmusica.util.DefaultResponseBody;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -27,39 +18,22 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.validation.Valid;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
-
+@Slf4j
 @RestController
 @RequestMapping(value="tarifa")
 public class TarifaController {
 
 
-    private final UserService userService;
-    private final SecurityService securityService;
-
     private final TarifaService tarifaService;
     private final ArtistaService artistaService;
 
 
-    private final InformeService informeService;
-    private final IncrementoService incrementoService;
-
-    private Logger logger = LoggerFactory.getLogger(TarifaController.class);
-
-    public TarifaController(UserService userService, SecurityService securityService, AgenciaService agenciaService,
-                            ArtistaService artistaService, TarifaService tarifaService, InformeService informeService, IncrementoService incrementoService){
-        this.userService = userService;
-        this.securityService = securityService;
+    public TarifaController(ArtistaService artistaService, TarifaService tarifaService) {
         this.artistaService = artistaService;
         this.tarifaService = tarifaService;
-        this.informeService = informeService;
-        this.incrementoService = incrementoService;
     }
 
     @PostMapping("/save")

@@ -1,13 +1,9 @@
 package es.musicalia.gestmusica.agencia;
 
-import es.musicalia.gestmusica.localizacion.Municipio;
-import es.musicalia.gestmusica.localizacion.Provincia;
-import es.musicalia.gestmusica.usuario.Usuario;
-import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 @Data
 public class AgenciaDto {
 
@@ -26,7 +22,6 @@ public class AgenciaDto {
 
     private String nombreProvincia;
     @NotNull
-    @NotEmpty
     private Long idUsuario;
     private String nombreUsuario;
     private String email;

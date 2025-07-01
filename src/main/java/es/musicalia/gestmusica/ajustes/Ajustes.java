@@ -1,19 +1,14 @@
 package es.musicalia.gestmusica.ajustes;
 
 import es.musicalia.gestmusica.agencia.Agencia;
-import es.musicalia.gestmusica.artista.Artista;
-import es.musicalia.gestmusica.contacto.Contacto;
 import es.musicalia.gestmusica.localizacion.Ccaa;
-import es.musicalia.gestmusica.localizacion.Municipio;
-import es.musicalia.gestmusica.localizacion.Provincia;
-import es.musicalia.gestmusica.permiso.Permiso;
 import es.musicalia.gestmusica.tipoartista.TipoArtista;
 import es.musicalia.gestmusica.usuario.Usuario;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.validation.constraints.NotNull;
+
 import java.util.Set;
 
 @Entity

@@ -1,13 +1,10 @@
 package es.musicalia.gestmusica.ocupacion;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
-
-import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
