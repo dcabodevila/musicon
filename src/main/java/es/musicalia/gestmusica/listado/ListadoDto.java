@@ -27,10 +27,10 @@ public class ListadoDto {
     private String localidad;
     private String comentario;
     private Long idTipoOcupacion;
-    @NotNull
+
     @DateTimeFormat(pattern = "dd-MM-yyyy")
     private LocalDate fechaDesde;
-    @NotNull
+
     @DateTimeFormat(pattern = "dd-MM-yyyy")
     private LocalDate fechaHasta;
     @DateTimeFormat(pattern = "dd-MM-yyyy")
