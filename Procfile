@@ -1,1 +1,1 @@
-web: java -jar target/gestmusica.war
+web: java -Xmx384m -Xms128m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:MetaspaceSize=96m -XX:MaxMetaspaceSize=128m -jar target/gestmusica.war
