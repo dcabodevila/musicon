@@ -1,1 +1,1 @@
-web: java -jar target/gestmusica.war
+web: java -Xmx320m -Xms96m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MetaspaceSize=64m -XX:MaxMetaspaceSize=96m -XX:+UseStringDeduplication -XX:G1HeapRegionSize=8m -XX:MaxGCPauseMillis=200 -XX:InitiatingHeapOccupancyPercent=35 -XX:+DisableExplicitGC -jar target/gestmusica.war
