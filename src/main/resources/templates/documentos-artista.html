@@ -44,13 +44,13 @@
                                     <thead>
                                     <tr>
                                         <th>Documento</th>
-                                        <th>Acciones</th>
+                                        <th class="text-end">Acciones</th>
                                     </tr>
                                     </thead>
                                     <tbody>
                                     <tr th:each="doc : ${documentos}">
                                         <td th:text="${doc.nombre}"></td>
-                                        <td>
+                                        <td class="text-end">
                                             <button type="button"
                                                     class="btn btn-primary btn-lg btn-descargar me-2"
                                                     th:data-id="${doc.id}"
@@ -59,7 +59,7 @@
                                             </button>
                                             <a th:href="@{/documentos/eliminar/__${doc.id}__}"
                                                class="btn btn-danger btn-lg">
-                                            <i class="fas fa-trash"></i>
+                                                <i class="fas fa-trash"></i>
                                             </a>
                                         </td>
                                     </tr>
@@ -72,15 +72,15 @@
 
                                         <input hidden th:field="*{id}">
                                         <input hidden th:field="*{idArtista}">
-                                        <div class="row">
-                                            <label class="col-form-label col-sm-3">Nuevo documento</label>
-                                            <div class="col-sm-9 d-flex align-items-start">
-                                                <div class="me-2">
-                                                    <input type="file" name="documento" accept="documento/*"
-                                                           class="form-control-file">
-
-                                                </div>
-                                                <button type="submit" class="btn btn-primary ms-auto">Subir archivo
+                                        <div class="row g-3">
+                                            <div class="col-12">
+                                                <label class="form-label">Nuevo documento</label>
+                                                <input type="file" name="documento" accept="documento/*"
+                                                       class="form-control">
+                                            </div>
+                                            <div class="col-12">
+                                                <button type="submit" class="btn btn-primary w-100">
+                                                    Subir archivo
                                                 </button>
                                             </div>
                                         </div>

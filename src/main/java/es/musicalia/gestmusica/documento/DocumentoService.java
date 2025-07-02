@@ -8,10 +8,9 @@ import java.util.List;
 public interface DocumentoService {
 
     @Transactional
-    void guardarDocumento(MultipartFile multipartFile, DocumentoDto documentoDto);
+    void guardarDocumento(MultipartFile multipartFile, DocumentoDto documentoDto, String contentType);
 
     List<Documento> findByArtistaId(Long idArtista);
-
 
     @Transactional
     void deleteById(Long id);

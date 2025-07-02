@@ -9,6 +9,6 @@ import java.util.Optional;
 @Repository
 public interface DocumentoRepository extends JpaRepository<Documento, Long> {
 
-	Optional<List<Documento>> findByArtistaId(Long artistaId);
+	Optional<List<Documento>> findByArtistaIdAndActivoTrue(Long artistaId);
 
 }
