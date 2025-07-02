@@ -1,6 +1,7 @@
 package es.musicalia.gestmusica.acceso;
 
 import es.musicalia.gestmusica.agencia.Agencia;
+import es.musicalia.gestmusica.artista.Artista;
 import es.musicalia.gestmusica.rol.Rol;
 import es.musicalia.gestmusica.usuario.Usuario;
 import jakarta.persistence.*;
@@ -29,6 +30,9 @@ public class Acceso {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "rol_id")
 	private Rol rol;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "artista_id")
+	private Artista artista;
 	@Column(name = "activo")
 	private Boolean activo;
 

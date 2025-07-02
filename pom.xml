@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>es.musicalia</groupId>
 	<artifactId>gestmusica</artifactId>
-	<version>0.0.8</version>
+	<version>0.0.9</version>
 	<packaging>war</packaging>
 	<name>gestmusica</name>
 	<description>Aplicación web para gestión de agrupaciones</description>
@@ -118,18 +118,24 @@
 		<dependency>
 			<groupId>com.cloudinary</groupId>
 			<artifactId>cloudinary-http5</artifactId>
-			<version>2.0.0</version>
+			<version>2.3.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.cloudinary</groupId>
 			<artifactId>cloudinary-taglib</artifactId>
-			<version>2.0.0</version>
+			<version>2.3.0</version>
 		</dependency>
 		<dependency>
 			<groupId>io.github.cdimascio</groupId>
 			<artifactId>dotenv-java</artifactId>
 			<version>2.2.4</version>
 		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.14.0</version>
+		</dependency>
+
 
 	</dependencies>
 

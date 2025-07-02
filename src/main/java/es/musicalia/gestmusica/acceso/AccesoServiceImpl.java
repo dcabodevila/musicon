@@ -107,6 +107,7 @@ public class AccesoServiceImpl implements AccesoService {
 		acceso.setUsuario(usuario);
 		acceso.setAgencia(obtenerAgencia(accesoDto.getIdAgencia()));
 		acceso.setRol(obtenerRol(accesoDto.getIdRol()));
+		acceso.setArtista(accesoDto.getIdArtista()!=null ? this.artistaRepository.findById(accesoDto.getIdArtista()).orElseThrow() : null);
 		acceso.setActivo(Boolean.TRUE);
 
 		acceso = accesoRepository.save(acceso);
