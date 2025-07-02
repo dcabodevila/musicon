@@ -1,1 +1,1 @@
-web: java -jar target/gestmusica.war
+web: java -Xmx280m -Xms150m -XX:MaxMetaspaceSize=96m -XX:CompressedClassSpaceSize=24m -XX:MaxDirectMemorySize=16m -XX:+UseSerialGC -XX:+UseCompressedOops -XX:+UseCompressedClassPointers -Xss128k -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Duser.timezone=Europe/Madrid -Dspring.profiles.active=heroku-minimal -jar target/gestmusica.war
