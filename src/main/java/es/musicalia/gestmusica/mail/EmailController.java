@@ -17,7 +17,7 @@ public class EmailController {
     public ResponseEntity<String> sendEmail(@Valid @RequestBody EmailDto emailDto) {
         try {
             emailService.sendHtmlEmail(emailDto);
-            return ResponseEntity.ok("Email enviado exitosamente");
+            return ResponseEntity.ok("Email enviado correctamente");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error enviando email: " + e.getMessage());
         }
@@ -30,7 +30,7 @@ public class EmailController {
             @RequestParam String content) {
         try {
             emailService.sendSimpleEmail(to, subject, content);
-            return ResponseEntity.ok("Email simple enviado exitosamente");
+            return ResponseEntity.ok("Email simple enviado correctamente");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error enviando email: " + e.getMessage());
         }

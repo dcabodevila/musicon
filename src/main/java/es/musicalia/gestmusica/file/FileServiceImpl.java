@@ -4,29 +4,17 @@ package es.musicalia.gestmusica.file;
 import es.musicalia.gestmusica.cloudinary.CloudinaryException;
 import es.musicalia.gestmusica.cloudinary.CloudinaryService;
 import es.musicalia.gestmusica.cloudinary.CloudinaryUploadResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 
-
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 public class FileServiceImpl implements FileService {
-	private Logger logger = LoggerFactory.getLogger(FileServiceImpl.class);
 
 	private final CloudinaryService cloudinaryService;
 
@@ -61,26 +49,69 @@ public class FileServiceImpl implements FileService {
 
 			return uploadResult;
 		} catch (Exception e) {
-			logger.error("Error al subir archivo a Cloudinary", e);
+			log.error("Error al subir archivo a Cloudinary", e);
 			throw new CloudinaryException("Error al subir archivo a Cloudinary", e);
 		}
 	}
 
-	@Cacheable(value = "files", key = "#pathFileName")
-	public byte[] getImageFileBytes(String pathFileName) throws IOException {
-		Path filePath = Paths.get("image/", pathFileName);
 
-		// Validar si el archivo existe antes de intentar leerlo
-		if (!Files.exists(filePath)) {
-			throw new FileNotFoundException("El archivo no existe: " + filePath);
-		}
-
-		// Usar try-with-resources para asegurar la liberación de recursos
-		try (InputStream inputStream = Files.newInputStream(filePath)) {
-			return inputStream.readAllBytes();
+	@Override
+	public void deleteFile(String pathFileName) {
+		try {
+			cloudinaryService.deleteFile(pathFileName);
+		} catch (Exception e) {
+			log.error("Error al eliminar archivo de Cloudinary", e);
+			throw new CloudinaryException("Error al eliminar archivo de Cloudinary", e);
 		}
 	}
 
+	@Override
+	public byte[] getPrivateFileBytes(String publicId, String resourceType) {
+		try {
+			return cloudinaryService.downloadPrivateFile(publicId, resourceType);
+		} catch (Exception e) {
+			log.error("Error al descargar archivo privado: " + publicId, e);
+			throw new CloudinaryException("Error al descargar archivo privado", e);
+		}
+	}
+
+	@Override
+	public void deletePrivateFile(String publicId, String resourceType) {
+		try {
+			cloudinaryService.deletePrivateFile(publicId, resourceType);
+			log.info("Archivo privado eliminado: {}", publicId);
+		} catch (Exception e) {
+			log.error("Error al eliminar archivo privado: " + publicId, e);
+			throw new CloudinaryException("Error al eliminar archivo privado", e);
+		}
+	}
+
+
+
+	@Override
+	public CloudinaryUploadResponse guardarFicheroPrivado(MultipartFile multipartFile) {
+		if (multipartFile != null && !multipartFile.isEmpty()) {
+			return this.savePrivateCloudinaryFile(multipartFile);
+		}
+		return null;
+	}
+
+	private CloudinaryUploadResponse savePrivateCloudinaryFile(MultipartFile multipartFile) throws CloudinaryException {
+		try {
+			File tempFile = File.createTempFile("temp", multipartFile.getOriginalFilename());
+			multipartFile.transferTo(tempFile);
+
+			CloudinaryUploadResponse uploadResult = cloudinaryService.uploadPrivateFile(tempFile);
+			tempFile.delete();
+
+			log.info("Archivo privado subido: {}", uploadResult);
+			return uploadResult;
+
+		} catch (Exception e) {
+			log.error("Error al subir archivo privado a Cloudinary", e);
+			throw new CloudinaryException("Error al subir archivo privado a Cloudinary", e);
+		}
+	}
 
 
 }

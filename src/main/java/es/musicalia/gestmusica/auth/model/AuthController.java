@@ -276,7 +276,7 @@ public class AuthController {
             codigoVerificacionService.marcarCodigoComoUsado(form.getEmail(), form.getCodigo());
 
             redirectAttributes.addFlashAttribute("message",
-                    "Contraseña cambiada exitosamente. Ya puedes iniciar sesión.");
+                    "Contraseña cambiada correctamente. Ya puedes iniciar sesión.");
 
             return "redirect:/auth/login";
 

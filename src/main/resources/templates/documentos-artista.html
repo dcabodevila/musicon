@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content=""><head>
+    <div th:replace="~{fragments/main-template :: header-css}"/>
+
+</head>
+
+<body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
+<div class="wrapper">
+
+    <div th:replace="~{fragments/main-template :: sidebar}"/>
+    <div class="main">
+
+        <div th:replace="~{fragments/main-template :: navbar}"/>
+        <main class="content">
+            <div class="container-fluid p-0">
+                <a th:href="@{/artista/__${documentoDto.idArtista}__}" class="btn btn-primary btn-lg mt-n1"><i
+                        class="fas fa-arrow-left"></i> Volver a artista</a>
+                <div class="mb-3">
+                    <h1 class="h3 d-inline align-middle"></h1>
+                </div>
+
+                <div th:if="${message}" th:class="${'alert alert-' + alertClass+ ' alert-dismissible fade show'}" role="alert">
+                    <div class="alert-message">
+                        <strong th:text="${message}">Hello there!</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 col-xl-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">Documentos del artista</h5>
+                            </div>
+                            <div class="card-body">
+
+                                <table class="table">
+                                    <thead>
+                                    <tr>
+                                        <th>Documento</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="doc : ${documentos}">
+                                        <td th:text="${doc.nombre}"></td>
+                                        <td>
+                                            <button type="button"
+                                                    class="btn btn-primary btn-lg btn-descargar me-2"
+                                                    th:data-id="${doc.id}"
+                                                    th:data-nombre="${doc.nombre}">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <a th:href="@{/documentos/eliminar/__${doc.id}__}"
+                                               class="btn btn-danger btn-lg">
+                                            <i class="fas fa-trash"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+
+                                <div class="container mt-4 mb-4">
+                                    <form method="POST" id="artista-detail-edit-form" th:object="${documentoDto}"
+                                          th:action=@{/documentos/guardar} enctype="multipart/form-data">
+
+                                        <input hidden th:field="*{id}">
+                                        <input hidden th:field="*{idArtista}">
+                                        <div class="row">
+                                            <label class="col-form-label col-sm-3">Nuevo documento</label>
+                                            <div class="col-sm-9 d-flex align-items-start">
+                                                <div class="me-2">
+                                                    <input type="file" name="documento" accept="documento/*"
+                                                           class="form-control-file">
+
+                                                </div>
+                                                <button type="submit" class="btn btn-primary ms-auto">Subir archivo
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <div th:replace="~{fragments/main-template :: footer}"/>
+
+    </div>
+</div>
+<script type="text/javascript" th:src="@{/js/comun.js}"></script>
+
+<script type="text/javascript" th:src="@{/js/documentos.js}"></script>
+
+</body>
+</html>

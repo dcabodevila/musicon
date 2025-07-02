@@ -45,7 +45,7 @@ public class EmailService {
             message.setText(content);
 
             mailSender.send(message);
-            log.info("Email enviado exitosamente a: {}", to);
+            log.info("Email enviado correctamente a: {}", to);
 
         } catch (MailException e) {
             log.error("Error enviando email simple a {}: {}", to, e.getMessage());
@@ -91,7 +91,7 @@ public class EmailService {
             }
 
             mailSender.send(mimeMessage);
-            log.info("Email HTML enviado exitosamente a: {}", emailDto.getTo());
+            log.info("Email HTML enviado correctamente a: {}", emailDto.getTo());
 
         } catch (MessagingException | MailException | UnsupportedEncodingException e) {
             log.error("Error enviando email HTML a {}: {}", emailDto.getTo(), e.getMessage());
