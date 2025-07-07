@@ -2,7 +2,6 @@ package es.musicalia.gestmusica.agencia;
 
 
 import es.musicalia.gestmusica.acceso.AccesoService;
-import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.contacto.ContactoRepository;
 import es.musicalia.gestmusica.contacto.Contacto;
 import es.musicalia.gestmusica.localizacion.*;
@@ -12,7 +11,6 @@ import es.musicalia.gestmusica.usuario.Usuario;
 import es.musicalia.gestmusica.usuario.UsuarioRepository;
 import es.musicalia.gestmusica.util.StringUtils;
 import org.modelmapper.ModelMapper;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -136,10 +134,9 @@ public class AgenciaServiceImpl implements AgenciaService {
 		}
 
 		if (agenciaDto.getIdUsuario()!=null){
-			final Optional<Usuario> optionalUsuario = this.usuarioRepository.findById(agenciaDto.getIdUsuario());
-			if (optionalUsuario.isPresent()){
-				agencia.setUsuario(optionalUsuario.get());
-			}
+			final Usuario usuario = this.usuarioRepository.findById(agenciaDto.getIdUsuario()).orElseThrow();
+			usuario.setRolGeneral(this.rolRepository.findRolByCodigo(RolEnum.ROL_AGENCIA.getCodigo()));
+			agencia.setUsuario(usuario);
 		}
 
 		if (agenciaDto.getActivo()!=null){
@@ -168,7 +165,7 @@ public class AgenciaServiceImpl implements AgenciaService {
 
 		agencia = this.agenciaRepository.save(agencia);
 
-		this.accesoService.crearAccesoUsuarioAgenciaRol(agencia.getUsuario().getId(), agencia.getId(), this.rolRepository.findRolByCodigo(RolEnum.ROL_AGENCIA.getCodigo()).id(), null);
+		this.accesoService.crearAccesoUsuarioAgenciaRol(agencia.getUsuario().getId(), agencia.getId(), this.rolRepository.findRolRecordByCodigo(RolEnum.ROL_AGENCIA.getCodigo()).id(), null);
 
 		return agencia;
 

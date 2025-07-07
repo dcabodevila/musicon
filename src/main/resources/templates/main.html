@@ -6,11 +6,11 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <meta name="description" content="">
         <meta name="author" content=""><head>
-
         <div th:replace="~{fragments/main-template :: header-css}"/>
     </head>
 
     <body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
+
     <div class="wrapper">
 
         <div th:replace="~{fragments/main-template :: sidebar}"/>
@@ -18,7 +18,14 @@
 
             <div th:replace="~{fragments/main-template :: navbar}"/>
             <div th:replace="~{fragments/modal-confirmacion :: modal-confirmacion}"/>
+
             <main class="content">
+
+                <div th:if="${message}" th:class="${'alert alert-' + alertClass+ ' alert-dismissible fade show'}" role="alert"
+                     style="padding: 15px;">
+                    <strong th:text="${message}">Hello there!</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
                 <div class="container-fluid p-0">
                     <!-- Carrusel Principal -->
                     <div class="row mb-4">
@@ -38,8 +45,8 @@
                         </div>
                     </div>
 
-                    <div class="row">
 
+                    <div class="row">
 
                         <div class="col-12 col-md-6 col-lg-3" th:each="ocupacion : ${listaOcupacionPendiente}">
 

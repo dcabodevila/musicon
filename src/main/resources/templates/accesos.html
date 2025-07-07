@@ -39,7 +39,7 @@
 
                 <div class="row">
 
-                    <div th:if="${#authorization.expression('hasPermission(' + accesoDto.idAgencia + ', ''AGENCIA'', ''GESTION_ACCESOS'')')}" class="col-12 col-sm-12 col-md-12 col-lg-6" >
+                    <div th:if="${#authorization.expression('hasPermission(' + accesoDto.idAgencia + ', ''AGENCIA'', ''GESTION_ACCESOS'')')}" class="col-12 col-sm-12 col-md-12 col-lg-12" >
                         <div class="card">
                             <div class="card-header">
                                 <h5 class="card-title">Permisos de acceso a la agencia</h5>

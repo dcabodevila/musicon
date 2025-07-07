@@ -9,7 +9,11 @@ import es.musicalia.gestmusica.localizacion.Provincia;
 import java.util.List;
 
 public interface ListadoService {
+    List<ListadosPorMesDto> obtenerListadosPorMes(List<ListadoRecord> listados);
+
     List<CodigoNombreDto> findAllTiposOcupacion();
 
     byte[] generarInformeListado(ListadoDto listadoDto);
+
+    List<ListadoRecord> obtenerListadoEntreFechas(ListadoAudienciasDto listadoAudienciasDto);
 }

@@ -179,3 +179,10 @@ function notifDuration(type, message, duration){
 
       $('#modalNuevaOcupacion').modal('toggle');
   }
+
+function clearFlatpickrDate(inputId) {
+    const input = document.getElementById(inputId);
+    if (input && input._flatpickr) {
+        input._flatpickr.clear(); // Limpia la fecha seleccionada
+    }
+}

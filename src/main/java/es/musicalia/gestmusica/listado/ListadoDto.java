@@ -9,7 +9,9 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -47,9 +49,9 @@ public class ListadoDto {
     private LocalDate fecha6;
     @DateTimeFormat(pattern = "dd-MM-yyyy")
     private LocalDate fecha7;
-    private List<Long> idsTipoArtista = new ArrayList<>();
-    private List<Long> idsAgencias = new ArrayList<>();
-    private List<Long> idsComunidades = new ArrayList<>();
+    private Set<Long> idsTipoArtista = new HashSet<>();
+    private Set<Long> idsAgencias = new HashSet<>();
+    private Set<Long> idsComunidades = new HashSet<>();
 
 
 

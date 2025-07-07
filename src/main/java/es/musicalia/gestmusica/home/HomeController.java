@@ -31,6 +31,14 @@ public class HomeController {
                         .filter(entry -> entry.getValue().contains(PermisoAgenciaEnum.CONFIRMAR_OCUPACION.name()))
                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
+        final boolean isUsuarioValidado = ((CustomAuthenticatedUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsuario().isValidado();
+
+        if (!isUsuarioValidado){
+            model.addAttribute("message", "Su cuenta de usuario será validada próximamente por los administradores. Una vez validada se le asignarán permisos de acceso");
+            model.addAttribute("alertClass", "success");
+
+        }
+
         model.addAttribute("listaOcupacionPendiente", this.ocupacionService.findOcupacionesDtoByAgenciaPendientes(mapPermisosAgencia.keySet()));
         return "main.html";
     }

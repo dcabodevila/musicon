@@ -71,6 +71,7 @@ public class TarifaController {
         return ResponseEntity.ok(this.tarifaService.findByArtistaIdAndDate(idArtista, fecha));
     }
 
+
     @PostMapping("/tarifa-anual")
     public ResponseEntity<byte[]> generarTarifaAnual(Model model, @ModelAttribute("tarifaAnualDto") @Valid TarifaAnualDto tarifaAnualDto,
                                                  BindingResult bindingResult, RedirectAttributes redirectAttributes, Errors errors) {

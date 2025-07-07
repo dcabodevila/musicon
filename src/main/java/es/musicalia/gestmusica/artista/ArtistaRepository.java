@@ -30,4 +30,14 @@ public interface ArtistaRepository extends JpaRepository<Artista, Long> {
 	@Query("select a from Artista a where a.id not in (:idsMisArtistas) and a.activo order by a.nombre")
 	List<Artista> findOtrosArtistas(@Param("idsMisArtistas") Set<Long> idsMisArtistas);
 
+	@Query("SELECT DISTINCT a FROM Artista a " +
+		   "JOIN a.tiposArtista ta " +
+		   "WHERE a.ccaa.id IN (:idsComunidades) " +
+		   "AND ta.id IN (:idsTipoArtista) " +
+		   "AND a.tarifasPublicas = true " +
+		   "AND a.activo = true")
+	Set<Artista> findArtistasByComunidadesAndTipos(
+		@Param("idsComunidades") Set<Long> idsComunidades,
+		@Param("idsTipoArtista") Set<Long> idsTipoArtista
+);
 }

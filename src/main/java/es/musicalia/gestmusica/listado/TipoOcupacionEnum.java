@@ -21,4 +21,11 @@ public enum TipoOcupacionEnum {
                 .findFirst()
                 .orElse(null);
     }
+
+    public static TipoOcupacionEnum getById(Long id) {
+        return Arrays.stream(TipoOcupacionEnum.values())
+                .filter(tipo -> tipo.getId().equals(id))
+                .findFirst()
+                .orElse(null);
+    }
 }

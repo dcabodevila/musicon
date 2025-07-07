@@ -55,6 +55,8 @@ public class Usuario {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "id_rol")
 	private Rol rolGeneral;
+	@Column(name = "VALIDADO")
+	private boolean validado;
 	@OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	private Set<Acceso> accesos;
 

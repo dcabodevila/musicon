@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content=""><head>
+    <div th:replace="~{fragments/main-template :: header-css}"/>
+    <script th:src="@{/js/jquery.min.js}"></script>
+    <script th:src="@{/adminkit/js/datatables.js}"></script>
+</head>
+
+
+<body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
+<div class="wrapper">
+
+    <div th:replace="~{fragments/main-template :: sidebar}"/>
+    <div class="main">
+        <div th:replace="~{fragments/main-template :: navbar}"/>
+
+        <main class="content">
+
+            <div class="container-fluid p-0">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Fechas presupuesto inicial y final</h5>
+                    </div>
+                    <form id="formListadoAudiencias" method="POST" th:object="${listadoAudienciasDto}"
+                          th:action=@{/listado/audiencias} autocomplete="off">
+
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <div class="mb-3 row">
+                                    <label class="col-form-label col-sm-2">Agencia</label>
+                                    <div class="col-sm-3">
+                                        <select id="agencia" th:field="*{idAgencia}" class="form-control choices-single">
+                                            <option sec:authorize="hasAuthority('ACCESO_PANEL_ADMIN')" value="">Todas las agencias</option>
+                                            <option th:each="agencia : ${listaAgencias}" th:value="${agencia.id}" th:text="${agencia.nombre}"></option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mb-3 row">
+
+                                    <label class="col-form-label col-sm-2">Fecha inicial</label>
+                                    <div class="col-sm-3">
+                                        <div class="input-wrapper">
+                                            <input id="idFechaDesde" th:field="*{fechaDesde}" type="text"
+                                                   required class="form-control flatpickr flatpickr-minimum"
+                                                   placeholder="Fecha inicial" readonly="readonly">
+                                            <button type="button" class="btn btn-outline-secondary clear-btn"
+                                                    onclick="clearFlatpickrDate('idFechaDesde')">X
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-3 row">
+                                    <label class="col-form-label col-sm-2">Fecha final</label>
+                                    <div class="col-sm-3">
+                                        <div class="input-wrapper">
+                                            <input id="idFechaHasta" th:field="*{fechaHasta}" type="text"
+                                                   required
+                                                   class="form-control flatpickr flatpickr-minimum flatpickr-input active"
+                                                   placeholder="Fecha final" readonly="readonly">
+                                            <button type="button" class="btn btn-outline-secondary clear-btn"
+                                                    onclick="clearFlatpickrDate('idFechaHasta')">X
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center mb-3">
+                            <button type="submit" class="btn btn-primary">Buscar</button>
+                        </div>
+                    </form>
+                    
+                </div>
+
+                <div class="row">
+                    <div th:if="${message}" th:class="${'alert alert-' + alertClass+ ' alert-dismissible fade show'}" role="alert"
+                         style="padding: 15px;">
+                        <strong th:text="${message}">Hello there!</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    <div class="col-12 col-sm-12 col-md-12 col-lg-12" >
+
+                        <div class="col-12 col-md-12 col-lg-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title">Listados generados por agencia</h5>
+                                </div>
+                                <div class="card-body">
+
+                                    <div id="datatables-reponsive_wrapper" class="dataTables_wrapper dt-bootstrap5 no-footer">
+                                        <div class="row">
+                                            <div class="col-sm-12">
+                                                <table id="datatables-reponsive_listados-generados" class="table table-striped dataTable no-footer dtr-inline collapsed" style="width: 100%;" aria-describedby="datatables-reponsive_info">
+                                                    <thead>
+                                                    <tr>
+                                                        <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Representante</th>
+                                                        <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Municipio</th>
+                                                        <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Localidad</th>
+                                                        <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Fecha listado</th>
+
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+
+                                                    <tr th:each="listadosGenerados : ${listadosGenerados}">
+
+                                                        <td class="dtr-control sorting_1" tabindex="0" th:text="${listadosGenerados.solicitadoPara}"></td>
+                                                        <td class="dtr-control sorting_1" tabindex="0" th:text="${listadosGenerados.municipio}"></td>
+                                                        <td class="dtr-control sorting_1" tabindex="0" th:text="${listadosGenerados.localidad}"></td>
+                                                        <td class="dtr-control sorting_1" tabindex="0"
+                                                            th:text="${#temporals.format(listadosGenerados.fechaCreacion, 'dd/MM/yyyy HH:mm')}"></td>
+
+                                                    </tr>
+
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                                        <canvas id="listadosChart"></canvas>
+                                    </div>
+                                    <input type="hidden" id="chartData" th:value="${chartData}">
+
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                </div>
+            </div>
+        </main>
+        <div th:replace="~{fragments/main-template :: footer}"/>
+
+    </div>
+</div>
+
+</body>
+<!-- Cargar AdminKit primero -->
+<!--<script th:src="@{/adminkit/js/app.js}"></script>-->
+<!-- Luego los scripts personalizados -->
+<script type="text/javascript" th:src="@{/js/comun.js}"></script>
+<script type="text/javascript" th:src="@{/js/listados-audiencia.js}"></script>
+</html>

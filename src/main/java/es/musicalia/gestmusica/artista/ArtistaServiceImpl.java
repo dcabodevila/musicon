@@ -197,7 +197,7 @@ public class ArtistaServiceImpl implements ArtistaService {
 
     private void crearAccesosUsuarioArtista(Usuario usuario, Long idAgencia, Long idArtista) {
 
-        accesoService.crearAccesoUsuarioAgenciaRol(usuario.getId(), idAgencia, rolRepository.findRolByCodigo(RolEnum.ROL_ARTISTA.getCodigo()).id(), idArtista);
+        accesoService.crearAccesoUsuarioAgenciaRol(usuario.getId(), idAgencia, rolRepository.findRolRecordByCodigo(RolEnum.ROL_ARTISTA.getCodigo()).id(), idArtista);
 
         Set<String> rolesPermitidos = Set.of(
                 RolEnum.ROL_REPRESENTANTE.getCodigo(),

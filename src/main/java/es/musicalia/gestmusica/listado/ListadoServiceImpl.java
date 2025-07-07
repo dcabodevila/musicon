@@ -1,36 +1,88 @@
 package es.musicalia.gestmusica.listado;
 
+import es.musicalia.gestmusica.agencia.Agencia;
+import es.musicalia.gestmusica.agencia.AgenciaRepository;
+import es.musicalia.gestmusica.artista.ArtistaRepository;
+import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.informe.InformeService;
 import es.musicalia.gestmusica.localizacion.*;
+import es.musicalia.gestmusica.ocupacion.TipoOcupacionRepository;
 import es.musicalia.gestmusica.util.DateUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.cglib.core.Local;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
-
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 public class ListadoServiceImpl implements ListadoService {
 
 	private final InformeService informeService;
-	private Logger logger = LoggerFactory.getLogger(ListadoServiceImpl.class);
 	private final ProvinciaRepository provinciaRepository;
 	private final MunicipioRepository municipioRepository;
+	private final ListadoMapper listadoMapper;
+	private final ListadoRepository listadoRepository;
+	private final AgenciaRepository agenciaRepository;
+	private final ArtistaRepository artistaRepository;
 
-	public ListadoServiceImpl(InformeService informeService, ProvinciaRepository provinciaRepository, MunicipioRepository municipioRepository) {
+	public ListadoServiceImpl(InformeService informeService, ProvinciaRepository provinciaRepository, MunicipioRepository municipioRepository, ListadoMapper listadoMapper, ListadoRepository listadoRepository, AgenciaRepository agenciaRepository, ArtistaRepository artistaRepository) {
 		this.informeService = informeService;
-
 		this.provinciaRepository = provinciaRepository;
 		this.municipioRepository = municipioRepository;
-	}
+        this.listadoMapper = listadoMapper;
+        this.listadoRepository = listadoRepository;
+        this.agenciaRepository = agenciaRepository;
+        this.artistaRepository = artistaRepository;
+    }
 
+	@Override
+	public List<ListadosPorMesDto> obtenerListadosPorMes(List<ListadoRecord> listados) {
+
+		// Nombres de meses en español
+		String[] nombresMeses = {
+			"Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+			"Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+		};
+
+		// Agrupar por mes y contar
+		Map<String, Long> contadorPorMes = listados.stream()
+			.collect(Collectors.groupingBy(
+				listado -> {
+					LocalDateTime fechaCreacion = listado.fechaCreacion();
+					int mes = fechaCreacion.getMonthValue();
+					int año = fechaCreacion.getYear();
+					return nombresMeses[mes - 1] + " " + año;
+				},
+				Collectors.counting()
+			));
+
+		// Convertir a lista y ordenar por fecha
+		return contadorPorMes.entrySet().stream()
+			.map(entry -> new ListadosPorMesDto(entry.getKey(), entry.getValue()))
+			.sorted((a, b) -> {
+				// Ordenar por año y mes
+				String[] partsA = a.getMes().split(" ");
+				String[] partsB = b.getMes().split(" ");
+				int añoA = Integer.parseInt(partsA[1]);
+				int añoB = Integer.parseInt(partsB[1]);
+				if (añoA != añoB) {
+					return Integer.compare(añoA, añoB);
+				}
+				// Si mismo año, ordenar por mes
+				int mesA = Arrays.asList(nombresMeses).indexOf(partsA[0]);
+				int mesB = Arrays.asList(nombresMeses).indexOf(partsB[0]);
+				return Integer.compare(mesA, mesB);
+			})
+			.collect(Collectors.toList());
+	}
 	@Override
 	public List<CodigoNombreDto> findAllTiposOcupacion() {
 		return Arrays.stream(TipoOcupacionEnum.values())
@@ -38,11 +90,30 @@ public class ListadoServiceImpl implements ListadoService {
 				.collect(Collectors.toList());
 	}
 
+private String convertSetLongToString(Set<Long> setIds) {
+    if (setIds == null || setIds.isEmpty()) {
+        return "";
+    }
+    
+    StringBuilder stringBuilder = new StringBuilder();
+    Iterator<Long> iterator = setIds.iterator();
+    
+    while (iterator.hasNext()) {
+        stringBuilder.append(iterator.next());
+        if (iterator.hasNext()) {
+            stringBuilder.append(", ");
+        }
+    }
+    
+    return stringBuilder.toString();
+}
 
+// Actualizar las llamadas en el método generarInformeListado
 	@Override
+	@Transactional
 	public byte[] generarInformeListado(ListadoDto listadoDto) {
 
-		logger.info("Generando listado");
+		log.info("Generando listado");
 		Map<String, Object> parametros = new HashMap<String, Object>();
 		String fileReport = TipoOcupacionEnum.SIN_OCUPACION.getId().equals(listadoDto.getIdTipoOcupacion()) ? "listado_sin_ocupacion2.jrxml" : "listado_con_ocupacion.jrxml";
 
@@ -66,9 +137,9 @@ public class ListadoServiceImpl implements ListadoService {
 		parametros.put("provincia", this.provinciaRepository.findById(listadoDto.getIdProvincia()).get().getNombre());
 		parametros.put("municipio", listadoDto.getIdMunicipio() != null ? this.municipioRepository.findById(listadoDto.getIdMunicipio()).get().getNombre() : "");
 		parametros.put("lugar", listadoDto.getLocalidad() != null ? listadoDto.getLocalidad() : "");
-		parametros.put("idsTipoArtista", convertListLongToString(listadoDto.getIdsTipoArtista()));
-		parametros.put("idsAgencias", convertListLongToString(listadoDto.getIdsAgencias()));
-		parametros.put("idsComunidades", convertListLongToString(listadoDto.getIdsComunidades()));
+		parametros.put("idsTipoArtista", convertSetLongToString(listadoDto.getIdsTipoArtista()));
+		parametros.put("idsAgencias", convertSetLongToString(listadoDto.getIdsAgencias()));
+		parametros.put("idsComunidades", convertSetLongToString(listadoDto.getIdsComunidades()));
 
 
 
@@ -81,7 +152,80 @@ public class ListadoServiceImpl implements ListadoService {
 		for (Map.Entry<String, String> entry : listFechas) {
 			parametros.put(entry.getKey(), entry.getValue());
 		}
-		return this.informeService.imprimirInforme(parametros, fileNameToExport, fileReport);
+		byte[] listado = this.informeService.imprimirInforme(parametros, fileNameToExport, fileReport);
+
+		guardarListadoEntity(listadoDto);
+
+		return listado;
+	}
+
+	@Override
+public List<ListadoRecord> obtenerListadoEntreFechas(ListadoAudienciasDto listadoAudienciasDto) {
+    // Usar directamente las specifications para crear la consulta
+    var spec = ListadoSpecifications.findListadosByAgenciaAndFechas(
+        listadoAudienciasDto.getIdAgencia(),
+        listadoAudienciasDto.getFechaDesde().atStartOfDay(),
+        listadoAudienciasDto.getFechaHasta().plusDays(1).atStartOfDay().minusNanos(1)
+    );
+    
+    // Añadir ordenación por fecha de creación descendente
+    var sort = Sort.by(Sort.Direction.DESC, "fechaCreacion");
+    
+    // Obtener las entidades ordenadas
+    List<Listado> listados = this.listadoRepository.findAll(spec, sort);
+    
+    // Mapear a ListadoRecord
+    return listados.stream()
+        .map(this::mapToListadoRecord)
+        .collect(Collectors.toList());
+}
+
+// Método privado para mapear de Entity a Record
+private ListadoRecord mapToListadoRecord(Listado listado) {
+    return new ListadoRecord(
+        listado.getId(),
+        listado.getSolicitadoPara(),
+        listado.getLocalidad(),
+        listado.getMunicipio().getNombre(),
+        listado.getUsuario().getNombre(),
+        listado.getUsuario().getApellidos(),
+        listado.getTipoOcupacion() != null ? listado.getTipoOcupacion().name() : null,
+        listado.getFechaCreacion(),
+        listado.getFecha1(),
+        listado.getFecha2(),
+        listado.getFecha3(),
+        listado.getFecha4(),
+        listado.getFecha5(),
+        listado.getFecha6(),
+        listado.getFecha7(),
+        listado.getFechaDesde(),
+        listado.getFechaHasta()
+    );
+}
+	
+	
+
+	private void guardarListadoEntity(ListadoDto listadoDto) {
+		Listado listadoEntity = this.listadoMapper.toEntity(listadoDto);
+
+		listadoEntity.setUsuario(((CustomAuthenticatedUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
+				.getUsuario());
+
+		// Cargar municipio
+		Municipio municipio = municipioRepository.findById(listadoDto.getIdMunicipio())
+				.orElseThrow(() -> new IllegalArgumentException("Municipio no encontrado con ID: " + listadoDto.getIdMunicipio()));
+		listadoEntity.setMunicipio(municipio);
+
+
+		// Cargar agencias si existen
+		if (listadoDto.getIdsAgencias() != null && !listadoDto.getIdsAgencias().isEmpty()) {
+			Set<Agencia> agencias = new HashSet<>(agenciaRepository.findAllById(listadoDto.getIdsAgencias()));
+			listadoEntity.setAgencias(agencias);
+		}
+
+		listadoEntity.setArtistas(this.artistaRepository.findArtistasByComunidadesAndTipos(listadoDto.getIdsComunidades(),listadoDto.getIdsTipoArtista()));
+
+		this.listadoRepository.save(listadoEntity);
 	}
 
 	private String getFechaRangoDesde(final LocalDate fechaDesde, List<LocalDate> dateList) {
@@ -126,7 +270,7 @@ public class ListadoServiceImpl implements ListadoService {
 				colNamesBuilder.append(", ");
 			}
 		}
-		logger.info(colNamesBuilder.toString());
+		log.info(colNamesBuilder.toString());
 		return colNamesBuilder.toString();
 
 	}
