@@ -167,20 +167,17 @@ public List<ListadoRecord> obtenerListadoEntreFechas(ListadoAudienciasDto listad
         listadoAudienciasDto.getFechaDesde().atStartOfDay(),
         listadoAudienciasDto.getFechaHasta().plusDays(1).atStartOfDay().minusNanos(1)
     );
-    
-    // Añadir ordenación por fecha de creación descendente
-    var sort = Sort.by(Sort.Direction.DESC, "fechaCreacion");
-    
-    // Obtener las entidades ordenadas
-    List<Listado> listados = this.listadoRepository.findAll(spec, sort);
-    
-    // Mapear a ListadoRecord
-    return listados.stream()
-        .map(this::mapToListadoRecord)
-        .collect(Collectors.toList());
-}
 
-// Método privado para mapear de Entity a Record
+    // Obtener las entidades ordenadas
+    List<Listado> listados = this.listadoRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "fechaCreacion"));
+
+    // Mapear a ListadoRecord
+		return listados.stream()
+				.map(this::mapToListadoRecord)
+				.collect(Collectors.toList());
+	}
+
+	// Método privado para mapear de Entity a Record
 private ListadoRecord mapToListadoRecord(Listado listado) {
     return new ListadoRecord(
         listado.getId(),
