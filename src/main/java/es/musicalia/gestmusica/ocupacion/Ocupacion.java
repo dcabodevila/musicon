@@ -43,6 +43,10 @@ public class Ocupacion {
     private Usuario usuario;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_conf_id")
+    private Usuario usuarioConfirmacion;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tipo_ocupacion_id")
     @NotNull
     private TipoOcupacion tipoOcupacion;

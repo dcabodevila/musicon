@@ -70,9 +70,9 @@ public class OcupacionServiceImpl implements OcupacionService {
 	@Override
 	@Transactional(readOnly = false)
 	public Void anularOcupacion(long id){
-		final Ocupacion ocupacion =  this.ocupacionRepository.findById(id).get();
+		final Ocupacion ocupacion =  this.ocupacionRepository.findById(id).orElseThrow();
 
-		ocupacion.setOcupacionEstado(this.ocupacionEstadoRepository.findById(OcupacionEstadoEnum.ANULADO.getId()).get());
+		ocupacion.setOcupacionEstado(this.ocupacionEstadoRepository.findById(OcupacionEstadoEnum.ANULADO.getId()).orElseThrow());
 		this.ocupacionRepository.save(ocupacion);
 		return null;
 
@@ -81,9 +81,10 @@ public class OcupacionServiceImpl implements OcupacionService {
 	@Override
 	@Transactional(readOnly = false)
 	public Void confirmarOcupacion(long id){
-		final Ocupacion ocupacion =  this.ocupacionRepository.findById(id).get();
-		ocupacion.setOcupacionEstado(this.ocupacionEstadoRepository.findById(OcupacionEstadoEnum.OCUPADO.getId()).get());
-		ocupacion.setTipoOcupacion(this.tipoOcupacionRepository.findById(TipoOcupacionEnum.OCUPADO.getId()).get());
+		final Ocupacion ocupacion =  this.ocupacionRepository.findById(id).orElseThrow();
+		ocupacion.setOcupacionEstado(this.ocupacionEstadoRepository.findById(OcupacionEstadoEnum.OCUPADO.getId()).orElseThrow());
+		ocupacion.setTipoOcupacion(this.tipoOcupacionRepository.findById(TipoOcupacionEnum.OCUPADO.getId()).orElseThrow());
+		ocupacion.setUsuarioConfirmacion(this.userService.obtenerUsuarioAutenticado());
 		this.ocupacionRepository.save(ocupacion);
 		return null;
 

@@ -85,7 +85,8 @@
                                 <a th:if="${#authorization.expression('hasPermission(' + artistaDto.id + ', ''ARTISTA'', ''ARTISTAS_EDITAR'')')}" th:href="@{/artista/edit/__${artistaDto.id}__}" class="btn btn-primary">Editar datos artista</a>
                             </div>
 
-                            <div class="card-body text-center" th:if="${#authorization.expression('hasPermission(' + artistaDto.id + ', ''ARTISTA'', ''DOCUMENTACION'')')}">
+                            <div class="card-body text-center"
+                                 th:if="${#authorization.expression('hasPermission(' + artistaDto.id + ', ''ARTISTA'', ''DOCUMENTACION'')') or #authorization.expression('hasPermission(' + artistaDto.id + ', ''ARTISTA'', ''DOCUMENTACION_DESCARGAR'')')}">
                                 <a th:href="@{/documentos/__${artistaDto.id}__}" class="btn btn-primary"> Documentación artista</a>
                             </div>
                         </div>

@@ -29,17 +29,9 @@ public class DocumentoController {
 @GetMapping("/descargar/{id}")
 public ResponseEntity<byte[]> descargarDocumento(@PathVariable Long id) {
     try {
-        log.debug("Iniciando descarga de documento con ID: {}", id);
-        
         Documento documento = documentoService.findById(id);
-        log.debug("Documento encontrado: nombre={}, url={}, resourceType={}", 
-                documento.getNombre(), documento.getUrl(), documento.getResourceType());
-        
         String contentType = determinarContentType(documento.getNombre());
-        log.debug("ContentType determinado: {}", contentType);
-
         byte[] fileBytes = fileService.getPrivateFileBytes(documento.getUrl(), documento.getResourceType(), contentType);
-        log.debug("Archivo descargado exitosamente. Tamaño: {} bytes", fileBytes.length);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_TYPE, contentType)
@@ -101,7 +93,7 @@ private String determinarContentType(String nombreArchivo) {
     /**
      * Muestra la vista para gestionar los documentos de un artista.
      */
-    @PreAuthorize("hasPermission(#idArtista, 'ARTISTA', 'DOCUMENTACION')")
+    @PreAuthorize("hasPermission(#idArtista, 'ARTISTA', 'DOCUMENTACION') or hasPermission(#idArtista, 'ARTISTA', 'DOCUMENTACION_DESCARGAR')")
     @GetMapping("/{idArtista}")
     public String documentosArtista(Model model, @PathVariable("idArtista") Long idArtista) {
         try {

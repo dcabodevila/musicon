@@ -5,8 +5,10 @@ import es.musicalia.gestmusica.agencia.AgenciaRepository;
 import es.musicalia.gestmusica.artista.ArtistaRepository;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.informe.InformeService;
-import es.musicalia.gestmusica.localizacion.*;
-import es.musicalia.gestmusica.ocupacion.TipoOcupacionRepository;
+import es.musicalia.gestmusica.localizacion.CodigoNombreDto;
+import es.musicalia.gestmusica.localizacion.Municipio;
+import es.musicalia.gestmusica.localizacion.MunicipioRepository;
+import es.musicalia.gestmusica.localizacion.ProvinciaRepository;
 import es.musicalia.gestmusica.util.DateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
@@ -58,8 +60,8 @@ public class ListadoServiceImpl implements ListadoService {
 				listado -> {
 					LocalDateTime fechaCreacion = listado.fechaCreacion();
 					int mes = fechaCreacion.getMonthValue();
-					int año = fechaCreacion.getYear();
-					return nombresMeses[mes - 1] + " " + año;
+					int ano = fechaCreacion.getYear();
+					return nombresMeses[mes - 1] + " " + ano;
 				},
 				Collectors.counting()
 			));

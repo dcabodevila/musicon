@@ -51,13 +51,13 @@
                                     <tr th:each="doc : ${documentos}">
                                         <td th:text="${doc.nombre}"></td>
                                         <td class="text-end">
-                                            <button type="button"
+                                            <button th:if="${#authorization.expression('hasPermission(' + documentoDto.idArtista + ', ''ARTISTA'', ''DOCUMENTACION_DESCARGAR'')')}" type="button"
                                                     class="btn btn-primary btn-lg btn-descargar me-2"
                                                     th:data-id="${doc.id}"
                                                     th:data-nombre="${doc.nombre}">
                                                 <i class="fas fa-download"></i>
                                             </button>
-                                            <a th:href="@{/documentos/eliminar/__${doc.id}__}"
+                                            <a th:if="${#authorization.expression('hasPermission(' + documentoDto.idArtista + ', ''ARTISTA'', ''DOCUMENTACION'')')}" th:href="@{/documentos/eliminar/__${doc.id}__}"
                                                class="btn btn-danger btn-lg">
                                                 <i class="fas fa-trash"></i>
                                             </a>
@@ -66,7 +66,7 @@
                                     </tbody>
                                 </table>
 
-                                <div class="container mt-4 mb-4">
+                                <div class="container mt-4 mb-4" th:if="${#authorization.expression('hasPermission(' + documentoDto.idArtista + ', ''ARTISTA'', ''DOCUMENTACION'')')}">
                                     <form method="POST" id="artista-detail-edit-form" th:object="${documentoDto}"
                                           th:action=@{/documentos/guardar} enctype="multipart/form-data">
 
