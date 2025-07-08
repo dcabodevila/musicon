@@ -235,7 +235,7 @@ END AS escenario, t.fecha::date,
 			<textField>
 				<reportElement x="0" y="0" width="802" height="55" uuid="a4676890-9119-497a-bc0c-584535b0ccae"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="Lucida Sans Unicode" size="14"/>
+					<font fontName="SansSerif" size="14"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{titulo}]]></textFieldExpression>
 			</textField>
@@ -249,69 +249,72 @@ END AS escenario, t.fecha::date,
 		<band height="60">
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 			<textField isBlankWhenNull="true">
-				<reportElement x="80" y="0" width="280" height="14" uuid="e8c2da84-bc2f-49f1-999b-093659668276"/>
-				<textElement>
-					<font fontName="Lucida Sans Unicode" size="8"/>
+				<reportElement x="81" y="0" width="279" height="14" uuid="e8c2da84-bc2f-49f1-999b-093659668276"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{solicitante}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement x="440" y="0" width="360" height="56" uuid="448fa279-ad1e-47f0-a127-d3ca0dfab6f2"/>
 				<textElement>
-					<font fontName="Lucida Sans Unicode"/>
+					<font fontName="SansSerif"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{observaciones}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="0" y="0" width="81" height="14" uuid="be1acd60-fa3d-4842-9a05-4433d7945ca0"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Lucida Sans Unicode" size="8"/>
+					<font fontName="SansSerif" size="8"/>
 				</textElement>
 				<text><![CDATA[Agente solicitante:]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="0" y="14" width="81" height="14" uuid="bc8d53fb-c827-43fb-ad2e-752b941840e7"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Lucida Sans Unicode" size="8"/>
+					<font fontName="SansSerif" size="8"/>
 				</textElement>
 				<text><![CDATA[Provincia:]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="0" y="28" width="81" height="14" uuid="6edbfb33-476e-4e6e-9d0f-f0ce2a31df6d"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Lucida Sans Unicode" size="8"/>
+					<font fontName="SansSerif" size="8"/>
 				</textElement>
 				<text><![CDATA[Municipio:]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
 				<reportElement x="81" y="14" width="279" height="14" uuid="3dc932c4-d399-458f-8e1b-acddd344a1bd"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
 				<textFieldExpression><![CDATA[$P{provincia}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="80" y="28" width="280" height="14" uuid="0878fab1-678a-494f-b9b4-095ce6e6b89e"/>
-				<textElement>
-					<font fontName="Lucida Sans Unicode" size="8"/>
+				<reportElement x="81" y="28" width="279" height="14" uuid="0878fab1-678a-494f-b9b4-095ce6e6b89e"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{municipio}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="0" y="42" width="81" height="14" uuid="3ce09507-3b6b-4179-a801-7b0b363fb4a6"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Lucida Sans Unicode" size="8"/>
+					<font fontName="SansSerif" size="8"/>
 				</textElement>
 				<text><![CDATA[Lugar]]></text>
 			</staticText>
 			<textField isBlankWhenNull="true">
-				<reportElement x="80" y="42" width="280" height="14" uuid="2bf5a4cc-c268-47a2-9666-e18ecea3b64b"/>
-				<textElement>
-					<font fontName="Lucida Sans Unicode" size="8"/>
+				<reportElement x="81" y="42" width="279" height="14" uuid="2bf5a4cc-c268-47a2-9666-e18ecea3b64b"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{lugar}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="372" y="0" width="59" height="14" uuid="aad52031-1d8b-4b4d-bd17-8d607fc8b514"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Lucida Sans Unicode" size="8"/>
+					<font fontName="SansSerif" size="8"/>
 				</textElement>
 				<text><![CDATA[Observaciones:]]></text>
 			</staticText>
@@ -325,7 +328,7 @@ END AS escenario, t.fecha::date,
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="Lucida Sans Unicode" size="8"/>
+					<font fontName="SansSerif" size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
@@ -334,14 +337,14 @@ END AS escenario, t.fecha::date,
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Lucida Sans Unicode" size="8"/>
+					<font fontName="SansSerif" size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="601" y="20" width="100" height="36" uuid="175de349-2de7-430b-85f2-20eaae6c0af4"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Lucida Sans Unicode" size="7" isBold="false"/>
+					<font fontName="SansSerif" size="7" isBold="false"/>
 				</textElement>
 				<text><![CDATA[NO = Sin escenario
 R = Rígido
@@ -350,7 +353,7 @@ T = Trailer]]></text>
 			<staticText>
 				<reportElement x="700" y="20" width="120" height="36" uuid="b1e24629-c557-40d4-8d3d-a28fd9c68e73"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Lucida Sans Unicode" size="7" isBold="false"/>
+					<font fontName="SansSerif" size="7" isBold="false"/>
 				</textElement>
 				<text><![CDATA[MT = Sesión Matinal
 SMT = Solo sesión Matinal
@@ -359,14 +362,14 @@ SMT = Solo sesión Matinal
 			<staticText>
 				<reportElement x="601" y="6" width="100" height="14" uuid="40d63143-130d-45fc-a227-13391c6eb514"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Lucida Sans Unicode" size="7" isBold="true"/>
+					<font fontName="SansSerif" size="7" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Lectura escenario]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="700" y="6" width="120" height="14" uuid="ffd2f3ad-9e50-4d44-86d3-6930f255c646"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Lucida Sans Unicode" size="7" isBold="true"/>
+					<font fontName="SansSerif" size="7" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Lectura ocupaciones]]></text>
 			</staticText>
@@ -511,7 +514,7 @@ SMT = Solo sesión Matinal
 										<pen lineWidth="0.0"/>
 									</box>
 									<textElement verticalAlignment="Middle" markup="none">
-										<font fontName="Lucida Sans Unicode" size="8" isBold="true"/>
+										<font fontName="SansSerif" size="8" isBold="true"/>
 									</textElement>
 									<textFieldExpression><![CDATA[$F{Agencia}]]></textFieldExpression>
 								</textField>
@@ -540,7 +543,7 @@ SMT = Solo sesión Matinal
 									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 								</box>
 								<textElement verticalAlignment="Middle">
-									<font fontName="Lucida Sans Unicode" size="8" isBold="false" isItalic="false"/>
+									<font fontName="SansSerif" size="8" isBold="false" isItalic="false"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{Artista}]]></textFieldExpression>
 							</textField>
@@ -561,7 +564,7 @@ SMT = Solo sesión Matinal
 								<reportElement x="0" y="0" width="46" height="25" uuid="acc1d79b-8af1-43f9-b1aa-f0c35480cec8"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
-									<font fontName="Lucida Sans Unicode" size="8"/>
+									<font fontName="SansSerif" size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$P{dia1}]]></textFieldExpression>
 							</textField>
@@ -577,7 +580,7 @@ SMT = Solo sesión Matinal
 									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 								</box>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
-									<font fontName="Lucida Sans Unicode" size="8"/>
+									<font fontName="SansSerif" size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{dia1val}]]></textFieldExpression>
 							</textField>
@@ -597,7 +600,7 @@ SMT = Solo sesión Matinal
 								<reportElement x="0" y="0" width="45" height="25" uuid="ce78282b-f98a-4395-8d1d-4136c1233c27"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
-									<font fontName="Lucida Sans Unicode" size="8"/>
+									<font fontName="SansSerif" size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$P{dia2}]]></textFieldExpression>
 							</textField>
@@ -613,7 +616,7 @@ SMT = Solo sesión Matinal
 									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 								</box>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
-									<font fontName="Lucida Sans Unicode" size="8"/>
+									<font fontName="SansSerif" size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{dia2val}]]></textFieldExpression>
 							</textField>
@@ -633,7 +636,7 @@ SMT = Solo sesión Matinal
 								<reportElement x="0" y="0" width="44" height="25" uuid="c42dd875-6740-4dbf-8298-813e752c1436"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
-									<font fontName="Lucida Sans Unicode" size="8"/>
+									<font fontName="SansSerif" size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$P{dia3}]]></textFieldExpression>
 							</textField>
@@ -650,7 +653,7 @@ SMT = Solo sesión Matinal
 									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 								</box>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
-									<font fontName="Lucida Sans Unicode" size="8"/>
+									<font fontName="SansSerif" size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{dia3val}]]></textFieldExpression>
 							</textField>
@@ -670,7 +673,7 @@ SMT = Solo sesión Matinal
 								<reportElement x="0" y="0" width="44" height="25" uuid="0829230a-2886-45d7-8954-8145d9dba543"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
-									<font fontName="Lucida Sans Unicode" size="8"/>
+									<font fontName="SansSerif" size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$P{dia4}]]></textFieldExpression>
 							</textField>
@@ -686,7 +689,7 @@ SMT = Solo sesión Matinal
 									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 								</box>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
-									<font fontName="Lucida Sans Unicode" size="8"/>
+									<font fontName="SansSerif" size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{dia4val}]]></textFieldExpression>
 							</textField>
@@ -706,7 +709,7 @@ SMT = Solo sesión Matinal
 								<reportElement x="0" y="0" width="44" height="25" uuid="b3cf2da0-e524-4a67-93d9-89ec33006a0a"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
-									<font fontName="Lucida Sans Unicode" size="8"/>
+									<font fontName="SansSerif" size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$P{dia5}]]></textFieldExpression>
 							</textField>
@@ -722,7 +725,7 @@ SMT = Solo sesión Matinal
 									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 								</box>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
-									<font fontName="Lucida Sans Unicode" size="8"/>
+									<font fontName="SansSerif" size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{dia5val}]]></textFieldExpression>
 							</textField>
@@ -742,7 +745,7 @@ SMT = Solo sesión Matinal
 								<reportElement x="0" y="0" width="44" height="25" uuid="9a62ecd4-9c47-4ac6-8b67-76c11199d0cf"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
-									<font fontName="Lucida Sans Unicode" size="8"/>
+									<font fontName="SansSerif" size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$P{dia6}]]></textFieldExpression>
 							</textField>
@@ -758,7 +761,7 @@ SMT = Solo sesión Matinal
 									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 								</box>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
-									<font fontName="Lucida Sans Unicode" size="8"/>
+									<font fontName="SansSerif" size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{dia6val}]]></textFieldExpression>
 							</textField>
@@ -778,7 +781,7 @@ SMT = Solo sesión Matinal
 								<reportElement x="0" y="0" width="44" height="25" uuid="5e348a4b-cc58-479e-8a26-fa6d59b21f13"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
-									<font fontName="Lucida Sans Unicode" size="8"/>
+									<font fontName="SansSerif" size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$P{dia7}]]></textFieldExpression>
 							</textField>
@@ -794,7 +797,7 @@ SMT = Solo sesión Matinal
 									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 								</box>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
-									<font fontName="Lucida Sans Unicode" size="8"/>
+									<font fontName="SansSerif" size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{dia7val}]]></textFieldExpression>
 							</textField>
@@ -814,7 +817,7 @@ SMT = Solo sesión Matinal
 								<reportElement x="0" y="0" width="44" height="25" uuid="60e38e4b-d585-49bd-9346-7a17c00d1997"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
-									<font fontName="Lucida Sans Unicode" size="8"/>
+									<font fontName="SansSerif" size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$P{dia8}]]></textFieldExpression>
 							</textField>
@@ -830,7 +833,7 @@ SMT = Solo sesión Matinal
 									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 								</box>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
-									<font fontName="Lucida Sans Unicode" size="8"/>
+									<font fontName="SansSerif" size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{dia8val}]]></textFieldExpression>
 							</textField>
@@ -850,7 +853,7 @@ SMT = Solo sesión Matinal
 								<reportElement x="0" y="0" width="44" height="25" uuid="a2752505-25e2-4fa4-b783-d17d1ab0291e"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
-									<font fontName="Lucida Sans Unicode" size="8"/>
+									<font fontName="SansSerif" size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$P{dia9}]]></textFieldExpression>
 							</textField>
@@ -866,7 +869,7 @@ SMT = Solo sesión Matinal
 									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 								</box>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
-									<font fontName="Lucida Sans Unicode" size="8"/>
+									<font fontName="SansSerif" size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{dia9val}]]></textFieldExpression>
 							</textField>
@@ -886,7 +889,7 @@ SMT = Solo sesión Matinal
 								<reportElement x="0" y="0" width="44" height="25" uuid="9f4ede5e-b781-4572-b227-c42bd618759e"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
-									<font fontName="Lucida Sans Unicode" size="8"/>
+									<font fontName="SansSerif" size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$P{dia10}]]></textFieldExpression>
 							</textField>
@@ -902,7 +905,7 @@ SMT = Solo sesión Matinal
 									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 								</box>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
-									<font fontName="Lucida Sans Unicode" size="8"/>
+									<font fontName="SansSerif" size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{dia10val}]]></textFieldExpression>
 							</textField>
@@ -922,7 +925,7 @@ SMT = Solo sesión Matinal
 								<reportElement x="0" y="0" width="44" height="25" uuid="eab9f28c-e3f4-4fc0-bc5d-d638d11dc896"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
-									<font fontName="Lucida Sans Unicode" size="8"/>
+									<font fontName="SansSerif" size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$P{dia11}]]></textFieldExpression>
 							</textField>
@@ -938,7 +941,7 @@ SMT = Solo sesión Matinal
 									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 								</box>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
-									<font fontName="Lucida Sans Unicode" size="8"/>
+									<font fontName="SansSerif" size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{dia11val}]]></textFieldExpression>
 							</textField>
@@ -960,7 +963,7 @@ SMT = Solo sesión Matinal
 								</reportElement>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
-									<font fontName="Lucida Sans Unicode" size="8"/>
+									<font fontName="SansSerif" size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$P{dia12}]]></textFieldExpression>
 							</textField>
@@ -978,7 +981,7 @@ SMT = Solo sesión Matinal
 									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 								</box>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
-									<font fontName="Lucida Sans Unicode" size="8"/>
+									<font fontName="SansSerif" size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{dia12val}]]></textFieldExpression>
 							</textField>
@@ -998,7 +1001,7 @@ SMT = Solo sesión Matinal
 								<reportElement x="0" y="0" width="44" height="25" uuid="05d024eb-ed36-41b5-8d9b-b42684a28740"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
-									<font fontName="Lucida Sans Unicode" size="8"/>
+									<font fontName="SansSerif" size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$P{dia13}]]></textFieldExpression>
 							</textField>
@@ -1014,7 +1017,7 @@ SMT = Solo sesión Matinal
 									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 								</box>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
-									<font fontName="Lucida Sans Unicode" size="8"/>
+									<font fontName="SansSerif" size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{dia13val}]]></textFieldExpression>
 							</textField>
@@ -1034,7 +1037,7 @@ SMT = Solo sesión Matinal
 								<reportElement x="0" y="0" width="44" height="25" uuid="1126e15a-effc-400c-8367-61742a1f4cea"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
-									<font fontName="Lucida Sans Unicode" size="8"/>
+									<font fontName="SansSerif" size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$P{dia14}]]></textFieldExpression>
 							</textField>
@@ -1050,7 +1053,7 @@ SMT = Solo sesión Matinal
 									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 								</box>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
-									<font fontName="Lucida Sans Unicode" size="8"/>
+									<font fontName="SansSerif" size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{dia14val}]]></textFieldExpression>
 							</textField>
@@ -1070,7 +1073,7 @@ SMT = Solo sesión Matinal
 								<reportElement x="0" y="0" width="43" height="25" uuid="a02bad86-c2a6-4331-aec8-a7874e101945"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
-									<font fontName="Lucida Sans Unicode" size="8"/>
+									<font fontName="SansSerif" size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$P{dia15}]]></textFieldExpression>
 							</textField>
@@ -1086,7 +1089,7 @@ SMT = Solo sesión Matinal
 									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 								</box>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
-									<font fontName="Lucida Sans Unicode" size="8"/>
+									<font fontName="SansSerif" size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{dia15val}]]></textFieldExpression>
 							</textField>
@@ -1103,7 +1106,7 @@ SMT = Solo sesión Matinal
 							<staticText>
 								<reportElement x="0" y="0" width="35" height="25" uuid="bb8ec02c-0e1a-402f-bb71-a35c7debb219"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font fontName="Lucida Sans Unicode" size="8"/>
+									<font fontName="SansSerif" size="8"/>
 								</textElement>
 								<text><![CDATA[COMP]]></text>
 							</staticText>
@@ -1117,7 +1120,7 @@ SMT = Solo sesión Matinal
 									<bottomPen lineWidth="0.0"/>
 								</box>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font fontName="Lucida Sans Unicode" size="8"/>
+									<font fontName="SansSerif" size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{Componentes}]]></textFieldExpression>
 							</textField>
@@ -1134,7 +1137,7 @@ SMT = Solo sesión Matinal
 							<staticText>
 								<reportElement x="0" y="0" width="37" height="25" uuid="18d4c667-4707-42f2-82b1-30efbadd7fb6"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font fontName="Lucida Sans Unicode" size="8"/>
+									<font fontName="SansSerif" size="8"/>
 								</textElement>
 								<text><![CDATA[ESC]]></text>
 							</staticText>
@@ -1148,7 +1151,7 @@ SMT = Solo sesión Matinal
 									<bottomPen lineWidth="0.0"/>
 								</box>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font fontName="Lucida Sans Unicode" size="8"/>
+									<font fontName="SansSerif" size="8"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{Escenario}]]></textFieldExpression>
 							</textField>
