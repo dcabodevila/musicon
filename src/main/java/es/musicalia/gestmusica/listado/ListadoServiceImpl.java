@@ -119,7 +119,7 @@ private String convertSetLongToString(Set<Long> setIds) {
 		Map<String, Object> parametros = new HashMap<String, Object>();
 		String fileReport = TipoOcupacionEnum.SIN_OCUPACION.getId().equals(listadoDto.getIdTipoOcupacion()) ? "listado_sin_ocupacion2.jrxml" : "listado_con_ocupacion.jrxml";
 
-		parametros.put("titulo", TipoOcupacionEnum.SIN_OCUPACION.getId().equals(listadoDto.getIdTipoOcupacion()) ? "Listado sin ocupación " : "Listado con ocupación ");
+		parametros.put("titulo", TipoOcupacionEnum.SIN_OCUPACION.getId().equals(listadoDto.getIdTipoOcupacion()) ? "Presupuesto sin ocupación " : "Presupuesto con ocupación ");
 
 
 		String fileNameToExport = "Listado_".concat(TipoOcupacionEnum.getDescripcionById(listadoDto.getIdTipoOcupacion())).concat(DateUtils.getDateStr(new Date(), "ddMMyyyyHHmmss")).concat(".pdf");
