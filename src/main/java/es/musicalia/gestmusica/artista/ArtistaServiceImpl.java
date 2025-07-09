@@ -39,11 +39,12 @@ public class ArtistaServiceImpl implements ArtistaService {
 	private final AccesoService accesoService;
 	private final RolRepository rolRepository;
 	private final AccesoRepository accesoRepository;
+	private final ArtistaMapper artistaMapper;
 
 	public ArtistaServiceImpl(ArtistaRepository artistaRepository, UsuarioRepository usuarioRepository, ContactoRepository agenciaContactoRepository,
                               TipoEscenarioRepository tipoEscenarioRepository,
                               TipoArtistaRepository tipoArtistaRepository,
-                              CcaaRepository ccaaRepository, AgenciaRepository agenciaRepository, AccesoService accesoService, RolRepository rolRepository, AccesoRepository accesoRepository){
+                              CcaaRepository ccaaRepository, AgenciaRepository agenciaRepository, AccesoService accesoService, RolRepository rolRepository, AccesoRepository accesoRepository, ArtistaMapper artistaMapper){
 		this.artistaRepository = artistaRepository;
 		this.usuarioRepository = usuarioRepository;
 		this.agenciaContactoRepository = agenciaContactoRepository;
@@ -55,19 +56,20 @@ public class ArtistaServiceImpl implements ArtistaService {
         this.accesoService = accesoService;
         this.rolRepository = rolRepository;
         this.accesoRepository = accesoRepository;
+        this.artistaMapper = artistaMapper;
     }
 
 	@Override
-	public List<ArtistaDto> findAllArtistasForUser(final Usuario usuario){
-		return getArtistaDtos(this.artistaRepository.findAllArtistasOrderedByName());
+	public List<ArtistaRecord> findAllArtistasForUser(final Usuario usuario){
+		return this.artistaRepository.findAllArtistasOrderedByName();
 	}
 	@Override
-	public List<ArtistaDto> findMisArtistas(Set<Long> idsMisArtistas) {
-		return getArtistaDtos(this.artistaRepository.findMisArtistas(idsMisArtistas));
+	public List<ArtistaRecord> findMisArtistas(Set<Long> idsMisArtistas) {
+		return this.artistaRepository.findMisArtistas(idsMisArtistas);
 	}
 	@Override
-	public List<ArtistaDto> findOtrosArtistas(Set<Long> idsMisArtistas) {
-		return getArtistaDtos(this.artistaRepository.findOtrosArtistas(idsMisArtistas));
+	public List<ArtistaRecord> findOtrosArtistas(Set<Long> idsMisArtistas) {
+		return this.artistaRepository.findOtrosArtistas(idsMisArtistas);
 	}
 
 
@@ -76,7 +78,7 @@ public class ArtistaServiceImpl implements ArtistaService {
 		return getArtistaDtos(this.artistaRepository.findAllArtistasByIdAgencia(idAgencia));
 	}
 
-	private static List<ArtistaDto> getArtistaDtos(List<Artista> listaArtistas) {
+	private List<ArtistaDto> getArtistaDtos(List<Artista> listaArtistas) {
 		List<ArtistaDto> listaArtistasDto = new ArrayList<>();
 
 		if (listaArtistas !=null){
@@ -91,20 +93,8 @@ public class ArtistaServiceImpl implements ArtistaService {
 		return getArtistaDto(this.artistaRepository.findById(idArtista).get());
 	}
 
-	private static ArtistaDto getArtistaDto(Artista artista) {
-		ModelMapper modelMapper = new ModelMapper();
-		ArtistaDto artistaDto = modelMapper.map(artista, ArtistaDto.class);
-		artistaDto.setNombreUsuario(artista.getUsuario().getNombreCompleto());
-
-		if (CollectionUtils.isNotEmpty(artista.getTiposArtista())) {
-			artistaDto.getIdsTipoArtista().addAll(
-					artista.getTiposArtista().stream()
-							.map(TipoArtista::getId)
-							.collect(Collectors.toList())
-			);
-		}
-
-
+	private ArtistaDto getArtistaDto(Artista artista) {
+		ArtistaDto artistaDto = artistaMapper.toDto(artista);
 
 		final Contacto contacto = artista.getContacto();
 
