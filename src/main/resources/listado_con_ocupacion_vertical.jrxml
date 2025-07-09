@@ -801,7 +801,7 @@ SMT = Solo sesión Matinal
 						<jr:columnHeader style="Table_CH" height="25" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="46" height="25" uuid="9a62ecd4-9c47-4ac6-8b67-76c11199d0cf"/>
+								<reportElement x="0" y="0" width="47" height="25" uuid="9a62ecd4-9c47-4ac6-8b67-76c11199d0cf"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
 									<font fontName="SansSerif" size="8"/>
@@ -811,7 +811,7 @@ SMT = Solo sesión Matinal
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="20">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="46" height="20" uuid="eeab8de1-e528-47be-9c41-ce8a144a543e"/>
+								<reportElement x="0" y="0" width="47" height="20" uuid="eeab8de1-e528-47be-9c41-ce8a144a543e"/>
 								<box padding="0">
 									<pen lineWidth="0.5" lineStyle="Solid" lineColor="#030303"/>
 									<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#050505"/>
