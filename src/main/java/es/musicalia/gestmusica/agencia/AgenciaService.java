@@ -5,15 +5,17 @@ import java.util.List;
 import java.util.Set;
 
 public interface AgenciaService {
-    List<AgenciaDto> findAllAgenciasForUser(final Usuario usuario);
+    List<AgenciaRecord> findAllAgenciasForUser(final Usuario usuario);
 
     List<AgenciaRecord> listaAgenciasRecordActivasTarifasPublicas();
 
     Agencia saveAgencia(AgenciaDto agenciaDto);
 
-    List<AgenciaDto> findMisAgencias(Set<Long> idsMisAgencias);
+    AgenciaRecord findAgenciaRecordById(Long idAgencia);
 
-    List<AgenciaDto> findOtrasAgencias(Set<Long> idsMisAgencias);
+    List<AgenciaRecord> findMisAgencias(Set<Long> idsMisAgencias);
+
+    List<AgenciaRecord> findOtrasAgencias(Set<Long> idsMisAgencias);
 
     AgenciaDto findAgenciaDtoById(Long idAgencia);
 

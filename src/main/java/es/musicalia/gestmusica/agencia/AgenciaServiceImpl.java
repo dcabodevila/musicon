@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -29,8 +28,9 @@ public class AgenciaServiceImpl implements AgenciaService {
 	private final ContactoRepository agenciaContactoRepository;
 	private final AccesoService accesoService;
 	private final RolRepository rolRepository;
+	private final AgenciaMapper agenciaMapper;
 
-	public AgenciaServiceImpl(AgenciaRepository agenciaRepository, MunicipioRepository municipioRepository, ProvinciaRepository provinciaRepository, UsuarioRepository usuarioRepository, ContactoRepository agenciaContactoRepository, AccesoService accesoService, RolRepository rolRepository){
+	public AgenciaServiceImpl(AgenciaRepository agenciaRepository, MunicipioRepository municipioRepository, ProvinciaRepository provinciaRepository, UsuarioRepository usuarioRepository, ContactoRepository agenciaContactoRepository, AccesoService accesoService, RolRepository rolRepository, AgenciaMapper agenciaMapper){
 		this.agenciaRepository = agenciaRepository;
 		this.municipioRepository = municipioRepository;
 		this.provinciaRepository = provinciaRepository;
@@ -38,48 +38,35 @@ public class AgenciaServiceImpl implements AgenciaService {
 		this.agenciaContactoRepository = agenciaContactoRepository;
         this.accesoService = accesoService;
         this.rolRepository = rolRepository;
+        this.agenciaMapper = agenciaMapper;
     }
 	@Override
-	public List<AgenciaDto> findAllAgenciasForUser(final Usuario usuario){
+	public List<AgenciaRecord> findAllAgenciasForUser(final Usuario usuario){
 
-		List<Agencia> agencias = agenciaRepository.findAllAgenciasOrderedByName();
-		if (agencias == null || agencias.isEmpty()) {
-			return Collections.emptyList();
-		}
-		return agencias.stream()
-				.map(this::getAgenciaDto)
-				.collect(Collectors.toList());
+		return agenciaRepository.findAllAgenciasOrderedByName();
+
 	}
 
 	@Override
-	public List<AgenciaDto> findMisAgencias(Set<Long> idsMisAgencias){
-
-
-
-		List<Agencia> agencias = agenciaRepository.findAllAgenciasByIds(idsMisAgencias);
-		if (agencias == null || agencias.isEmpty()) {
-			return Collections.emptyList();
-		}
-		return agencias.stream()
-				.map(this::getAgenciaDto)
-				.collect(Collectors.toList());
+	public AgenciaRecord findAgenciaRecordById(Long idAgencia){
+		return this.agenciaRepository.findAgenciaRecordById(idAgencia);
 	}
 
 	@Override
-	public List<AgenciaDto> findOtrasAgencias(Set<Long> idsMisAgencias){
+	public List<AgenciaRecord> findMisAgencias(Set<Long> idsMisAgencias){
 
-		List<Agencia> agencias = agenciaRepository.findAllAgenciasNotByIds(idsMisAgencias);
-		if (agencias == null || agencias.isEmpty()) {
-			return Collections.emptyList();
-		}
-		return agencias.stream()
-				.map(this::getAgenciaDto)
-				.collect(Collectors.toList());
+		return agenciaRepository.findAllAgenciasByIds(idsMisAgencias);
+	}
+
+	@Override
+	public List<AgenciaRecord> findOtrasAgencias(Set<Long> idsMisAgencias){
+
+		return agenciaRepository.findAllAgenciasNotByIds(idsMisAgencias);
 	}
 
 	@Override
 	public AgenciaDto findAgenciaDtoById(Long idAgencia){
-		return getAgenciaDto(this.agenciaRepository.findById(idAgencia).orElseThrow());
+		return this.agenciaMapper.toDto(this.agenciaRepository.findById(idAgencia).orElseThrow());
 	}
 
 	private AgenciaDto getAgenciaDto(Agencia agencia) {

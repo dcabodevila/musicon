@@ -82,7 +82,7 @@ public class ArtistaController {
         model.addAttribute("artistaDto", artistaDto);
 
         model.addAttribute("listaUsuarios", this.userService.findAllUsuarioRecords());
-        model.addAttribute("listaAgencias", artistaDto.getIdAgencia() != null ? this.agenciaService.findAgenciaDtoById(artistaDto.getIdAgencia()) : this.agenciaService.findAllAgenciasForUser(userService.obtenerUsuarioAutenticado()));
+        model.addAttribute("listaAgencias", artistaDto.getIdAgencia() != null ? this.agenciaService.findAgenciaRecordById(artistaDto.getIdAgencia()) : this.agenciaService.findAllAgenciasForUser(userService.obtenerUsuarioAutenticado()));
         model.addAttribute("listaTipoArtista", this.artistaService.listaTipoArtista());
         model.addAttribute("listaTipoEscenario", this.artistaService.listaTipoEscenario());
         model.addAttribute("listaCcaa", this.localizacionService.findAllComunidades());

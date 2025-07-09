@@ -1,5 +1,6 @@
 package es.musicalia.gestmusica.ajustes;
 
+import es.musicalia.gestmusica.agencia.AgenciaRecord;
 import es.musicalia.gestmusica.agencia.AgenciaRepository;
 import es.musicalia.gestmusica.localizacion.CcaaRepository;
 import es.musicalia.gestmusica.tipoartista.TipoArtistaRepository;
@@ -104,7 +105,7 @@ public class AjustesServiceImpl implements AjustesService {
 			);
 
 			ajustesDto.setIdsAgencias(this.agenciaRepository.findAllAgenciasOrderedByName().stream()
-					.map(Agencia::getId) // Suponiendo que TipoArtista tiene un método getId()
+					.map(AgenciaRecord::id) // Suponiendo que TipoArtista tiene un método getId()
 					.collect(Collectors.toList()));
 			ajustesDto.setIdsComunidades(this.ccaaRepository.findAll().stream()
 					.map(Ccaa::getId) // Suponiendo que TipoArtista tiene un método getId()
