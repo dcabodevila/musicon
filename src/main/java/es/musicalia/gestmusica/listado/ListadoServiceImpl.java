@@ -117,27 +117,18 @@ private String convertSetLongToString(Set<Long> setIds) {
 
 		log.info("Generando listado");
 		Map<String, Object> parametros = new HashMap<String, Object>();
-		String fileReport = TipoOcupacionEnum.SIN_OCUPACION.getId().equals(listadoDto.getIdTipoOcupacion()) ? "listado_sin_ocupacion2.jrxml" : "listado_con_ocupacion.jrxml";
-
-		parametros.put("titulo", TipoOcupacionEnum.SIN_OCUPACION.getId().equals(listadoDto.getIdTipoOcupacion()) ? "Presupuesto sin ocupación " : "Presupuesto con ocupación ");
-
 
 		String fileNameToExport = "Listado_".concat(TipoOcupacionEnum.getDescripcionById(listadoDto.getIdTipoOcupacion())).concat(DateUtils.getDateStr(new Date(), "ddMMyyyyHHmmss")).concat(".pdf");
 
 		List<LocalDate> dateList = sortDates(listadoDto.getFecha1(), listadoDto.getFecha2(), listadoDto.getFecha3(), listadoDto.getFecha4(), listadoDto.getFecha5(), listadoDto.getFecha6(), listadoDto.getFecha7());
 
 		parametros.put("colNames", getColNamesListadoFechas());
-
-
 		parametros.put("fechaListIn", getFechaListFechas(listadoDto.getFechaDesde(), listadoDto.getFechaHasta(), dateList));
-
 		parametros.put("idProvincia", listadoDto.getIdProvincia().intValue());
-
 		parametros.put("observaciones", listadoDto.getComentario());
-
 		parametros.put("solicitante", listadoDto.getSolicitadoPara());
-		parametros.put("provincia", this.provinciaRepository.findById(listadoDto.getIdProvincia()).get().getNombre());
-		parametros.put("municipio", listadoDto.getIdMunicipio() != null ? this.municipioRepository.findById(listadoDto.getIdMunicipio()).get().getNombre() : "");
+		parametros.put("provincia", this.provinciaRepository.findById(listadoDto.getIdProvincia()).orElseThrow().getNombre());
+		parametros.put("municipio", listadoDto.getIdMunicipio() != null ? this.municipioRepository.findById(listadoDto.getIdMunicipio()).orElseThrow().getNombre() : "");
 		parametros.put("lugar", listadoDto.getLocalidad() != null ? listadoDto.getLocalidad() : "");
 		parametros.put("idsTipoArtista", convertSetLongToString(listadoDto.getIdsTipoArtista()));
 		parametros.put("idsAgencias", convertSetLongToString(listadoDto.getIdsAgencias()));
@@ -154,7 +145,13 @@ private String convertSetLongToString(Set<Long> setIds) {
 		for (Map.Entry<String, String> entry : listFechas) {
 			parametros.put(entry.getKey(), entry.getValue());
 		}
-		byte[] listado = this.informeService.imprimirInforme(parametros, fileNameToExport, fileReport);
+
+		final boolean isReportVertical = diaList.size()<=8;
+
+		TipoReportEnum tipoReport = TipoOcupacionEnum.SIN_OCUPACION.getId().equals(listadoDto.getIdTipoOcupacion()) ? (isReportVertical ? TipoReportEnum.LISTADO_SIN_OCUPACION_VERTICAL: TipoReportEnum.LISTADO_SIN_OCUPACION_HORIZONTAL) :  (isReportVertical ? TipoReportEnum.LISTADO_CON_OCUPACION_VERTICAL : TipoReportEnum.LISTADO_CON_OCUPACION_HORIZONTAL);
+		parametros.put("titulo", tipoReport.getTitulo());
+
+		byte[] listado = this.informeService.imprimirInforme(parametros, fileNameToExport, tipoReport.getNombreFicheroReport());
 
 		guardarListadoEntity(listadoDto);
 
@@ -278,7 +275,7 @@ private ListadoRecord mapToListadoRecord(Listado listado) {
 	private String getColNamesListadoFechas() {
 
 		StringBuilder colNamesBuilder = new StringBuilder();
-		colNamesBuilder.append("\"Artista\" text, \"Agencia\" text, \"Componentes\" text,\"Escenario\" text,");
+		colNamesBuilder.append("\"Artista\" text, \"Agencia\" text, \"Telefono\" text, \"Telefono2\" text,\"Telefono3\" text,\"Componentes\" text,\"Escenario\" text,");
 		int index = 1;
 		// Completar hasta dia16 si faltan
 		while (index <= 15) {

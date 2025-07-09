@@ -70,7 +70,7 @@ public class TarifaServiceImpl implements TarifaService {
 	public byte[] getInformeTarifaAnual(final TarifaAnualDto tarifaAnualDto) {
 		// Cargar el informe desde algún lugar y almacenarlo en un arreglo de bytes.
 		Map<String, Object> parametros = new HashMap<String, Object>();
-		final Artista artista = this.artistaRepository.findById(tarifaAnualDto.getIdArtista()).get();
+		final Artista artista = this.artistaRepository.findById(tarifaAnualDto.getIdArtista()).orElseThrow();
 		parametros.put("titulo", artista.getNombre());
 		parametros.put("idArtista", tarifaAnualDto.getIdArtista());
 		parametros.put("ano", tarifaAnualDto.getAno().toString());

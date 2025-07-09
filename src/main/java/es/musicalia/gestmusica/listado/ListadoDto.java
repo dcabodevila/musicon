@@ -6,11 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
-
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Data
@@ -52,11 +49,5 @@ public class ListadoDto {
     private Set<Long> idsTipoArtista = new HashSet<>();
     private Set<Long> idsAgencias = new HashSet<>();
     private Set<Long> idsComunidades = new HashSet<>();
-
-
-
-
-
-
 
 }

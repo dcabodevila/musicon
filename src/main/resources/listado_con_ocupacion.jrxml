@@ -32,6 +32,7 @@
 		</box>
 	</style>
 	<style name="Style1" mode="Opaque" forecolor="#FFFFFF" backcolor="#D9D9D9"/>
+	<style name="Negrita" fontSize="8" isBold="true"/>
 	<subDataset name="Dataset2" uuid="d46a6bb4-b9fe-4a43-8cff-3a39a6ea90ad">
 		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Sample DB"/>
@@ -52,7 +53,7 @@
 		<parameter name="dia14" class="java.lang.String"/>
 		<parameter name="dia15" class="java.lang.String"/>
 		<parameter name="colNames" class="java.lang.String">
-			<defaultValueExpression><![CDATA["\"Artista\" text, \"Agencia\" text, \"Componentes\" text,\"Escenario\" text, \"dia1val\" text, \"dia2val\" text, \"dia3val\" text, \"dia4val\" text, \"dia5val\" text, \"dia6val\" text, \"dia7val\" text, \"dia8val\" text, \"dia9val\" text, \"dia10val\" text, \"dia11val\" text, \"dia12val\" text, \"dia13val\" text, \"dia14val\" text, \"dia15val\" text, \"dia16val\" text"]]></defaultValueExpression>
+			<defaultValueExpression><![CDATA["\"Artista\" text, \"Agencia\" text, \"Telefono\" text, \"Telefono2\" text, \"Telefono3\" text,\"Componentes\" text,\"Escenario\" text, \"dia1val\" text, \"dia2val\" text, \"dia3val\" text, \"dia4val\" text, \"dia5val\" text, \"dia6val\" text, \"dia7val\" text, \"dia8val\" text, \"dia9val\" text, \"dia10val\" text, \"dia11val\" text, \"dia12val\" text, \"dia13val\" text, \"dia14val\" text, \"dia15val\" text, \"dia16val\" text"]]></defaultValueExpression>
 		</parameter>
 		<parameter name="fechaListIn" class="java.lang.String">
 			<defaultValueExpression><![CDATA["''2023-08-01'', ''2023-08-02'', ''2023-08-03''"]]></defaultValueExpression>
@@ -81,7 +82,7 @@
 		<queryString language="SQL">
 			<![CDATA[SELECT *
 FROM crosstab(
-  'SELECT a.nombre, ag.nombre, a.componentes,
+  'SELECT a.nombre, UPPER(ag.nombre), cont.telefono, cont.telefono2,cont.telefono3,a.componentes,
 	CASE WHEN (a.escenario) THEN ''SI'' ELSE ''NO'' END ||
 CASE 
     WHEN (a.escenario=false OR a.tipo_escenario_id IS NULL) THEN ''''
@@ -91,7 +92,7 @@ CASE
          END
 END AS escenario, t.fecha::date, 
    (CASE WHEN p.abreviatura is not null THEN (CASE WHEN o.estado_id=2 THEN ''RESER'' WHEN o.estado_id=3 THEN ''PEND'' WHEN o.solo_matinal THEN ''SMT''|| p.abreviatura WHEN o.matinal THEN ''MT''||p.abreviatura else p.abreviatura END) ELSE  (CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t.importe + COALESCE(ip.incremento,0),''999999'') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t.importe+(t.importe*ip.incremento)/100,''999999'') else TO_CHAR(t.importe,''999999'')  end) end) AS importe
-   FROM gestmusica.tarifa t inner join gestmusica.artista a on t.artista_id=a.id inner join gestmusica.artista_tipo_artista ata on a.id=ata.artista_id inner join gestmusica.agencia ag on a.agencia_id=ag.id
+   FROM gestmusica.tarifa t inner join gestmusica.artista a on t.artista_id=a.id inner join gestmusica.artista_tipo_artista ata on a.id=ata.artista_id inner join gestmusica.agencia ag on a.agencia_id=ag.id left join gestmusica.contacto cont on ag.agencia_contacto_id=cont.id
        LEFT JOIN gestmusica.ocupacion o ON (t.artista_id = o.artista_id 
         AND t.id = o.tarifa_id 
         AND o.activo
@@ -179,6 +180,9 @@ END AS escenario, t.fecha::date,
 		</field>
 		<field name="Componentes" class="java.lang.String"/>
 		<field name="Escenario" class="java.lang.String"/>
+		<field name="telefono" class="java.lang.String"/>
+		<field name="telefono2" class="java.lang.String"/>
+		<field name="telefono3" class="java.lang.String"/>
 		<group name="Group1">
 			<groupExpression><![CDATA[$F{Agencia}]]></groupExpression>
 		</group>
@@ -251,7 +255,7 @@ END AS escenario, t.fecha::date,
 			<textField isBlankWhenNull="true">
 				<reportElement x="81" y="0" width="279" height="14" uuid="e8c2da84-bc2f-49f1-999b-093659668276"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="SansSerif" size="8"/>
+					<font fontName="SansSerif" size="8" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{solicitante}]]></textFieldExpression>
 			</textField>
@@ -379,7 +383,7 @@ SMT = Solo sesión Matinal
 		<band height="250" splitType="Stretch">
 			<property name="local_mesure_unitheight" value="pixel"/>
 			<componentElement>
-				<reportElement x="0" y="0" width="840" height="250" uuid="b67c98c3-386a-443f-ae40-d7cd5df64ca9">
+				<reportElement x="0" y="0" width="802" height="250" uuid="b67c98c3-386a-443f-ae40-d7cd5df64ca9">
 					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
 					<property name="com.jaspersoft.studio.table.style.table_header" value="Table_TH"/>
 					<property name="com.jaspersoft.studio.table.style.column_header" value="Table_CH"/>
@@ -498,23 +502,23 @@ SMT = Solo sesión Matinal
 						</datasetParameter>
 						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 					</datasetRun>
-					<jr:column width="106" uuid="63a43719-cd99-4ea7-985d-b6b60108591b">
+					<jr:column width="104" uuid="63a43719-cd99-4ea7-985d-b6b60108591b">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column1"/>
 						<jr:tableHeader style="Table_TH" height="1" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<property name="com.jaspersoft.studio.unit.height" value="px"/>
 						</jr:tableHeader>
 						<jr:groupHeader groupName="Group1">
-							<jr:cell style="Style1" height="20" rowSpan="1">
+							<jr:cell height="20" rowSpan="1">
 								<property name="com.jaspersoft.studio.unit.height" value="px"/>
 								<property name="com.jaspersoft.studio.unit.width" value="px"/>
 								<textField textAdjust="ScaleFont">
-									<reportElement x="0" y="0" width="103" height="20" uuid="5ac2cb1e-a2c4-4672-bffc-cd3cd6520e80"/>
+									<reportElement key="" style="Negrita" mode="Opaque" x="0" y="0" width="104" height="20" backcolor="#D9D9D9" uuid="5ac2cb1e-a2c4-4672-bffc-cd3cd6520e80"/>
 									<box padding="5">
 										<pen lineWidth="0.0"/>
 									</box>
 									<textElement verticalAlignment="Middle" markup="none">
-										<font fontName="SansSerif" size="8" isBold="true"/>
+										<font fontName="SansSerif" size="9" isBold="false"/>
 									</textElement>
 									<textFieldExpression><![CDATA[$F{Agencia}]]></textFieldExpression>
 								</textField>
@@ -524,44 +528,57 @@ SMT = Solo sesión Matinal
 							<property name="com.jaspersoft.studio.unit.height" value="px"/>
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<staticText>
-								<reportElement x="0" y="0" width="106" height="25" uuid="baf07eb2-d8dd-4124-a784-236b0521697b"/>
+								<reportElement x="0" y="0" width="104" height="25" uuid="baf07eb2-d8dd-4124-a784-236b0521697b"/>
 								<box padding="5"/>
 								<textElement verticalAlignment="Middle"/>
 								<text><![CDATA[]]></text>
 							</staticText>
 						</jr:columnHeader>
-						<jr:detailCell style="Table_TD" height="25">
+						<jr:detailCell style="Table_TD" height="20">
 							<property name="com.jaspersoft.studio.unit.height" value="px"/>
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<textField textAdjust="ScaleFont">
-								<reportElement x="0" y="0" width="106" height="25" uuid="61a14e92-fada-4306-93b3-a14b1f6fc4b6"/>
+								<reportElement key="" mode="Transparent" x="0" y="0" width="104" height="20" uuid="61a14e92-fada-4306-93b3-a14b1f6fc4b6">
+									<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+								</reportElement>
 								<box padding="5">
-									<pen lineWidth="0.25"/>
-									<topPen lineWidth="0.25" lineStyle="Solid" lineColor="#000000"/>
+									<pen lineWidth="0.5" lineStyle="Solid"/>
+									<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 									<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 								</box>
 								<textElement verticalAlignment="Middle">
-									<font fontName="SansSerif" size="8" isBold="false" isItalic="false"/>
+									<font fontName="SansSerif" size="9" isBold="true"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{Artista}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="46" uuid="0771221f-c00d-49ae-9fe3-4c81ce1e2cc8">
+					<jr:column width="45" uuid="0771221f-c00d-49ae-9fe3-4c81ce1e2cc8">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column2"/>
 						<printWhenExpression><![CDATA[$P{dia1} !=null]]></printWhenExpression>
 						<jr:tableHeader style="Table_TH" height="1" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 						</jr:tableHeader>
 						<jr:groupHeader groupName="Group1">
-							<jr:cell style="Style1" height="20" rowSpan="1"/>
+							<jr:cell style="Style1" height="20" rowSpan="1">
+								<textField textAdjust="ScaleFont" isBlankWhenNull="true">
+									<reportElement x="0" y="0" width="45" height="20" uuid="c54890f5-af44-4a5a-92ea-8ba961c30733"/>
+									<box padding="5">
+										<pen lineWidth="0.0"/>
+									</box>
+									<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+										<font fontName="SansSerif" size="8"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{telefono}]]></textFieldExpression>
+								</textField>
+							</jr:cell>
 						</jr:groupHeader>
 						<jr:columnHeader style="Table_CH" height="25" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="46" height="25" uuid="acc1d79b-8af1-43f9-b1aa-f0c35480cec8"/>
+								<reportElement x="0" y="0" width="45" height="25" uuid="acc1d79b-8af1-43f9-b1aa-f0c35480cec8"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
 									<font fontName="SansSerif" size="8"/>
@@ -569,12 +586,14 @@ SMT = Solo sesión Matinal
 								<textFieldExpression><![CDATA[$P{dia1}]]></textFieldExpression>
 							</textField>
 						</jr:columnHeader>
-						<jr:detailCell style="Table_TD" height="25">
+						<jr:detailCell style="Table_TD" height="20">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="46" height="25" uuid="0e470b77-a132-4a1d-a8c6-d70729bf9a19"/>
+								<reportElement x="0" y="0" width="45" height="20" uuid="0e470b77-a132-4a1d-a8c6-d70729bf9a19">
+									<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+								</reportElement>
 								<box padding="0">
-									<pen lineWidth="0.25" lineColor="#030303"/>
-									<topPen lineWidth="0.25" lineStyle="Solid" lineColor="#050505"/>
+									<pen lineWidth="0.5" lineStyle="Solid" lineColor="#030303"/>
+									<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#050505"/>
 									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 									<bottomPen lineWidth="0.0" lineStyle="Dotted" lineColor="#050505"/>
 									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -586,18 +605,32 @@ SMT = Solo sesión Matinal
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="45" uuid="aaa4118c-d515-4fee-8815-3af49a91b9db">
+					<jr:column width="44" uuid="aaa4118c-d515-4fee-8815-3af49a91b9db">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column3"/>
 						<printWhenExpression><![CDATA[$P{dia2} !=null]]></printWhenExpression>
 						<jr:tableHeader style="Table_TH" height="1" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 						</jr:tableHeader>
 						<jr:groupHeader groupName="Group1">
-							<jr:cell style="Style1" height="20" rowSpan="1"/>
+							<jr:cell style="Style1" height="20" rowSpan="1">
+								<property name="com.jaspersoft.studio.unit.width" value="px"/>
+								<textField textAdjust="ScaleFont" isBlankWhenNull="true">
+									<reportElement x="0" y="0" width="44" height="20" uuid="88b79c92-fd24-4849-9b3f-d63a643692ca">
+										<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+									</reportElement>
+									<box padding="5">
+										<pen lineWidth="0.0"/>
+									</box>
+									<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+										<font fontName="SansSerif" size="8"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{telefono2}]]></textFieldExpression>
+								</textField>
+							</jr:cell>
 						</jr:groupHeader>
 						<jr:columnHeader style="Table_CH" height="25" rowSpan="1">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="45" height="25" uuid="ce78282b-f98a-4395-8d1d-4136c1233c27"/>
+								<reportElement x="0" y="0" width="44" height="25" uuid="ce78282b-f98a-4395-8d1d-4136c1233c27"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
 									<font fontName="SansSerif" size="8"/>
@@ -605,12 +638,12 @@ SMT = Solo sesión Matinal
 								<textFieldExpression><![CDATA[$P{dia2}]]></textFieldExpression>
 							</textField>
 						</jr:columnHeader>
-						<jr:detailCell style="Table_TD" height="25">
+						<jr:detailCell style="Table_TD" height="20">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="45" height="25" uuid="82e4acc5-197e-44cd-ac22-3e72c723b5c3"/>
+								<reportElement x="0" y="0" width="44" height="20" uuid="82e4acc5-197e-44cd-ac22-3e72c723b5c3"/>
 								<box padding="0">
-									<pen lineWidth="0.25" lineColor="#030303"/>
-									<topPen lineWidth="0.25" lineStyle="Solid" lineColor="#050505"/>
+									<pen lineWidth="0.5" lineStyle="Solid" lineColor="#030303"/>
+									<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#050505"/>
 									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 									<bottomPen lineWidth="0.0" lineStyle="Dotted" lineColor="#050505"/>
 									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -629,7 +662,19 @@ SMT = Solo sesión Matinal
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 						</jr:tableHeader>
 						<jr:groupHeader groupName="Group1">
-							<jr:cell style="Style1" height="20" rowSpan="1"/>
+							<jr:cell style="Style1" height="20" rowSpan="1">
+								<property name="com.jaspersoft.studio.unit.width" value="px"/>
+								<textField textAdjust="ScaleFont" isBlankWhenNull="true">
+									<reportElement x="0" y="0" width="44" height="20" uuid="40b06a63-ccc4-40da-803b-d83b3be75cbd"/>
+									<box padding="5">
+										<pen lineWidth="0.0"/>
+									</box>
+									<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+										<font fontName="SansSerif" size="8"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{telefono3}]]></textFieldExpression>
+								</textField>
+							</jr:cell>
 						</jr:groupHeader>
 						<jr:columnHeader style="Table_CH" height="25" rowSpan="1">
 							<textField isBlankWhenNull="true">
@@ -641,13 +686,13 @@ SMT = Solo sesión Matinal
 								<textFieldExpression><![CDATA[$P{dia3}]]></textFieldExpression>
 							</textField>
 						</jr:columnHeader>
-						<jr:detailCell style="Table_TD" height="25">
+						<jr:detailCell style="Table_TD" height="20">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="44" height="25" uuid="93f9fe9e-d8c8-4180-8f81-204760fd7136"/>
+								<reportElement x="0" y="0" width="44" height="20" uuid="93f9fe9e-d8c8-4180-8f81-204760fd7136"/>
 								<box padding="0">
-									<pen lineWidth="0.25" lineColor="#030303"/>
-									<topPen lineWidth="0.25" lineStyle="Solid" lineColor="#050505"/>
+									<pen lineWidth="0.5" lineStyle="Solid" lineColor="#030303"/>
+									<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#050505"/>
 									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 									<bottomPen lineWidth="0.0" lineStyle="Dotted" lineColor="#050505"/>
 									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -659,7 +704,7 @@ SMT = Solo sesión Matinal
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="44" uuid="d4e48713-e7df-4d23-9ace-d7413f70cf2a">
+					<jr:column width="42" uuid="d4e48713-e7df-4d23-9ace-d7413f70cf2a">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column5"/>
 						<printWhenExpression><![CDATA[$P{dia4} !=null]]></printWhenExpression>
 						<jr:tableHeader style="Table_TH" height="1" rowSpan="1">
@@ -670,7 +715,7 @@ SMT = Solo sesión Matinal
 						</jr:groupHeader>
 						<jr:columnHeader style="Table_CH" height="25" rowSpan="1">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="44" height="25" uuid="0829230a-2886-45d7-8954-8145d9dba543"/>
+								<reportElement x="0" y="0" width="42" height="25" uuid="0829230a-2886-45d7-8954-8145d9dba543"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
 									<font fontName="SansSerif" size="8"/>
@@ -678,12 +723,12 @@ SMT = Solo sesión Matinal
 								<textFieldExpression><![CDATA[$P{dia4}]]></textFieldExpression>
 							</textField>
 						</jr:columnHeader>
-						<jr:detailCell style="Table_TD" height="25">
+						<jr:detailCell style="Table_TD" height="20">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="44" height="25" uuid="069035af-8224-4191-9117-0d1ac893b79d"/>
+								<reportElement x="0" y="0" width="42" height="20" uuid="069035af-8224-4191-9117-0d1ac893b79d"/>
 								<box padding="0">
-									<pen lineWidth="0.25" lineColor="#030303"/>
-									<topPen lineWidth="0.25" lineStyle="Solid" lineColor="#050505"/>
+									<pen lineWidth="0.5" lineStyle="Solid" lineColor="#030303"/>
+									<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#050505"/>
 									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 									<bottomPen lineWidth="0.0" lineStyle="Dotted" lineColor="#050505"/>
 									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -695,7 +740,7 @@ SMT = Solo sesión Matinal
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="44" uuid="7308da64-e12d-4608-aead-6353d7c6d377">
+					<jr:column width="42" uuid="7308da64-e12d-4608-aead-6353d7c6d377">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column6"/>
 						<printWhenExpression><![CDATA[$P{dia5} !=null]]></printWhenExpression>
 						<jr:tableHeader style="Table_TH" height="1" rowSpan="1">
@@ -706,7 +751,7 @@ SMT = Solo sesión Matinal
 						</jr:groupHeader>
 						<jr:columnHeader style="Table_CH" height="25" rowSpan="1">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="44" height="25" uuid="b3cf2da0-e524-4a67-93d9-89ec33006a0a"/>
+								<reportElement x="0" y="0" width="42" height="25" uuid="b3cf2da0-e524-4a67-93d9-89ec33006a0a"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
 									<font fontName="SansSerif" size="8"/>
@@ -714,12 +759,12 @@ SMT = Solo sesión Matinal
 								<textFieldExpression><![CDATA[$P{dia5}]]></textFieldExpression>
 							</textField>
 						</jr:columnHeader>
-						<jr:detailCell style="Table_TD" height="25">
+						<jr:detailCell style="Table_TD" height="20">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="44" height="25" uuid="dcbfd023-b9dc-4ea6-ab2a-93d4be81c66c"/>
+								<reportElement x="0" y="0" width="42" height="20" uuid="dcbfd023-b9dc-4ea6-ab2a-93d4be81c66c"/>
 								<box padding="0">
-									<pen lineWidth="0.25" lineColor="#030303"/>
-									<topPen lineWidth="0.25" lineStyle="Solid" lineColor="#050505"/>
+									<pen lineWidth="0.5" lineStyle="Solid" lineColor="#030303"/>
+									<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#050505"/>
 									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 									<bottomPen lineWidth="0.0" lineStyle="Dotted" lineColor="#050505"/>
 									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -731,7 +776,7 @@ SMT = Solo sesión Matinal
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="44" uuid="4ca681c1-eac5-4602-aef2-5c636e02039d">
+					<jr:column width="42" uuid="4ca681c1-eac5-4602-aef2-5c636e02039d">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column7"/>
 						<printWhenExpression><![CDATA[$P{dia6} !=null]]></printWhenExpression>
 						<jr:tableHeader style="Table_TH" height="1" rowSpan="1">
@@ -742,7 +787,7 @@ SMT = Solo sesión Matinal
 						</jr:groupHeader>
 						<jr:columnHeader style="Table_CH" height="25" rowSpan="1">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="44" height="25" uuid="9a62ecd4-9c47-4ac6-8b67-76c11199d0cf"/>
+								<reportElement x="0" y="0" width="42" height="25" uuid="9a62ecd4-9c47-4ac6-8b67-76c11199d0cf"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
 									<font fontName="SansSerif" size="8"/>
@@ -750,12 +795,12 @@ SMT = Solo sesión Matinal
 								<textFieldExpression><![CDATA[$P{dia6}]]></textFieldExpression>
 							</textField>
 						</jr:columnHeader>
-						<jr:detailCell style="Table_TD" height="25">
+						<jr:detailCell style="Table_TD" height="20">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="44" height="25" uuid="eeab8de1-e528-47be-9c41-ce8a144a543e"/>
+								<reportElement x="0" y="0" width="42" height="20" uuid="eeab8de1-e528-47be-9c41-ce8a144a543e"/>
 								<box padding="0">
-									<pen lineWidth="0.25" lineColor="#030303"/>
-									<topPen lineWidth="0.25" lineStyle="Solid" lineColor="#050505"/>
+									<pen lineWidth="0.5" lineStyle="Solid" lineColor="#030303"/>
+									<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#050505"/>
 									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 									<bottomPen lineWidth="0.0" lineStyle="Dotted" lineColor="#050505"/>
 									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -767,7 +812,7 @@ SMT = Solo sesión Matinal
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="44" uuid="f0c19488-c178-4b9d-8a7d-e68539675dcc">
+					<jr:column width="41" uuid="f0c19488-c178-4b9d-8a7d-e68539675dcc">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column8"/>
 						<printWhenExpression><![CDATA[$P{dia7} !=null]]></printWhenExpression>
 						<jr:tableHeader style="Table_TH" height="1" rowSpan="1">
@@ -778,7 +823,7 @@ SMT = Solo sesión Matinal
 						</jr:groupHeader>
 						<jr:columnHeader style="Table_CH" height="25" rowSpan="1">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="44" height="25" uuid="5e348a4b-cc58-479e-8a26-fa6d59b21f13"/>
+								<reportElement x="0" y="0" width="41" height="25" uuid="5e348a4b-cc58-479e-8a26-fa6d59b21f13"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
 									<font fontName="SansSerif" size="8"/>
@@ -786,12 +831,12 @@ SMT = Solo sesión Matinal
 								<textFieldExpression><![CDATA[$P{dia7}]]></textFieldExpression>
 							</textField>
 						</jr:columnHeader>
-						<jr:detailCell style="Table_TD" height="25">
+						<jr:detailCell style="Table_TD" height="20">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="44" height="25" uuid="e03abf23-0248-4383-84a7-8e74a3c88208"/>
+								<reportElement x="0" y="0" width="41" height="20" uuid="e03abf23-0248-4383-84a7-8e74a3c88208"/>
 								<box padding="0">
-									<pen lineWidth="0.25" lineColor="#030303"/>
-									<topPen lineWidth="0.25" lineStyle="Solid" lineColor="#050505"/>
+									<pen lineWidth="0.5" lineStyle="Solid" lineColor="#030303"/>
+									<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#050505"/>
 									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 									<bottomPen lineWidth="0.0" lineStyle="Dotted" lineColor="#050505"/>
 									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -803,7 +848,7 @@ SMT = Solo sesión Matinal
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="44" uuid="f4e7414c-dcdc-4e0a-8415-7abfc593366a">
+					<jr:column width="41" uuid="f4e7414c-dcdc-4e0a-8415-7abfc593366a">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column9"/>
 						<printWhenExpression><![CDATA[$P{dia8} !=null]]></printWhenExpression>
 						<jr:tableHeader style="Table_TH" height="1" rowSpan="1">
@@ -814,7 +859,7 @@ SMT = Solo sesión Matinal
 						</jr:groupHeader>
 						<jr:columnHeader style="Table_CH" height="25" rowSpan="1">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="44" height="25" uuid="60e38e4b-d585-49bd-9346-7a17c00d1997"/>
+								<reportElement x="0" y="0" width="41" height="25" uuid="60e38e4b-d585-49bd-9346-7a17c00d1997"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
 									<font fontName="SansSerif" size="8"/>
@@ -822,12 +867,12 @@ SMT = Solo sesión Matinal
 								<textFieldExpression><![CDATA[$P{dia8}]]></textFieldExpression>
 							</textField>
 						</jr:columnHeader>
-						<jr:detailCell style="Table_TD" height="25">
+						<jr:detailCell style="Table_TD" height="20">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="44" height="25" uuid="a1c46b3e-eea5-402e-aef3-71b04a7da618"/>
+								<reportElement x="0" y="0" width="41" height="20" uuid="a1c46b3e-eea5-402e-aef3-71b04a7da618"/>
 								<box padding="0">
-									<pen lineWidth="0.25" lineColor="#030303"/>
-									<topPen lineWidth="0.25" lineStyle="Solid" lineColor="#050505"/>
+									<pen lineWidth="0.5" lineStyle="Solid" lineColor="#030303"/>
+									<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#050505"/>
 									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 									<bottomPen lineWidth="0.0" lineStyle="Dotted" lineColor="#050505"/>
 									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -839,7 +884,7 @@ SMT = Solo sesión Matinal
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="44" uuid="9142c25e-2dc1-4e16-ac5c-7fe735c94fb0">
+					<jr:column width="41" uuid="9142c25e-2dc1-4e16-ac5c-7fe735c94fb0">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column10"/>
 						<printWhenExpression><![CDATA[$P{dia9} !=null]]></printWhenExpression>
 						<jr:tableHeader style="Table_TH" height="1" rowSpan="1">
@@ -850,7 +895,7 @@ SMT = Solo sesión Matinal
 						</jr:groupHeader>
 						<jr:columnHeader style="Table_CH" height="25" rowSpan="1">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="44" height="25" uuid="a2752505-25e2-4fa4-b783-d17d1ab0291e"/>
+								<reportElement x="0" y="0" width="41" height="25" uuid="a2752505-25e2-4fa4-b783-d17d1ab0291e"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
 									<font fontName="SansSerif" size="8"/>
@@ -858,12 +903,12 @@ SMT = Solo sesión Matinal
 								<textFieldExpression><![CDATA[$P{dia9}]]></textFieldExpression>
 							</textField>
 						</jr:columnHeader>
-						<jr:detailCell style="Table_TD" height="25">
+						<jr:detailCell style="Table_TD" height="20">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="44" height="25" uuid="5e7e8821-e9df-49ad-8bc6-38acdc515535"/>
+								<reportElement x="0" y="0" width="41" height="20" uuid="5e7e8821-e9df-49ad-8bc6-38acdc515535"/>
 								<box padding="0">
-									<pen lineWidth="0.25" lineColor="#030303"/>
-									<topPen lineWidth="0.25" lineStyle="Solid" lineColor="#050505"/>
+									<pen lineWidth="0.5" lineStyle="Solid" lineColor="#030303"/>
+									<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#050505"/>
 									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 									<bottomPen lineWidth="0.0" lineStyle="Dotted" lineColor="#050505"/>
 									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -875,7 +920,7 @@ SMT = Solo sesión Matinal
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="44" uuid="5eac7e54-6e4b-45e3-98cb-d4670c253e5b">
+					<jr:column width="41" uuid="5eac7e54-6e4b-45e3-98cb-d4670c253e5b">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column11"/>
 						<printWhenExpression><![CDATA[$P{dia10} !=null]]></printWhenExpression>
 						<jr:tableHeader style="Table_TH" height="1" rowSpan="1">
@@ -886,7 +931,7 @@ SMT = Solo sesión Matinal
 						</jr:groupHeader>
 						<jr:columnHeader style="Table_CH" height="25" rowSpan="1">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="44" height="25" uuid="9f4ede5e-b781-4572-b227-c42bd618759e"/>
+								<reportElement x="0" y="0" width="41" height="25" uuid="9f4ede5e-b781-4572-b227-c42bd618759e"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
 									<font fontName="SansSerif" size="8"/>
@@ -894,12 +939,12 @@ SMT = Solo sesión Matinal
 								<textFieldExpression><![CDATA[$P{dia10}]]></textFieldExpression>
 							</textField>
 						</jr:columnHeader>
-						<jr:detailCell style="Table_TD" height="25">
+						<jr:detailCell style="Table_TD" height="20">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="44" height="25" uuid="62412b35-2713-4180-b96b-63f7ea283986"/>
+								<reportElement x="0" y="0" width="41" height="20" uuid="62412b35-2713-4180-b96b-63f7ea283986"/>
 								<box padding="0">
-									<pen lineWidth="0.25" lineColor="#030303"/>
-									<topPen lineWidth="0.25" lineStyle="Solid" lineColor="#050505"/>
+									<pen lineWidth="0.5" lineStyle="Solid" lineColor="#030303"/>
+									<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#050505"/>
 									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 									<bottomPen lineWidth="0.0" lineStyle="Dotted" lineColor="#050505"/>
 									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -911,7 +956,7 @@ SMT = Solo sesión Matinal
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="44" uuid="88d807cc-c748-4a0f-9c23-71f846cf9f18">
+					<jr:column width="41" uuid="88d807cc-c748-4a0f-9c23-71f846cf9f18">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column12"/>
 						<printWhenExpression><![CDATA[$P{dia11} !=null]]></printWhenExpression>
 						<jr:tableHeader style="Table_TH" height="1" rowSpan="1">
@@ -922,7 +967,7 @@ SMT = Solo sesión Matinal
 						</jr:groupHeader>
 						<jr:columnHeader style="Table_CH" height="25" rowSpan="1">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="44" height="25" uuid="eab9f28c-e3f4-4fc0-bc5d-d638d11dc896"/>
+								<reportElement x="0" y="0" width="41" height="25" uuid="eab9f28c-e3f4-4fc0-bc5d-d638d11dc896"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
 									<font fontName="SansSerif" size="8"/>
@@ -930,12 +975,12 @@ SMT = Solo sesión Matinal
 								<textFieldExpression><![CDATA[$P{dia11}]]></textFieldExpression>
 							</textField>
 						</jr:columnHeader>
-						<jr:detailCell style="Table_TD" height="25">
+						<jr:detailCell style="Table_TD" height="20">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="44" height="25" uuid="8f9719ef-dd97-4924-84d7-4609e26d331d"/>
+								<reportElement x="0" y="0" width="41" height="20" uuid="8f9719ef-dd97-4924-84d7-4609e26d331d"/>
 								<box padding="0">
-									<pen lineWidth="0.25" lineColor="#030303"/>
-									<topPen lineWidth="0.25" lineStyle="Solid" lineColor="#050505"/>
+									<pen lineWidth="0.5" lineStyle="Solid" lineColor="#030303"/>
+									<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#050505"/>
 									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 									<bottomPen lineWidth="0.0" lineStyle="Dotted" lineColor="#050505"/>
 									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -947,7 +992,7 @@ SMT = Solo sesión Matinal
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="44" uuid="dda85216-d371-4469-814f-2c80ca9cdcaf">
+					<jr:column width="41" uuid="dda85216-d371-4469-814f-2c80ca9cdcaf">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column13"/>
 						<printWhenExpression><![CDATA[$P{dia12} !=null]]></printWhenExpression>
 						<jr:tableHeader style="Table_TH" height="1" rowSpan="1">
@@ -958,7 +1003,7 @@ SMT = Solo sesión Matinal
 						</jr:groupHeader>
 						<jr:columnHeader style="Table_CH" height="25" rowSpan="1">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="44" height="25" uuid="1d39a48c-8009-4738-b730-fb28c78d631c">
+								<reportElement x="0" y="0" width="41" height="25" uuid="1d39a48c-8009-4738-b730-fb28c78d631c">
 									<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
 								</reportElement>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
@@ -968,14 +1013,14 @@ SMT = Solo sesión Matinal
 								<textFieldExpression><![CDATA[$P{dia12}]]></textFieldExpression>
 							</textField>
 						</jr:columnHeader>
-						<jr:detailCell style="Table_TD" height="25">
+						<jr:detailCell style="Table_TD" height="20">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="44" height="25" uuid="68fd064e-a76b-4559-8ae9-1a53497794f7">
+								<reportElement x="0" y="0" width="41" height="20" uuid="68fd064e-a76b-4559-8ae9-1a53497794f7">
 									<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
 								</reportElement>
 								<box padding="0">
-									<pen lineWidth="0.25" lineColor="#030303"/>
-									<topPen lineWidth="0.25" lineStyle="Solid" lineColor="#050505"/>
+									<pen lineWidth="0.5" lineStyle="Solid" lineColor="#030303"/>
+									<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#050505"/>
 									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 									<bottomPen lineWidth="0.0" lineStyle="Dotted" lineColor="#050505"/>
 									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -987,7 +1032,7 @@ SMT = Solo sesión Matinal
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="44" uuid="f048c5f0-8702-4932-a473-710ea0a78084">
+					<jr:column width="41" uuid="f048c5f0-8702-4932-a473-710ea0a78084">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column14"/>
 						<printWhenExpression><![CDATA[$P{dia13} !=null]]></printWhenExpression>
 						<jr:tableHeader style="Table_TH" height="1" rowSpan="1">
@@ -998,7 +1043,7 @@ SMT = Solo sesión Matinal
 						</jr:groupHeader>
 						<jr:columnHeader style="Table_CH" height="25" rowSpan="1">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="44" height="25" uuid="05d024eb-ed36-41b5-8d9b-b42684a28740"/>
+								<reportElement x="0" y="0" width="41" height="25" uuid="05d024eb-ed36-41b5-8d9b-b42684a28740"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
 									<font fontName="SansSerif" size="8"/>
@@ -1006,12 +1051,12 @@ SMT = Solo sesión Matinal
 								<textFieldExpression><![CDATA[$P{dia13}]]></textFieldExpression>
 							</textField>
 						</jr:columnHeader>
-						<jr:detailCell style="Table_TD" height="25">
+						<jr:detailCell style="Table_TD" height="20">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="44" height="25" uuid="fc7dcc40-33f1-4059-b258-ae1c73820c53"/>
+								<reportElement x="0" y="0" width="41" height="20" uuid="fc7dcc40-33f1-4059-b258-ae1c73820c53"/>
 								<box padding="0">
-									<pen lineWidth="0.25" lineColor="#030303"/>
-									<topPen lineWidth="0.25" lineStyle="Solid" lineColor="#050505"/>
+									<pen lineWidth="0.5" lineStyle="Solid" lineColor="#030303"/>
+									<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#050505"/>
 									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 									<bottomPen lineWidth="0.0" lineStyle="Dotted" lineColor="#050505"/>
 									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -1023,7 +1068,7 @@ SMT = Solo sesión Matinal
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="44" uuid="59f6d74d-e944-4040-b6fb-476c6e76b9c6">
+					<jr:column width="41" uuid="59f6d74d-e944-4040-b6fb-476c6e76b9c6">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column15"/>
 						<printWhenExpression><![CDATA[$P{dia14} !=null]]></printWhenExpression>
 						<jr:tableHeader style="Table_TH" height="1" rowSpan="1">
@@ -1034,7 +1079,7 @@ SMT = Solo sesión Matinal
 						</jr:groupHeader>
 						<jr:columnHeader style="Table_CH" height="25" rowSpan="1">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="44" height="25" uuid="1126e15a-effc-400c-8367-61742a1f4cea"/>
+								<reportElement x="0" y="0" width="41" height="25" uuid="1126e15a-effc-400c-8367-61742a1f4cea"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
 									<font fontName="SansSerif" size="8"/>
@@ -1042,12 +1087,12 @@ SMT = Solo sesión Matinal
 								<textFieldExpression><![CDATA[$P{dia14}]]></textFieldExpression>
 							</textField>
 						</jr:columnHeader>
-						<jr:detailCell style="Table_TD" height="25">
+						<jr:detailCell style="Table_TD" height="20">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="44" height="25" uuid="f497162b-0c59-4a8d-a4e1-096d6f6534de"/>
+								<reportElement x="0" y="0" width="41" height="20" uuid="aebb1abb-971f-4cb8-9160-98ae92f01e63"/>
 								<box padding="0">
-									<pen lineWidth="0.25" lineColor="#030303"/>
-									<topPen lineWidth="0.25" lineStyle="Solid" lineColor="#050505"/>
+									<pen lineWidth="0.5" lineStyle="Solid" lineColor="#030303"/>
+									<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#050505"/>
 									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 									<bottomPen lineWidth="0.0" lineStyle="Dotted" lineColor="#050505"/>
 									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -1059,7 +1104,7 @@ SMT = Solo sesión Matinal
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="43" uuid="cc386026-6199-4637-819f-e24645cdd21d">
+					<jr:column width="40" uuid="cc386026-6199-4637-819f-e24645cdd21d">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column16"/>
 						<printWhenExpression><![CDATA[$P{dia15} !=null]]></printWhenExpression>
 						<jr:tableHeader style="Table_TH" height="1" rowSpan="1">
@@ -1070,7 +1115,7 @@ SMT = Solo sesión Matinal
 						</jr:groupHeader>
 						<jr:columnHeader style="Table_CH" height="25" rowSpan="1">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="43" height="25" uuid="a02bad86-c2a6-4331-aec8-a7874e101945"/>
+								<reportElement x="0" y="0" width="40" height="25" uuid="a02bad86-c2a6-4331-aec8-a7874e101945"/>
 								<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
 									<font fontName="SansSerif" size="8"/>
@@ -1078,12 +1123,12 @@ SMT = Solo sesión Matinal
 								<textFieldExpression><![CDATA[$P{dia15}]]></textFieldExpression>
 							</textField>
 						</jr:columnHeader>
-						<jr:detailCell style="Table_TD" height="25">
+						<jr:detailCell style="Table_TD" height="20">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="43" height="25" uuid="b0974122-1a9d-48bd-a13c-c7003100a4b1"/>
+								<reportElement x="0" y="0" width="40" height="20" uuid="b0974122-1a9d-48bd-a13c-c7003100a4b1"/>
 								<box padding="0">
-									<pen lineWidth="0.25" lineColor="#030303"/>
-									<topPen lineWidth="0.25" lineStyle="Solid" lineColor="#050505"/>
+									<pen lineWidth="0.5" lineStyle="Solid" lineColor="#030303"/>
+									<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#050505"/>
 									<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 									<bottomPen lineWidth="0.0" lineStyle="Dotted" lineColor="#050505"/>
 									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -1095,29 +1140,33 @@ SMT = Solo sesión Matinal
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="35" uuid="b7b5c12e-5e94-44eb-970f-db3edd8002ce">
+					<jr:column width="36" uuid="b7b5c12e-5e94-44eb-970f-db3edd8002ce">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column17"/>
 						<jr:tableHeader style="Table_TH" height="1" rowSpan="1"/>
 						<jr:groupHeader groupName="Group1">
-							<jr:cell style="Style1" height="20" rowSpan="1"/>
+							<jr:cell style="Style1" height="20" rowSpan="1">
+								<property name="com.jaspersoft.studio.unit.width" value="px"/>
+							</jr:cell>
 						</jr:groupHeader>
 						<jr:columnHeader style="Table_CH" height="25" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<staticText>
-								<reportElement x="0" y="0" width="35" height="25" uuid="bb8ec02c-0e1a-402f-bb71-a35c7debb219"/>
+								<reportElement x="0" y="0" width="36" height="25" uuid="bb8ec02c-0e1a-402f-bb71-a35c7debb219"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font fontName="SansSerif" size="8"/>
 								</textElement>
 								<text><![CDATA[COMP]]></text>
 							</staticText>
 						</jr:columnHeader>
-						<jr:detailCell style="Table_TD" height="25">
+						<jr:detailCell style="Table_TD" height="20">
 							<textField>
-								<reportElement x="0" y="0" width="35" height="25" uuid="3a6becd1-a6f8-4a94-bf94-6aeef2400a27"/>
+								<reportElement x="0" y="0" width="36" height="20" uuid="3a6becd1-a6f8-4a94-bf94-6aeef2400a27"/>
 								<box>
-									<pen lineWidth="0.0"/>
-									<topPen lineWidth="0.25" lineStyle="Solid"/>
+									<pen lineWidth="0.5" lineStyle="Solid"/>
+									<topPen lineWidth="1.0" lineStyle="Solid"/>
+									<leftPen lineWidth="0.0"/>
 									<bottomPen lineWidth="0.0"/>
+									<rightPen lineWidth="0.0"/>
 								</box>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font fontName="SansSerif" size="8"/>
@@ -1126,7 +1175,7 @@ SMT = Solo sesión Matinal
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="37" uuid="3c44e6cd-c4f3-4f1d-a045-c9b09e111a80">
+					<jr:column width="35" uuid="3c44e6cd-c4f3-4f1d-a045-c9b09e111a80">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column18"/>
 						<jr:tableHeader style="Table_TH" height="1" rowSpan="1"/>
 						<jr:groupHeader groupName="Group1">
@@ -1135,20 +1184,25 @@ SMT = Solo sesión Matinal
 						<jr:columnHeader style="Table_CH" height="25" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<staticText>
-								<reportElement x="0" y="0" width="37" height="25" uuid="18d4c667-4707-42f2-82b1-30efbadd7fb6"/>
+								<reportElement x="0" y="0" width="35" height="25" uuid="18d4c667-4707-42f2-82b1-30efbadd7fb6"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font fontName="SansSerif" size="8"/>
 								</textElement>
 								<text><![CDATA[ESC]]></text>
 							</staticText>
 						</jr:columnHeader>
-						<jr:detailCell style="Table_TD" height="25">
+						<jr:detailCell style="Table_TD" height="20">
+							<property name="com.jaspersoft.studio.unit.height" value="px"/>
 							<textField>
-								<reportElement x="0" y="0" width="37" height="25" uuid="8a019b18-e3b8-49a3-a69a-daf6c8dfcc86"/>
+								<reportElement x="0" y="0" width="35" height="20" uuid="8a019b18-e3b8-49a3-a69a-daf6c8dfcc86">
+									<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+								</reportElement>
 								<box>
-									<pen lineWidth="0.0"/>
-									<topPen lineWidth="0.25" lineStyle="Solid"/>
+									<pen lineWidth="0.5" lineStyle="Solid"/>
+									<topPen lineWidth="1.0" lineStyle="Solid"/>
+									<leftPen lineWidth="0.0"/>
 									<bottomPen lineWidth="0.0"/>
+									<rightPen lineWidth="0.0"/>
 								</box>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font fontName="SansSerif" size="8"/>
