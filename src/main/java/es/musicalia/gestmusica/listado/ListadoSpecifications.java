@@ -4,11 +4,11 @@ import es.musicalia.gestmusica.agencia.Agencia;
 import es.musicalia.gestmusica.localizacion.Municipio;
 import es.musicalia.gestmusica.localizacion.Provincia;
 import es.musicalia.gestmusica.usuario.Usuario;
-import org.springframework.data.jpa.domain.Specification;
-
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
+import org.springframework.data.jpa.domain.Specification;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -18,6 +18,8 @@ import java.util.Set;
 public class ListadoSpecifications {
 
     public static Specification<Listado> hasAgencia(Long idAgencia) {
+
+
         return (root, query, criteriaBuilder) -> {
             if (idAgencia == null) {
                 return criteriaBuilder.conjunction();

@@ -24,7 +24,7 @@
             <div class="container-fluid p-0">
                 <div class="card">
                     <div class="card-header">
-                        <h5 class="card-title mb-0">Fechas presupuesto inicial y final</h5>
+                        <h5 class="card-title mb-0">Fechas generación presupuesto inicial y final</h5>
                     </div>
                     <form id="formListadoAudiencias" method="POST" th:object="${listadoAudienciasDto}"
                           th:action=@{/listado/audiencias} autocomplete="off">
@@ -98,10 +98,11 @@
                                                 <table id="datatables-reponsive_listados-generados" class="table table-striped dataTable no-footer dtr-inline collapsed" style="width: 100%;" aria-describedby="datatables-reponsive_info">
                                                     <thead>
                                                     <tr>
-                                                        <th class="sorting sorting_desc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="descending" >Fecha listado</th>
+                                                        <th class="sorting sorting_desc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="descending" >Fecha generación presupuesto</th>
                                                         <th  tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1"  >Representante</th>
                                                         <th  tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1"  >Municipio</th>
                                                         <th  tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1"  >Localidad</th>
+                                                        <th  tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1"  >Fechas del presupuesto</th>
 
 
                                                     </tr>
@@ -114,7 +115,16 @@
                                                         <td class="dtr-control" tabindex="0" th:text="${listadosGenerados.solicitadoPara}"></td>
                                                         <td class="dtr-control" tabindex="0" th:text="${listadosGenerados.municipio}"></td>
                                                         <td class="dtr-control" tabindex="0" th:text="${listadosGenerados.localidad}"></td>
-
+                                                        <td class="dtr-control sorting_1" tabindex="0"
+                                                            th:text="${(listadosGenerados.fechaInicio != null and listadosGenerados.fechaFin != null) ? 
+                                                            (#temporals.format(listadosGenerados.fechaInicio, 'dd/MM/yyyy') + ' a ' + #temporals.format(listadosGenerados.fechaFin, 'dd/MM/yyyy')) :
+                                                            ((listadosGenerados.fechaPropuesta1 != null ? #temporals.format(listadosGenerados.fechaPropuesta1, 'dd/MM/yyyy') : '') + 
+                                                             (listadosGenerados.fechaPropuesta2 != null ? ' - ' + #temporals.format(listadosGenerados.fechaPropuesta2, 'dd/MM/yyyy') : '') + 
+                                                             (listadosGenerados.fechaPropuesta3 != null ? ' - ' + #temporals.format(listadosGenerados.fechaPropuesta3, 'dd/MM/yyyy') : '') +
+                                                             (listadosGenerados.fechaPropuesta4 != null ? ' - ' + #temporals.format(listadosGenerados.fechaPropuesta4, 'dd/MM/yyyy') : '') +
+                                                             (listadosGenerados.fechaPropuesta5 != null ? ' - ' + #temporals.format(listadosGenerados.fechaPropuesta5, 'dd/MM/yyyy') : '') +
+                                                             (listadosGenerados.fechaPropuesta6 != null ? ' - ' + #temporals.format(listadosGenerados.fechaPropuesta6, 'dd/MM/yyyy') : '') +
+                                                             (listadosGenerados.fechaPropuesta7 != null ? ' - ' + #temporals.format(listadosGenerados.fechaPropuesta7, 'dd/MM/yyyy') : ''))}"></td>
 
                                                     </tr>
 

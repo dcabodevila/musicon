@@ -160,7 +160,7 @@ private String convertSetLongToString(Set<Long> setIds) {
 
 	@Override
 public List<ListadoRecord> obtenerListadoEntreFechas(ListadoAudienciasDto listadoAudienciasDto) {
-    // Usar directamente las specifications para crear la consulta
+
     var spec = ListadoSpecifications.findListadosByAgenciaAndFechas(
         listadoAudienciasDto.getIdAgencia(),
         listadoAudienciasDto.getFechaDesde().atStartOfDay(),
