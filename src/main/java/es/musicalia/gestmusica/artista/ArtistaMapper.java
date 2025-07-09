@@ -18,9 +18,12 @@ public interface ArtistaMapper {
     @Mapping(target = "id", source = "id")
     @Mapping(target = "idCcaa", source = "ccaa.id")
     @Mapping(target = "nombreCcaa", source = "ccaa.nombre")
+    @Mapping(target = "idUsuario", source = "usuario.id")
     @Mapping(target = "nombreUsuario", source = "usuario.nombreCompleto")
     @Mapping(target = "idAgencia", source = "agencia.id")
     @Mapping(target = "nombreAgencia", source = "agencia.nombre")
+    @Mapping(target = "idTipoEscenario", source = "tipoEscenario.id")
+    @Mapping(target = "nombreTipoEscenario", source = "tipoEscenario.nombre")
     @Mapping(target = "idsTipoArtista", source = "tiposArtista", qualifiedByName = "tipoArtistaToIdList")
     @Mapping(target = "email", source = "contacto.email")
     @Mapping(target = "facebook", source = "contacto.facebook")
@@ -29,6 +32,7 @@ public interface ArtistaMapper {
     @Mapping(target = "telefono", source = "contacto.telefono")
     @Mapping(target = "telefono2", source = "contacto.telefono2")
     @Mapping(target = "telefono3", source = "contacto.telefono3")
+    @Mapping(target = "fax", source = "contacto.fax")
     @Mapping(target = "youtube", source = "contacto.youtube")
     ArtistaDto toDto(Artista artista);
 
