@@ -25,7 +25,7 @@ import lombok.Setter;
 public class Usuario {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
+	private Long id;
 
 	@Column(name = "USERNAME")
 	private String username;
@@ -57,7 +57,9 @@ public class Usuario {
 	private Rol rolGeneral;
 	@Column(name = "VALIDADO")
 	private boolean validado;
-	@OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@Column(name = "IMAGEN")
+	private String imagen;
+	@OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY)
 	private Set<Acceso> accesos;
 
 

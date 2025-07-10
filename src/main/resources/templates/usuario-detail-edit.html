@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content=""><head>
+    <div th:replace="~{fragments/main-template :: header-css}"/>
+
+</head>
+<body>
+<body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
+<div class="wrapper">
+
+    <div th:replace="~{fragments/main-template :: sidebar}"/>
+    <div class="main">
+
+        <div th:replace="~{fragments/main-template :: navbar}"/>
+        <main class="content">
+            <div class="container-fluid p-0">
+
+                <div th:if="${message}" th:class="${'alert alert-' + alertClass+ ' alert-dismissible fade show'}" role="alert">
+                    <div class="alert-message">
+                        <strong th:text="${message}">Hello there!</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 col-xl-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title" >Editar usuario</h5>
+                            </div>
+                            <div class="card-body">
+                                <form method="POST" th:object="${usuarioEdicionDTO}" th:action=@{/usuarios/guardar} enctype="multipart/form-data">
+
+                                    <input hidden th:field="*{id}">
+                                    <div class="mb-3 row required">
+                                        <label class="col-form-label col-sm-3 text-sm-end">Nombre de usuario</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" th:field="*{username}" placeholder="Nombre de usuario" id="username" required autocomplete="off">
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3 row">
+                                        <label class="col-form-label col-sm-3 text-sm-end">Nombre</label>
+                                        <div class="col-sm-9">
+                                            <input class="form-control" th:field="*{nombre}" placeholder="Nombre" id="nombre" autocomplete="off">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 row">
+                                        <label class="col-form-label col-sm-3 text-sm-end">Apellidos</label>
+                                        <div class="col-sm-9">
+                                            <input id="apellidos" class="form-control" th:field="*{apellidos}" placeholder="Apellidos" autocomplete="off"></input>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 row">
+                                        <label class="col-form-label col-sm-3 text-sm-end">email</label>
+                                        <div class="col-sm-9">
+                                            <input id="email" class="form-control" th:field="*{email}" placeholder="email" autocomplete="off"></input>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3 row">
+                                        <label class="col-form-label col-sm-3 text-sm-end">Imágen</label>
+                                        <div class="col-sm-9">
+                                            <input type="file" name="image" accept="image/*" class="form-control-file">
+                                            <small class="form-text text-muted">Logo de la empresa. Tamaño ideal 327x250</small>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary">Guardar</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <div th:replace="~{fragments/main-template :: footer}"/>
+
+    </div>
+</div>
+
+</body>
+
+</body>
+</html>

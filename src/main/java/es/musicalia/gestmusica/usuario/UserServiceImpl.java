@@ -2,13 +2,16 @@ package es.musicalia.gestmusica.usuario;
 
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.auth.model.RegistrationForm;
+import es.musicalia.gestmusica.file.FileService;
+import es.musicalia.gestmusica.rol.RolEnum;
+import es.musicalia.gestmusica.rol.RolRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -17,19 +20,24 @@ import java.util.*;
 @Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
 
-	@Autowired
-	private UsuarioRepository userRepository;
-	@Autowired
-	private PasswordEncoder passwordEncoder;
-	@Autowired
-	private CodigoVerificacionService codigoVerificacionService;
+
+	private final UsuarioRepository userRepository;
+	private final PasswordEncoder passwordEncoder;
+	private final CodigoVerificacionService codigoVerificacionService;
+	private final RolRepository rolRepository;
+	private final UsuarioMapper usuarioMapper;
+	private final FileService fileService;
+
+	UserServiceImpl(UsuarioRepository userRepository, PasswordEncoder passwordEncoder, CodigoVerificacionService codigoVerificacionService, RolRepository rolRepository, UsuarioMapper usuarioMapper, FileService fileService) {
+		this.userRepository = userRepository;
+		this.passwordEncoder = passwordEncoder;
+		this.codigoVerificacionService = codigoVerificacionService;
+        this.rolRepository = rolRepository;
+        this.usuarioMapper = usuarioMapper;
+        this.fileService = fileService;
+    }
 
 
-	@Override
-	public Usuario save(Usuario usuario) {
-		usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
-		return userRepository.save(usuario);
-	}
 
 	@Transactional(readOnly = false)
 	public Usuario saveRegistration(RegistrationForm registrationForm) throws EmailYaExisteException {
@@ -133,6 +141,57 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public boolean existsUsuarioByEmail(String email) {
 		return userRepository.existsUsuarioByEmail(email);
+	}
+
+	@Override
+	public List<UsuarioAdminListRecord> findAllUsuarioAdminListRecords(){
+		return this.userRepository.findAllUsuarioAdminListRecords();
+	}
+
+
+	@Transactional(readOnly = false)
+	@Override
+	public void validarUsuario(Long id) {
+		Usuario usuario = userRepository.findById(id).orElseThrow();
+		usuario.setValidado(true);
+		if (usuario.getRolGeneral()==null){
+			usuario.setRolGeneral(this.rolRepository.findRolByCodigo(RolEnum.ROL_AGENTE.getCodigo()));
+		}
+		userRepository.save(usuario);
+	}
+
+	@Transactional(readOnly = false)
+	@Override
+	public void toggleActivarUsuario(Long id) {
+		Usuario usuario = userRepository.findById(id).orElseThrow();
+		usuario.setActivo(!usuario.isActivo());
+		userRepository.save(usuario);
+	}
+
+	@Override
+	public UsuarioEdicionDTO getUsuarioEdicionDTO(Long idUsuario){
+		return this.usuarioMapper.toUsuarioEdicionDTO(this.userRepository.findById(idUsuario).orElseThrow());
+	}
+
+	@Transactional(readOnly = false)
+	@Override
+	public Usuario guardarUsuario(UsuarioEdicionDTO usuarioEdicionDTO, MultipartFile multipartFile) {
+
+		final Usuario usuario = this.userRepository.findById(usuarioEdicionDTO.getId()).orElseThrow();
+		usuario.setUsername( usuarioEdicionDTO.getUsername() );
+		usuario.setNombre( usuarioEdicionDTO.getNombre() );
+		usuario.setApellidos( usuarioEdicionDTO.getApellidos() );
+		usuario.setEmail( usuarioEdicionDTO.getEmail() );
+
+		if (multipartFile!=null){
+			final String uploadedFile = this.fileService.guardarFichero(multipartFile);
+
+			if (uploadedFile!=null ){
+				usuario.setImagen(uploadedFile);
+			}
+		}
+
+		return userRepository.save(usuario);
 	}
 
 }

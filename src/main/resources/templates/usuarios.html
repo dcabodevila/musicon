@@ -1,14 +1,118 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org"
-      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content=""><head>
     <div th:replace="~{fragments/main-template :: header-css}"/>
+    <script th:src="@{/js/jquery.min.js}"></script>
+    <script th:src="@{/adminkit/js/datatables.js}"></script>
 </head>
-<body>
-<div th:replace="~{fragments/main-template :: header}"/>
+
+
+<body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
+<div class="wrapper">
+
+    <div th:replace="~{fragments/main-template :: sidebar}"/>
+    <div class="main">
+        <div th:replace="~{fragments/main-template :: navbar}"/>
+
+        <main class="content">
+
+            <div class="container-fluid p-0">
+
+                <div class="mb-3">
+                    <h1 class="h3 d-inline align-middle"></h1>
+                </div>
+
+                <div th:if="${message}" th:class="${'alert alert-' + alertClass+ ' alert-dismissible fade show'}" role="alert">
+                    <div class="alert-message">
+                        <strong th:text="${message}">Hello there!</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+
+                <div class="row">
+
+                    <div sec:authorize="hasAuthority('USUARIOS')" class="col-12 col-sm-12 col-md-12 col-lg-12" >
+
+                        <div class="col-12 col-md-12 col-lg-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title">Lista de usuarios</h5>
+                                </div>
+                                <div class="card-body">
+
+                                    <div id="datatables-reponsive_wrapper" class="dataTables_wrapper dt-bootstrap5 no-footer">
+                                        <div class="row">
+                                            <div class="col-sm-12">
+                                                <table id="datatables-reponsive_usuarios" class="table table-striped dataTable no-footer dtr-inline collapsed" style="width: 100%;" aria-describedby="datatables-reponsive_info">
+                                                    <thead>
+                                                    <tr>
+                                                        <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Nombre</th>
+                                                        <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Apellidos</th>
+                                                        <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >email</th>
+                                                        <th>Fecha último acceso</th>
+                                                        <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Activo</th>
+                                                        <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Validado</th>
+                                                        <th>Acciones</th>
+                                                        <th>Editar</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+
+                                                    <tr th:each="usuario : ${listaUsuarios}">
+                                                        <td class="dtr-control sorting_1" tabindex="0" th:text="${usuario.nombre}"></td>
+                                                        <td class="dtr-control sorting_1" tabindex="0" th:text="${usuario.apellidos}" ></td>
+                                                        <td class="dtr-control sorting_1" tabindex="0" th:text="${usuario.email}" ></td>
+                                                        <td th:text="${usuario.fechaUltimoAcceso != null ? #dates.format(usuario.fechaUltimoAcceso, 'dd/MM/yyyy HH:mm') : '-'}"></td>
+                                                        <td class="dtr-control sorting_1" tabindex="0"
+                                                            th:text="${usuario.activo ? 'Sí' : 'No'}"></td>
+                                                        <td class="dtr-control sorting_1" tabindex="0"
+                                                            th:text="${usuario.validado ? 'Sí' : 'No'}"></td>
+                                                        
+                                                        <td>
+                                                            <a th:href="@{/usuarios/activar/{id}(id=${usuario.id})}"
+                                                               th:class="${'btn btn-sm ' + (usuario.activo ? 'btn-danger' : 'btn-secondary')}"
+                                                               th:text="${usuario.activo ? 'Desactivar' : 'Activar'}">Activar</a>
+
+                                                            <a th:if="${!usuario.validado}"
+                                                               th:href="@{/usuarios/validar/{id}(id=${usuario.id})}"
+                                                               class="btn btn-success btn-sm">Validar</a>
 
 
 
-<div th:replace="~{fragments/main-template :: footer}"/>
+                                                        </td>
+
+                                                        <td>
+                                                            <a th:href="@{/usuarios/editar/{id}(id=${usuario.id})}"
+                                                               class="btn btn-primary btn-sm"> <i class="far fa-edit"></i></a>
+                                                        </td>
+                                                    </tr>
+
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </main>
+        <div th:replace="~{fragments/main-template :: footer}"/>
+
+    </div>
+</div>
+
 </body>
+<script type="text/javascript" th:src="@{/js/comun.js}"></script>
+<script type="text/javascript" th:src="@{/js/usuarios.js}"></script>
+
+
 </html>

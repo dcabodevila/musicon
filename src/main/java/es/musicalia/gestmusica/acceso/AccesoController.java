@@ -61,6 +61,7 @@ public class AccesoController {
     public String guardarAcceso(@Valid @ModelAttribute AccesoDto accesoDto, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
 
         accesoService.guardarAcceso(accesoDto);
+        redirectAttributes.addFlashAttribute("alertClass", "success");
         redirectAttributes.addFlashAttribute("message", "Acceso guardado correctamente");
 
         return "redirect:/accesos/"+ accesoDto.getIdAgencia();
@@ -84,6 +85,7 @@ public class AccesoController {
     public String guardarAccesoArtista(@Valid @ModelAttribute AccesoArtistaDto accesoDto, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
 
         final AccesoArtista accesoArtista = accesoPermisoService.guardarAccesoArtista(accesoDto);
+        redirectAttributes.addFlashAttribute("alertClass", "success");
         redirectAttributes.addFlashAttribute("message", "Acceso guardado correctamente");
 
         return "redirect:/accesos/"+ accesoArtista.getArtista().getAgencia().getId();
