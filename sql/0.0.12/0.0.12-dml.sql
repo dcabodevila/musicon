@@ -1,0 +1,1 @@
+update gestmusica.permiso set tipo_permiso = 2 where codigo ='VER_DATOS_ECONOMICOS';

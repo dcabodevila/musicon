@@ -66,7 +66,7 @@
               </div>
             </div>
 
-            <div th:if="${#authorization.expression('hasPermission(' + artistaDto.idAgencia + ', ''AGENCIA'', ''VER_DATOS_ECONOMICOS'')')}">
+            <div th:if="${#authorization.expression('hasPermission(' + artistaDto.id + ', ''ARTISTA'', ''VER_DATOS_ECONOMICOS'')')}">
               <div class="mb-3 row">
                 <label class="col-form-label col-sm-3 text-sm-end">Importe</label>
                 <div class="col-sm-9">

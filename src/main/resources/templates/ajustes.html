@@ -63,7 +63,7 @@
                                     </div>
                                     <div class="mb-3">
                                         <div class="mb-3 row">
-                                            <label class="col-form-label col-sm-3 text-sm-end">Comunidades</label>
+                                            <label class="col-form-label col-sm-3 text-sm-end">Comunidades del artista</label>
                                             <div class="col-sm-9">
                                                 <select id="ccaa"  th:field="*{idsComunidades}" class="form-control choices-multiple selectMultiple" multiple>
                                                     <option th:each="ccaa : ${listaCcaa}" th:value="${ccaa.id}" th:text="${ccaa.nombre}"></option>
