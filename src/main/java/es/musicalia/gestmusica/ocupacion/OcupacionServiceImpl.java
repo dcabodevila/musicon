@@ -101,7 +101,7 @@ public class OcupacionServiceImpl implements OcupacionService {
 
 		if (ocupacionSaveDto.getId()!=null){
 			final Usuario usuarioAutenticado = this.userService.obtenerUsuarioAutenticado();
-			if (!(ocupacion.getUsuario().getId()==usuarioAutenticado.getId()) &&
+			if (!(ocupacion.getUsuario().getId().equals(usuarioAutenticado.getId())) &&
 					!this.permisoService.existePermisoUsuarioAgencia(ocupacion.getArtista().getAgencia().getId(), PermisoAgenciaEnum.MODIFICAR_OCUPACION_OTROS.name())) {
 				throw new es.musicalia.gestmusica.ocupacion.ModificacionOcupacionException("No tiene permisos para modificar ocupaciones de otros usuarios");
 			}
@@ -144,6 +144,12 @@ public class OcupacionServiceImpl implements OcupacionService {
 
 
 		Ocupacion ocupacionSave = this.ocupacionRepository.save(ocupacion);
+
+		if (!permisoConfirmarOcupacionAgencia){
+			//TODO: Enviar notificación a usuarios con rol Agencia de la ocupacion de la agencia.
+
+		}
+
 
         logger.info("Completado guardado ocupacionSave: {}", ocupacionSave.getId());
 

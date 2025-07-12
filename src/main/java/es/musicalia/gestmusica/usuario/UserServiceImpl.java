@@ -105,6 +105,10 @@ public class UserServiceImpl implements UserService {
 	public List<UsuarioRecord> findAllUsuarioRecords(){
 		return this.userRepository.findAllUsuarioRecords();
 	}
+	@Override
+	public List<RepresentanteRecord> findAllRepresentanteRecords(){
+		return this.userRepository.findAllRepresentantesRecords();
+	}
 
 	@Transactional(readOnly = false)
 	@Override

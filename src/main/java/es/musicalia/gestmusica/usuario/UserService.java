@@ -14,6 +14,8 @@ public interface UserService {
 
 	List<UsuarioRecord> findAllUsuarioRecords();
 
+	List<RepresentanteRecord> findAllRepresentanteRecords();
+
 	@Transactional(readOnly = false)
 	Usuario activateUserByEmail(String email) throws UsuarioNoEncontradoException;
 

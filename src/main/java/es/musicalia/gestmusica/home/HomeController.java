@@ -1,6 +1,5 @@
 package es.musicalia.gestmusica.home;
 
-import es.musicalia.gestmusica.artista.ArtistaService;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.ocupacion.OcupacionService;
 import es.musicalia.gestmusica.permiso.PermisoAgenciaEnum;
@@ -9,9 +8,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
 
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;

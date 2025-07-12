@@ -85,7 +85,7 @@
 
 			<ul class="sidebar-nav">
 				<li class="sidebar-item">
-					<a class="sidebar-link" href="/">
+					<a class="sidebar-link" th:href="@{/}">
 						<i class="align-middle me-2 fas fa-fw fa-home"></i> <span class="align-middle">Inicio</span>
 					</a>
 				</li>
@@ -119,11 +119,11 @@
 						Fechas
 					</li>
 					<li class="sidebar-item">
-						<a class="sidebar-link" href="/listado">
+						<a class="sidebar-link" th:href="@{/listado}">
 							<i class="align-middle me-2 fas fa-fw fa-calendar-alt" ></i> <span class="align-middle">Listado presupuestos</span>
 						</a>
 
-						<a class="sidebar-link" sec:authorize="hasAuthority('AUDIENCIA_LISTADOS')" href="/listado/audiencia-listados">
+						<a class="sidebar-link" sec:authorize="hasAuthority('AUDIENCIA_LISTADOS')" th:href="@{/listado/audiencia-listados}">
 							<i class="align-middle me-2 fas fa-fw fa-chart-simple" ></i> <span class="align-middle">Audiencia presupuestos</span>
 						</a>
 						<a class="sidebar-link" th:href="@{/ajustes}">
@@ -136,18 +136,18 @@
 					Información general
 				</li>
 				<li class="sidebar-item">
-					<a class="sidebar-link" href="/agencia">
+					<a class="sidebar-link" th:href="@{/agencia}">
 						<i class="align-middle me-2 fas fa-fw fa-suitcase" ></i> <span class="align-middle">Agencias</span>
 					</a>
 				</li>
 				<li class="sidebar-item">
-					<a class="sidebar-link" href="/artista">
+					<a class="sidebar-link" th:href="@{/artista}">
 						<i class="align-middle me-2 fas fa-fw fa-music" ></i> <span class="align-middle">Artistas</span>
 					</a>
 				</li>
 				<li class="sidebar-item">
-					<a class="sidebar-link" href="#">
-						<i class="align-middle me-2 fas fa-fw fa-user-tie" ></i> <span class="align-middle">Representantes</span>
+					<a class="sidebar-link" th:href="@{/representantes}">
+						<i class="align-middle me-2 fas fa-fw fa-users" ></i> <span class="align-middle">Representantes</span>
 					</a>
 				</li>
 
