@@ -173,6 +173,14 @@ public class UserServiceImpl implements UserService {
 		return this.usuarioMapper.toUsuarioEdicionDTO(this.userRepository.findById(idUsuario).orElseThrow());
 	}
 
+
+	@Override
+	public UsuarioEdicionDTO getMiPerfil(){
+
+		return this.usuarioMapper.toUsuarioEdicionDTO(this.obtenerUsuarioAutenticado());
+	}
+
+
 	@Transactional(readOnly = false)
 	@Override
 	public Usuario guardarUsuario(UsuarioEdicionDTO usuarioEdicionDTO, MultipartFile multipartFile) {

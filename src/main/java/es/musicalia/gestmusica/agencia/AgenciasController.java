@@ -50,13 +50,21 @@ public class AgenciasController {
     public String agencias(Model model) {
         if (userService.isUserAutheticated()){
 
+            model.addAttribute("listaAgencias",this.agenciaService.findAllAgenciasForUser(userService.obtenerUsuarioAutenticado()));
+
+        }
+        return "agencias";
+    }
+
+    @GetMapping("/mis-agencias")
+    public String misAgencias(Model model) {
+        if (userService.isUserAutheticated()){
+
             final Map<Long, Set<String>> mapPermisosAgencia =
                     ((CustomAuthenticatedUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
                             .getMapPermisosAgencia();
 
-            model.addAttribute("listaAgencias", mapPermisosAgencia.isEmpty() ? this.agenciaService.findAllAgenciasForUser(userService.obtenerUsuarioAutenticado()): new ArrayList<>());
-            model.addAttribute("listaMisAgencias", mapPermisosAgencia.isEmpty() ? new ArrayList<>() : this.agenciaService.findMisAgencias(mapPermisosAgencia.keySet()));
-            model.addAttribute("listaOtrasAgencias", mapPermisosAgencia.isEmpty() ? new ArrayList<>() : this.agenciaService.findOtrasAgencias(mapPermisosAgencia.keySet()));
+            model.addAttribute("listaAgencias", mapPermisosAgencia.isEmpty() ? new ArrayList<>() : this.agenciaService.findMisAgencias(mapPermisosAgencia.keySet()));
 
         }
         return "agencias";

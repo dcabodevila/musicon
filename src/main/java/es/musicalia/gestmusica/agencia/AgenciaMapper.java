@@ -7,7 +7,7 @@ import org.mapstruct.*;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface AgenciaMapper {
-
+    @Mapping(source = "id", target = "id")
     @Mapping(source = "usuario", target = "nombreUsuario", qualifiedByName = "mapUsuarioToNombreUsuario")
     @Mapping(source = "usuario.id", target = "idUsuario")
     @Mapping(source = "municipio.id", target = "idMunicipio")

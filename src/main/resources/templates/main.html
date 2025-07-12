@@ -45,8 +45,46 @@
                         </div>
                     </div>
 
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="d-flex flex-column flex-sm-row justify-content-around">
+                                <a th:if="${#sets.size(misAgencias)==1}"
+                                   th:href="@{'/agencia/{id}'(id=${misAgencias[0]})}"
+                                   class="btn btn-pill btn-secondary m-1 col-12 col-sm-3">
+                                    <i class="align-middle me-2 fas fa-fw fa-suitcase"></i>
+                                    <span class="align-middle">Mi agencia</span>
+                                </a>
+                                <a th:if="${#sets.size(misAgencias)>1}"
+                                   th:href="@{/agencia/mis-agencias}"
+                                   class="btn btn-pill btn-secondary m-1 col-12 col-sm-3">
+                                    <i class="align-middle me-2 fas fa-fw fa-suitcase"></i>
+                                    <span class="align-middle">Mis agencias</span>
+                                </a>
+                                <a th:if="${#sets.size(misArtistas)==1}"
+                                   th:href="@{'/artista/{id}'(id=${misArtistas[0]})}"
+                                   class="btn btn-pill btn-warning m-1 col-12 col-sm-3">
+                                    <i class="align-middle me-2 fas fa-fw fa-music"></i>
+                                    <span class="align-middle">Mi artista</span>
+                                </a>
+                                <a th:if="${#sets.size(misArtistas)>1}"
+                                   th:href="@{/artista/mis-artistas}"
+                                   class="btn btn-pill btn-warning m-1 col-12 col-sm-3">
+                                    <i class="align-middle me-2 fas fa-fw fa-music"></i>
+                                    <span class="align-middle">Mis artistas</span>
+                                </a>
 
-                    <div class="row">
+                                <a sec:authorize="hasAuthority('MENU_LISTADOS')" href="/listado"
+                                   class="btn btn-pill btn-primary m-1 col-12 col-sm-3">
+                                    <i class="align-middle me-2 fas fa-fw fa-calendar-alt"></i>
+                                    <span class="align-middle">Presupuestos</span>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="row mb-4">
 
                         <div class="col-12 col-md-6 col-lg-3" th:each="ocupacion : ${listaOcupacionPendiente}">
 

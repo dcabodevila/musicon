@@ -22,6 +22,7 @@ public class AccesoDto {
     private String rol;
 
     private Long idArtista;
+    private String nombreArtista;
 
 
 }

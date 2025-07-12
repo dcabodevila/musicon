@@ -30,8 +30,13 @@
                 <div class="row">
                     <div class="col-12 col-xl-6">
                         <div class="card">
+
                             <div class="card-header">
                                 <h5 class="card-title" >Editar usuario</h5>
+                                <div class="text-center">
+                                    <img class="rounded-circle img-responsive mt-2" width="128" height="128"
+                                         th:src="${usuarioEdicionDTO.imagen != null ? usuarioEdicionDTO.imagen : '/img/avatars/avatar.jpg'}" alt="Unsplash">
+                                </div>
                             </div>
                             <div class="card-body">
                                 <form method="POST" th:object="${usuarioEdicionDTO}" th:action=@{/usuarios/guardar} enctype="multipart/form-data">
@@ -67,7 +72,7 @@
                                         <label class="col-form-label col-sm-3 text-sm-end">Imágen</label>
                                         <div class="col-sm-9">
                                             <input type="file" name="image" accept="image/*" class="form-control-file">
-                                            <small class="form-text text-muted">Logo de la empresa. Tamaño ideal 327x250</small>
+                                            <small class="form-text text-muted">Foto del usuario. Tamaño ideal cuadrado (200x200)</small>
                                         </div>
                                     </div>
 
@@ -75,6 +80,34 @@
                                 </form>
                             </div>
                         </div>
+                    </div>
+
+                    <div class="col-12 col-xl-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">Accesos del usuario</h5>
+                            </div>
+                            <div class="card-body">
+                                <table class="table">
+                                    <thead>
+                                    <tr>
+                                        <th>Agencia</th>
+                                        <th>Rol</th>
+                                        <th>Artista</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="acceso : ${listaAccesos}">
+                                        <td th:text="${acceso.nombreAgencia}"></td>
+                                        <td th:text="${acceso.nombreRol}"></td>
+                                        <td th:text="${acceso.nombreArtista}"></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+
                     </div>
                 </div>
             </div>

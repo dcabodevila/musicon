@@ -13,8 +13,6 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring", uses = {})
 public interface ArtistaMapper {
 
-    ArtistaMapper INSTANCE = Mappers.getMapper(ArtistaMapper.class);
-
     @Mapping(target = "id", source = "id")
     @Mapping(target = "idCcaa", source = "ccaa.id")
     @Mapping(target = "nombreCcaa", source = "ccaa.nombre")

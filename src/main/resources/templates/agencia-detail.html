@@ -48,7 +48,7 @@
                                 <h5 class="card-text" th:if="${agenciaDto.cif!=null}" th:text="${'CIF: '+ agenciaDto.cif}">CIF</h5>
 
                                 <ul class="list-unstyled mb-0">
-                                    <li class="mb-1"><span class="fas fa-user fa-fw me-1"></span> <a th:href="@{/usuario/__${agenciaDto.idUsuario}__}"  th:text="${agenciaDto.nombreUsuario}"></a></li>
+                                    <li class="mb-1"><span class="fas fa-user fa-fw me-1"></span> <a th:href="@{/usuarios/__${agenciaDto.idUsuario}__}"  th:text="${agenciaDto.nombreUsuario}"></a></li>
                                     <li class="mb-1" th:if="${agenciaDto.telefono!=null && agenciaDto.telefono!=''}"><span class="fas fa-phone fa-fw me-1"></span> <a th:href="${'tel:'+ agenciaDto.telefono}"  th:text="${agenciaDto.telefono}"></a></li>
                                     <li class="mb-1" th:if="${agenciaDto.telefono2!=null && agenciaDto.telefono2!=''}"><span class="fas fa-phone fa-fw me-1"></span> <a th:href="${'tel:'+ agenciaDto.telefono2}"  th:text="${agenciaDto.telefono2}"></a></li>
                                     <li class="mb-1" th:if="${agenciaDto.telefono3!=null && agenciaDto.telefono3!=''}"><span class="fas fa-phone fa-fw me-1"></span> <a th:href="${'tel:'+ agenciaDto.telefono3}"  th:text="${agenciaDto.telefono3}"></a></li>
@@ -65,46 +65,52 @@
                                     <li class="mb-1" th:if="${agenciaDto.instagram!=null  && agenciaDto.instagram!=''}"><span class="fab fa-fw fa-instagram" ></span> <a th:text="${agenciaDto.instagram}" th:href="${'http://'+agenciaDto.instagram}" th:target="_blank"></a></li>
                                     <li class="mb-1" th:if="${agenciaDto.youtube!=null  && agenciaDto.youtube!=''}"><span class="fab fa-fw fa-youtube" ></span> <a th:text="${agenciaDto.youtube}" th:href="${'http://'+agenciaDto.youtube}" th:target="_blank"></a></li>
                                 </ul>
-                            </div>
-
-                            <div class="card-body text-center">
-
-                                <div th:with="idAgencia=${agenciaDto.id}">
-                                    <a th:if="${#authorization.expression('hasPermission(' + agenciaDto.id + ', ''AGENCIA'', ''AGENCIA_EDITAR'')')}"
-                                       th:href="@{/agencia/edit/__${agenciaDto.id}__}"
-                                       class="btn btn-primary">
-                                        Editar datos agencia
-                                    </a>
-                                </div>
 
                             </div>
 
+                            <a th:if="${#authorization.expression('hasPermission(' + agenciaDto.id + ', ''AGENCIA'', ''AGENCIA_EDITAR'')')}"
+                               th:href="@{/agencia/edit/__${agenciaDto.id}__}"
+                               class="btn btn-pill btn-secondary m-1 col-12">
+                                Editar agencia
+                            </a>
 
 
-                            <div class="card-body text-center">
+                            <a th:if="${#authorization.expression('hasPermission(' + agenciaDto.id + ', ''AGENCIA'', ''GESTION_ACCESOS'')')}"
+                               th:href="@{/accesos/__${agenciaDto.id}__}"
+                               class="btn btn-pill btn-warning m-1 col-12">
+                                Gestión de accesos
+                            </a>
 
-                                <div th:with="idAgencia=${agenciaDto.id}">
-                                    <a th:if="${#authorization.expression('hasPermission(' + agenciaDto.id + ', ''AGENCIA'', ''GESTION_ACCESOS'')')}"
-                                       th:href="@{/accesos/__${agenciaDto.id}__}"
-                                       class="btn btn-primary">
-                                        Gestionar accesos
-                                    </a>
-                                </div>
-
-                            </div>
 
                         </div>
                     </div>
+
+
+
                     <div class="col-12 col-md-9 col-lg-9" >
+                        <div class="row col-12 mb-3">
+
+                            <div class="card-body text-center">
+
+                                <div class="d-flex flex-column flex-sm-row justify-content-around">
+
+
+                                    <a th:if="${#authorization.expression('hasPermission(' + agenciaDto.id + ', ''AGENCIA'', ''ARTISTA_CREAR'')')}"
+                                       th:href="@{/artista/crear/__${agenciaDto.id}__}"
+                                       class="btn btn-pill btn-primary m-1 col-12 col-sm-3">
+                                        Nuevo artista
+                                    </a>
+
+                                </div>
+
+                            </div>
+                        </div>
+
                         <div class="card">
+
                         <div class="card-header">
                             <h5 class="card-title">Artistas de la agencia</h5>
                             <div th:with="idAgencia=${agenciaDto.id}">
-                                <a th:if="${#authorization.expression('hasPermission(' + agenciaDto.id + ', ''AGENCIA'', ''ARTISTA_CREAR'')')}"
-                                   th:href="@{/artista/crear/__${agenciaDto.id}__}"
-                                   class="btn btn-primary">
-                                    Nuevo artista
-                                </a>
                             </div>
                         </div>
                         <div class="card-body">
@@ -117,8 +123,8 @@
                                 <thead>
                                     <tr>
                                         <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Artista</th>
-                                        <th class="sorting" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Responsable</th>
-                                        <th class="sorting dtr-hidden dt-head-right" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Componentes</th>
+<!--                                        <th class="sorting" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Responsable</th>-->
+                                        <th class="sorting dtr-hidden dt-head-right" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Compon.</th>
                                         <th class="sorting dtr-hidden dt-head-right" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Viento</th>
                                         <th class="sorting dtr-hidden dt-head-right" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Ritmo</th>
                                         <th class="sorting dtr-hidden dt-head-right" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Bailarinas</th>
@@ -126,17 +132,21 @@
                                         <th class="sorting dtr-hidden dt-head-right" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Luz</th>
                                         <th class="sorting dtr-hidden dt-head-right" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Sonido</th>
                                         <th class="sorting dtr-hidden dt-head-center" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Escenario</th>
-                                        <th class="sorting dtr-hidden" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Tipo escenario</th>
-                                        <th class="sorting dtr-hidden" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Medidas escenario</th>
-                                        <th></th>
+                                        <th class="sorting dtr-hidden" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Tipo esc</th>
+                                        <th class="sorting dtr-hidden" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Medidas esc</th>
+
                                     </tr>
                                 </thead>
                                 <tbody>
 
                                 <tr th:each="artista : ${listaArtistas}">
 
-                                    <td class="dtr-control sorting_1" tabindex="0" th:text="${artista.nombre}" ></td>
-                                    <td th:text="${artista.nombreUsuario}">Responsable</td>
+                                    <td class="dtr-control sorting_1" tabindex="0"  >
+                                        <a th:text="${artista.nombre}" th:href="@{/artista/__${artista.id}__}">
+                                            <i class="far fa-edit"></i>
+                                        </a>
+                                    </td>
+<!--                                    <td th:text="${artista.nombreUsuario}">Responsable</td>-->
                                     <td class="dtr-hidden dt-body-right" th:text="${artista.componentes}">Componentes</td>
                                     <td class="dtr-hidden dt-body-right" th:text="${artista.viento}">Viento</td>
                                     <td class="dtr-hidden dt-body-right" th:text="${artista.ritmo}">Ritmo</td>
@@ -147,11 +157,7 @@
                                     <td class="dtr-hidden dt-body-center" th:text="${artista.escenario ? 'Sí' : 'No'}"></td>
                                     <td class="dtr-hidden" th:text="${artista.nombreTipoEscenario}"></td>
                                     <td class="dtr-hidden" th:text="${artista.medidasEscenario}"></td>
-                                    <td class="dtr-control sorting_1" tabindex="0">
-                                        <a type="button" class="btn btn-primary mb-1" th:href="@{/artista/__${artista.id}__}">
-                                            <i class="far fa-edit"></i>
-                                        </a>
-                                    </td>
+
                                 </tr>
 
                             </tbody>

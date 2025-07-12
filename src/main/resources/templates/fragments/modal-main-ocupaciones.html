@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<div th:fragment="modal-main-ocupaciones">
+  <div class="modal fade" id="modalNuevaOcupacion" tabindex="-1" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" th:text="${'Ocupación para '+ artistaDto.nombre}"> </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form method="POST" action="#" autocomplete="off">
+          <div class="modal-body m-3">
+            <input hidden id="id-ocupacion"/>
+            <input hidden id="id-artista-modal-ocupacion" th:value="${artistaDto.id}"/>
+
+            <div id="divEstadoOcupacion" class="mb-3 row">
+              <label class="col-form-label col-sm-3 text-sm-end">Estado</label>
+              <div class="col-sm-1">
+                <a href="#" id="badge-estado-ocupacion" class="badge bg-primary me-1 my-1">aaa</a>
+              </div>
+            </div>
+
+            <div class="mb-3 row">
+              <label class="col-form-label col-sm-3 text-sm-end">Fecha</label>
+              <div class="col-sm-9">
+                <input id="idFechaOcupacion" type="text" required class="form-control flatpickr flatpickr-minimum flatpickr-input active" placeholder="Fecha ocupación">
+              </div>
+            </div>
+            <div class="mb-3 row">
+              <label class="col-form-label col-sm-3 text-sm-end">Tipo ocupación</label>
+              <div class="col-sm-9">
+                <select id="tipos-ocupacion" class="form-control choices-single" required>
+                  <option th:each="tipoOcupacion : ${listaTiposOcupacion}" th:value="${tipoOcupacion.id}" th:text="${tipoOcupacion.nombre}"></option>
+                </select>
+              </div>
+            </div>
+            <div class="mb-3 row">
+              <label class="col-form-label col-sm-3 text-sm-end">Comunidad</label>
+              <div class="col-sm-9">
+                <select id="ccaa-ocupacion" th:field="${artistaDto.idCcaa}" class="form-control choices-single" required>
+                  <option th:each="ccaa : ${listaCcaa}" th:value="${ccaa.id}" th:text="${ccaa.nombre}"></option>
+                </select>
+              </div>
+            </div>
+            <div class="mb-3 row">
+              <label class="col-form-label col-sm-3 text-sm-end">Provincia</label>
+              <div class="col-sm-9">
+                <select id="provincia-ocupacion" class="form-control choices-single" required>
+                  <option th:each="provincia : ${listaProvinciasCcaaArtista}" th:value="${provincia.id}" th:text="${provincia.nombre}"></option>
+                </select>
+              </div>
+            </div>
+            <div class="mb-3 row">
+              <label class="col-form-label col-sm-3 text-sm-end">Municipio</label>
+              <div class="col-sm-9">
+                <select id="municipio-ocupacion" class="form-control choices-single">
+                </select>
+              </div>
+            </div>
+            <div class="mb-3 row">
+              <label class="col-form-label col-sm-3 text-sm-end">Localidad</label>
+              <div class="col-sm-9">
+                <input class="form-control" placeholder="Localidad" id="localidad-ocupacion" autocomplete="off" required>
+              </div>
+            </div>
+
+            <div th:if="${#authorization.expression('hasPermission(' + artistaDto.id + ', ''ARTISTA'', ''VER_DATOS_ECONOMICOS'')')}">
+              <div class="mb-3 row">
+                <label class="col-form-label col-sm-3 text-sm-end">Importe</label>
+                <div class="col-sm-9">
+                  <input id="importe-ocupacion" type="number" required class="form-control" placeholder="Importe" autocomplete="off" step="1">
+                </div>
+              </div>
+              <div class="mb-3 row">
+                <label class="col-form-label col-sm-3 text-sm-end">Porcentaje representante</label>
+                <div class="col-sm-9">
+                  <input id="porcentaje-repre-ocupacion" type="number" required class="form-control" placeholder="Importe" autocomplete="off" step="1">
+                </div>
+              </div>
+              <div class="mb-3 row">
+                <label class="col-form-label col-sm-3 text-sm-end">IVA</label>
+                <div class="col-sm-9">
+                  <input id="iva-ocupacion" type="number" required class="form-control" placeholder="Importe" autocomplete="off" step="1">
+                </div>
+              </div>
+
+            </div>
+
+            <div class="mb-3 row">
+              <label class="col-form-label col-sm-3 text-sm-end pt-sm-0" for="matinal-ocupacion">Matinal</label>
+              <div class="col-sm-9">
+                <div class="form-check form-switch">
+                  <input id="matinal-ocupacion" class="form-check-input" type="checkbox"  checked="false" wfd-id="id17">
+                </div>
+              </div>
+            </div>
+            <div class="mb-3 row">
+              <label class="col-form-label col-sm-3 text-sm-end pt-sm-0" for="solo-matinal-ocupacion">Solo matinal</label>
+              <div class="col-sm-9">
+                <div class="form-check form-switch">
+                  <input id="solo-matinal-ocupacion" class="form-check-input" type="checkbox"  checked="false" wfd-id="id17">
+                </div>
+              </div>
+            </div>
+
+            <div th:if="${#authorization.expression('hasPermission(' + artistaDto.idAgencia + ', ''AGENCIA'', ''VER_DATOS_ACTUACION'')')}">
+              <div class="mb-3 row">
+                <label class="col-form-label col-sm-3 text-sm-end">Lugar</label>
+                <div class="col-sm-9">
+                  <input class="form-control" placeholder="Lugar" id="lugar-ocupacion" autocomplete="off">
+                </div>
+              </div>
+              <div class="mb-3 row">
+                <label class="col-form-label col-sm-3 text-sm-end">Observaciones</label>
+                <div class="col-sm-9">
+                  <textarea class="form-control" placeholder="Observaciones" id="observaciones-ocupacion"
+                            autocomplete="off" maxlength="1800"></textarea>
+                </div>
+              </div>
+            </div>
+
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            <button type="button" th:if="${#authorization.expression('hasPermission(' + artistaDto.id + ', ''ARTISTA'', ''ANULAR_OCUPACION'')')}" id="btn-anular-ocupacion" class="btn btn-danger">Anular</button>
+            <button type="button" th:if="${#authorization.expression('hasPermission(' + artistaDto.id + ', ''ARTISTA'', ''CONFIRMAR_OCUPACION'')')}" id="btn-confirmar-ocupacion" class="btn btn-success">Confirmar</button>
+            <button type="submit" id="btn-guardar-ocupacion" class="btn btn-primary">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

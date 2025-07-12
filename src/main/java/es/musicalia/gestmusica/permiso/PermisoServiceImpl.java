@@ -86,17 +86,15 @@ public class PermisoServiceImpl implements PermisoService {
 								acceso -> acceso.getRol().getPermisos().stream()
 										.filter(permiso -> TipoPermisoEnum.AGENCIA.getId().equals(permiso.getTipoPermiso())) // Filtrar permisos de tipo AGENCIA
 										.map(Permiso::getCodigo),
-								Collectors.collectingAndThen(
-										Collectors.toSet(),
-										set -> set.isEmpty() ? null : set
-								)
+								Collectors.toSet()
 						)
 				))
 				.entrySet().stream()
-				.filter(entry -> entry.getValue() != null)
 				.collect(Collectors.toMap(
 						Map.Entry::getKey,
-						Map.Entry::getValue
+						Map.Entry::getValue,
+						(v1, v2) -> v1,
+						HashMap::new
 				));
 	}
 

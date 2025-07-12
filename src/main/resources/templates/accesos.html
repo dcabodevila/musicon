@@ -51,17 +51,17 @@
                             <div class="card-body">
 
 
-
-
-                                <div id="datatables-reponsive_accesos" class="dataTables_wrapper dt-bootstrap5 no-footer">
-                                    <div class="row">
+                                <div id="datatables-reponsive_accesos"
+                                     class="dataTables_wrapper dt-bootstrap5 no-footer">
+                                <div class="row">
                                         <div class="col-sm-12">
                                             <table id="datatables-reponsive-accesos" class="table table-striped dataTable no-footer dtr-inline collapsed" style="width: 100%;" aria-describedby="datatables-reponsive_info">
                                                 <thead>
                                                 <tr>
                                                     <th  tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Usuario</th>
                                                     <th  tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Rol</th>
-                                                    <th>Editar</th>
+                                                    <th  tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Artista</th>
+                                                    <th tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Editar</th>
                                                 </tr>
                                                 </thead>
                                                 <tbody>
@@ -69,7 +69,10 @@
                                                 <tr th:each="acceso : ${listaAccesos}">
                                                     <td th:text="${acceso.nombreUsuario}">Responsable</td>
                                                     <td th:text="${acceso.rol}">Componentes</td>
-                                                    <td>        <button type="button" class="btn btn-primary mb-1 btnModalAcceso"
+                                                    <td th:text="${acceso.nombreArtista}">Artista</td>
+                                                    <td>
+                                                        <button type="button"
+                                                                class="btn btn-primary mb-1 btnModalAcceso"
                                                                         th:data-idacceso="${acceso.id}"
                                                                         th:data-idusuario="${acceso.idUsuario}"
                                                                         th:data-idrol="${acceso.idRol}"

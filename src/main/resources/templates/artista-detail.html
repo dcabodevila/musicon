@@ -37,89 +37,155 @@
                     </div>
                 </div>
 
-                <div class="row">
+                <div class="row g-4">
 
                     <div class="col-12 col-md-3 col-lg-3 order-2 order-lg-1">
                         <div class="card card-max-width">
-                            <img class="card-img-top img-max-height" th:if="${artistaDto.logo!=null}"  th:src="@{${artistaDto.logo}}" alt="Unsplash">
+                            <img class="card-img-top img-max-height" th:if="${artistaDto.logo!=null}"
+                                 th:src="@{${artistaDto.logo}}" alt="Unsplash">
                             <div class="card-header px-4 pt-4">
-                                <h5 class="card-title mb-0" th:text="${artistaDto.nombre}">Card with image and button</h5>
+                                <h5 class="card-title mb-0" th:text="${artistaDto.nombre}">Card with image and
+                                    button</h5>
                             </div>
                             <div class="card-body">
                                 <input hidden id="idArtista" th:value="${artistaDto.id}"/>
                                 <input hidden id="idAgencia" th:value="${artistaDto.idAgencia}"/>
                                 <input hidden id="anoTarifa" th:value="${anoTarifa}"/>
-                                <h5 class="card-text" th:if="${artistaDto.cif!=null}" th:text="${'CIF: '+ artistaDto.cif}">CIF</h5>
+                                <h5 class="card-text" th:if="${artistaDto.cif!=null}"
+                                    th:text="${'CIF: '+ artistaDto.cif}">CIF</h5>
 
                                 <ul class="list-unstyled mb-0">
-                                    <li class="mb-1"><span class="fas fa-suitcase fa-fw me-1"></span> <a th:href="@{/agencia/__${artistaDto.idAgencia}__}"  th:text="${artistaDto.nombreAgencia}"></a></li>
-                                    <li class="mb-1"><span class="fas fa-user fa-fw me-1"></span> <a :href="#"  th:text="${artistaDto.nombreUsuario}"></a></li>
-                                    <li class="mb-1" th:if="${artistaDto.telefono!=null && artistaDto.telefono!=''}"><span class="fas fa-phone fa-fw me-1" ></span> <a th:href="${'tel:'+ artistaDto.telefono}"  th:text="${artistaDto.telefono}"></a></li>
-                                    <li class="mb-1" th:if="${artistaDto.telefono2!=null && artistaDto.telefono2!=''}"><span class="fas fa-phone fa-fw me-1" ></span> <a th:href="${'tel:'+ artistaDto.telefono2}"  th:text="${artistaDto.telefono2}"></a></li>
-                                    <li class="mb-1" th:if="${artistaDto.telefono3!=null && artistaDto.telefono3!=''}"><span class="fas fa-phone fa-fw me-1" ></span> <a th:href="${'tel:'+ artistaDto.telefono3}"  th:text="${artistaDto.telefono3}"></a></li>
-                                    <li class="mb-1" th:if="${artistaDto.email!=null && artistaDto.email!=''}"><span class="fas fa-envelope fa-fw me-1" ></span> <a th:href="${'mailto:'+ artistaDto.email}"  th:text="${artistaDto.email}"></a></li>
-                                    <li class="mb-1" th:if="${artistaDto.nombreCcaa!=null  && artistaDto.nombreCcaa!=''}"><span class="fas fa-map-marked fa-fw me-1" ></span> <span th:text="${artistaDto.nombreCcaa}"></span></li>
+                                    <li class="mb-1"><span class="fas fa-suitcase fa-fw me-1"></span> <a
+                                            th:href="@{/agencia/__${artistaDto.idAgencia}__}"
+                                            th:text="${artistaDto.nombreAgencia}"></a></li>
+                                    <li class="mb-1"><span class="fas fa-user fa-fw me-1"></span> <a
+                                            th:href="@{/usuarios/__${artistaDto.idUsuario}__}"
+                                            th:text="${artistaDto.nombreUsuario}"></a>
+                                    </li>
+                                    <li class="mb-1" th:if="${artistaDto.telefono!=null && artistaDto.telefono!=''}">
+                                        <span class="fas fa-phone fa-fw me-1"></span> <a
+                                            th:href="${'tel:'+ artistaDto.telefono}"
+                                            th:text="${artistaDto.telefono}"></a></li>
+                                    <li class="mb-1" th:if="${artistaDto.telefono2!=null && artistaDto.telefono2!=''}">
+                                        <span class="fas fa-phone fa-fw me-1"></span> <a
+                                            th:href="${'tel:'+ artistaDto.telefono2}"
+                                            th:text="${artistaDto.telefono2}"></a></li>
+                                    <li class="mb-1" th:if="${artistaDto.telefono3!=null && artistaDto.telefono3!=''}">
+                                        <span class="fas fa-phone fa-fw me-1"></span> <a
+                                            th:href="${'tel:'+ artistaDto.telefono3}"
+                                            th:text="${artistaDto.telefono3}"></a></li>
+                                    <li class="mb-1" th:if="${artistaDto.email!=null && artistaDto.email!=''}"><span
+                                            class="fas fa-envelope fa-fw me-1"></span> <a
+                                            th:href="${'mailto:'+ artistaDto.email}" th:text="${artistaDto.email}"></a>
+                                    </li>
+                                    <li class="mb-1"
+                                        th:if="${artistaDto.nombreCcaa!=null  && artistaDto.nombreCcaa!=''}"><span
+                                            class="fas fa-map-marked fa-fw me-1"></span> <span
+                                            th:text="${artistaDto.nombreCcaa}"></span></li>
                                 </ul>
                             </div>
                             <hr class="my-0">
                             <div class="card-body">
 
                                 <ul class="list-unstyled mb-0">
-                                    <li class="mb-1" th:if="${artistaDto.nombreTipoEscenario!=null && artistaDto.nombreTipoEscenario!=''}"><span title="Tipo escenario" class="fas fa-truck fa-fw me-1" ></span> <a th:text="${artistaDto.nombreTipoEscenario}"></a></li>
-                                    <li class="mb-1" th:if="${artistaDto.medidasEscenario!=null && artistaDto.medidasEscenario!=''}"><span title="Medidas escenario" class="fas fa-arrows fa-fw me-1" ></span> <a th:text="${artistaDto.medidasEscenario}"></a></li>
-                                    <li class="mb-1" th:if="${artistaDto.componentes!=null && artistaDto.componentes!='' && artistaDto.componentes!=0}"><span title="Componentes" class="fas fa-users fa-fw me-1" ></span> <a th:text="${artistaDto.componentes}"></a></li>
-                                    <li class="mb-1" th:if="${artistaDto.sonido!=null && artistaDto.sonido!='' && artistaDto.sonido!=0}"><span title="Sonido" class="fas fa-volume-up fa-fw me-1" ></span> <a th:text="${artistaDto.sonido}"></a></li>
-                                    <li class="mb-1" th:if="${artistaDto.luz!=null && artistaDto.luz!='' && artistaDto.luz!=0}"><span title="Luz" class="fas fa-bolt fa-fw me-1" ></span> <a th:text="${artistaDto.luz}"></a></li>
+                                    <li class="mb-1"
+                                        th:if="${artistaDto.nombreTipoEscenario!=null && artistaDto.nombreTipoEscenario!=''}">
+                                        <span title="Tipo escenario" class="fas fa-truck fa-fw me-1"></span> <a
+                                            th:text="${artistaDto.nombreTipoEscenario}"></a></li>
+                                    <li class="mb-1"
+                                        th:if="${artistaDto.medidasEscenario!=null && artistaDto.medidasEscenario!=''}">
+                                        <span title="Medidas escenario" class="fas fa-arrows fa-fw me-1"></span> <a
+                                            th:text="${artistaDto.medidasEscenario}"></a></li>
+                                    <li class="mb-1"
+                                        th:if="${artistaDto.componentes!=null && artistaDto.componentes!='' && artistaDto.componentes!=0}">
+                                        <span title="Componentes" class="fas fa-users fa-fw me-1"></span> <a
+                                            th:text="${artistaDto.componentes}"></a></li>
+                                    <li class="mb-1"
+                                        th:if="${artistaDto.sonido!=null && artistaDto.sonido!='' && artistaDto.sonido!=0}">
+                                        <span title="Sonido" class="fas fa-volume-up fa-fw me-1"></span> <a
+                                            th:text="${artistaDto.sonido}"></a></li>
+                                    <li class="mb-1"
+                                        th:if="${artistaDto.luz!=null && artistaDto.luz!='' && artistaDto.luz!=0}"><span
+                                            title="Luz" class="fas fa-bolt fa-fw me-1"></span> <a
+                                            th:text="${artistaDto.luz}"></a></li>
                                 </ul>
                             </div>
                             <hr class="my-0">
                             <div class="card-body">
                                 <ul class="list-unstyled mb-0">
-                                    <li class="mb-1" th:if="${artistaDto.web!=null && artistaDto.web!=''}"><span class="fas fa-globe fa-fw me-1" ></span> <a th:href="${'http://'+artistaDto.web}" th:target="_blank" th:text="${artistaDto.web}"></a></li>
-                                    <li class="mb-1" th:if="${artistaDto.facebook!=null && artistaDto.facebook!=''}"><span class="fab fa-fw fa-facebook" ></span> <a th:text="${artistaDto.facebook}" th:href="${'http://'+artistaDto.facebook}" th:target="_blank"></a></li>
-                                    <li class="mb-1" th:if="${artistaDto.instagram!=null && artistaDto.instagram!=''}"><span class="fab fa-fw fa-instagram" ></span> <a th:text="${artistaDto.instagram}" th:href="${'http://'+artistaDto.instagram}" th:target="_blank"></a></li>
-                                    <li class="mb-1" th:if="${artistaDto.youtube!=null && artistaDto.youtube!=''}"><span class="fab fa-fw fa-youtube" ></span> <a th:text="${artistaDto.youtube}" th:href="${'http://'+artistaDto.youtube}" th:target="_blank"></a></li>
+                                    <li class="mb-1" th:if="${artistaDto.web!=null && artistaDto.web!=''}"><span
+                                            class="fas fa-globe fa-fw me-1"></span> <a
+                                            th:href="${'http://'+artistaDto.web}" th:target="_blank"
+                                            th:text="${artistaDto.web}"></a></li>
+                                    <li class="mb-1" th:if="${artistaDto.facebook!=null && artistaDto.facebook!=''}">
+                                        <span class="fab fa-fw fa-facebook"></span> <a th:text="${artistaDto.facebook}"
+                                                                                       th:href="${'http://'+artistaDto.facebook}"
+                                                                                       th:target="_blank"></a></li>
+                                    <li class="mb-1" th:if="${artistaDto.instagram!=null && artistaDto.instagram!=''}">
+                                        <span class="fab fa-fw fa-instagram"></span> <a
+                                            th:text="${artistaDto.instagram}"
+                                            th:href="${'http://'+artistaDto.instagram}" th:target="_blank"></a></li>
+                                    <li class="mb-1" th:if="${artistaDto.youtube!=null && artistaDto.youtube!=''}"><span
+                                            class="fab fa-fw fa-youtube"></span> <a th:text="${artistaDto.youtube}"
+                                                                                    th:href="${'http://'+artistaDto.youtube}"
+                                                                                    th:target="_blank"></a></li>
                                 </ul>
-                            </div>
-                            <div class="card-body text-center">
-                                <a th:if="${#authorization.expression('hasPermission(' + artistaDto.id + ', ''ARTISTA'', ''ARTISTAS_EDITAR'')')}" th:href="@{/artista/edit/__${artistaDto.id}__}" class="btn btn-primary">Editar datos artista</a>
+
+                                <a th:if="${#authorization.expression('hasPermission(' + artistaDto.id + ', ''ARTISTA'', ''ARTISTAS_EDITAR'')')}"
+                                   th:href="@{/artista/edit/__${artistaDto.id}__}" class="btn btn-pill btn-secondary m-1 col-12">Editar datos
+                                    artista</a>
+                                <a th:href="@{/documentos/__${artistaDto.id}__}" th:if="${#authorization.expression('hasPermission(' + artistaDto.id + ', ''ARTISTA'', ''DOCUMENTACION'')') or #authorization.expression('hasPermission(' + artistaDto.id + ', ''ARTISTA'', ''DOCUMENTACION_DESCARGAR'')')}" class="btn btn-pill btn-primary m-1 col-12"> Documentación
+                                    artista</a>
+
                             </div>
 
-                            <div class="card-body text-center"
-                                 th:if="${#authorization.expression('hasPermission(' + artistaDto.id + ', ''ARTISTA'', ''DOCUMENTACION'')') or #authorization.expression('hasPermission(' + artistaDto.id + ', ''ARTISTA'', ''DOCUMENTACION_DESCARGAR'')')}">
-                                <a th:href="@{/documentos/__${artistaDto.id}__}" class="btn btn-primary"> Documentación artista</a>
-                            </div>
                         </div>
 
                     </div>
 
 
 
-                    <div class="col-12 col-lg-6 order-1 order-lg-2" th:with="permisoCrearTarifas=${#authorization.expression('hasPermission(' + artistaDto.id + ', ''ARTISTA'', ''CREAR_TARIFAS'')')},
+
+                    <div class="col-12 col-md-9 col-lg-9 order-1 order-lg-2 " >
+
+
+                        <div class="row col-12 mb-3" th:with="permisoCrearTarifas=${#authorization.expression('hasPermission(' + artistaDto.id + ', ''ARTISTA'', ''CREAR_TARIFAS'')')},
                                              permisoOcupaciones=${#authorization.expression('hasPermission(' + artistaDto.id + ', ''ARTISTA'', ''OCUPACIONES'')')},
                                              permisoTarifaAnual=${#authorization.expression('hasPermission(' + artistaDto.id + ', ''ARTISTA'', ''TARIFA_ANUAL'')')}">
-                        <div class="card" th:if="${permisoCrearTarifas or permisoOcupaciones or permisoTarifaAnual}">
-                            <div class="card-body text-center">
-                                <div class="mb-3">
-                                    <button th:if="${permisoCrearTarifas}" type="button" class="btn btn-primary mb-1" data-bs-toggle="modal" data-bs-target="#modalNuevaTarifa">
-                                        <i class="far fa-calendar"></i> Nueva tarifa
-                                    </button>
-                                    <button th:if="${permisoOcupaciones}" type="button" id="btnModalNuevaOcupacion" class="btn btn-success mb-1" data-bs-toggle="modal" data-bs-target="#modalNuevaOcupacion">
-                                        <i class="far fa-calendar-plus"></i> Nueva ocupación
-                                    </button>
-                                    <button th:if="${permisoCrearTarifas}" id="btn-incrementos" type="button" class="btn btn-secondary mb-1" data-bs-toggle="modal" data-bs-target="#modalIncrementos">
-                                        <i class="fa fa-eur"></i> Incrementos provinciales
-                                    </button>
-                                    <a th:if="${permisoTarifaAnual}" type="button" id="btn-tarifa-anual" data-bs-toggle="modal" data-bs-target="#modalTarifaAnual" class="btn btn-info mb-1">
-                                        <i class="far fa-calendar-plus"></i> Tarifa anual
-                                    </a>
+                            <div th:if="${permisoCrearTarifas or permisoOcupaciones or permisoTarifaAnual}">
+                                <div class="row card-body text-center mb-3">
+
+                                    <div class="d-flex flex-column flex-sm-row justify-content-around">
+                                        <button th:if="${permisoCrearTarifas}" type="button"
+                                                class="btn btn-pill btn-primary m-1 col-12 col-sm-3"
+                                                data-bs-toggle="modal" data-bs-target="#modalNuevaTarifa">
+                                            <i class="far fa-calendar"></i> Nueva tarifa
+                                        </button>
+                                        <button th:if="${permisoOcupaciones}" type="button" id="btnModalNuevaOcupacion"
+                                                class="btn btn-pill btn-success m-1 col-12 col-sm-3"
+                                                data-bs-toggle="modal" data-bs-target="#modalNuevaOcupacion">
+                                            <i class="far fa-calendar-plus"></i> Ocupación
+                                        </button>
+
+                                        <a th:if="${permisoTarifaAnual}" type="button" id="btn-tarifa-anual"
+                                           class="btn btn-pill btn-info m-1 col-12 col-sm-3" data-bs-toggle="modal"
+                                           data-bs-target="#modalTarifaAnual">
+                                            <i class="far fa-calendar-alt"></i> Tarifa anual
+                                        </a>
+                                        <button th:if="${permisoCrearTarifas}" id="btn-incrementos" type="button"
+                                                class="btn btn-pill btn-secondary m-1 col-12 col-sm-3"
+                                                data-bs-toggle="modal" data-bs-target="#modalIncrementos">
+                                            <i class="fa fa-eur"></i> Inc. provinciales
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-12 col-lg-12" th:if="${#authorization.expression('hasPermission(' + artistaDto.id + ', ''ARTISTA'', ''VER_TARIFAS'')')}">
-                            <div class="card">
-                                <div class="card-body text-center">
-                                    <div id="calendar"></div>
+                            <div class="col-12 col-lg-12"
+                                 th:if="${#authorization.expression('hasPermission(' + artistaDto.id + ', ''ARTISTA'', ''VER_TARIFAS'')')}">
+                                <div class="card">
+                                    <div class="card-body text-center">
+                                        <div id="calendar"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

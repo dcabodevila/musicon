@@ -7,7 +7,6 @@ import org.mapstruct.factory.Mappers;
 
 @Mapper(componentModel = "spring")
 public interface UsuarioMapper {
-    UsuarioMapper INSTANCE = Mappers.getMapper(UsuarioMapper.class);
 
     UsuarioEdicionDTO toUsuarioEdicionDTO(Usuario usuario);
     Usuario toUsuario(UsuarioEdicionDTO usuarioEdicionDTO);

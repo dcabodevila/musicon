@@ -1,19 +1,23 @@
 package es.musicalia.gestmusica.acceso;
 
+
 import es.musicalia.gestmusica.accesoartista.AccesoArtista;
 import es.musicalia.gestmusica.accesoartista.AccesoArtistaRepository;
 import es.musicalia.gestmusica.agencia.Agencia;
 import es.musicalia.gestmusica.agencia.AgenciaRepository;
 import es.musicalia.gestmusica.artista.Artista;
 import es.musicalia.gestmusica.artista.ArtistaRepository;
+import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.permiso.Permiso;
 import es.musicalia.gestmusica.permiso.PermisoRecord;
 import es.musicalia.gestmusica.permiso.PermisoRepository;
 import es.musicalia.gestmusica.permiso.TipoPermisoEnum;
 import es.musicalia.gestmusica.rol.*;
+import es.musicalia.gestmusica.usuario.UserService;
 import es.musicalia.gestmusica.usuario.Usuario;
 import es.musicalia.gestmusica.usuario.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,8 +35,9 @@ public class AccesoServiceImpl implements AccesoService {
 	private final UsuarioRepository usuarioRepository;
 	private final AccesoArtistaRepository accesoArtistaRepository;
 	private final ArtistaRepository artistaRepository;
+	private final AccesoMapper accesoMapper;
 
-	public AccesoServiceImpl(AccesoRepository accesoRepository, RolRepository rolRepository, PermisoRepository permisoRepository, AgenciaRepository agenciaRepository, UsuarioRepository usuarioRepository, AccesoArtistaRepository accesoArtistaRepository, ArtistaRepository artistaRepository){
+	public AccesoServiceImpl(AccesoRepository accesoRepository, RolRepository rolRepository, PermisoRepository permisoRepository, AgenciaRepository agenciaRepository, UsuarioRepository usuarioRepository, AccesoArtistaRepository accesoArtistaRepository, ArtistaRepository artistaRepository, AccesoMapper accesoMapper){
 		this.accesoRepository = accesoRepository;
         this.rolRepository = rolRepository;
         this.permisoRepository = permisoRepository;
@@ -40,13 +45,15 @@ public class AccesoServiceImpl implements AccesoService {
 		this.usuarioRepository = usuarioRepository;
         this.accesoArtistaRepository = accesoArtistaRepository;
         this.artistaRepository = artistaRepository;
+        this.accesoMapper = accesoMapper;
+
     }
 
 	@Override
 	public Acceso crearAccesoUsuarioAgenciaRol(Long idUsuario, Long idAgencia, Long idRol, Long idArtista){
 
 		Acceso acceso = obtenerOCrearAcceso(idUsuario, idAgencia, idRol);
-		AccesoDto accesoDto = getAccesoDto(acceso);
+		AccesoDto accesoDto = accesoMapper.toAccesoDto(acceso);
 		accesoDto.setIdArtista(idArtista);
 		guardarAcceso(accesoDto);
 
@@ -62,21 +69,8 @@ public class AccesoServiceImpl implements AccesoService {
 		return accesoRepository.findAllAccesosByIdAgencia(idAgencia)
 				.orElseGet(Collections::emptyList) // Retorna una lista vacía si el Optional está vacío
 				.stream() // Convierte la lista en un Stream
-				.map(this::getAccesoDto) // Transforma cada Acceso en un AccesoDto
+				.map(accesoMapper::toAccesoDto) // Transforma cada Acceso en un AccesoDto
 				.collect(Collectors.toList()); // Recoge el resultado en una lista
-	}
-
-	private AccesoDto getAccesoDto(Acceso acceso) {
-		AccesoDto accesoDto = new AccesoDto();
-		accesoDto.setId(acceso.getId());
-		accesoDto.setIdUsuario(acceso.getUsuario().getId());
-		accesoDto.setNombreUsuario(acceso.getUsuario().getNombreCompleto());
-		accesoDto.setIdAgencia(acceso.getAgencia().getId());
-		accesoDto.setAgencia(acceso.getAgencia().getNombre());
-		accesoDto.setIdRol(acceso.getRol().getId());
-		accesoDto.setRol(acceso.getRol().getNombre());
-
-		return accesoDto;
 	}
 
 	@Override
@@ -238,7 +232,17 @@ public class AccesoServiceImpl implements AccesoService {
 
 	}
 
+	@Override
+	public List<AccesoDetailRecord> findAllAccesosDetailRecordByIdUsuario(Long idUsuario) {
+		return accesoRepository.findAllAccesosDetailRecordByIdUsuario(idUsuario);
+	}
 
+	@Override
+	public List<AccesoDetailRecord> getMisAccesos(){
 
+		return this.findAllAccesosDetailRecordByIdUsuario(((CustomAuthenticatedUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
+				.getUsuario().getId());
+
+	}
 
 }

@@ -24,4 +24,7 @@ public interface AccesoService {
 
 	void guardarPermisosArtistas(Acceso acceso, Long idArtista);
 
+    List<AccesoDetailRecord> findAllAccesosDetailRecordByIdUsuario(Long idUsuario);
+
+	List<AccesoDetailRecord> getMisAccesos();
 }

@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
@@ -51,9 +50,9 @@
 								<a th:remove="tag" sec:authentication="name">Nombre usuario</a>
 							</a>
 							<div class="dropdown-menu dropdown-menu-end">
-								<a class="dropdown-item" href="#"><i class="align-middle me-1" data-feather="user"></i> Mi perfil</a>
+								<a class="dropdown-item" th:href="@{/usuarios/mi-perfil}"><i class="align-middle me-1" data-feather="user"></i> Mi perfil</a>
 								<div class="dropdown-divider"></div>
-								<a class="dropdown-item" th:href="@{/ajustes}"><i class="align-middle me-1" data-feather="settings"></i> Ajustes</a>
+								<a class="dropdown-item" th:href="@{/ajustes}"><i class="align-middle me-1" data-feather="settings"></i> Configuración presupuestos</a>
 								<div class="dropdown-divider"></div>
 								<a class="dropdown-item sign-out-alt" th:href=@{/logout}><i class="align-middle me-1" ></i>Log out</a>
 							</div>
@@ -85,8 +84,56 @@
 			</a>
 
 			<ul class="sidebar-nav">
+				<li class="sidebar-item">
+					<a class="sidebar-link" href="/">
+						<i class="align-middle me-2 fas fa-fw fa-home"></i> <span class="align-middle">Inicio</span>
+					</a>
+				</li>
+				<div>
+					<li class="sidebar-header">
+						Mi cuenta
+					</li>
+
+					<li class="sidebar-item">
+						<a class="sidebar-link" th:if="${misAgencias != null and misAgencias.size() > 0}"
+						   th:href="${#sets.size(misAgencias)==1 ? '/agencia/' + misAgencias[0] : '/agencia/mis-agencias'}">
+							<i class="align-middle me-2 fas fa-fw fa-suitcase"></i>
+							<span class="align-middle"
+								  th:text="${#sets.size(misAgencias)==1 ? 'Mi agencia' : 'Mis agencias'}">Mis agencias</span>
+						</a>
+						<a class="sidebar-link" th:if="${misArtistas != null and misArtistas.size() > 0}"
+						   th:href="${#sets.size(misArtistas)==1 ? '/artista/' + misArtistas[0] : '/artista/mis-artistas'}">
+							<i class="align-middle me-2 fas fa-fw fa-music"></i>
+							<span class="align-middle"
+								  th:text="${#sets.size(misArtistas)==1 ? 'Mi artista' : 'Mis artistas'}">Mis artistas</span>
+						</a>
+						<a class="sidebar-link" th:href="@{/usuarios/mi-perfil}">
+							<i class="align-middle me-2 fas fa-fw fa-users"></i> <span class="align-middle">Mi perfil</span>
+						</a>
+					</li>
+
+
+				</div>
+				<div sec:authorize="hasAuthority('MENU_LISTADOS')">
+					<li class="sidebar-header">
+						Fechas
+					</li>
+					<li class="sidebar-item">
+						<a class="sidebar-link" href="/listado">
+							<i class="align-middle me-2 fas fa-fw fa-calendar-alt" ></i> <span class="align-middle">Listado presupuestos</span>
+						</a>
+
+						<a class="sidebar-link" sec:authorize="hasAuthority('AUDIENCIA_LISTADOS')" href="/listado/audiencia-listados">
+							<i class="align-middle me-2 fas fa-fw fa-chart-simple" ></i> <span class="align-middle">Audiencia presupuestos</span>
+						</a>
+						<a class="sidebar-link" th:href="@{/ajustes}">
+							<i class="align-middle me-1" data-feather="settings"></i> <span class="align-middle">Configuración</span>
+						</a>
+					</li>
+
+				</div>
 				<li class="sidebar-header">
-					Agencia
+					Información general
 				</li>
 				<li class="sidebar-item">
 					<a class="sidebar-link" href="/agencia">
@@ -103,19 +150,7 @@
 						<i class="align-middle me-2 fas fa-fw fa-user-tie" ></i> <span class="align-middle">Representantes</span>
 					</a>
 				</li>
-				<div sec:authorize="hasAuthority('MENU_LISTADOS')">
-					<li class="sidebar-header">
-						Fechas
-					</li>
-					<li class="sidebar-item">
-						<a class="sidebar-link" href="/listado">
-							<i class="align-middle me-2 fas fa-fw fa-calendar-alt" ></i> <span class="align-middle">Listado presupuestos</span>
-						</a>
-						<a class="sidebar-link" sec:authorize="hasAuthority('AUDIENCIA_LISTADOS')" href="/listado/audiencia-listados">
-							<i class="align-middle me-2 fas fa-fw fa-chart-simple" ></i> <span class="align-middle">Audiencia listados</span>
-						</a>
-					</li>
-				</div>
+
 				<div sec:authorize="hasAuthority('ACCESO_PANEL_ADMIN')">
 					<li class="sidebar-header">
 						Administración

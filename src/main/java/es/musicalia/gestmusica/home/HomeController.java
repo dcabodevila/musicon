@@ -1,5 +1,6 @@
 package es.musicalia.gestmusica.home;
 
+import es.musicalia.gestmusica.artista.ArtistaService;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.ocupacion.OcupacionService;
 import es.musicalia.gestmusica.permiso.PermisoAgenciaEnum;
@@ -9,6 +10,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -38,6 +41,9 @@ public class HomeController {
             model.addAttribute("alertClass", "success");
 
         }
+        final Map<Long, Set<String>> mapPermisosArtista =
+                ((CustomAuthenticatedUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
+                        .getMapPermisosArtista();
 
         model.addAttribute("listaOcupacionPendiente", this.ocupacionService.findOcupacionesDtoByAgenciaPendientes(mapPermisosAgencia.keySet()));
         return "main.html";

@@ -61,9 +61,21 @@ public class ArtistaController {
                     ((CustomAuthenticatedUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
                             .getMapPermisosArtista();
 
-            model.addAttribute("listaArtistas", mapPermisosArtista.isEmpty() ? this.artistaService.findAllArtistasForUser(usuario) : new ArrayList<>());
-            model.addAttribute("listaMisArtistas", mapPermisosArtista.isEmpty() ? new ArrayList<>() : this.artistaService.findMisArtistas(mapPermisosArtista.keySet()));
-            model.addAttribute("listaOtrosArtistas", mapPermisosArtista.isEmpty() ? new ArrayList<>() : this.artistaService.findOtrosArtistas(mapPermisosArtista.keySet()));
+            model.addAttribute("listaArtistas", this.artistaService.findAllArtistasForUser(usuario));
+        }
+        return "artistas";
+    }
+
+    @GetMapping("/mis-artistas")
+    public String misArtistas(Model model) {
+        if (userService.isUserAutheticated()){
+
+            final Map<Long, Set<String>> mapPermisosArtista =
+                    ((CustomAuthenticatedUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
+                            .getMapPermisosArtista();
+
+            model.addAttribute("listaArtistas", mapPermisosArtista.isEmpty() ? new ArrayList<>() : this.artistaService.findMisArtistas(mapPermisosArtista.keySet()));
+
         }
         return "artistas";
     }
@@ -103,7 +115,6 @@ public class ArtistaController {
         getModelAttributeArtistaOcupacion(model, artistaDto);
 
         addTarifaAnualModelAttribute(model, idArtista);
-
 
         return "artista-detail";
     }
@@ -159,6 +170,7 @@ public class ArtistaController {
 
 
     }
+
 
 
 

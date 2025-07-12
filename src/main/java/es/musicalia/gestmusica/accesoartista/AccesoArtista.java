@@ -13,7 +13,9 @@ import lombok.Setter;
  * @author sir
  */
 @Entity
-@Table(name = "acceso_artista", schema="gestmusica")
+@Table(name = "acceso_artista", schema = "gestmusica", uniqueConstraints = {
+		@UniqueConstraint(columnNames = {"usuario_id", "artista_id", "permiso_id"})
+})
 @Getter
 @Setter
 public class AccesoArtista {

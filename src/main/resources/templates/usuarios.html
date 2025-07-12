@@ -51,6 +51,7 @@
                                                 <table id="datatables-reponsive_usuarios" class="table table-striped dataTable no-footer dtr-inline collapsed" style="width: 100%;" aria-describedby="datatables-reponsive_info">
                                                     <thead>
                                                     <tr>
+                                                        <td></td>
                                                         <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Nombre</th>
                                                         <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Apellidos</th>
                                                         <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >email</th>
@@ -64,32 +65,49 @@
                                                     <tbody>
 
                                                     <tr th:each="usuario : ${listaUsuarios}">
+                                                        <td>
+                                                            <img th:if="${usuario.imagen}!=null" th:src="${usuario.imagen}" class="rounded-circle my-n1" width="32" height="32" alt="Charles Hall">
+                                                        </td>
                                                         <td class="dtr-control sorting_1" tabindex="0" th:text="${usuario.nombre}"></td>
                                                         <td class="dtr-control sorting_1" tabindex="0" th:text="${usuario.apellidos}" ></td>
                                                         <td class="dtr-control sorting_1" tabindex="0" th:text="${usuario.email}" ></td>
                                                         <td th:text="${usuario.fechaUltimoAcceso != null ? #dates.format(usuario.fechaUltimoAcceso, 'dd/MM/yyyy HH:mm') : '-'}"></td>
-                                                        <td class="dtr-control sorting_1" tabindex="0"
-                                                            th:text="${usuario.activo ? 'Sí' : 'No'}"></td>
-                                                        <td class="dtr-control sorting_1" tabindex="0"
-                                                            th:text="${usuario.validado ? 'Sí' : 'No'}"></td>
-                                                        
+
+                                                        <td class="dtr-control sorting_1" tabindex="0">
+                                                            <span th:class="${'badge ' + (usuario.activo ? 'bg-success' : 'bg-warning')}"
+                                                                  th:text="${usuario.activo ? 'Activo' : 'Inactivo'}"></span>
+                                                        </td>
+                                                        <td class="dtr-control sorting_1" tabindex="0">
+                                                            <span th:class="${'badge ' + (usuario.validado ? 'bg-success' : 'bg-warning')}"
+                                                                  th:text="${usuario.validado ? 'Validado' : 'Pendiente'}"></span>
+                                                        </td>
                                                         <td>
                                                             <a th:href="@{/usuarios/activar/{id}(id=${usuario.id})}"
                                                                th:class="${'btn btn-sm ' + (usuario.activo ? 'btn-danger' : 'btn-secondary')}"
-                                                               th:text="${usuario.activo ? 'Desactivar' : 'Activar'}">Activar</a>
+                                                               th:text="${usuario.activo ? 'Desactivar' : 'Activar'}"
+                                                               th:title="${usuario.activo ? 'Desactivar usuario' : 'Activar usuario'}">Activar</a>
 
                                                             <a th:if="${!usuario.validado}"
                                                                th:href="@{/usuarios/validar/{id}(id=${usuario.id})}"
-                                                               class="btn btn-success btn-sm">Validar</a>
-
+                                                               class="btn btn-success btn-sm"
+                                                               title="Validar usuario">Validar</a>
 
 
                                                         </td>
 
                                                         <td>
                                                             <a th:href="@{/usuarios/editar/{id}(id=${usuario.id})}"
-                                                               class="btn btn-primary btn-sm"> <i class="far fa-edit"></i></a>
+                                                               class="btn btn-primary btn-sm"
+                                                               title="Editar usuario"> <i class="far fa-edit"></i></a>
+
+                                                            <a th:href="@{/usuarios/{id}(id=${usuario.id})}"
+                                                               class="btn btn-primary btn-sm"
+                                                               title="Ver detalles del usuario"> <i
+                                                                    class="far fa-eye"></i></a>
+
                                                         </td>
+
+
                                                     </tr>
 
                                                     </tbody>

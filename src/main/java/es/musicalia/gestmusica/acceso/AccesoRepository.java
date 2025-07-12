@@ -24,4 +24,14 @@ public interface AccesoRepository extends JpaRepository<Acceso, Long> {
 
     @Query("SELECT a FROM Acceso a INNER JOIN FETCH a.rol r WHERE a.agencia.id=:idAgencia AND r.codigo IN (:codigoRol) AND a.activo = true")
     Optional<List<Acceso>> findAllAccesosByAndIdAgenciaAndCodigoRolAndActivo(@Param("codigoRol") Set<String> codigoRol, Long idAgencia);
+    
+    @Query("select new es.musicalia.gestmusica.acceso.AccesoDetailRecord(" +
+           "a.agencia.id, a.agencia.nombre, " +
+           "a.usuario.id, " +
+           "a.rol.id, a.rol.descripcion, " +
+           "ar.id, ar.nombre) " +
+           "from Acceso a left join a.artista ar " +
+           "where a.usuario.id = :idUsuario " +
+           "and a.activo order by a.agencia.nombre")
+    List<AccesoDetailRecord> findAllAccesosDetailRecordByIdUsuario(@Param("idUsuario") Long idUsuario);
 }

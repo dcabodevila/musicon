@@ -1,5 +1,6 @@
 package es.musicalia.gestmusica.usuario;
 
+import es.musicalia.gestmusica.acceso.AccesoService;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -15,9 +16,11 @@ public class UsuarioController {
 
 
     private final UserService userService;
+    private final AccesoService accesoService;
 
-    public UsuarioController(UserService userService){
+    public UsuarioController(UserService userService, AccesoService accesoService){
         this.userService = userService;
+        this.accesoService = accesoService;
     }
 
     @GetMapping
@@ -46,11 +49,18 @@ public class UsuarioController {
         return "redirect:/usuarios";
     }
 
+    @GetMapping("/{id}")
+    public String verUsuario(@PathVariable Long id, ModelMap model) {
+        model.addAttribute("usuarioEdicionDTO", this.userService.getUsuarioEdicionDTO(id));
+        return "usuario-edit";
+    }
+
     @GetMapping("/editar/{id}")
     @PreAuthorize("hasAuthority('USUARIOS')")
     public String editarUsuario(@PathVariable Long id, ModelMap model) {
         model.addAttribute("usuarioEdicionDTO", this.userService.getUsuarioEdicionDTO(id));
-        model.addAttribute("roleEnumMap", RolEnum.getRoleEnumMap());
+        model.addAttribute("listaAccesos", this.accesoService.findAllAccesosDetailRecordByIdUsuario(id));
+
         return "usuario-detail-edit";
     }
 
@@ -63,5 +73,13 @@ public class UsuarioController {
         return "redirect:/usuarios/editar/" + usuarioEdicionDTO.getId();
     }
 
+    @GetMapping("/mi-perfil")
+    public String miPerfil(ModelMap model) {
+
+        model.addAttribute("usuarioEdicionDTO", this.userService.getMiPerfil());
+        model.addAttribute("listaAccesos", this.accesoService.getMisAccesos());
+
+        return "usuario-detail-edit";
+    }
 
 }

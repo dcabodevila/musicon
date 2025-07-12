@@ -26,7 +26,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
 	@Query("select new es.musicalia.gestmusica.usuario.UsuarioRecord(u.id, u.nombre || ' ' || u.apellidos) from Usuario u where u.activo order by u.nombre || ' ' || u.apellidos")
 	List<UsuarioRecord> findAllUsuarioRecords();
-	@Query("select new es.musicalia.gestmusica.usuario.UsuarioAdminListRecord(u.id, u.nombre,u.apellidos, u.email, u.fechaUltimoAcceso, u.activo, u.validado) from Usuario u order by u.nombre || ' ' || u.apellidos")
+	@Query("select new es.musicalia.gestmusica.usuario.UsuarioAdminListRecord(u.id, u.nombre,u.apellidos, u.email, u.fechaUltimoAcceso, u.imagen, u.activo, u.validado) from Usuario u order by u.nombre || ' ' || u.apellidos")
 	List<UsuarioAdminListRecord> findAllUsuarioAdminListRecords();
 
 	@Query("select CASE WHEN COUNT(u) > 0 THEN true ELSE false END from Usuario u where u.email = ?1 ")
