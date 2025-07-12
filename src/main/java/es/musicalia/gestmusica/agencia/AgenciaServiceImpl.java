@@ -41,7 +41,7 @@ public class AgenciaServiceImpl implements AgenciaService {
         this.agenciaMapper = agenciaMapper;
     }
 	@Override
-	public List<AgenciaRecord> findAllAgenciasForUser(final Usuario usuario){
+	public List<AgenciaRecord> findAllAgenciasForUser(){
 
 		return agenciaRepository.findAllAgenciasOrderedByName();
 

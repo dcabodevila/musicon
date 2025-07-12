@@ -8,10 +8,9 @@ import es.musicalia.gestmusica.localizacion.LocalizacionService;
 import es.musicalia.gestmusica.ocupacion.OcupacionService;
 import es.musicalia.gestmusica.tarifa.TarifaAnualDto;
 import es.musicalia.gestmusica.usuario.UserService;
-import es.musicalia.gestmusica.usuario.Usuario;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -53,26 +52,19 @@ public class ArtistaController {
     }
 
     @GetMapping
-    public String artistas(Model model) {
-        if (userService.isUserAutheticated()){
-            final Usuario usuario = userService.obtenerUsuarioAutenticado();
+    public String artistas(@AuthenticationPrincipal CustomAuthenticatedUser user,
+                           Model model) {
 
-            final Map<Long, Set<String>> mapPermisosArtista =
-                    ((CustomAuthenticatedUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
-                            .getMapPermisosArtista();
+        model.addAttribute("listaArtistas", this.artistaService.findAllArtistasForUser(user.getUsuario()));
 
-            model.addAttribute("listaArtistas", this.artistaService.findAllArtistasForUser(usuario));
-        }
         return "artistas";
     }
 
     @GetMapping("/mis-artistas")
-    public String misArtistas(Model model) {
+    public String misArtistas(@AuthenticationPrincipal CustomAuthenticatedUser user, Model model) {
         if (userService.isUserAutheticated()){
 
-            final Map<Long, Set<String>> mapPermisosArtista =
-                    ((CustomAuthenticatedUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
-                            .getMapPermisosArtista();
+            final Map<Long, Set<String>> mapPermisosArtista = user.getMapPermisosArtista();
 
             model.addAttribute("listaArtistas", mapPermisosArtista.isEmpty() ? new ArrayList<>() : this.artistaService.findMisArtistas(mapPermisosArtista.keySet()));
 
@@ -94,7 +86,7 @@ public class ArtistaController {
         model.addAttribute("artistaDto", artistaDto);
 
         model.addAttribute("listaUsuarios", this.userService.findAllUsuarioRecords());
-        model.addAttribute("listaAgencias", artistaDto.getIdAgencia() != null ? this.agenciaService.findAgenciaRecordById(artistaDto.getIdAgencia()) : this.agenciaService.findAllAgenciasForUser(userService.obtenerUsuarioAutenticado()));
+        model.addAttribute("listaAgencias", artistaDto.getIdAgencia() != null ? this.agenciaService.findAgenciaRecordById(artistaDto.getIdAgencia()) : this.agenciaService.findAllAgenciasForUser());
         model.addAttribute("listaTipoArtista", this.artistaService.listaTipoArtista());
         model.addAttribute("listaTipoEscenario", this.artistaService.listaTipoEscenario());
         model.addAttribute("listaCcaa", this.localizacionService.findAllComunidades());

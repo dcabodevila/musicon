@@ -179,9 +179,9 @@ public class UserServiceImpl implements UserService {
 
 
 	@Override
-	public UsuarioEdicionDTO getMiPerfil(){
+	public UsuarioEdicionDTO getMiPerfil(final Usuario usuario){
 
-		return this.usuarioMapper.toUsuarioEdicionDTO(this.obtenerUsuarioAutenticado());
+		return this.usuarioMapper.toUsuarioEdicionDTO(usuario);
 	}
 
 

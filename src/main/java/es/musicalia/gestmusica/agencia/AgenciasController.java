@@ -3,16 +3,13 @@ package es.musicalia.gestmusica.agencia;
 
 import es.musicalia.gestmusica.artista.ArtistaService;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
-import es.musicalia.gestmusica.auth.model.SecurityService;
 import es.musicalia.gestmusica.file.FileService;
 import es.musicalia.gestmusica.localizacion.LocalizacionService;
 import es.musicalia.gestmusica.usuario.UserService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -47,26 +44,18 @@ public class AgenciasController {
     }
 
     @GetMapping
-    public String agencias(Model model) {
-        if (userService.isUserAutheticated()){
+    public String agencias(@AuthenticationPrincipal CustomAuthenticatedUser user, Model model) {
+        model.addAttribute("listaAgencias",this.agenciaService.findAllAgenciasForUser());
 
-            model.addAttribute("listaAgencias",this.agenciaService.findAllAgenciasForUser(userService.obtenerUsuarioAutenticado()));
-
-        }
         return "agencias";
     }
 
     @GetMapping("/mis-agencias")
-    public String misAgencias(Model model) {
-        if (userService.isUserAutheticated()){
+    public String misAgencias(@AuthenticationPrincipal CustomAuthenticatedUser user, Model model) {
 
-            final Map<Long, Set<String>> mapPermisosAgencia =
-                    ((CustomAuthenticatedUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
-                            .getMapPermisosAgencia();
+        final Map<Long, Set<String>> mapPermisosAgencia = user.getMapPermisosAgencia();
+        model.addAttribute("listaAgencias", mapPermisosAgencia.isEmpty() ? new ArrayList<>() : this.agenciaService.findMisAgencias(mapPermisosAgencia.keySet()));
 
-            model.addAttribute("listaAgencias", mapPermisosAgencia.isEmpty() ? new ArrayList<>() : this.agenciaService.findMisAgencias(mapPermisosAgencia.keySet()));
-
-        }
         return "agencias";
     }
 

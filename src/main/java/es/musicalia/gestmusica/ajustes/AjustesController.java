@@ -3,11 +3,11 @@ package es.musicalia.gestmusica.ajustes;
 
 import es.musicalia.gestmusica.agencia.AgenciaService;
 import es.musicalia.gestmusica.artista.ArtistaService;
+import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.localizacion.LocalizacionService;
-import es.musicalia.gestmusica.usuario.UserService;
-import es.musicalia.gestmusica.usuario.Usuario;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -24,15 +24,13 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class AjustesController {
 
 
-    private final UserService userService;
     private final LocalizacionService localizacionService;
     private final AgenciaService agenciaService;
     private final ArtistaService artistaService;
     private final AjustesService ajustesService;
-    public AjustesController(UserService userService, LocalizacionService localizacionService, ArtistaService artistaService,
+    public AjustesController(LocalizacionService localizacionService, ArtistaService artistaService,
                              AgenciaService agenciaService, AjustesService ajustesService){
 
-        this.userService = userService;
         this.localizacionService = localizacionService;
         this.artistaService = artistaService;
         this.agenciaService = agenciaService;
@@ -40,10 +38,10 @@ public class AjustesController {
     }
 
     @GetMapping
-    public String ajustes(Model model) {
+    public String ajustes(@AuthenticationPrincipal CustomAuthenticatedUser user,
+                          Model model) {
 
-        final Usuario usuario = userService.obtenerUsuarioAutenticado();
-        model.addAttribute("ajustesDto", this.ajustesService.getAjustesByIdUsuario(usuario.getId()));
+        model.addAttribute("ajustesDto", this.ajustesService.getAjustesByIdUsuario(user.getUserId()));
         model.addAttribute("listaCcaa", this.localizacionService.findAllComunidades());
         model.addAttribute("listaTipoArtista", this.artistaService.listaTipoArtista());
         model.addAttribute("listaAgencias", this.agenciaService.listaAgenciasRecordActivasTarifasPublicas());
@@ -52,7 +50,7 @@ public class AjustesController {
     }
 
     @PostMapping("/guardar")
-    public String guardarAgencia(Model model, @ModelAttribute("ajustesDto") @Valid AjustesDto ajustesDto,
+    public String guardarAgencia(@AuthenticationPrincipal CustomAuthenticatedUser user,Model model, @ModelAttribute("ajustesDto") @Valid AjustesDto ajustesDto,
                                  BindingResult bindingResult, RedirectAttributes redirectAttributes, Errors errors) {
 
         if (bindingResult.hasErrors()) {
@@ -60,7 +58,7 @@ public class AjustesController {
         }
 
         try {
-            final Ajustes ajustes = this.ajustesService.saveAjustesDto(ajustesDto, this.userService.obtenerUsuarioAutenticado());
+            final Ajustes ajustes = this.ajustesService.saveAjustesDto(ajustesDto, user.getUsuario());
 
             redirectAttributes.addFlashAttribute("message", "Ajustes guardados correctamente");
             redirectAttributes.addFlashAttribute("alertClass", "success");

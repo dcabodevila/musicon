@@ -7,17 +7,14 @@ import es.musicalia.gestmusica.agencia.Agencia;
 import es.musicalia.gestmusica.agencia.AgenciaRepository;
 import es.musicalia.gestmusica.artista.Artista;
 import es.musicalia.gestmusica.artista.ArtistaRepository;
-import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.permiso.Permiso;
 import es.musicalia.gestmusica.permiso.PermisoRecord;
 import es.musicalia.gestmusica.permiso.PermisoRepository;
 import es.musicalia.gestmusica.permiso.TipoPermisoEnum;
 import es.musicalia.gestmusica.rol.*;
-import es.musicalia.gestmusica.usuario.UserService;
 import es.musicalia.gestmusica.usuario.Usuario;
 import es.musicalia.gestmusica.usuario.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -238,10 +235,9 @@ public class AccesoServiceImpl implements AccesoService {
 	}
 
 	@Override
-	public List<AccesoDetailRecord> getMisAccesos(){
+	public List<AccesoDetailRecord> getMisAccesos(Long userId){
 
-		return this.findAllAccesosDetailRecordByIdUsuario(((CustomAuthenticatedUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
-				.getUsuario().getId());
+		return this.findAllAccesosDetailRecordByIdUsuario(userId);
 
 	}
 

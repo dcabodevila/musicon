@@ -1,11 +1,10 @@
 package es.musicalia.gestmusica.agencia;
 
-import es.musicalia.gestmusica.usuario.Usuario;
 import java.util.List;
 import java.util.Set;
 
 public interface AgenciaService {
-    List<AgenciaRecord> findAllAgenciasForUser(final Usuario usuario);
+    List<AgenciaRecord> findAllAgenciasForUser();
 
     List<AgenciaRecord> listaAgenciasRecordActivasTarifasPublicas();
 

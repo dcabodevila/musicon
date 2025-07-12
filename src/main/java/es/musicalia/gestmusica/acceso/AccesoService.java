@@ -2,8 +2,6 @@ package es.musicalia.gestmusica.acceso;
 
 import es.musicalia.gestmusica.permiso.PermisoRecord;
 import es.musicalia.gestmusica.rol.RolRecord;
-import es.musicalia.gestmusica.usuario.Usuario;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -26,5 +24,5 @@ public interface AccesoService {
 
     List<AccesoDetailRecord> findAllAccesosDetailRecordByIdUsuario(Long idUsuario);
 
-	List<AccesoDetailRecord> getMisAccesos();
+	List<AccesoDetailRecord> getMisAccesos(Long userId);
 }

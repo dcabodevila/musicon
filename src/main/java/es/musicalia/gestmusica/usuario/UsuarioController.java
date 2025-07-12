@@ -1,14 +1,15 @@
 package es.musicalia.gestmusica.usuario;
 
 import es.musicalia.gestmusica.acceso.AccesoService;
+import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import es.musicalia.gestmusica.rol.RolEnum;
 
 @Controller
 @RequestMapping("usuarios")
@@ -74,10 +75,10 @@ public class UsuarioController {
     }
 
     @GetMapping("/mi-perfil")
-    public String miPerfil(ModelMap model) {
+    public String miPerfil(@AuthenticationPrincipal CustomAuthenticatedUser user, ModelMap model) {
 
-        model.addAttribute("usuarioEdicionDTO", this.userService.getMiPerfil());
-        model.addAttribute("listaAccesos", this.accesoService.getMisAccesos());
+        model.addAttribute("usuarioEdicionDTO", this.userService.getMiPerfil(user.getUsuario()));
+        model.addAttribute("listaAccesos", this.accesoService.getMisAccesos(user.getUserId()));
 
         return "usuario-detail-edit";
     }

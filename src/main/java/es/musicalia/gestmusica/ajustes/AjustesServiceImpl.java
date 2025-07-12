@@ -18,10 +18,10 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class AjustesServiceImpl implements AjustesService {
 
-	private AjustesRepository ajustesRepository;
-	private TipoArtistaRepository tipoArtistaRepository;
-	private AgenciaRepository agenciaRepository;
-	private CcaaRepository ccaaRepository;
+	private final AjustesRepository ajustesRepository;
+	private final TipoArtistaRepository tipoArtistaRepository;
+	private final AgenciaRepository agenciaRepository;
+	private final CcaaRepository ccaaRepository;
 
 	public AjustesServiceImpl(AjustesRepository ajustesRepository,  TipoArtistaRepository tipoArtistaRepository,  AgenciaRepository agenciaRepository, CcaaRepository ccaaRepository){
 		this.ajustesRepository = ajustesRepository;
@@ -34,7 +34,7 @@ public class AjustesServiceImpl implements AjustesService {
 	@Transactional(readOnly = false)
 	public Ajustes saveAjustesDto(AjustesDto ajustesDto, Usuario usuario){
 
-		Ajustes ajustes = ajustesDto.getId()!=null? this.ajustesRepository.findById(ajustesDto.getId()).get() : new Ajustes();
+		Ajustes ajustes = ajustesDto.getId()!=null? this.ajustesRepository.findById(ajustesDto.getId()).orElseThrow() : new Ajustes();
 
 		ajustes.setUsuario(usuario);
 

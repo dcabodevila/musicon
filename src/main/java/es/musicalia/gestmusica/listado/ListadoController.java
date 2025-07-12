@@ -9,18 +9,14 @@ import es.musicalia.gestmusica.artista.ArtistaService;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.localizacion.LocalizacionService;
 import es.musicalia.gestmusica.permiso.PermisoService;
-import es.musicalia.gestmusica.usuario.UserService;
-import es.musicalia.gestmusica.usuario.Usuario;
 import es.musicalia.gestmusica.util.DateUtils;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -31,7 +27,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Slf4j
@@ -39,9 +34,6 @@ import java.util.*;
 @RequestMapping(value="listado")
 public class ListadoController {
 
-
-    private Logger logger = LoggerFactory.getLogger(ListadoController.class);
-    private final UserService userService;
     private final LocalizacionService localizacionService;
     private final ListadoService listadoService;
     private final ArtistaService artistaService;
@@ -50,10 +42,9 @@ public class ListadoController {
     private final PermisoService permisoService;
     private final ObjectMapper objectMapper;
 
-    public ListadoController(UserService userService, LocalizacionService localizacionService, ListadoService listadoService, ArtistaService artistaService,
+    public ListadoController(LocalizacionService localizacionService, ListadoService listadoService, ArtistaService artistaService,
                              AgenciaService agenciaService, AjustesService ajustesService, PermisoService permisoService, ObjectMapper objectMapper){
 
-        this.userService = userService;
         this.localizacionService = localizacionService;
         this.listadoService = listadoService;
         this.artistaService = artistaService;
@@ -64,13 +55,11 @@ public class ListadoController {
     }
 
     @GetMapping
-    public String listados(Model model) {
-        if (userService.isUserAutheticated()){
-            final Usuario usuario = userService.obtenerUsuarioAutenticado();
-        }
-        final Usuario usuario = this.userService.obtenerUsuarioAutenticado();
+    public String listados(@AuthenticationPrincipal CustomAuthenticatedUser user,
+                           Model model) {
+
         ListadoDto listado = new ListadoDto();
-        listado.setSolicitadoPara(usuario.getNombreCompleto());
+        listado.setSolicitadoPara(user.getUsuario().getNombreCompleto());
         listado.setIdCcaa(12L);
         listado.setIdProvincia(27L);
         listado.setIdTipoOcupacion(1L);
@@ -82,7 +71,7 @@ public class ListadoController {
         model.addAttribute("listaTipoArtista", this.artistaService.listaTipoArtista());
         model.addAttribute("listaAgencias", this.agenciaService.listaAgenciasRecordActivasTarifasPublicas());
 
-        final AjustesDto ajustesDto = this.ajustesService.getAjustesByIdUsuario(usuario.getId());
+        final AjustesDto ajustesDto = this.ajustesService.getAjustesByIdUsuario(user.getUserId());
 
         if (ajustesDto != null) {
             // Convertir explícitamente de List a Set si es necesario
@@ -101,10 +90,7 @@ public class ListadoController {
     }
 
     @GetMapping("/audiencia-listados")
-    public String getAudienciaListados(Model model) {
-        if (userService.isUserAutheticated()){
-            final Usuario usuario = userService.obtenerUsuarioAutenticado();
-        }
+    public String getAudienciaListados(@AuthenticationPrincipal CustomAuthenticatedUser user, Model model) {
 
         List<ListadoRecord> listadosGenerados = new ArrayList<>();
         model.addAttribute("listadosGenerados", listadosGenerados);
@@ -112,15 +98,14 @@ public class ListadoController {
                 .fechaDesde(LocalDate.now().minusMonths(1))
                 .fechaHasta(LocalDate.now())
                 .build());
-        obtenerModelComun(model);
+        obtenerModelComun(model, user.getUserId());
 
         return "listados-generados";
     }
 
-    private void obtenerModelComun(Model model) {
+    private void obtenerModelComun(Model model, Long idUsuarioLogueado) {
 
-        final Map<Long, Set<String>> mapPermisosAgencia = this.permisoService.obtenerMapPermisosAgencia(((CustomAuthenticatedUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
-                .getUsuario().getId());
+        final Map<Long, Set<String>> mapPermisosAgencia = this.permisoService.obtenerMapPermisosAgencia(idUsuarioLogueado);
 
         model.addAttribute("listaAgencias", this.agenciaService.findMisAgencias(mapPermisosAgencia.keySet()));
     }
@@ -157,7 +142,7 @@ public class ListadoController {
             return new ResponseEntity<>(informeGenerado, headers, HttpStatus.OK);
 
         } catch (Exception e) {
-            logger.error("Error generando listado", e);
+            log.error("Error generando listado", e);
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("message", "Error al generar el presupuesto: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -167,17 +152,21 @@ public class ListadoController {
     }
 
     @PostMapping("/audiencias")
-    public String procesarListadoAudiencias(@Valid @ModelAttribute ListadoAudienciasDto listadoAudienciasDto,
+    public String procesarListadoAudiencias(@AuthenticationPrincipal CustomAuthenticatedUser user,@Valid @ModelAttribute ListadoAudienciasDto listadoAudienciasDto,
                                            BindingResult bindingResult,
                                            Model model,
                                            RedirectAttributes redirectAttributes) {
+
+        final Long idUsuarioAutenticado = user.getUserId();
+
         try {
+
             // Validar errores de binding
             if (bindingResult.hasErrors()) {
                 model.addAttribute("message", "Error en los datos del formulario");
                 model.addAttribute("alertClass", "danger");
                 model.addAttribute("listadosGenerados", new ArrayList<ListadoRecord>());
-                obtenerModelComun(model);
+                obtenerModelComun(model, idUsuarioAutenticado);
                 return "listados-generados";
             }
 
@@ -186,7 +175,7 @@ public class ListadoController {
                 model.addAttribute("message", "Las fechas inicial y final son obligatorias");
                 model.addAttribute("alertClass", "danger");
                 model.addAttribute("listadosGenerados", new ArrayList<ListadoRecord>());
-                obtenerModelComun(model);
+                obtenerModelComun(model, idUsuarioAutenticado);
 
                 return "listados-generados";
             }
@@ -195,7 +184,7 @@ public class ListadoController {
                 model.addAttribute("message", "La fecha inicial no puede ser posterior a la fecha final");
                 model.addAttribute("alertClass", "danger");
                 model.addAttribute("listadosGenerados", new ArrayList<ListadoRecord>());
-                obtenerModelComun(model);
+                obtenerModelComun(model, idUsuarioAutenticado);
 
                 return "listados-generados";
             }
@@ -207,7 +196,7 @@ public class ListadoController {
             model.addAttribute("chartData", chartDataJson);
 
 
-            obtenerModelComun(model);
+            obtenerModelComun(model, idUsuarioAutenticado);
 
             return "listados-generados";
 
@@ -219,7 +208,7 @@ public class ListadoController {
 
         }
 
-        obtenerModelComun(model);
+        obtenerModelComun(model, idUsuarioAutenticado);
         return "listados-generados";
     }
 }
