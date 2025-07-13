@@ -181,6 +181,7 @@ private ListadoRecord mapToListadoRecord(Listado listado) {
     return new ListadoRecord(
         listado.getId(),
         listado.getSolicitadoPara(),
+		listado.getUsuario().getNombre() + " " + listado.getUsuario().getApellidos(),
         listado.getLocalidad(),
         listado.getMunicipio().getNombre(),
         listado.getUsuario().getNombre(),

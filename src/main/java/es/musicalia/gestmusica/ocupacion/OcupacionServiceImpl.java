@@ -2,32 +2,34 @@ package es.musicalia.gestmusica.ocupacion;
 
 import es.musicalia.gestmusica.artista.Artista;
 import es.musicalia.gestmusica.artista.ArtistaRepository;
-import es.musicalia.gestmusica.localizacion.*;
+import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
+import es.musicalia.gestmusica.localizacion.CodigoNombreDto;
+import es.musicalia.gestmusica.localizacion.MunicipioRepository;
+import es.musicalia.gestmusica.localizacion.ProvinciaRepository;
 import es.musicalia.gestmusica.permiso.PermisoAgenciaEnum;
 import es.musicalia.gestmusica.permiso.PermisoArtistaEnum;
 import es.musicalia.gestmusica.permiso.PermisoService;
+import es.musicalia.gestmusica.permiso.TipoPermisoEnum;
 import es.musicalia.gestmusica.tarifa.Tarifa;
 import es.musicalia.gestmusica.tarifa.TarifaRepository;
 import es.musicalia.gestmusica.usuario.UserService;
 import es.musicalia.gestmusica.usuario.Usuario;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 public class OcupacionServiceImpl implements OcupacionService {
-	private Logger logger = LoggerFactory.getLogger(OcupacionServiceImpl.class);
+
 
 	private final OcupacionRepository ocupacionRepository;
 	private final ArtistaRepository artistaRepository;
@@ -94,7 +96,7 @@ public class OcupacionServiceImpl implements OcupacionService {
 	@Transactional(readOnly = false)
 	public Ocupacion saveOcupacion(OcupacionSaveDto ocupacionSaveDto) throws es.musicalia.gestmusica.ocupacion.ModificacionOcupacionException {
 
-		logger.info("Empezando saveOcupacion: {}", ocupacionSaveDto.toString());
+		log.info("Empezando saveOcupacion: {}", ocupacionSaveDto.toString());
 
 		final Ocupacion ocupacion = ocupacionSaveDto.getId()!=null? this.ocupacionRepository.findById(ocupacionSaveDto.getId()).orElse(new Ocupacion())  : new Ocupacion();
 		final Usuario usuario = this.userService.obtenerUsuarioAutenticado();
@@ -151,7 +153,7 @@ public class OcupacionServiceImpl implements OcupacionService {
 		}
 
 
-        logger.info("Completado guardado ocupacionSave: {}", ocupacionSave.getId());
+		log.info("Completado guardado ocupacionSave: {}", ocupacionSave.getId());
 
 		return ocupacionSave;
 
@@ -218,6 +220,51 @@ public class OcupacionServiceImpl implements OcupacionService {
 	@Override
 	public List<OcupacionDto> findOcupacionesDtoByAgenciaPendientes(Set<Long> idsAgencia){
 		return this.ocupacionRepository.findOcupacionesDtoByAgenciaPendientes(idsAgencia).orElse(new ArrayList<>());
+	}
+
+	@Override
+	public List<OcupacionListRecord> findOcupacionesByArtistasListAndDatesActivo(Long idAgencia, LocalDateTime start) {
+
+
+		// Filtrar por los artistas sobre los que tenemos permiso OCUPACIONES
+
+		final CustomAuthenticatedUser authenticatedUser = (CustomAuthenticatedUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		final Set<Long> idsArtistas = authenticatedUser.getMapPermisosArtista().keySet().stream()
+				.filter(artistaId -> authenticatedUser.getMapPermisosArtista().get(artistaId).contains(PermisoArtistaEnum.OCUPACIONES.name()))
+				.collect(Collectors.toSet());
+
+
+		var spec = Specification
+				.where(OcupacionSpecifications.hasArtistaIdsIn(idsArtistas))
+				.and(OcupacionSpecifications.hasFechaAfter(start))
+				.and(OcupacionSpecifications.isActivo())
+				.and(OcupacionSpecifications.orderByIdDesc())
+				.and(OcupacionSpecifications.hasAgenciaId(idAgencia));
+
+		// Ejecutar la consulta y mapear resultados a OcupacionListRecord
+		return ocupacionRepository.findAll(spec).stream()
+				.map(ocupacion -> new OcupacionListRecord(
+						ocupacion.getId(),
+						ocupacion.getFecha(),
+						ocupacion.getArtista().getId(),
+						ocupacion.getArtista().getNombre(),
+						ocupacion.getImporte().setScale(0).toPlainString(),
+						true,
+						ocupacion.getTipoOcupacion().getNombre(),
+						ocupacion.getProvincia().getNombre(),
+						ocupacion.getMunicipio().getNombre(),
+						ocupacion.getPoblacion(),
+						ocupacion.isMatinal(),
+						ocupacion.isSoloMatinal(),
+						ocupacion.getOcupacionEstado().getNombre(),
+						ocupacion.getUsuario().getId(),
+						ocupacion.getUsuario().getNombre() + " " + ocupacion.getUsuario().getApellidos(),
+						ocupacion.getUsuarioConfirmacion() != null ? ocupacion.getUsuarioConfirmacion().getId() : null,
+						ocupacion.getUsuarioConfirmacion() != null ? ocupacion.getUsuarioConfirmacion().getNombre() + " " + ocupacion.getUsuarioConfirmacion().getApellidos() : null
+				))
+				.toList();
+
+
 	}
 
 }

@@ -8,12 +8,20 @@ $(document).ready(function () {
     $('#datatables-reponsive_listados-generados').DataTable({
         responsive: true,
         searching: true,
-        ordering: false,
+        ordering: true,
         paging: true,
-        order: [[1, 'desc']],
         language: {
             url: "https://cdn.datatables.net/plug-ins/1.13.1/i18n/es-ES.json"
-        }
+        },
+        columnDefs: [
+            {
+                targets: 0,
+                type: 'date-eu'
+            }
+        ],
+        order: [
+          [0, 'desc']
+        ]
     });
 
     // Configurar flatpickr

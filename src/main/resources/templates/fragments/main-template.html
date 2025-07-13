@@ -135,6 +135,9 @@
 						<a class="sidebar-link" sec:authorize="hasAuthority('AUDIENCIA_LISTADOS')" th:href="@{/listado/audiencia-listados}">
 							<i class="align-middle me-2 fas fa-fw fa-chart-simple" ></i> <span class="align-middle">Audiencia presupuestos</span>
 						</a>
+						<a class="sidebar-link" sec:authorize="hasAuthority('MENU_OCUPACIONES')" th:href="@{/ocupacion/list}">
+							<i class="align-middle me-2 fas fa-fw fa-calendar-plus" ></i> <span class="align-middle">Ocupaciones</span>
+						</a>
 						<a class="sidebar-link" th:href="@{/ajustes}">
 							<i class="align-middle me-2 fas fa-fw fa-cog" ></i> <span class="align-middle">Configuración</span>
 						</a>

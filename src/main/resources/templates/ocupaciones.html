@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content=""><head>
+    <div th:replace="~{fragments/main-template :: header-css}"/>
+    <script th:src="@{/js/jquery.min.js}"></script>
+    <script th:src="@{/adminkit/js/datatables.js}"></script>
+</head>
+
+
+<body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
+<div class="wrapper">
+
+    <div th:replace="~{fragments/main-template :: sidebar}"/>
+    <div class="main">
+        <div th:replace="~{fragments/main-template :: navbar}"/>
+
+        <main class="content">
+
+            <div class="container-fluid p-0">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Fechas generación presupuesto inicial y final</h5>
+                    </div>
+                    <form id="formListadoOcupaciones" method="POST" th:object="${ocupacionListFilterDto}" th:action=@{/ocupacion/list} autocomplete="off">
+
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <div class="mb-3 row">
+                                    <label class="col-form-label col-sm-2">Agencia</label>
+                                    <div class="col-sm-3">
+                                        <select id="agencia" th:field="*{idAgencia}" class="form-control choices-single">
+                                            <option sec:authorize="hasAuthority('ACCESO_PANEL_ADMIN')" value="">Todas las agencias</option>
+                                            <option th:each="agencia : ${listaAgencias}" th:value="${agencia.id}" th:text="${agencia.nombre}"></option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mb-3 row">
+
+                                    <label class="col-form-label col-sm-2">Fecha inicial ocupación</label>
+                                    <div class="col-sm-3">
+                                        <div class="input-wrapper">
+                                            <input id="idFechaDesde" th:field="*{fechaDesde}" type="text"
+                                                   required class="form-control flatpickr flatpickr-minimum"
+                                                   placeholder="Fecha inicial" readonly="readonly">
+                                            <button type="button" class="btn btn-outline-secondary clear-btn"
+                                                    onclick="clearFlatpickrDate('idFechaDesde')">X
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="text-center mb-3">
+                            <button type="submit" class="btn btn-primary">Buscar</button>
+                        </div>
+                    </form>
+
+                </div>
+                <div class="mb-3">
+                    <h1 class="h3 d-inline align-middle"></h1>
+                </div>
+
+                <div th:if="${message}" th:class="${'alert alert-' + alertClass+ ' alert-dismissible fade show'}" role="alert">
+                    <div class="alert-message">
+                        <strong th:text="${message}">Hello there!</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+
+                <div class="row">
+
+<!--                    <div sec:authorize="hasAuthority('USUARIOS')" class="col-12 col-sm-12 col-md-12 col-lg-12" >-->
+                    <div class="col-12 col-sm-12 col-md-12 col-lg-12" >
+
+                        <div class="col-12 col-md-12 col-lg-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title">Lista de ocupaciones</h5>
+                                </div>
+                                <div class="card-body">
+
+                                    <div id="datatables-reponsive_wrapper" class="dataTables_wrapper dt-bootstrap5 no-footer">
+                                        <div class="row">
+                                            <div class="col-sm-12">
+                                                <table id="datatables-reponsive_ocupaciones" class="table table-striped dataTable no-footer dtr-inline collapsed" style="width: 100%;" aria-describedby="datatables-reponsive_info">
+                                                    <thead>
+                                                    <tr>
+
+                                                        <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Artista</th>
+                                                        <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Fecha</th>
+                                                        <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Localidad</th>
+                                                        <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Municipio - Provincia</th>
+                                                        <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Representante</th>
+                                                        <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Estado</th>
+                                                        <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Matinal</th>
+                                                        <th>Editar</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+
+                                                    <tr th:each="ocupacion : ${listaOcupaciones}">
+
+                                                        <td class="dtr-control sorting_1" tabindex="0">
+                                                            <a th:href="@{/artista/__${ocupacion.idArtista}__}"
+                                                                    th:text="${ocupacion.artista}"></a>
+                                                        </td>
+                                                        <td th:text="${#temporals.format(ocupacion.start, 'dd/MM/yyyy')}">-</td>
+
+                                                        <td class="dtr-control sorting_1" tabindex="0" th:text="${ocupacion.localidad}" ></td>
+                                                        <td class="dtr-control sorting_1" tabindex="0" th:text="${ocupacion.municipio + ', ' + ocupacion.provincia}" ></td>
+                                                        <td class="dtr-control sorting_1" tabindex="0" th:text="${ocupacion.nombreUsuario}" ></td>
+                                                        <td th:if="${ocupacion.tipoOcupacion=='Reservado'}" class="dtr-control sorting_1" tabindex="0" >
+                                                            <a  href="#" class="badge bg-warning me-1 my-1" th:text="${ocupacion.tipoOcupacion}">Reservado</a>
+                                                        </td>
+                                                        <td th:if="${ocupacion.tipoOcupacion!='Reservado'}" class="dtr-control sorting_1" tabindex="0" >
+                                                            <a th:if="${ocupacion.estado=='Pendiente'}" href="#" class="badge bg-secondary me-1 my-1" th:text="${ocupacion.estado}">Pendiente</a>
+                                                            <a th:if="${ocupacion.estado == 'Ocupado'}" href="#"
+                                                               class="badge bg-success me-1 my-1">Ocupado</a>
+                                                            <a th:if="${ocupacion.estado == 'Anulado'}" href="#"
+                                                               class="badge bg-danger me-1 my-1">Anulado</a>
+
+                                                        </td>
+
+
+                                                        <td class="dtr-control sorting_1" tabindex="0">
+                                                            <a th:if="${ocupacion.matinal}" href="#"
+                                                               class="badge bg-primary me-1 my-1">Matinal</a>
+                                                            <a th:if="${ocupacion.soloMatinal}" href="#" class="badge bg-primary me-1 my-1">Solo matinal</a>
+                                                        </td>
+
+                                                        <td>
+
+
+                                                            <a href="#"
+                                                               class="btn btn-primary btn-sm"
+                                                               title="Ver detalles de la ocupación"> <i
+                                                                    class="far fa-eye"></i></a>
+
+                                                        </td>
+
+
+                                                    </tr>
+
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </main>
+        <div th:replace="~{fragments/main-template :: footer}"/>
+
+    </div>
+</div>
+
+</body>
+<script type="text/javascript" th:src="@{/js/comun.js}"></script>
+<script th:src="@{/js/date-eu.js}"></script>
+<script type="text/javascript" th:src="@{/js/ocupaciones-list.js}"></script>
+
+
+</html>

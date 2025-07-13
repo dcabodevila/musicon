@@ -23,4 +23,7 @@ public interface OcupacionService {
     boolean existeOcupacionFecha(OcupacionSaveDto ocupacionSaveDto);
 
     List<OcupacionDto> findOcupacionesDtoByAgenciaPendientes(Set<Long> idsAgencia);
+
+    List<OcupacionListRecord> findOcupacionesByArtistasListAndDatesActivo(Long idArtistas, LocalDateTime start);
+
 }

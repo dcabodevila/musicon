@@ -1,32 +1,36 @@
 package es.musicalia.gestmusica.ocupacion;
 
 
-import es.musicalia.gestmusica.auth.model.SecurityService;
-import es.musicalia.gestmusica.usuario.UserService;
+import es.musicalia.gestmusica.agencia.AgenciaService;
+import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
+import es.musicalia.gestmusica.permiso.TipoPermisoEnum;
 import es.musicalia.gestmusica.util.DefaultResponseBody;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-@RestController
+@Slf4j
+@Controller
 @RequestMapping(value="ocupacion")
 public class OcupacionController {
 
+    private final OcupacionService ocupacionService;
+    private final AgenciaService agenciaService;
 
-    private UserService userService;
-    private SecurityService securityService;
-
-    private OcupacionService ocupacionService;
-
-    private Logger logger = LoggerFactory.getLogger(OcupacionController.class);
-
-    public OcupacionController(UserService userService, SecurityService securityService, OcupacionService ocupacionService){
-        this.userService = userService;
-        this.securityService = securityService;
+    public OcupacionController(OcupacionService ocupacionService, AgenciaService agenciaService){
         this.ocupacionService = ocupacionService;
 
+        this.agenciaService = agenciaService;
     }
 
     @GetMapping("/get/{id}")
@@ -93,6 +97,30 @@ public class OcupacionController {
         return ResponseEntity.ok(result);
 
 
+    }
+
+    @GetMapping("/list")
+    @PreAuthorize("hasAuthority('MENU_OCUPACIONES')")
+    public String getListadoOcupaciones(@AuthenticationPrincipal CustomAuthenticatedUser user, Model model){
+
+        getModelAttributeComunOcupacionList(user, model, OcupacionListFilterDto.builder().fechaDesde(LocalDate.now().minusMonths(2)).build());
+        return "ocupaciones";
+    }
+
+    private void getModelAttributeComunOcupacionList(CustomAuthenticatedUser user, Model model, OcupacionListFilterDto filter) {
+
+        model.addAttribute("ocupacionListFilterDto", filter);
+        model.addAttribute("listaAgencias", this.agenciaService.findMisAgencias(user.getMapPermisosAgencia().keySet()));
+        model.addAttribute("listaOcupaciones", this.ocupacionService.findOcupacionesByArtistasListAndDatesActivo(filter.getIdAgencia(), filter.getFechaDesde().atStartOfDay()));
+    }
+
+    @PostMapping("/list")
+    @PreAuthorize("hasAuthority('MENU_OCUPACIONES')")
+    public String postListadoOcupaciones(@AuthenticationPrincipal CustomAuthenticatedUser user,
+                                         @ModelAttribute OcupacionListFilterDto ocupacionListFilterDto,
+                                         Model model) {
+        getModelAttributeComunOcupacionList(user, model, ocupacionListFilterDto);
+        return "ocupaciones";
     }
 
 
