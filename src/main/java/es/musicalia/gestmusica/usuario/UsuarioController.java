@@ -57,7 +57,6 @@ public class UsuarioController {
     }
 
     @GetMapping("/editar/{id}")
-    @PreAuthorize("hasAuthority('USUARIOS')")
     public String editarUsuario(@PathVariable Long id, ModelMap model) {
         model.addAttribute("usuarioEdicionDTO", this.userService.getUsuarioEdicionDTO(id));
         model.addAttribute("listaAccesos", this.accesoService.findAllAccesosDetailRecordByIdUsuario(id));
