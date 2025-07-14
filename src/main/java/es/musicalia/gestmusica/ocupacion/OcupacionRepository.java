@@ -27,7 +27,5 @@ public interface OcupacionRepository extends JpaRepository<Ocupacion, Long>, Jpa
     @Query(value ="select new es.musicalia.gestmusica.ocupacion.OcupacionDto(t.id, t.fecha, t.artista.id,  t.artista.nombre, cast(TRUNC(t.importe,0) as string), true, t.tipoOcupacion.nombre, t.provincia.nombre, t.municipio.nombre, t.poblacion, t.matinal, t.soloMatinal, t.ocupacionEstado.nombre, t.usuario.id, t.usuario.nombre || ' ' || t.usuario.apellidos) FROM Ocupacion t WHERE t.artista.agencia.id in (:idsAgencia) and t.activo and (t.ocupacionEstado.id =3  or t.ocupacionEstado.id=2) order by t.id ")
     Optional<List<OcupacionDto>> findOcupacionesDtoByAgenciaPendientes(@Param("idsAgencia") Set<Long> idsAgencia);
 
-//    @Query(value ="select new es.musicalia.gestmusica.ocupacion.OcupacionListRecord(t.id, t.fecha, t.artista.id,  t.artista.nombre,cast(TRUNC(t.importe,0) as string), true, t.tipoOcupacion.nombre, t.provincia.nombre, t.municipio.nombre, t.poblacion, t.matinal, t.soloMatinal, t.ocupacionEstado.nombre, t.usuario.id, t.usuario.nombre || ' ' || t.usuario.apellidos, uconf.id, uconf.nombre || ' ' || uconf.apellidos) FROM Ocupacion t LEFT JOIN t.usuarioConfirmacion uconf WHERE t.artista.id in (?1) AND t.fecha >= ?2 and t.activo order by t.id desc")
-//    List<OcupacionListRecord> findOcupacionesByArtistasListAndDatesActivo(Set<Long> idsArtistas, LocalDateTime start);
 
 }

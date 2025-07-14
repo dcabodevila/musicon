@@ -11,8 +11,22 @@ public class OcupacionSpecifications {
         return (root, query, criteriaBuilder) -> root.get("artista").get("id").in(idsArtistas);
     }
 
+    public static Specification<Ocupacion> hasArtistaId(Long artistaId) {
+        if (artistaId == null) {
+            return null;
+        }
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("artista").get("id"), artistaId);
+    }
+
     public static Specification<Ocupacion> hasFechaAfter(LocalDateTime startDate) {
         return (root, query, criteriaBuilder) -> criteriaBuilder.greaterThanOrEqualTo(root.get("fecha"), startDate);
+    }
+
+    public static Specification<Ocupacion> hasFechaBefore(LocalDateTime endDate) {
+        if (endDate == null) {
+            return null;
+        }
+        return (root, query, criteriaBuilder) -> criteriaBuilder.lessThanOrEqualTo(root.get("fecha"), endDate);
     }
 
     public static Specification<Ocupacion> isActivo() {

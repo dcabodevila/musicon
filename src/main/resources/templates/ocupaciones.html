@@ -24,7 +24,7 @@
             <div class="container-fluid p-0">
                 <div class="card">
                     <div class="card-header">
-                        <h5 class="card-title mb-0">Fechas generación presupuesto inicial y final</h5>
+                        <h5 class="card-title mb-0">Listado de ocupaciones</h5>
                     </div>
                     <form id="formListadoOcupaciones" method="POST" th:object="${ocupacionListFilterDto}" th:action=@{/ocupacion/list} autocomplete="off">
 
@@ -40,15 +40,31 @@
                                     </div>
                                 </div>
                                 <div class="mb-3 row">
+                                    <label class="col-form-label col-sm-2">Artista</label>
+                                    <div class="col-sm-3">
+                                        <select id="artista" th:field="*{idArtista}" class="form-control choices-single">
+                                            <option value="">Todos los artistas de la agencia</option>
+                                            <option th:each="artista : ${listaArtistas}" th:value="${artista.id}" th:text="${artista.nombre}"></option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mb-3 row">
 
-                                    <label class="col-form-label col-sm-2">Fecha inicial ocupación</label>
+                                    <label class="col-form-label col-sm-2"> Fechas ocupación </label>
                                     <div class="col-sm-3">
                                         <div class="input-wrapper">
-                                            <input id="idFechaDesde" th:field="*{fechaDesde}" type="text"
-                                                   required class="form-control flatpickr flatpickr-minimum"
+                                            <input id="idFechaDesde" required th:field="*{fechaDesde}" type="text"
+                                                   class="form-control flatpickr flatpickr-minimum"
                                                    placeholder="Fecha inicial" readonly="readonly">
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="input-wrapper">
+                                            <input id="idFechaHasta" th:field="*{fechaHasta}" type="text"
+                                                   required class="form-control flatpickr flatpickr-minimum"
+                                                   placeholder="Fecha final" readonly="readonly">
                                             <button type="button" class="btn btn-outline-secondary clear-btn"
-                                                    onclick="clearFlatpickrDate('idFechaDesde')">X
+                                                    onclick="clearFlatpickrDate('idFechaHasta')">X
                                             </button>
                                         </div>
                                     </div>
@@ -93,7 +109,8 @@
                                                     <tr>
 
                                                         <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Artista</th>
-                                                        <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Fecha</th>
+                                                        <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Fecha creación</th>
+                                                        <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Fecha actuación</th>
                                                         <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Localidad</th>
                                                         <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Municipio - Provincia</th>
                                                         <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Representante</th>
@@ -106,12 +123,9 @@
 
                                                     <tr th:each="ocupacion : ${listaOcupaciones}">
 
-                                                        <td class="dtr-control sorting_1" tabindex="0">
-                                                            <a th:href="@{/artista/__${ocupacion.idArtista}__}"
-                                                                    th:text="${ocupacion.artista}"></a>
-                                                        </td>
+                                                        <td class="dtr-control sorting_1" tabindex="0" th:text="${ocupacion.artista}"></td>
+                                                        <td th:text="${#temporals.format(ocupacion.fechaCreacion, 'dd/MM/yyyy')}">-</td>
                                                         <td th:text="${#temporals.format(ocupacion.start, 'dd/MM/yyyy')}">-</td>
-
                                                         <td class="dtr-control sorting_1" tabindex="0" th:text="${ocupacion.localidad}" ></td>
                                                         <td class="dtr-control sorting_1" tabindex="0" th:text="${ocupacion.municipio + ', ' + ocupacion.provincia}" ></td>
                                                         <td class="dtr-control sorting_1" tabindex="0" th:text="${ocupacion.nombreUsuario}" ></td>

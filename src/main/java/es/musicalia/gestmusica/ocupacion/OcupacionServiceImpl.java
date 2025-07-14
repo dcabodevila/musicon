@@ -223,7 +223,7 @@ public class OcupacionServiceImpl implements OcupacionService {
 	}
 
 	@Override
-	public List<OcupacionListRecord> findOcupacionesByArtistasListAndDatesActivo(Long idAgencia, LocalDateTime start) {
+	public List<OcupacionListRecord> findOcupacionesByArtistasListAndDatesActivo(OcupacionListFilterDto ocupacionListFilterDto) {
 
 
 		// Filtrar por los artistas sobre los que tenemos permiso OCUPACIONES
@@ -236,10 +236,13 @@ public class OcupacionServiceImpl implements OcupacionService {
 
 		var spec = Specification
 				.where(OcupacionSpecifications.hasArtistaIdsIn(idsArtistas))
-				.and(OcupacionSpecifications.hasFechaAfter(start))
+				.and(OcupacionSpecifications.hasFechaAfter(ocupacionListFilterDto.getFechaDesde().atStartOfDay()))
+				.and(OcupacionSpecifications.hasFechaBefore(ocupacionListFilterDto.getFechaHasta() != null ? ocupacionListFilterDto.getFechaHasta().atTime(23, 59, 59): null))
 				.and(OcupacionSpecifications.isActivo())
 				.and(OcupacionSpecifications.orderByIdDesc())
-				.and(OcupacionSpecifications.hasAgenciaId(idAgencia));
+				.and(OcupacionSpecifications.hasAgenciaId(ocupacionListFilterDto.getIdAgencia()))
+				.and(OcupacionSpecifications.hasArtistaId(ocupacionListFilterDto.getIdArtista()));
+
 
 		// Ejecutar la consulta y mapear resultados a OcupacionListRecord
 		return ocupacionRepository.findAll(spec).stream()
@@ -260,7 +263,9 @@ public class OcupacionServiceImpl implements OcupacionService {
 						ocupacion.getUsuario().getId(),
 						ocupacion.getUsuario().getNombre() + " " + ocupacion.getUsuario().getApellidos(),
 						ocupacion.getUsuarioConfirmacion() != null ? ocupacion.getUsuarioConfirmacion().getId() : null,
-						ocupacion.getUsuarioConfirmacion() != null ? ocupacion.getUsuarioConfirmacion().getNombre() + " " + ocupacion.getUsuarioConfirmacion().getApellidos() : null
+						ocupacion.getUsuarioConfirmacion() != null ? ocupacion.getUsuarioConfirmacion().getNombre() + " " + ocupacion.getUsuarioConfirmacion().getApellidos() : null,
+						ocupacion.getFechaCreacion()
+
 				))
 				.toList();
 

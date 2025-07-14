@@ -10,14 +10,12 @@ import es.musicalia.gestmusica.contacto.ContactoRepository;
 import es.musicalia.gestmusica.localizacion.*;
 import es.musicalia.gestmusica.rol.RolEnum;
 import es.musicalia.gestmusica.rol.RolRepository;
-import es.musicalia.gestmusica.tipoartista.TipoArtista;
 import es.musicalia.gestmusica.tipoartista.TipoArtistaRepository;
 import es.musicalia.gestmusica.tipoescenario.TipoEscenarioRepository;
 import es.musicalia.gestmusica.usuario.Usuario;
 import es.musicalia.gestmusica.usuario.UsuarioRepository;
 import es.musicalia.gestmusica.util.StringUtils;
 import org.apache.commons.collections.CollectionUtils;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -230,6 +228,10 @@ public class ArtistaServiceImpl implements ArtistaService {
                 .flatMap(artistaRepository::findById)
                 .orElse(new Artista());
     }
+	@Override
+	public List<ArtistaRecord> findArtistasRecordByIdAgencia(Long idAgencia) {
+		return artistaRepository.findAllArtistasRecordByIdAgencia(idAgencia);
+	}
 
 
 }

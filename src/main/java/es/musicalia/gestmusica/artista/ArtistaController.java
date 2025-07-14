@@ -10,6 +10,7 @@ import es.musicalia.gestmusica.tarifa.TarifaAnualDto;
 import es.musicalia.gestmusica.usuario.UserService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,6 +22,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.Year;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -163,6 +165,12 @@ public class ArtistaController {
 
     }
 
+    @GetMapping("/artistas/{idAgencia}")
+    @ResponseBody
+    public ResponseEntity<List<ArtistaRecord>> obtenerArtistasPorAgencia(@PathVariable Long idAgencia) {
+        List<ArtistaRecord> artistas = artistaService.findArtistasRecordByIdAgencia(idAgencia);
+        return ResponseEntity.ok(artistas);
+    }
 
 
 
