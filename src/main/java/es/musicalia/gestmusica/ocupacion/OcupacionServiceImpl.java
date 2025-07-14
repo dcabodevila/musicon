@@ -1,5 +1,6 @@
 package es.musicalia.gestmusica.ocupacion;
 
+import es.musicalia.gestmusica.acceso.AccesoRepository;
 import es.musicalia.gestmusica.artista.Artista;
 import es.musicalia.gestmusica.artista.ArtistaRepository;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
@@ -9,7 +10,7 @@ import es.musicalia.gestmusica.localizacion.ProvinciaRepository;
 import es.musicalia.gestmusica.permiso.PermisoAgenciaEnum;
 import es.musicalia.gestmusica.permiso.PermisoArtistaEnum;
 import es.musicalia.gestmusica.permiso.PermisoService;
-import es.musicalia.gestmusica.permiso.TipoPermisoEnum;
+import es.musicalia.gestmusica.rol.RolEnum;
 import es.musicalia.gestmusica.tarifa.Tarifa;
 import es.musicalia.gestmusica.tarifa.TarifaRepository;
 import es.musicalia.gestmusica.usuario.UserService;
@@ -40,8 +41,9 @@ public class OcupacionServiceImpl implements OcupacionService {
 	private final TarifaRepository tarifaRepository;
 	private final UserService userService;
 	private final PermisoService permisoService;
+	private final AccesoRepository accesoRepository;
 
-	public OcupacionServiceImpl(OcupacionRepository ocupacionRepository, ArtistaRepository artistaRepository, ProvinciaRepository provinciaRepository, MunicipioRepository municipioRepository, TipoOcupacionRepository tipoOcupacionRepository, OcupacionEstadoRepository ocupacionEstadoRepository, TarifaRepository tarifaRepository, UserService userService, PermisoService permisoService){
+	public OcupacionServiceImpl(OcupacionRepository ocupacionRepository, ArtistaRepository artistaRepository, ProvinciaRepository provinciaRepository, MunicipioRepository municipioRepository, TipoOcupacionRepository tipoOcupacionRepository, OcupacionEstadoRepository ocupacionEstadoRepository, TarifaRepository tarifaRepository, UserService userService, PermisoService permisoService, AccesoRepository accesoRepository){
 		this.ocupacionRepository = ocupacionRepository;
 		this.artistaRepository = artistaRepository;
         this.provinciaRepository = provinciaRepository;
@@ -51,6 +53,7 @@ public class OcupacionServiceImpl implements OcupacionService {
         this.tarifaRepository = tarifaRepository;
         this.userService = userService;
         this.permisoService = permisoService;
+        this.accesoRepository = accesoRepository;
     }
 
 	@Override
@@ -223,8 +226,7 @@ public class OcupacionServiceImpl implements OcupacionService {
 	}
 
 	@Override
-	public List<OcupacionListRecord> findOcupacionesByArtistasListAndDatesActivo(OcupacionListFilterDto ocupacionListFilterDto) {
-
+	public List<OcupacionListRecord> findOcupacionesByArtistasListAndDatesActivo(CustomAuthenticatedUser user, OcupacionListFilterDto ocupacionListFilterDto) {
 
 		// Filtrar por los artistas sobre los que tenemos permiso OCUPACIONES
 
@@ -233,15 +235,18 @@ public class OcupacionServiceImpl implements OcupacionService {
 				.filter(artistaId -> authenticatedUser.getMapPermisosArtista().get(artistaId).contains(PermisoArtistaEnum.OCUPACIONES.name()))
 				.collect(Collectors.toSet());
 
-
-		var spec = Specification
+		final Specification<Ocupacion> spec
+				= Specification
 				.where(OcupacionSpecifications.hasArtistaIdsIn(idsArtistas))
 				.and(OcupacionSpecifications.hasFechaAfter(ocupacionListFilterDto.getFechaDesde().atStartOfDay()))
 				.and(OcupacionSpecifications.hasFechaBefore(ocupacionListFilterDto.getFechaHasta() != null ? ocupacionListFilterDto.getFechaHasta().atTime(23, 59, 59): null))
 				.and(OcupacionSpecifications.isActivo())
 				.and(OcupacionSpecifications.orderByIdDesc())
 				.and(OcupacionSpecifications.hasAgenciaId(ocupacionListFilterDto.getIdAgencia()))
-				.and(OcupacionSpecifications.hasArtistaId(ocupacionListFilterDto.getIdArtista()));
+				.and(OcupacionSpecifications.hasArtistaId(ocupacionListFilterDto.getIdArtista()))
+				.and(OcupacionSpecifications.hasEstadoNotAnulado())
+				.and(OcupacionSpecifications.hasUsuarioId(isRolRepresentante(user.getUserId(), ocupacionListFilterDto.getIdAgencia()), user.getUserId()))
+				;
 
 
 		// Ejecutar la consulta y mapear resultados a OcupacionListRecord
@@ -269,6 +274,15 @@ public class OcupacionServiceImpl implements OcupacionService {
 				))
 				.toList();
 
+
+	}
+
+	private boolean isRolRepresentante(Long idUsuario, Long idAgencia){
+		if (idAgencia!=null){
+			return this.accesoRepository.findAccesoByIdUsuarioAndIdAgenciaAndCodigoRol(idUsuario, idAgencia, RolEnum.ROL_REPRESENTANTE.getCodigo()).isPresent();
+		}
+
+		return false;
 
 	}
 

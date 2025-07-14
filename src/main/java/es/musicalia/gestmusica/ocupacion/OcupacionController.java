@@ -108,7 +108,6 @@ public class OcupacionController {
     }
 
     @GetMapping("/list")
-    @PreAuthorize("hasAuthority('MENU_OCUPACIONES')")
     public String getListadoOcupaciones(@AuthenticationPrincipal CustomAuthenticatedUser user, Model model){
 
         getModelAttributeComunOcupacionList(user, model, OcupacionListFilterDto.builder().fechaDesde(LocalDate.now()).build());
@@ -132,11 +131,10 @@ public class OcupacionController {
     }
 
     @PostMapping("/list")
-    @PreAuthorize("hasAuthority('MENU_OCUPACIONES')")
     public String postListadoOcupaciones(@AuthenticationPrincipal CustomAuthenticatedUser user,
                                          @ModelAttribute OcupacionListFilterDto ocupacionListFilterDto,
                                          Model model) {
-        model.addAttribute("listaOcupaciones", this.ocupacionService.findOcupacionesByArtistasListAndDatesActivo(ocupacionListFilterDto));
+        model.addAttribute("listaOcupaciones", this.ocupacionService.findOcupacionesByArtistasListAndDatesActivo(user, ocupacionListFilterDto));
 
         getModelAttributeComunOcupacionList(user, model, ocupacionListFilterDto);
         return "ocupaciones";

@@ -47,5 +47,15 @@ public class OcupacionSpecifications {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("artista").get("agencia").get("id"), agenciaId);
     }
 
+    public static Specification<Ocupacion> hasEstadoNotAnulado() {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.notEqual(root.get("ocupacionEstado").get("nombre"), "Anulado");
+    }
 
+
+    public static Specification<Ocupacion> hasUsuarioId(Boolean isRolRepresentante, Long idUsuario) {
+        if (Boolean.TRUE.equals(isRolRepresentante)) {
+            return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("usuario").get("id"), idUsuario);
+        }
+        return null;
+    }
 }

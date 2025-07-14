@@ -66,7 +66,6 @@ public class UsuarioController {
     }
 
     @PostMapping("/guardar")
-    @PreAuthorize("hasAuthority('USUARIOS')")
     public String guardarUsuario(@Valid @ModelAttribute UsuarioEdicionDTO usuarioEdicionDTO, @RequestParam(value = "image", required = false) MultipartFile multipartFile, RedirectAttributes redirectAttributes) {
         this.userService.guardarUsuario(usuarioEdicionDTO, multipartFile);
         redirectAttributes.addFlashAttribute("alertClass", "success");
