@@ -32,7 +32,7 @@ public class CodigoVerificacionService {
      * Genera y envía un código de verificación de 4 dígitos
      */
     @Transactional
-    public void generarYEnviarCodigo(String email, CodigoVerificacion.TipoVerificacion tipo) {
+    public void generarYEnviarCodigo(String email, CodigoVerificacion.TipoVerificacion tipo) throws EnvioEmailException {
         log.info("Generando código de verificación para email: {} tipo: {}", email, tipo);
 
         // Desactivar códigos previos
@@ -103,7 +103,7 @@ public class CodigoVerificacionService {
      * Reenvía código de verificación si es válido hacerlo
      */
     @Transactional
-    public boolean reenviarCodigo(String email, CodigoVerificacion.TipoVerificacion tipo) {
+    public boolean reenviarCodigo(String email, CodigoVerificacion.TipoVerificacion tipo) throws EnvioEmailException {
         log.info("Intentando reenviar código para email: {}", email);
 
         Optional<CodigoVerificacion> codigoOpt = codigoRepository
@@ -141,7 +141,7 @@ public class CodigoVerificacionService {
         return String.format("%04d", secureRandom.nextInt(10000));
     }
 
-    private void enviarCodigoPorEmail(String email, String codigo, CodigoVerificacion.TipoVerificacion tipo) {
+    private void enviarCodigoPorEmail(String email, String codigo, CodigoVerificacion.TipoVerificacion tipo) throws EnvioEmailException {
 
         EmailDto emailDto = EmailDto.builder()
                 .to(email)
@@ -155,7 +155,7 @@ public class CodigoVerificacionService {
             emailService.sendHtmlEmail(emailDto);
         } catch (Exception e) {
             log.error("Error enviando código de verificación a {}: {}", email, e.getMessage());
-            throw new RuntimeException("No se pudo enviar el código de verificación", e);
+            throw new EnvioEmailException("No se pudo enviar el código de verificación");
         }
     }
 

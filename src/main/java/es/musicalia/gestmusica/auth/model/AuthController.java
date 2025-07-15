@@ -1,9 +1,6 @@
 package es.musicalia.gestmusica.auth.model;
 
-import es.musicalia.gestmusica.usuario.CodigoVerificacion;
-import es.musicalia.gestmusica.usuario.CodigoVerificacionService;
-import es.musicalia.gestmusica.usuario.EmailYaExisteException;
-import es.musicalia.gestmusica.usuario.UserService;
+import es.musicalia.gestmusica.usuario.*;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -76,6 +73,10 @@ public class AuthController {
         }
         catch (EmailYaExisteException e){
             bindingResult.rejectValue("email", "error.email", "El email ya está registrado por otro usuario");
+            return "registration";
+        }
+        catch (EnvioEmailException m){
+            bindingResult.rejectValue("email", "error.email", "No se ha podido enviar el código al email seleccionado");
             return "registration";
         }
         catch (Exception e){

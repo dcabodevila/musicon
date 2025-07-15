@@ -10,7 +10,7 @@ public interface UserService {
 
 	boolean isUserAutheticated();
 
-	Usuario saveRegistration(RegistrationForm registrationForm) throws EmailYaExisteException;
+	Usuario saveRegistration(RegistrationForm registrationForm) throws EmailYaExisteException, EnvioEmailException;
 
 	List<UsuarioRecord> findAllUsuarioRecords();
 

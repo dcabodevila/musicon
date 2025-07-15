@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>es.musicalia</groupId>
 	<artifactId>gestmusica</artifactId>
-	<version>0.0.13</version>
+	<version>0.0.14</version>
 	<packaging>war</packaging>
 	<name>gestmusica</name>
 	<description>Aplicación web para gestión de agrupaciones</description>
@@ -134,6 +134,11 @@
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 			<version>2.14.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>2.1.0</version>
 		</dependency>
 
 

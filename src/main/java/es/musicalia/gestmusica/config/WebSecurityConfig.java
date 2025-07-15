@@ -52,8 +52,10 @@ public class WebSecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/auth/**").permitAll()
-                .requestMatchers("/fragments/**", "/static/**", "/adminkit/**", "/img/**", "/logo/**", "/favicon.ico", "/js**").permitAll()
-                // .requestMatchers("/remember", "/change-pwd/**", "/registration", "/send-remember-mail","/change-pwd-submit/**").permitAll()
+                .requestMatchers("/fragments/**", "/static/**", "/adminkit/**", "/img/**", "/logo/**", "/favicon.ico", "/js**", "/api/sincronizacion/**").permitAll()
+					.requestMatchers("/swagger-ui/**", "/api-docs/**", "/swagger-ui.html").permitAll()
+
+					// .requestMatchers("/remember", "/change-pwd/**", "/registration", "/send-remember-mail","/change-pwd-submit/**").permitAll()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form

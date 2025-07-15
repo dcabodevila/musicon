@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserService {
 
 
 	@Transactional(readOnly = false)
-	public Usuario saveRegistration(RegistrationForm registrationForm) throws EmailYaExisteException {
+	public Usuario saveRegistration(RegistrationForm registrationForm) throws EmailYaExisteException, EnvioEmailException {
 
 		if (userRepository.existsUsuarioByEmail(registrationForm.getEmail())) {
 			throw new EmailYaExisteException("El email ya está registrado");
@@ -55,11 +55,12 @@ public class UserServiceImpl implements UserService {
 					CodigoVerificacion.TipoVerificacion.REGISTRO
 			);
 			log.info("Código de verificación enviado a: {}", registrationForm.getEmail());
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			log.error("Error enviando código de verificación: {}", e.getMessage());
 			// Eliminar usuario si no se pudo enviar el código
 			userRepository.delete(user);
-			throw new RuntimeException("No se pudo enviar el código de verificación. Inténtalo de nuevo.");
+			throw e;
 		}
 
 
