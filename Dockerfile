@@ -6,7 +6,7 @@ WORKDIR /app
 
 # Copiar el archivo de configuración y sus dependencias
 COPY pom.xml ./
-RUN mvn dependency:go-offline -B
+RUN mvn dependency:resolve-plugins dependency:resolve -B
 
 # Copiar el resto del código fuente a la imagen
 COPY src ./src
