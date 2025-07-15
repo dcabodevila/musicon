@@ -1,15 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="ehcache.xsd"
-         updateCheck="false">
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.ehcache.org/v3"
+        xsi:schemaLocation="http://www.ehcache.org/v3
+        http://www.ehcache.org/schema/ehcache-core-3.0.xsd">
 
-    <cache name="files"
-           maxEntriesLocalHeap="1000"
-           eternal="false"
-           timeToIdleSeconds="300"
-           timeToLiveSeconds="600"
-           diskSpoolBufferSizeMB="30"
-           memoryStoreEvictionPolicy="LRU">
+    <cache alias="provincias">
+        <key-type>java.lang.Object</key-type>
+        <value-type>java.lang.Object</value-type>
+        <expiry>
+            <ttl unit="hours">24</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">55</heap>
+        </resources>
     </cache>
 
-</ehcache>
+    <cache alias="comunidades">
+        <key-type>java.lang.Object</key-type>
+        <value-type>java.lang.Object</value-type>
+        <expiry>
+            <ttl unit="hours">24</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">20</heap>
+        </resources>
+    </cache>
+
+    <cache alias="provinciasPorCcaa">
+        <key-type>java.lang.Object</key-type>
+        <value-type>java.lang.Object</value-type>
+        <expiry>
+            <ttl unit="hours">24</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">10</heap>
+        </resources>
+    </cache>
+
+    <cache alias="municipiosPorProvincia">
+        <key-type>java.lang.Object</key-type>
+        <value-type>java.lang.Object</value-type>
+        <expiry>
+            <ttl unit="hours">12</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">500</heap>
+        </resources>
+    </cache>
+
+</config>
