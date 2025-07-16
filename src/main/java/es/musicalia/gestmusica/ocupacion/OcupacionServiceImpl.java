@@ -166,9 +166,22 @@ public class OcupacionServiceImpl implements OcupacionService {
 	@Override
 	public boolean existeOcupacionFecha(OcupacionSaveDto ocupacionSaveDto){
 
-		final List<OcupacionDto> optionalOcupacion = ocupacionSaveDto.getId() == null ? this.ocupacionRepository.findOcupacionesDtoByArtistaIdAndDates(ocupacionSaveDto.getIdArtista(), ocupacionSaveDto.getFecha().withHour(0).withMinute(0).withSecond(0) , ocupacionSaveDto.getFecha().withHour(23).withMinute(59).withSecond(59)) : this.ocupacionRepository.findOcupacionesDtoByArtistaIdAndDatesNotInId(ocupacionSaveDto.getIdArtista(), ocupacionSaveDto.getFecha().withHour(0).withMinute(0).withSecond(0) , ocupacionSaveDto.getFecha().withHour(23).withMinute(59).withSecond(59), ocupacionSaveDto.getId());
+		final List<OcupacionRecord> optionalOcupacion = ocupacionSaveDto.getId() == null ? this.ocupacionRepository.findOcupacionesDtoByArtistaIdAndDates(ocupacionSaveDto.getIdArtista(), ocupacionSaveDto.getFecha().withHour(0).withMinute(0).withSecond(0) , ocupacionSaveDto.getFecha().withHour(23).withMinute(59).withSecond(59)) : this.ocupacionRepository.findOcupacionesDtoByArtistaIdAndDatesNotInId(ocupacionSaveDto.getIdArtista(), ocupacionSaveDto.getFecha().withHour(0).withMinute(0).withSecond(0) , ocupacionSaveDto.getFecha().withHour(23).withMinute(59).withSecond(59), ocupacionSaveDto.getId());
 
-		return (optionalOcupacion!=null && !optionalOcupacion.isEmpty());
+		if (optionalOcupacion == null || optionalOcupacion.isEmpty()) {
+			return false;
+		}
+
+		if (optionalOcupacion.size() > 1) {
+			return true;
+		}
+
+		boolean soloMatinalExistente = optionalOcupacion.get(0).soloMatinal();
+		boolean soloMatinalNuevo = ocupacionSaveDto.getSoloMatinal();
+
+		return soloMatinalExistente == soloMatinalNuevo;
+
+
 	}
 
 
@@ -221,7 +234,7 @@ public class OcupacionServiceImpl implements OcupacionService {
 	}
 
 	@Override
-	public List<OcupacionDto> findOcupacionesDtoByAgenciaPendientes(Set<Long> idsAgencia){
+	public List<OcupacionRecord> findOcupacionesDtoByAgenciaPendientes(Set<Long> idsAgencia){
 		return this.ocupacionRepository.findOcupacionesDtoByAgenciaPendientes(idsAgencia).orElse(new ArrayList<>());
 	}
 

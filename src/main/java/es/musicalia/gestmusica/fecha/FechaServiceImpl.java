@@ -1,6 +1,6 @@
 package es.musicalia.gestmusica.fecha;
 
-import es.musicalia.gestmusica.ocupacion.OcupacionDto;
+import es.musicalia.gestmusica.ocupacion.OcupacionRecord;
 import es.musicalia.gestmusica.ocupacion.OcupacionRepository;
 import es.musicalia.gestmusica.tarifa.TarifaDto;
 import es.musicalia.gestmusica.tarifa.TarifaRepository;
@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,34 +31,34 @@ public class FechaServiceImpl implements FechaService {
         this.userService = userService;
 	}
 	@Override
-	public List<FechaDto> findFechaDtoByArtistaId(long idArtista , LocalDateTime start, LocalDateTime end){
+	public List<FechaDto> findFechaDtoByArtistaId(long idArtista, LocalDateTime start, LocalDateTime end) {
 
-		final List<FechaDto> listaFechas = getFechasTarifas(idArtista, start, end);
+		List<FechaDto> listaFechas = getFechasTarifas(idArtista, start, end);
+		List<FechaDto> listaOcupaciones = getFechasOcupaciones(idArtista, start, end);
 
-		Map<LocalDate, FechaDto> fechaFechaDtoMap = listaFechas.stream()
-				.collect(Collectors.toMap(
-						fecha -> fecha.start().toLocalDate(), // Clave: fecha sin hora
-						fecha -> fecha, // Valor: el objeto FechaDto
-						(existing, replacement) -> existing // Manejar duplicados, mantener el primero
-				));
+		// Obtener los días que tienen ocupaciones
+		Set<LocalDate> fechasOcupadas = listaOcupaciones.stream()
+				.map(fecha -> fecha.start().toLocalDate())
+				.collect(Collectors.toSet());
 
+		// Filtrar tarifas: solo aquellas que NO tienen ocupaciones en su día
+		List<FechaDto> tarifasFiltradas = listaFechas.stream()
+				.filter(fecha -> !fechasOcupadas.contains(fecha.start().toLocalDate()))
+				.toList();
 
-		final List<FechaDto> listaOcupaciones = getFechasOcupaciones(idArtista, start, end);
+		// Resultado final: todas las ocupaciones + tarifas sin ocupar
+		List<FechaDto> resultado = new ArrayList<>();
+		resultado.addAll(listaOcupaciones);
+		resultado.addAll(tarifasFiltradas);
 
-		// Sobrescribir con listaOcupaciones usando lambda
-		listaOcupaciones.forEach(ocupacion -> {
-			LocalDate fecha = ocupacion.start().toLocalDate();
-			fechaFechaDtoMap.put(fecha, ocupacion); // Sobrescribe si la fecha ya existe
-		});
-
-		// Actualizar listaTarifas con los datos del mapa
-		return fechaFechaDtoMap.values().stream().collect(Collectors.toList());
-
+		return resultado;
 	}
+
+
 
 	private List<FechaDto> getFechasTarifas(long idArtista, LocalDateTime start, LocalDateTime end) {
 		final List<TarifaDto> listaTarifas = this.tarifaRepository.findTarifasDtoByArtistaIdAndDates(idArtista, start, end).orElse(new ArrayList<>());
-		List<FechaDto> listaFechas = listaTarifas.stream()
+		return listaTarifas.stream()
 				.map(tarifaDto -> new FechaDto(
 						tarifaDto.id(),
 						tarifaDto.start(),
@@ -70,27 +71,26 @@ public class FechaServiceImpl implements FechaService {
 						Boolean.FALSE, ""
 				))
 				.collect(Collectors.toList());
-		return listaFechas;
 	}
 
 	private List<FechaDto> getFechasOcupaciones(long idArtista, LocalDateTime start, LocalDateTime end) {
-		List<OcupacionDto> listaOcupaciones = this.ocupacionRepository.findOcupacionesDtoByArtistaIdAndDates(idArtista, start, end);
+		List<OcupacionRecord> listaOcupaciones = this.ocupacionRepository.findOcupacionesDtoByArtistaIdAndDates(idArtista, start, end);
 
-		List<FechaDto> listaFechas = listaOcupaciones.stream()
-				.map(ocupacionDto -> new FechaDto(
-						ocupacionDto.id(),
-						ocupacionDto.start(),
-						ocupacionDto.idArtista(),
-						ocupacionDto.provincia(),
-						ocupacionDto.allDay(),
+		return listaOcupaciones.stream()
+				.map(ocupacionRecord -> new FechaDto(
+						ocupacionRecord.id(),
+						ocupacionRecord.start(),
+						ocupacionRecord.idArtista(),
+						ocupacionRecord.provincia(),
+						true,
 						TipoFechaEnum.OCUPACION.getDescripcion(),
-						ocupacionDto.tipoOcupacion(),
-						ocupacionDto.estado() + "<br>" +ocupacionDto.localidad() + "<br>"+ ocupacionDto.municipio() + ", " + ocupacionDto.provincia() +  (ocupacionDto.soloMatinal() ? "<br>Solo matinal" : ocupacionDto.matinal()? "<br>"+ "Matinal" : "") ,
-						ocupacionDto.matinal(),
-						ocupacionDto.estado()
+						ocupacionRecord.tipoOcupacion(),
+						ocupacionRecord.estado() + "<br>" + ocupacionRecord.localidad() + "<br>"+ ocupacionRecord.municipio() + ", " + ocupacionRecord.provincia() +  (ocupacionRecord.soloMatinal() ? "<br>Solo matinal" : ocupacionRecord.matinal()? "<br>"+ "Matinal" : "") ,
+						ocupacionRecord.matinal(),
+						ocupacionRecord.estado()
 				))
 				.collect(Collectors.toList());
-		return listaFechas;
+
 	}
 
 }

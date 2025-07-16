@@ -4,7 +4,6 @@ import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.localizacion.CodigoNombreDto;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -23,7 +22,7 @@ public interface OcupacionService {
 
     boolean existeOcupacionFecha(OcupacionSaveDto ocupacionSaveDto);
 
-    List<OcupacionDto> findOcupacionesDtoByAgenciaPendientes(Set<Long> idsAgencia);
+    List<OcupacionRecord> findOcupacionesDtoByAgenciaPendientes(Set<Long> idsAgencia);
 
     List<OcupacionListRecord> findOcupacionesByArtistasListAndDatesActivo(CustomAuthenticatedUser user, OcupacionListFilterDto ocupacionListFilterDto);
 }
