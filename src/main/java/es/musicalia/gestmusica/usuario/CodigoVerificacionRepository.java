@@ -1,5 +1,6 @@
 package es.musicalia.gestmusica.usuario;
 
+import es.musicalia.gestmusica.mail.EmailTemplateEnum;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -7,7 +8,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -18,7 +18,7 @@ public interface CodigoVerificacionRepository extends JpaRepository<CodigoVerifi
 			"AND c.tipo = :tipo AND c.activo = true AND c.usado = :usado")
 	Optional<CodigoVerificacion> findByEmailAndCodigoAndTipoAndActivoTrueAndUsado(
 			@Param("email") String email, @Param("codigo") String codigo,
-			@Param("tipo") CodigoVerificacion.TipoVerificacion tipo, @Param("usado") boolean usado);
+			@Param("tipo") EmailTemplateEnum tipo, @Param("usado") boolean usado);
 
 	// Query personalizada con ENUM
 	@Query("SELECT c FROM CodigoVerificacion c WHERE c.email = :email AND c.tipo = :tipo " +
@@ -26,7 +26,7 @@ public interface CodigoVerificacionRepository extends JpaRepository<CodigoVerifi
 			"ORDER BY c.fechaCreacion DESC")
 	Optional<CodigoVerificacion> findCodigoValidoByEmailAndTipo(
 			@Param("email") String email,
-			@Param("tipo") CodigoVerificacion.TipoVerificacion tipo,
+			@Param("tipo") EmailTemplateEnum tipo,
 			@Param("now") LocalDateTime now);
 
 	@Modifying

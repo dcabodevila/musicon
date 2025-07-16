@@ -1,5 +1,6 @@
 package es.musicalia.gestmusica.auth.model;
 
+import es.musicalia.gestmusica.mail.EmailTemplateEnum;
 import es.musicalia.gestmusica.usuario.*;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -105,7 +106,7 @@ public class AuthController {
     public ResponseEntity<Map<String, Object>> verificarEmail(@RequestParam String email,
                                                               @RequestParam String codigo) {
         try {
-            boolean verificado = codigoVerificacionService.verificarCodigo(email, codigo, CodigoVerificacion.TipoVerificacion.REGISTRO, false);
+            boolean verificado = codigoVerificacionService.verificarCodigo(email, codigo, EmailTemplateEnum.REGISTRO, false);
 
             if (verificado) {
 
@@ -135,7 +136,7 @@ public class AuthController {
     @ResponseBody
     public ResponseEntity<Map<String, Object>> reenviarCodigo(@RequestParam String email) {
         try {
-            boolean reenviado = codigoVerificacionService.reenviarCodigo(email, CodigoVerificacion.TipoVerificacion.REGISTRO);
+            boolean reenviado = codigoVerificacionService.reenviarCodigo(email, EmailTemplateEnum.REGISTRO);
 
             if (reenviado) {
                 return ResponseEntity.ok(Map.of(
@@ -182,7 +183,7 @@ public class AuthController {
             // Generar y enviar código
             codigoVerificacionService.generarYEnviarCodigo(
                     form.getEmail(),
-                    CodigoVerificacion.TipoVerificacion.RECUPERACION_PASSWORD
+                    EmailTemplateEnum.RECUPERACION_PASSWORD
             );
 
             redirectAttributes.addFlashAttribute("email", form.getEmail());
@@ -209,7 +210,7 @@ public class AuthController {
                                                                             @RequestParam String codigo) {
         try {
             boolean verificado = codigoVerificacionService.verificarCodigo(
-                    email, codigo, CodigoVerificacion.TipoVerificacion.RECUPERACION_PASSWORD, false
+                    email, codigo, EmailTemplateEnum.RECUPERACION_PASSWORD, false
             );
 
             if (verificado) {
@@ -262,7 +263,7 @@ public class AuthController {
         try {
             // Verificar el código una vez más por seguridad
             boolean codigoValido = codigoVerificacionService.verificarCodigo(
-                    form.getEmail(), form.getCodigo(), CodigoVerificacion.TipoVerificacion.RECUPERACION_PASSWORD, true
+                    form.getEmail(), form.getCodigo(), EmailTemplateEnum.RECUPERACION_PASSWORD, true
             );
 
             if (!codigoValido) {
@@ -293,7 +294,7 @@ public class AuthController {
     public ResponseEntity<Map<String, Object>> reenviarCodigoReset(@RequestParam String email) {
         try {
             boolean reenviado = codigoVerificacionService.reenviarCodigo(
-                    email, CodigoVerificacion.TipoVerificacion.RECUPERACION_PASSWORD
+                    email, EmailTemplateEnum.RECUPERACION_PASSWORD
             );
 
             if (reenviado) {

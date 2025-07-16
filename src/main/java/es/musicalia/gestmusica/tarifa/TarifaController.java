@@ -40,12 +40,8 @@ public class TarifaController {
     public ResponseEntity<?> getSearchResultViaAjax(
             @Valid @RequestBody TarifaSaveDto tarifaSaveDto) {
 
-        DefaultResponseBody result = new DefaultResponseBody();
         this.tarifaService.saveTarifa(tarifaSaveDto);
-        result.setSuccess(true);
-        result.setMessage("Tarifa guardada");
-        result.setMessageType("success");
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(DefaultResponseBody.builder().success(true).message("Tarifa guardada").messageType("success").build() );
 
     }
 
@@ -54,15 +50,10 @@ public class TarifaController {
     public ResponseEntity<?> eliminarTarifas(
             @Valid @RequestBody TarifaSaveDto tarifaSaveDto) {
 
-
-        // TODO: securizar por permiso de usuario sobre agrupación
-        DefaultResponseBody result = new DefaultResponseBody();
         tarifaSaveDto.setActivo(false);
         this.tarifaService.saveTarifa(tarifaSaveDto);
-        result.setSuccess(true);
-        result.setMessage("Tarifa eliminada");
-        result.setMessageType("success");
-        return ResponseEntity.ok(result);
+
+        return ResponseEntity.ok(DefaultResponseBody.builder().success(true).message("Tarifa eliminada").messageType("success").build() );
 
     }
 

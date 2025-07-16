@@ -1,5 +1,6 @@
 package es.musicalia.gestmusica.usuario;
 
+import es.musicalia.gestmusica.mail.EmailTemplateEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -42,14 +43,8 @@ public class CodigoVerificacion {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private TipoVerificacion tipo;
+    private EmailTemplateEnum tipo;
 
-    public enum TipoVerificacion {
-        REGISTRO,
-        RECUPERACION_PASSWORD,
-        CAMBIO_EMAIL
-
-    }
 
     public boolean isExpirado() {
         return LocalDateTime.now().isAfter(fechaExpiracion);

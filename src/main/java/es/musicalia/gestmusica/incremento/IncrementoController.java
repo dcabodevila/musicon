@@ -39,19 +39,13 @@ public class IncrementoController {
     public ResponseEntity<?> saveIncremento(
             @Valid @RequestBody IncrementoSaveDto incrementoSaveDto) {
 
-        DefaultResponseBody result = new DefaultResponseBody();
         try {
             this.incrementoService.saveIncremento(incrementoSaveDto);
-            result.setSuccess(true);
-            result.setMessage("Incremento guardado");
-            result.setMessageType("success");
-            return ResponseEntity.ok(result);
+            return ResponseEntity.ok(DefaultResponseBody.builder().success(true).message("Incremento guardado").messageType("success").build());
 
         } catch (Exception e){
-            result.setSuccess(false);
-            result.setMessage("Error guardando el incremento");
-            result.setMessageType("danger");
-            return ResponseEntity.ok(result);
+
+            return ResponseEntity.ok(DefaultResponseBody.builder().success(false).message("Error guardando el incremento").messageType("danger").build());
         }
 
 

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <div th:replace="~{fragments/mail-header :: header}"></div>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1 th:text="${titulo}">Gestmusica</h1>
+        <p th:text="${subtitulo}">Código de Verificación</p>
+    </div>
+    <div class="content">
+        <p class="message" th:text="${mensaje}">Aquí va el mensaje principal</p>
+        <div class="code-container" th:if="${codigo != null}">
+            <div class="code" th:text="${codigo}">123456</div>
+        </div>
+        <p class="message" th:if="${expiracionMinutos != null}">
+            Este código expira en <span th:text="${expiracionMinutos}">15</span> minutos.
+        </p>
+        <div th:utext="${contenidoExtra}"></div>
+        <p class="message">Si no solicitaste este código, puedes ignorar este mensaje.</p>
+    </div>
+    <div class="footer">
+        <p>Este es un mensaje automático de <strong>Gestmusica</strong></p>
+        <p>Desde Gestmusica <strong>nunca te enviaremos emails con enlaces</strong>.</p>
+    </div>
+</div>
+</body>
+</html>

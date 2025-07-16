@@ -2,6 +2,7 @@ package es.musicalia.gestmusica.ocupacion;
 
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.localizacion.CodigoNombreDto;
+import es.musicalia.gestmusica.util.DefaultResponseBody;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -13,12 +14,12 @@ public interface OcupacionService {
 
     OcupacionEditDto findOcupacionEditDtoByArtistaIdAndDates(long id);
     @Transactional(readOnly = false)
-    Void anularOcupacion(long id);
+    DefaultResponseBody anularOcupacion(long id);
     @Transactional(readOnly = false)
-    Void confirmarOcupacion(long id);
+    DefaultResponseBody confirmarOcupacion(long id);
 
     @Transactional(readOnly = false)
-    Ocupacion saveOcupacion(OcupacionSaveDto ocupacionSaveDto) throws ModificacionOcupacionException;
+    DefaultResponseBody saveOcupacion(OcupacionSaveDto ocupacionSaveDto) throws ModificacionOcupacionException;
 
     boolean existeOcupacionFecha(OcupacionSaveDto ocupacionSaveDto);
 

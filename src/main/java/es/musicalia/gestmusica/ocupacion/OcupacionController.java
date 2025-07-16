@@ -3,27 +3,20 @@ package es.musicalia.gestmusica.ocupacion;
 
 import es.musicalia.gestmusica.agencia.AgenciaRecord;
 import es.musicalia.gestmusica.agencia.AgenciaService;
-import es.musicalia.gestmusica.artista.ArtistaRecord;
 import es.musicalia.gestmusica.artista.ArtistaService;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
-import es.musicalia.gestmusica.permiso.TipoPermisoEnum;
 import es.musicalia.gestmusica.util.DefaultResponseBody;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
@@ -50,27 +43,15 @@ public class OcupacionController {
 
     @GetMapping("/anular/{id}")
     public ResponseEntity<DefaultResponseBody> anularOcupacion(@PathVariable long id) {
-        DefaultResponseBody result = new DefaultResponseBody();
 
-        this.ocupacionService.anularOcupacion(id);
-        result.setSuccess(true);
-        result.setMessage("Ocupación anulada");
-        result.setMessageType("success");
-
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(this.ocupacionService.anularOcupacion(id));
 
     }
 
     @GetMapping("/confirmar/{id}")
     public ResponseEntity<DefaultResponseBody> confirmarOcupacion(@PathVariable long id) {
-        DefaultResponseBody result = new DefaultResponseBody();
 
-        this.ocupacionService.confirmarOcupacion(id);
-        result.setSuccess(true);
-        result.setMessage("Ocupación confirmada");
-        result.setMessageType("success");
-
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(this.ocupacionService.confirmarOcupacion(id));
 
     }
 
@@ -78,32 +59,20 @@ public class OcupacionController {
     public ResponseEntity<?> saveOcupacion(
             @RequestBody OcupacionSaveDto ocupacionSaveDto) {
 
-        DefaultResponseBody result = new DefaultResponseBody();
 
         if (ocupacionService.existeOcupacionFecha(ocupacionSaveDto)) {
-            result.setSuccess(false);
-            result.setMessage("Ya existe una ocupación en esa fecha");
-            result.setMessageType("error");
-
-        }
-        else {
-            try {
-                ocupacionService.saveOcupacion(ocupacionSaveDto);
-                result.setSuccess(true);
-                result.setMessage("Ocupación guardada");
-                result.setMessageType("success");
-            } catch (ModificacionOcupacionException e) {
-                result.setSuccess(false);
-                result.setMessage("No tiene permisos para modificar la ocupación de otros usuarios");
-                result.setMessageType("error");
-            }
-
-
-
+            return ResponseEntity.ok(DefaultResponseBody.builder().success(false).message("Ya existe una ocupación en esa fecha").messageType("error").build());
         }
 
-        return ResponseEntity.ok(result);
-
+        try {
+            return ResponseEntity.ok(ocupacionService.saveOcupacion(ocupacionSaveDto));
+        }
+        catch (ModificacionOcupacionException e) {
+            return ResponseEntity.ok(DefaultResponseBody.builder().success(false).message("No tiene permisos para modificar la ocupación de otros usuarios").messageType("error").build());
+        }
+        catch (Exception e) {
+            return ResponseEntity.ok(DefaultResponseBody.builder().success(false).message("Error inesperado al guardar").messageType("error").build());
+        }
 
     }
 

@@ -3,6 +3,7 @@ package es.musicalia.gestmusica.usuario;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.auth.model.RegistrationForm;
 import es.musicalia.gestmusica.file.FileService;
+import es.musicalia.gestmusica.mail.EmailTemplateEnum;
 import es.musicalia.gestmusica.rol.RolEnum;
 import es.musicalia.gestmusica.rol.RolRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -52,7 +53,7 @@ public class UserServiceImpl implements UserService {
 		try {
 			codigoVerificacionService.generarYEnviarCodigo(
 					registrationForm.getEmail(),
-					CodigoVerificacion.TipoVerificacion.REGISTRO
+					EmailTemplateEnum.REGISTRO
 			);
 			log.info("Código de verificación enviado a: {}", registrationForm.getEmail());
 		}

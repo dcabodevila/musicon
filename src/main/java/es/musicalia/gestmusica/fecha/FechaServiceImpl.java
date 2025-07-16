@@ -20,15 +20,12 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class FechaServiceImpl implements FechaService {
 
-
 	private final TarifaRepository tarifaRepository;
 	private final OcupacionRepository ocupacionRepository;
-	private final UserService userService;
 
-	public FechaServiceImpl(TarifaRepository tarifaRepository, OcupacionRepository ocupacionRepository, UserService userService){
+	public FechaServiceImpl(TarifaRepository tarifaRepository, OcupacionRepository ocupacionRepository){
 		this.tarifaRepository = tarifaRepository;
         this.ocupacionRepository = ocupacionRepository;
-        this.userService = userService;
 	}
 	@Override
 	public List<FechaDto> findFechaDtoByArtistaId(long idArtista, LocalDateTime start, LocalDateTime end) {

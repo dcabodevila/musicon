@@ -7,14 +7,18 @@ import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.localizacion.CodigoNombreDto;
 import es.musicalia.gestmusica.localizacion.MunicipioRepository;
 import es.musicalia.gestmusica.localizacion.ProvinciaRepository;
+import es.musicalia.gestmusica.mail.EmailService;
+import es.musicalia.gestmusica.mail.EmailTemplateEnum;
 import es.musicalia.gestmusica.permiso.PermisoAgenciaEnum;
 import es.musicalia.gestmusica.permiso.PermisoArtistaEnum;
 import es.musicalia.gestmusica.permiso.PermisoService;
 import es.musicalia.gestmusica.rol.RolEnum;
 import es.musicalia.gestmusica.tarifa.Tarifa;
 import es.musicalia.gestmusica.tarifa.TarifaRepository;
+import es.musicalia.gestmusica.usuario.EnvioEmailException;
 import es.musicalia.gestmusica.usuario.UserService;
 import es.musicalia.gestmusica.usuario.Usuario;
+import es.musicalia.gestmusica.util.DefaultResponseBody;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -42,8 +46,9 @@ public class OcupacionServiceImpl implements OcupacionService {
 	private final UserService userService;
 	private final PermisoService permisoService;
 	private final AccesoRepository accesoRepository;
+	private final EmailService emailService;
 
-	public OcupacionServiceImpl(OcupacionRepository ocupacionRepository, ArtistaRepository artistaRepository, ProvinciaRepository provinciaRepository, MunicipioRepository municipioRepository, TipoOcupacionRepository tipoOcupacionRepository, OcupacionEstadoRepository ocupacionEstadoRepository, TarifaRepository tarifaRepository, UserService userService, PermisoService permisoService, AccesoRepository accesoRepository){
+	public OcupacionServiceImpl(OcupacionRepository ocupacionRepository, ArtistaRepository artistaRepository, ProvinciaRepository provinciaRepository, MunicipioRepository municipioRepository, TipoOcupacionRepository tipoOcupacionRepository, OcupacionEstadoRepository ocupacionEstadoRepository, TarifaRepository tarifaRepository, UserService userService, PermisoService permisoService, AccesoRepository accesoRepository, EmailService emailService){
 		this.ocupacionRepository = ocupacionRepository;
 		this.artistaRepository = artistaRepository;
         this.provinciaRepository = provinciaRepository;
@@ -54,6 +59,7 @@ public class OcupacionServiceImpl implements OcupacionService {
         this.userService = userService;
         this.permisoService = permisoService;
         this.accesoRepository = accesoRepository;
+        this.emailService = emailService;
     }
 
 	@Override
@@ -74,30 +80,51 @@ public class OcupacionServiceImpl implements OcupacionService {
 
 	@Override
 	@Transactional(readOnly = false)
-	public Void anularOcupacion(long id){
+	public DefaultResponseBody anularOcupacion(long id){
 		final Ocupacion ocupacion =  this.ocupacionRepository.findById(id).orElseThrow();
 
 		ocupacion.setOcupacionEstado(this.ocupacionEstadoRepository.findById(OcupacionEstadoEnum.ANULADO.getId()).orElseThrow());
 		this.ocupacionRepository.save(ocupacion);
-		return null;
+
+		try {
+			this.emailService.enviarMensajePorEmail(ocupacion.getUsuario().getEmail(), EmailTemplateEnum.EMAIL_NOTIFICACION_ANULACION);
+		} catch (EnvioEmailException e) {
+			return DefaultResponseBody.builder().success(false).message("Ocupacion anulada correctamente, pero ha habido un error inesperado enviando la notificación por correo").messageType("warning").build();
+		} catch (Exception e) {
+			log.error("error inesperado enviando notificacion de confirmación de ocupacion", e);
+			return DefaultResponseBody.builder().success(false).message("Ocupacion anulada correctamente, pero ha habido un error inesperado enviando la notificación por correo").messageType("warning").build();
+		}
+
+		return DefaultResponseBody.builder().success(true).message("Ocupacion anulada correctamente").messageType("success").build();
 
 	}
 
 	@Override
 	@Transactional(readOnly = false)
-	public Void confirmarOcupacion(long id){
+	public DefaultResponseBody confirmarOcupacion(long id){
 		final Ocupacion ocupacion =  this.ocupacionRepository.findById(id).orElseThrow();
 		ocupacion.setOcupacionEstado(this.ocupacionEstadoRepository.findById(OcupacionEstadoEnum.OCUPADO.getId()).orElseThrow());
 		ocupacion.setTipoOcupacion(this.tipoOcupacionRepository.findById(TipoOcupacionEnum.OCUPADO.getId()).orElseThrow());
 		ocupacion.setUsuarioConfirmacion(this.userService.obtenerUsuarioAutenticado());
 		this.ocupacionRepository.save(ocupacion);
-		return null;
+
+        try {
+            this.emailService.enviarMensajePorEmail(ocupacion.getUsuario().getEmail(), EmailTemplateEnum.EMAIL_NOTIFICACION_CONFIRMACION);
+        } catch (EnvioEmailException e) {
+			return DefaultResponseBody.builder().success(false).message("Ocupacion guardada correctamente, pero ha habido un error inesperado enviando la notificación por correo").messageType("warning").build();
+        } catch (Exception e) {
+			log.error("error inesperado enviando notificacion de confirmación de ocupacion", e);
+			return DefaultResponseBody.builder().success(false).message("Ocupacion confirmada correctamente, pero ha habido un error inesperado enviando la notificación por correo").messageType("warning").build();
+		}
+
+
+		return DefaultResponseBody.builder().success(true).message("Ocupacion confirmada correctamente").messageType("success").build();
 
 	}
 
 	@Override
 	@Transactional(readOnly = false)
-	public Ocupacion saveOcupacion(OcupacionSaveDto ocupacionSaveDto) throws es.musicalia.gestmusica.ocupacion.ModificacionOcupacionException {
+	public DefaultResponseBody saveOcupacion(OcupacionSaveDto ocupacionSaveDto) throws es.musicalia.gestmusica.ocupacion.ModificacionOcupacionException {
 
 		log.info("Empezando saveOcupacion: {}", ocupacionSaveDto.toString());
 
@@ -151,14 +178,28 @@ public class OcupacionServiceImpl implements OcupacionService {
 		Ocupacion ocupacionSave = this.ocupacionRepository.save(ocupacion);
 
 		if (!permisoConfirmarOcupacionAgencia){
-			//TODO: Enviar notificación a usuarios con rol Agencia de la ocupacion de la agencia.
+
+            try {
+                this.emailService.enviarMensajePorEmail(ocupacion.getArtista().getAgencia().getUsuario().getEmail(), EmailTemplateEnum.EMAIL_NOTIFICACION_CONFIRMACION_PENDIENTE);
+            } catch (EnvioEmailException e) {
+                log.error("error enviando notificacion de solicitud de ocupacion", e);
+				return DefaultResponseBody.builder().success(true).message("Ocupacion guardada correctamente. Pero no se ha podido enviar la notificación por correo").messageType("warning").build();
+            }catch (Exception e) {
+				log.error("error inesperado enviando notificacion de solicitud de ocupacion", e);
+				return DefaultResponseBody.builder().success(false).message("Ocupacion guardada correctamente, pero ha habido un error inesperado enviando la notificación por correo").messageType("warning").build();
+			}
+
+        }
+		else {
+
+			//TODO notificar a orquestas de galicia si aplica
 
 		}
 
 
 		log.info("Completado guardado ocupacionSave: {}", ocupacionSave.getId());
+		return DefaultResponseBody.builder().success(true).message("Ocupacion guardada correctamente").messageType("success").build();
 
-		return ocupacionSave;
 
 
 	}
