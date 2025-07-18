@@ -12,9 +12,10 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class OcupacionSaveDto {
     private Long id;
+    private Long idAgencia;
     @NotNull
     private Long idArtista;
-
+    private String estado;
     private LocalDateTime fecha;
     @NotNull
     private Long idTipoOcupacion;

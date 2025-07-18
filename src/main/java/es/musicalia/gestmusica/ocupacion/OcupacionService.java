@@ -26,4 +26,6 @@ public interface OcupacionService {
     List<OcupacionRecord> findOcupacionesDtoByAgenciaPendientes(Set<Long> idsAgencia);
 
     List<OcupacionListRecord> findOcupacionesByArtistasListAndDatesActivo(CustomAuthenticatedUser user, OcupacionListFilterDto ocupacionListFilterDto);
+
+    OcupacionSaveDto getOcupacionSaveDto(Long idOcupacion);
 }

@@ -1,73 +1,84 @@
 $(document).ready(function(){
-
-    let pickerFechaOcupacion = flatpickr("#idFechaOcupacion", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: true
-            ,
-            onChange: function(selectedDates, dateStr, instance) {
-//                pickerFechaDesde.set("maxDate", dateStr);
-            }
-
-    });
-
-
-    $("#modalNuevaOcupacion").submit(function (event) {
-
-        event.preventDefault();
-        guardar_ocupacion();
-        calendar.refetchEvents();
-
-    });
-
-
-
+    inicializarForm();
 
 });
 
 
+function inicializarForm(){
+    let estado = $('#badge-estado-ocupacion').text();
 
-function notif(type, message){
-    let duration = "5000";
-    let ripple = true;
-    let dismissible = false;
-    window.notyf.open({
-        type,
-        message,
-        duration,
-        ripple,
-        dismissible,
-        position: {
-            x: "center",
-            y: "top"
+    actualizarBadgeEstado(estado);
+
+    flatpickr("#idFechaOcupacion", {
+        disableMobile: true,
+        locale: "es",
+        altInput: true,
+        altFormat: "j F, Y",
+        dateFormat: "d-m-Y",
+        allowInput: false
+    });
+
+    const municipioChoice = new Choices('#municipio-ocupacion');
+    $('#municipio-ocupacion').data('choicesInstance', municipioChoice);
+
+    $('#ccaa-ocupacion').on('change', function() {
+        cargarProvincias('#provincia-ocupacion', $(this).val(), null)
+            .done(function() {
+                $('#provincia-ocupacion').change();
+            });
+    });
+
+
+    $('#provincia-ocupacion').on('change', function() {
+        cargarMunicipios('#municipio-ocupacion', $(this).val(), null);
+    });
+
+    $('#solo-matinal-ocupacion').on('change', function() {
+        if ($(this).is(':checked')) {
+            $('#matinal-ocupacion').prop('checked', true);
         }
     });
+
+    $("#formNuevaOcupacion").submit(function (event) {
+        event.preventDefault();
+        guardar_ocupacion();
+    });
+
+    $("#btn-confirmar-ocupacion").click(function (event) {
+        showConfirmationModal(function (confirmed) {
+            if (confirmed) {
+                confirmarOcupacion($('#id-ocupacion').val());
+                location.reload();
+            }
+        });
+
+
+    });
+
+    $("#btn-anular-ocupacion").click(function (event) {
+        showConfirmationModal(function (confirmed) {
+            if (confirmed) {
+                anularOcupacion($('#id-ocupacion').val());
+                location.reload();
+            }
+        });
+    });
 }
+
 function guardar_ocupacion() {
 
-    let tarifaSaveDto = crearOcupacionSaveDto();
+    if (validar_guardar_ocupacion()){
+        let ocupacionSaveDto = crearOcupacionSaveDto();
 
-    $("#btn-guardar-ocupacion").prop("disabled", true);
+        $("#btn-guardar-ocupacion").prop("disabled", true);
 
-    sendOcupacionPost(tarifaSaveDto);
-    $('#modalNuevaOcupacion').modal('toggle');
+        sendOcupacionPost(ocupacionSaveDto);
 
-}
+        $('#modalNuevaOcupacion').modal('toggle');
 
-
-function crearOcupacionSaveDto() {
-    let ocupacionSaveDto = {}
-
-    if ($("#id-tarifa").val()!=""){
-        tarifaSaveDto["id"] = $("#id-tarifa").val();
-    }
-    tarifaSaveDto["idArtista"] = $("#id-artista-modal").val();
-    tarifaSaveDto["fechaDesde"] = moment($("#idFechaDesde").val(), "DD-MM-YYYY").format("YYYY-MM-DDTHH:mm:ss");
-
-    if ($("#idFechaHasta").val()!=""){
-        tarifaSaveDto["fechaHasta"] = moment($("#idFechaHasta").val(), "DD-MM-YYYY").format("YYYY-MM-DDTHH:mm:ss");
     }
 
-    tarifaSaveDto["importe"] = $("#importe").val();
 
-    return tarifaSaveDto;
 }
 
 function sendOcupacionPost(ocupacionSaveDto){
@@ -84,6 +95,8 @@ function sendOcupacionPost(ocupacionSaveDto){
             $("#btn-guardar-ocupacion").prop("disabled", false);
             if (data.success){
                 notif("success", data.message);
+                location.reload();
+
             }
             else {
                 notif("error", data.message);
@@ -97,6 +110,78 @@ function sendOcupacionPost(ocupacionSaveDto){
     });
 }
 
+function validar_guardar_ocupacion(){
+    if (document.getElementById('idFechaOcupacion').value ==''){
+        notif('error','Selecciona la fecha de la ocupación');
+        return false;
+    }
+    if (document.getElementById('municipio-ocupacion').value ==''){
+        notif('error','Selecciona el municipio de la ocupación');
+        return false;
+    }
+    return true;
+
+}
+
+function crearOcupacionSaveDto() {
+    let ocupacionSaveDto = {}
+
+    ocupacionSaveDto["id"] = $("#id-ocupacion").val();
+    ocupacionSaveDto["idArtista"] = $("#id-artista-modal-ocupacion").val();
+    ocupacionSaveDto["fecha"] = moment($("#idFechaOcupacion").val(), "DD-MM-YYYY").format("YYYY-MM-DDTHH:mm:ss");
+    ocupacionSaveDto["idTipoOcupacion"] = $("#tipos-ocupacion").val();
+    ocupacionSaveDto["idCcaa"] = $("#ccaa-ocupacion").val();
+    ocupacionSaveDto["idProvincia"] = $("#provincia-ocupacion").val();
+    ocupacionSaveDto["idProvincia"] = $("#provincia-ocupacion").val();
+    ocupacionSaveDto["idMunicipio"] = $("#municipio-ocupacion").val();
+    ocupacionSaveDto["localidad"] = $("#localidad-ocupacion").val();
+    ocupacionSaveDto["lugar"] = $("#lugar-ocupacion").val();
+    ocupacionSaveDto["importe"] = $("#importe-ocupacion").val();
+    ocupacionSaveDto["porcentajeRepre"] = $("#porcentaje-repre-ocupacion").val();
+    ocupacionSaveDto["iva"] = $("#iva-ocupacion").val();
+    ocupacionSaveDto["matinal"] = $('#matinal-ocupacion').is(':checked');
+    ocupacionSaveDto["soloMatinal"] = $('#solo-matinal-ocupacion').is(':checked');
+    ocupacionSaveDto["observaciones"] = $("#observaciones-ocupacion").val();
+
+
+    return ocupacionSaveDto;
+}
+
+function actualizarBadgeEstado(estado) {
+    // Mapeo de estados a clases de fondo
+    const estadoMap = {
+        'Pendiente': 'bg-secondary',   // Azul
+        'Ocupado': 'bg-success',     // Verde
+        'Reservado': 'bg-warning',   // Amarillo
+        'Anulado': 'bg-danger'       // Rojo
+    };
+
+    // Obtener la clase de fondo correspondiente al estado
+    const bgClass = estadoMap[estado] || 'bg-secondary'; // Clase por defecto si el estado no está mapeado
+
+    // Seleccionar el badge por su ID
+    const $badge = $('#badge-estado-ocupacion');
+
+    if ($badge.length === 0) {
+        // Si el badge no existe, crearlo y añadirlo al contenedor
+        const badgeHtml = `<a href="#" id="badge-estado-ocupacion" class="badge ${bgClass} me-1 my-1">${estado}</a>`;
+        // Añadir el badge a un contenedor específico, por ejemplo, un div con id 'badge-container'
+        $('#badge-container').append(badgeHtml);
+    } else {
+        // Si el badge existe, actualizar sus clases y texto
+
+        // Remover todas las clases que empiezan con 'bg-'
+        $badge.removeClass(function(index, className) {
+            return (className.match(/(^|\s)bg-\S+/g) || []).join(' ');
+        });
+
+        // Añadir la nueva clase de fondo
+        $badge.addClass(bgClass);
+
+        // Actualizar el texto del badge
+        $badge.text(estado);
+    }
 
 
 
+}

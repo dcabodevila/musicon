@@ -34,7 +34,7 @@ public class AgenciaDto {
     private String facebook;
     private String youtube;
     private Boolean activo;
-    private Boolean tarifasPublicas;
+    private Boolean tarifasPublicas = true;
 
     private String codigoPostal;
 

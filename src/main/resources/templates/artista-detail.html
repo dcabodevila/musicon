@@ -23,11 +23,27 @@
 
                 <div th:replace="~{fragments/modal-tarifas :: modal-tarifas}"/>
                 <div th:replace="~{fragments/modal-incrementos :: modal-incrementos}"/>
-                <div th:replace="~{fragments/modal-ocupaciones :: modal-ocupaciones}"/>
+
                 <div th:replace="~{fragments/modal-tarifa-anual :: modal-tarifa-anual}"/>
                 <div th:replace="~{fragments/modal-confirmacion :: modal-confirmacion}"/>
                 <div class="mb-3">
                     <h1 class="h3 d-inline align-middle"></h1>
+                </div>
+
+                <div>
+                    <div class="modal fade" id="modalNuevaOcupacion" tabindex="-1" aria-hidden="true" style="display: none;">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" th:text="${'Ocupación para '+ artistaDto.nombre}"> </h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body m-3">
+                                    <div th:replace="~{fragments/modal-ocupaciones :: modal-ocupaciones}"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div th:if="${message}" th:class="${'alert alert-' + alertClass+ ' alert-dismissible fade show'}" role="alert">

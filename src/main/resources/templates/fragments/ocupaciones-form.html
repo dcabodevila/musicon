@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<form id="formNuevaOcupacion" th:fragment="ocupaciones-form" method="POST" action="#" th:object="${ocupacionDto}" autocomplete="off" th:with="tienePermisoOcupacion=${#authorization.expression('hasPermission(' + ocupacionDto.idArtista + ', ''ARTISTA'', ''OCUPACIONES'')')}">
+
+  <input hidden id="id-ocupacion" th:field="*{id}"/>
+
+  <div class="mb-3 row">
+    <label class="col-form-label col-sm-3 text-sm-end">Artista</label>
+    <div class="col-sm-9">
+      <select id="id-artista-modal-ocupacion" th:field="*{idArtista}" th:attr="disabled=${ocupacionDto != null}" class="form-control choices-single" required>
+        <option th:each="artista : ${listaArtistas}" th:value="${artista.id}" th:text="${artista.nombre}"></option>
+      </select>
+    </div>
+  </div>
+
+  <div  class="mb-3 row">
+    <label for="badge-estado-ocupacion" class="col-form-label col-sm-3 text-sm-end">Estado</label>
+    <div class="col-sm-1">
+      <a href="#" id="badge-estado-ocupacion" class="badge bg-primary me-1 my-1" th:text="*{estado}">aaa</a>
+    </div>
+  </div>
+
+  <div class="mb-3 row">
+    <label for="idFechaOcupacion" class="col-form-label col-sm-3 text-sm-end">Fecha</label>
+    <div class="col-sm-9">
+      <input id="idFechaOcupacion" th:value="${ocupacionDto.fecha != null} ? ${#temporals.format(ocupacionDto.fecha, 'dd-MM-yyyy')} : ''" type="text" required class="form-control flatpickr flatpickr-minimum flatpickr-input active" placeholder="Fecha ocupación">
+    </div>
+  </div>
+  <div class="mb-3 row">
+    <label for="tipos-ocupacion" class="col-form-label col-sm-3 text-sm-end">Tipo ocupación</label>
+    <div class="col-sm-9">
+      <select id="tipos-ocupacion" th:field="*{idTipoOcupacion}" class="form-control choices-single" required>
+        <option th:each="tipoOcupacion : ${listaTiposOcupacion}" th:value="${tipoOcupacion.id}" th:text="${tipoOcupacion.nombre}"></option>
+      </select>
+    </div>
+  </div>
+  <div class="mb-3 row">
+    <label for="ccaa-ocupacion" class="col-form-label col-sm-3 text-sm-end">Comunidad</label>
+    <div class="col-sm-9">
+      <select id="ccaa-ocupacion" th:field="*{idCcaa}" class="form-control choices-single" required>
+        <option th:each="ccaa : ${listaCcaa}" th:value="${ccaa.id}" th:text="${ccaa.nombre}"></option>
+      </select>
+    </div>
+  </div>
+  <div class="mb-3 row">
+    <label for="provincia-ocupacion" class="col-form-label col-sm-3 text-sm-end">Provincia</label>
+    <div class="col-sm-9">
+      <select id="provincia-ocupacion" th:field="*{idProvincia}" class="form-control choices-single" required>
+        <option th:each="provincia : ${listaProvinciasCcaaArtista}" th:value="${provincia.id}" th:text="${provincia.nombre}"></option>
+      </select>
+    </div>
+  </div>
+  <div class="mb-3 row">
+    <label for="municipio-ocupacion" class="col-form-label col-sm-3 text-sm-end">Municipio</label>
+    <div class="col-sm-9">
+      <select id="municipio-ocupacion" th:field="*{idMunicipio}" class="form-control choices-single">
+        <option th:each="municipio : ${listaMunicipioListado}" th:value="${municipio.id}" th:text="${municipio.nombre}"></option>
+      </select>
+    </div>
+  </div>
+  <div class="mb-3 row">
+    <label for="localidad-ocupacion" class="col-form-label col-sm-3 text-sm-end">Localidad</label>
+    <div class="col-sm-9">
+      <input id="localidad-ocupacion" th:field="*{localidad}" class="form-control" placeholder="Localidad"  autocomplete="off" required>
+    </div>
+  </div>
+
+  <div th:if="${#authorization.expression('hasPermission(' + ocupacionDto.idArtista + ', ''ARTISTA'', ''VER_DATOS_ECONOMICOS'')')}">
+    <div class="mb-3 row">
+      <label for="importe-ocupacion" class="col-form-label col-sm-3 text-sm-end">Importe</label>
+      <div class="col-sm-9">
+        <input id="importe-ocupacion" th:field="*{importe}" type="number" required class="form-control" placeholder="Importe" autocomplete="off" step="1">
+      </div>
+    </div>
+    <div class="mb-3 row">
+      <label for="porcentaje-repre-ocupacion" class="col-form-label col-sm-3 text-sm-end">Porcentaje representante</label>
+      <div class="col-sm-9">
+        <input id="porcentaje-repre-ocupacion" th:field="*{porcentajeRepre}" type="number" required class="form-control" placeholder="Importe" autocomplete="off" step="1">
+      </div>
+    </div>
+    <div class="mb-3 row">
+      <label for="iva-ocupacion" class="col-form-label col-sm-3 text-sm-end">IVA</label>
+      <div class="col-sm-9">
+        <input id="iva-ocupacion" th:field="*{iva}" type="number" required class="form-control" placeholder="Importe" autocomplete="off" step="1">
+      </div>
+    </div>
+
+  </div>
+
+  <div class="mb-3 row">
+    <label for="matinal-ocupacion" class="col-form-label col-sm-3 text-sm-end pt-sm-0" >Matinal</label>
+    <div class="col-sm-9">
+      <div class="form-check form-switch">
+        <input id="matinal-ocupacion" th:field="*{matinal}" class="form-check-input" type="checkbox"  checked="false" wfd-id="id17">
+      </div>
+    </div>
+  </div>
+  <div class="mb-3 row">
+    <label for="solo-matinal-ocupacion" class="col-form-label col-sm-3 text-sm-end pt-sm-0">Solo matinal</label>
+    <div class="col-sm-9">
+      <div class="form-check form-switch">
+        <input id="solo-matinal-ocupacion" th:field="*{soloMatinal}" class="form-check-input" type="checkbox"  checked="false" wfd-id="id17">
+      </div>
+    </div>
+  </div>
+
+  <div th:if="${#authorization.expression('hasPermission(' + ocupacionDto.idAgencia + ', ''AGENCIA'', ''VER_DATOS_ACTUACION'')')}">
+    <div class="mb-3 row">
+      <label for="lugar-ocupacion" class="col-form-label col-sm-3 text-sm-end">Lugar</label>
+      <div class="col-sm-9">
+        <input id="lugar-ocupacion" th:field="*{lugar}" class="form-control" placeholder="Lugar"  autocomplete="off">
+      </div>
+    </div>
+    <div class="mb-3 row">
+      <label for="observaciones-ocupacion" class="col-form-label col-sm-3 text-sm-end">Observaciones</label>
+      <div class="col-sm-9">
+                  <textarea class="form-control" th:field="*{observaciones}" placeholder="Observaciones" id="observaciones-ocupacion"
+                            autocomplete="off" maxlength="1800"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="row card-body text-center mb-3">
+
+    <div class="d-flex flex-column flex-sm-row justify-content-around">
+      <button type="button" th:if="${#authorization.expression('hasPermission(' + ocupacionDto.idArtista + ', ''ARTISTA'', ''ANULAR_OCUPACION'')') && ocupacionDto.id!=null}" id="btn-anular-ocupacion" class="btn btn-pill btn-danger m-1 col-12 col-sm-2">Anular</button>
+      <button type="button" th:if="${#authorization.expression('hasPermission(' + ocupacionDto.idArtista + ', ''ARTISTA'', ''CONFIRMAR_OCUPACION'')') && ocupacionDto.estado!='Ocupado' }" id="btn-confirmar-ocupacion" class="btn btn-pill btn-success m-1 col-12 col-sm-2">Confirmar</button>
+      <button type="submit"  id="btn-guardar-ocupacion" th:if="${tienePermisoOcupacion}" class="btn btn-pill btn-primary m-1 col-12 col-sm-2">Guardar</button>
+
+    </div>
+  </div>
+
+  <div class="modal-footer">
+
+
+  </div>
+</form>

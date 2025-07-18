@@ -9,17 +9,22 @@
     <div th:replace="~{fragments/main-template :: header-css}"/>
 
 </head>
-<body>
 <body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
 <div class="wrapper">
 
     <div th:replace="~{fragments/main-template :: sidebar}"/>
     <div class="main">
-
+        <div th:replace="~{fragments/modal-confirmacion :: modal-confirmacion}"/>
         <div th:replace="~{fragments/main-template :: navbar}"/>
         <main class="content">
             <div class="container-fluid p-0">
-
+                <div >
+                    <a th:href="@{/ocupacion/list}" class="btn btn-primary mt-n1"><i
+                            class="fas fa-arrow-left"></i> Volver a ocupaciones</a>
+                </div>
+                <div class="mb-3">
+                    <h1 class="h3 d-inline align-middle"></h1>
+                </div>
                 <div th:if="${message}" th:class="${'alert alert-' + alertClass+ ' alert-dismissible fade show'}" role="alert">
                     <div class="alert-message">
                         <strong th:text="${message}">Hello there!</strong>
@@ -35,7 +40,7 @@
                                 <h5 class="card-title" >Ocupación</h5>
                             </div>
                             <div class="card-body">
-
+                                <div th:replace="~{fragments/ocupaciones-form :: ocupaciones-form}"/>
 
                             </div>
                         </div>
@@ -48,8 +53,9 @@
 
     </div>
 </div>
+<script type="text/javascript" th:src="@{/js/comun.js}"></script>
+<script type="text/javascript" th:src="@{/js/ocupaciones.js}"></script>
 
 </body>
 
-</body>
 </html>

@@ -47,8 +47,9 @@ public class OcupacionServiceImpl implements OcupacionService {
 	private final PermisoService permisoService;
 	private final AccesoRepository accesoRepository;
 	private final EmailService emailService;
+	private final OcupacionMapper ocupacionMapper;
 
-	public OcupacionServiceImpl(OcupacionRepository ocupacionRepository, ArtistaRepository artistaRepository, ProvinciaRepository provinciaRepository, MunicipioRepository municipioRepository, TipoOcupacionRepository tipoOcupacionRepository, OcupacionEstadoRepository ocupacionEstadoRepository, TarifaRepository tarifaRepository, UserService userService, PermisoService permisoService, AccesoRepository accesoRepository, EmailService emailService){
+	public OcupacionServiceImpl(OcupacionRepository ocupacionRepository, ArtistaRepository artistaRepository, ProvinciaRepository provinciaRepository, MunicipioRepository municipioRepository, TipoOcupacionRepository tipoOcupacionRepository, OcupacionEstadoRepository ocupacionEstadoRepository, TarifaRepository tarifaRepository, UserService userService, PermisoService permisoService, AccesoRepository accesoRepository, EmailService emailService, OcupacionMapper ocupacionMapper){
 		this.ocupacionRepository = ocupacionRepository;
 		this.artistaRepository = artistaRepository;
         this.provinciaRepository = provinciaRepository;
@@ -60,6 +61,7 @@ public class OcupacionServiceImpl implements OcupacionService {
         this.permisoService = permisoService;
         this.accesoRepository = accesoRepository;
         this.emailService = emailService;
+        this.ocupacionMapper = ocupacionMapper;
     }
 
 	@Override
@@ -338,6 +340,11 @@ public class OcupacionServiceImpl implements OcupacionService {
 
 		return false;
 
+	}
+
+	@Override
+	public OcupacionSaveDto getOcupacionSaveDto(Long idOcupacion){
+		return this.ocupacionMapper.toDto(this.ocupacionRepository.findById(idOcupacion).orElseThrow());
 	}
 
 }
