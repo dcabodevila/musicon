@@ -123,7 +123,7 @@ public class OcupacionController {
     }
     private void getModelAttributeComunOcupacionList(CustomAuthenticatedUser user, Model model) {
 
-        OcupacionListFilterDto filter = OcupacionListFilterDto.builder().fechaDesde(LocalDate.now()).build();
+        OcupacionListFilterDto filter = model.containsAttribute("ocupacionListFilterDto") ? (OcupacionListFilterDto) model.getAttribute("ocupacionListFilterDto") : OcupacionListFilterDto.builder().fechaDesde(LocalDate.now()).build() ;
 
         if (!model.containsAttribute("listaOcupaciones")) {
             model.addAttribute("listaOcupaciones", new ArrayList<>());
