@@ -91,4 +91,14 @@ public class Artista {
 
     @Column(name = "tarifas_publicas")
     private boolean tarifasPublicas;
+
+    @Column(name = "id_artista_gestmanager")
+    private Long idArtistaGestmanager;
+
+    @Column(name = "condicionesContratacion")
+    private String condicionesContratacion;
+
+    @Column(name = "biografia")
+    private String biografia;
+
 }

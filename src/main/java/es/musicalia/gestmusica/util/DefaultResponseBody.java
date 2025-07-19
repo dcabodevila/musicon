@@ -12,5 +12,4 @@ public class DefaultResponseBody {
     private boolean success;
     private String messageType;
 
-
 }

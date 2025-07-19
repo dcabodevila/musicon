@@ -41,5 +41,10 @@ public class Sincronizacion {
     private LocalDateTime fechaRecepcion;
     @Column(name= "caddatos", length = 1000)
     private String cadDatos;
+
+    private Boolean procesado;
+
+    @Column(name= "codigo_error", length = 1000)
+    private String codigoError;
 }
 

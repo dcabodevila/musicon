@@ -55,6 +55,8 @@ public class ArtistaDto {
     private String youtube;
     private Boolean activo;
     private Boolean tarifasPublicas;
+    private String condicionesContratacion;
+    private String biografia;
 
     public ArtistaDto(){
         activo=true;

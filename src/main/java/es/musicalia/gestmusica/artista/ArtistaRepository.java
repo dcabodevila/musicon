@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Repository
@@ -39,5 +40,10 @@ public interface ArtistaRepository extends JpaRepository<Artista, Long> {
 	Set<Artista> findArtistasByComunidadesAndTipos(
 		@Param("idsComunidades") Set<Long> idsComunidades,
 		@Param("idsTipoArtista") Set<Long> idsTipoArtista
-);
+	);
+
+	@Query("select a from Artista a where a.idArtistaGestmanager = :idArtistaGestmanager")
+	Optional<Artista> findArtistaByIdArtistaGestmanager(@Param("idArtistaGestmanager") Long idArtistaGestmanager);
+
+
 }

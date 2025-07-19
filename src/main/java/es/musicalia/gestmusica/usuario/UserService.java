@@ -42,4 +42,7 @@ public interface UserService {
 
 	@Transactional(readOnly = false)
 	Usuario guardarUsuario(UsuarioEdicionDTO usuarioEdicionDTO, MultipartFile multipartFile);
+
+	List<Usuario> findUsuariosAdmin();
+
 }

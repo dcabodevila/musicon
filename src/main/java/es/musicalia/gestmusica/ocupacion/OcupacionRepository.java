@@ -27,5 +27,10 @@ public interface OcupacionRepository extends JpaRepository<Ocupacion, Long>, Jpa
     @Query(value ="select new es.musicalia.gestmusica.ocupacion.OcupacionRecord(t.id, t.fecha, t.artista.id,  t.artista.nombre, cast(TRUNC(t.importe,0) as string), true, t.tipoOcupacion.nombre, t.provincia.nombre, t.municipio.nombre, t.poblacion, t.matinal, t.soloMatinal, t.ocupacionEstado.nombre, t.usuario.id, t.usuario.nombre || ' ' || t.usuario.apellidos) FROM Ocupacion t WHERE t.artista.agencia.id in (:idsAgencia) and t.activo and (t.ocupacionEstado.id =3  or t.ocupacionEstado.id=2) order by t.id ")
     Optional<List<OcupacionRecord>> findOcupacionesDtoByAgenciaPendientes(@Param("idsAgencia") Set<Long> idsAgencia);
 
+    @Query(value = "select o FROM Ocupacion o WHERE o.artista.id= ?1 AND o.fecha >= ?2 AND o.fecha<= ?3 and o.activo and o.ocupacionEstado.id!=4")
+    Optional<List<Ocupacion>> findOcupacionesDtoByArtistaIdAndDatesCualquiera(long idArtista, LocalDateTime start, LocalDateTime end);
+
+//    @Query("SELECT o FROM Ocupacion o WHERE o.provincia.id = :provinciaId AND o.poblacion = :poblacion AND o.lugar = :lugar")
+//    Optional<Ocupacion> findOcupacionByProvinciaIdAndPoblacionAndLugar(@Param("provinciaId") Long provinciaId, @Param("poblacion") String poblacion, @Param("lugar") String lugar);
 
 }

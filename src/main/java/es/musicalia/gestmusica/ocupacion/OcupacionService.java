@@ -1,5 +1,6 @@
 package es.musicalia.gestmusica.ocupacion;
 
+import es.musicalia.gestmusica.api.DatosGestmanagerConvertedDTO;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.localizacion.CodigoNombreDto;
 import es.musicalia.gestmusica.util.DefaultResponseBody;
@@ -28,4 +29,9 @@ public interface OcupacionService {
     List<OcupacionListRecord> findOcupacionesByArtistasListAndDatesActivo(CustomAuthenticatedUser user, OcupacionListFilterDto ocupacionListFilterDto);
 
     OcupacionSaveDto getOcupacionSaveDto(Long idOcupacion);
+
+    Ocupacion saveOcupacionFromGestmanager(DatosGestmanagerConvertedDTO datos);
+
+    @Transactional(readOnly = false)
+    DefaultResponseBody deleteOcupacionFromGestmanager(DatosGestmanagerConvertedDTO datos);
 }

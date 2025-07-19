@@ -226,6 +226,18 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="mb-3 row">
+                                        <label class="col-form-label col-sm-3 text-sm-end">Condiciones contratación</label>
+                                        <div class="col-sm-9">
+                                            <textarea class="form-control" th:field="*{condicionesContratacion}" placeholder="Condiciones de contratación" id="condiciones-contratacion" autocomplete="off" maxlength="900"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 row">
+                                        <label class="col-form-label col-sm-3 text-sm-end">Biografía</label>
+                                        <div class="col-sm-9">
+                                            <textarea class="form-control" th:field="*{biografia}" placeholder="Biografía del artista" id="biografia" autocomplete="off" maxlength="900"></textarea>
+                                        </div>
+                                    </div>
 
                                     <button type="submit" class="btn btn-primary" th:text="${artistaDto.id==null ? 'Crear artista' : 'Guardar' }">Botón</button>
                                 </form>

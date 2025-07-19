@@ -208,4 +208,9 @@ public class UserServiceImpl implements UserService {
 		return userRepository.save(usuario);
 	}
 
+	@Override
+	public List<Usuario> findUsuariosAdmin() {
+		return userRepository.findUsuariosByRolGeneralCodigo(RolEnum.ROL_ADMINISTRADOR.getCodigo());
+	}
+
 }

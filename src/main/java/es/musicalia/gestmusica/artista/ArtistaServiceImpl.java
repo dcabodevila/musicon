@@ -156,6 +156,8 @@ public class ArtistaServiceImpl implements ArtistaService {
         artista.setLuz(dto.getLuz());
         artista.setSonido(dto.getSonido());
         artista.setTarifasPublicas(dto.getTarifasPublicas());
+		artista.setBiografia(dto.getBiografia());
+		artista.setCondicionesContratacion(dto.getCondicionesContratacion());
     }
 
     private void actualizarTiposArtista(Artista artista, List<Long> idsTipoArtista) {

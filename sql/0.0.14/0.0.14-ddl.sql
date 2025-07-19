@@ -31,3 +31,4 @@ ALTER TABLE gestmusica.sincronizacion ALTER COLUMN estado TYPE varchar(5) USING 
 
 ALTER TABLE gestmusica.sincronizacion ADD caddatos varchar(1000) NULL;
 
+

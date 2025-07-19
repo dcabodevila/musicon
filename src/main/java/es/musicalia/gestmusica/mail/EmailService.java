@@ -151,7 +151,7 @@ public class EmailService {
     /**
      * Envía un email con formato HTML y adjuntos
      */
-    public void sendHtmlEmail(EmailDto emailDto) {
+    public void sendHtmlEmail(EmailDto emailDto) throws EnvioEmailException {
         log.info("Enviando email HTML a: {}", emailDto.getTo());
 
         try {
@@ -190,7 +190,7 @@ public class EmailService {
 
         } catch (MessagingException | MailException | UnsupportedEncodingException e) {
             log.error("Error enviando email HTML a {}: {}", emailDto.getTo(), e.getMessage());
-            throw new RuntimeException("Error enviando email: " + e.getMessage(), e);
+            throw new EnvioEmailException("Error enviando email: " + e.getMessage());
         }
     }
 
@@ -218,7 +218,7 @@ public class EmailService {
      * Envía email con plantilla HTML
      */
     public void sendTemplateEmail(String to, String subject, String templateContent,
-                                  Object... templateParams) {
+                                  Object... templateParams) throws EnvioEmailException {
         String formattedContent = String.format(templateContent, templateParams);
 
         EmailDto emailDto = EmailDto.builder()
@@ -234,7 +234,7 @@ public class EmailService {
     /**
      * Envía email de notificación del sistema
      */
-    public void sendSystemNotification(String to, String subject, String message) {
+    public void sendSystemNotification(String to, String subject, String message) throws EnvioEmailException {
         String htmlContent = buildSystemNotificationTemplate(subject, message);
 
         EmailDto emailDto = EmailDto.builder()

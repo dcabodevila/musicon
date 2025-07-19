@@ -1,6 +1,8 @@
 package es.musicalia.gestmusica.ocupacion;
 
 import es.musicalia.gestmusica.acceso.AccesoRepository;
+import es.musicalia.gestmusica.api.DatosGestmanagerConvertedDTO;
+import es.musicalia.gestmusica.api.TipoEstadoGestmanagerEnum;
 import es.musicalia.gestmusica.artista.Artista;
 import es.musicalia.gestmusica.artista.ArtistaRepository;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
@@ -20,6 +22,7 @@ import es.musicalia.gestmusica.usuario.UserService;
 import es.musicalia.gestmusica.usuario.Usuario;
 import es.musicalia.gestmusica.util.DefaultResponseBody;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -88,6 +91,8 @@ public class OcupacionServiceImpl implements OcupacionService {
 		ocupacion.setOcupacionEstado(this.ocupacionEstadoRepository.findById(OcupacionEstadoEnum.ANULADO.getId()).orElseThrow());
 		this.ocupacionRepository.save(ocupacion);
 
+		//TODO: llamar a Orquestas de galicia
+
 		try {
 			this.emailService.enviarMensajePorEmail(ocupacion.getUsuario().getEmail(), EmailTemplateEnum.EMAIL_NOTIFICACION_ANULACION);
 		} catch (EnvioEmailException e) {
@@ -109,6 +114,8 @@ public class OcupacionServiceImpl implements OcupacionService {
 		ocupacion.setTipoOcupacion(this.tipoOcupacionRepository.findById(TipoOcupacionEnum.OCUPADO.getId()).orElseThrow());
 		ocupacion.setUsuarioConfirmacion(this.userService.obtenerUsuarioAutenticado());
 		this.ocupacionRepository.save(ocupacion);
+
+		//TODO: llamar a Orquestas de galicia
 
         try {
             this.emailService.enviarMensajePorEmail(ocupacion.getUsuario().getEmail(), EmailTemplateEnum.EMAIL_NOTIFICACION_CONFIRMACION);
@@ -167,15 +174,11 @@ public class OcupacionServiceImpl implements OcupacionService {
 		ocupacion.setMunicipio(this.municipioRepository.findById(ocupacionSaveDto.getIdMunicipio()).orElseThrow());
 		ocupacion.setPoblacion(ocupacionSaveDto.getLocalidad());
 		ocupacion.setLugar(ocupacionSaveDto.getLugar());
-		ocupacion.setTarifa(actualizarTarifaSegunOcupacion(ocupacionSaveDto, ocupacion));
+		ocupacion.setTarifa(actualizarTarifaSegunOcupacion(ocupacionSaveDto.getIdArtista(), ocupacionSaveDto.getFecha(), ocupacion));
 		ocupacion.setObservaciones(ocupacionSaveDto.getObservaciones());
 		ocupacion.setMatinal(ocupacionSaveDto.getMatinal());
 		ocupacion.setSoloMatinal(ocupacionSaveDto.getSoloMatinal());
 		ocupacion.setActivo(true);
-
-
-
-
 
 		Ocupacion ocupacionSave = this.ocupacionRepository.save(ocupacion);
 
@@ -236,16 +239,16 @@ public class OcupacionServiceImpl implements OcupacionService {
 		return idEstadoOcupacion;
 	}
 
-	private Tarifa actualizarTarifaSegunOcupacion(OcupacionSaveDto ocupacionSaveDto, Ocupacion ocupacion) {
+	private Tarifa actualizarTarifaSegunOcupacion(Long idArtista, LocalDateTime fecha, Ocupacion ocupacion) {
 
-		Tarifa nuevaTarifa = obtenerTarifaByOcupacion(ocupacionSaveDto,ocupacion);
+		Tarifa nuevaTarifa = obtenerTarifaByOcupacion(idArtista, fecha,ocupacion);
 
 		nuevaTarifa.setArtista(ocupacion.getArtista());
 		nuevaTarifa.setImporte(ocupacion.getImporte()!=null ? ocupacion.getImporte() : BigDecimal.ZERO);
-		nuevaTarifa.setFecha(ocupacionSaveDto.getFecha());
+		nuevaTarifa.setFecha(fecha);
 		nuevaTarifa.setActivo(Boolean.TRUE);
 
-		final String userName = this.userService.obtenerUsuarioAutenticado().getUsername();
+		final String userName = this.userService.isUserAutheticated() ? this.userService.obtenerUsuarioAutenticado().getUsername() : "GESTMANAGER";
 
 		if (nuevaTarifa.getFechaCreacion()==null){
 			nuevaTarifa.setFechaCreacion(LocalDateTime.now());
@@ -261,13 +264,13 @@ public class OcupacionServiceImpl implements OcupacionService {
 
 	}
 
-	private Tarifa obtenerTarifaByOcupacion(final OcupacionSaveDto ocupacionSaveDto, final Ocupacion ocupacion){
+	private Tarifa obtenerTarifaByOcupacion(Long idArtista, LocalDateTime fecha, final Ocupacion ocupacion){
 
 		if (ocupacion.getTarifa()!=null){
 			return ocupacion.getTarifa();
 		}
 
-		final List<Tarifa> listaTarifas = this.tarifaRepository.findTarifasByArtistaIdAndDates(ocupacionSaveDto.getIdArtista(), ocupacionSaveDto.getFecha().withHour(0).withMinute(0).withSecond(0), ocupacionSaveDto.getFecha().withHour(23).withMinute(59).withSecond(59));
+		final List<Tarifa> listaTarifas = this.tarifaRepository.findTarifasByArtistaIdAndDates(idArtista, fecha.withHour(0).withMinute(0).withSecond(0), fecha.withHour(23).withMinute(59).withSecond(59));
 
 		if (listaTarifas!=null && !listaTarifas.isEmpty()){
 			return listaTarifas.get(0);
@@ -346,5 +349,126 @@ public class OcupacionServiceImpl implements OcupacionService {
 	public OcupacionSaveDto getOcupacionSaveDto(Long idOcupacion){
 		return this.ocupacionMapper.toDto(this.ocupacionRepository.findById(idOcupacion).orElseThrow());
 	}
+
+	@Override
+	@Transactional(readOnly = false)
+	public Ocupacion saveOcupacionFromGestmanager(DatosGestmanagerConvertedDTO datos) {
+		Ocupacion ocupacion = gestManagerSincroToOcupacion(datos);
+		return this.ocupacionRepository.save(ocupacion);
+
+		//TODO: llamar a Orquestas de galicia
+	}
+
+	@Transactional(readOnly = false)
+	@Override
+	public DefaultResponseBody deleteOcupacionFromGestmanager(DatosGestmanagerConvertedDTO datos) {
+
+		Long idArtista = datos.getIdArtistaGestmanager();
+		LocalDateTime fecha = datos.getFecha();
+
+		List<String> listaDatos = Arrays.asList(datos.getDescripcion().split("\\*"));
+		if (CollectionUtils.isEmpty(listaDatos) || listaDatos.size() < 3) {
+			throw new IllegalArgumentException("Campo descripcion no puede estar vacio o tener menos de 3 elementos separados por * ");
+		}
+
+		String provincia = listaDatos.get(0);
+		String municipio = listaDatos.get(1);
+		String localidad = listaDatos.get(2);
+
+		final Artista artista = this.artistaRepository.findArtistaByIdArtistaGestmanager(datos.getIdArtistaGestmanager()).orElseThrow(() -> new IllegalArgumentException("Artista no encontrado con el idArtistaGestmanager: " + datos.getIdArtistaGestmanager()));
+
+		Optional<List<Ocupacion>> listaOcupaciones = this.ocupacionRepository.findOcupacionesDtoByArtistaIdAndDatesCualquiera(artista.getId(), fecha.withHour(0).withMinute(0).withSecond(0), fecha.withHour(23).withMinute(59).withSecond(59));
+
+		if (listaOcupaciones.isPresent() && !listaOcupaciones.get().isEmpty()) {
+
+			if (listaOcupaciones.get().size() > 1) {
+				List<Ocupacion> ocupacionesFiltradas = listaOcupaciones.get().stream()
+						.filter(o -> o.getProvincia().getNombre().equalsIgnoreCase(provincia.trim()) &&
+								o.getMunicipio().getNombre().equalsIgnoreCase(municipio.trim()) &&
+								o.getPoblacion().equalsIgnoreCase(localidad.trim()))
+						.toList();
+
+				if (ocupacionesFiltradas.size() > 1) {
+					DefaultResponseBody.builder().success(false).message("Se ha encontrado más de 1 ocupación que coincide con la ubicación especificada").messageType("warning").build();
+				}
+				if (ocupacionesFiltradas.isEmpty()) {
+					DefaultResponseBody.builder().success(false).message("No se encontraron ocupaciones que coincidan con la ubicación especificada").messageType("warning").build();
+				}
+				return this.anularOcupacion(ocupacionesFiltradas.get(0).getId());
+
+			} else {
+				return this.anularOcupacion(listaOcupaciones.get().get(0).getId());
+			}
+
+		}
+		else {
+			throw new IllegalArgumentException("No se encontraron ocupaciones para el artista con id: " + idArtista + " y fecha: " + fecha);
+		}
+
+
+
+
+	}
+
+
+	private Ocupacion gestManagerSincroToOcupacion(DatosGestmanagerConvertedDTO datos) {
+
+		Ocupacion ocupacion = new Ocupacion();
+
+		// Datos básicos
+		ocupacion.setFecha(datos.getFecha());
+		ocupacion.setPoblacion(datos.getPoblacion());
+		ocupacion.setLugar(datos.getNombreLocal());
+		ocupacion.setMatinal(datos.getMatinal());
+		ocupacion.setSoloMatinal(datos.getSoloMatinal());
+
+		// Entidades relacionadas
+		ocupacion.setArtista(artistaRepository.findArtistaByIdArtistaGestmanager(datos.getIdArtistaGestmanager())
+				.orElseThrow(() -> new IllegalArgumentException("Artista no encontrado: " + datos.getIdArtistaGestmanager())));
+
+		ocupacion.setProvincia(provinciaRepository.findProvinciaByNombreUpperCase(datos.getProvincia().trim().toUpperCase())
+				.orElseThrow(() -> new IllegalArgumentException("Provincia no encontrada: " + datos.getProvincia())));
+
+		ocupacion.setMunicipio(municipioRepository.findMunicipioByNombreUpperCase(datos.getMunicipio().trim().toUpperCase())
+				.orElseThrow(() -> new IllegalArgumentException("Municipio no encontrado: " + datos.getMunicipio())));
+
+		// Estado y tipo según el estado recibido
+		if (datos.getEstado() == TipoEstadoGestmanagerEnum.OCUPADO) {
+			ocupacion.setTipoOcupacion(tipoOcupacionRepository.findById(TipoOcupacionEnum.OCUPADO.getId())
+					.orElseThrow(() -> new IllegalArgumentException("Tipo ocupación no encontrado: OCUPADO")));
+			ocupacion.setOcupacionEstado(ocupacionEstadoRepository.findById(OcupacionEstadoEnum.OCUPADO.getId())
+					.orElseThrow(() -> new IllegalArgumentException("Estado ocupación no encontrado: OCUPADO")));
+		} else {
+			ocupacion.setTipoOcupacion(tipoOcupacionRepository.findById(TipoOcupacionEnum.RESERVADO.getId())
+					.orElseThrow(() -> new IllegalArgumentException("Tipo ocupación no encontrado: RESERVADO")));
+			ocupacion.setOcupacionEstado(ocupacionEstadoRepository.findById(OcupacionEstadoEnum.RESERVADO.getId())
+					.orElseThrow(() -> new IllegalArgumentException("Estado ocupación no encontrado: RESERVADO")));
+		}
+
+
+		final List<Usuario> usuariosAdmin = this.userService.findUsuariosAdmin();
+
+		if (usuariosAdmin.isEmpty()) {
+			throw new IllegalArgumentException("No hay usuarios administradores registrados");
+		}
+
+		final Usuario usuario = usuariosAdmin.get(0);
+
+		// Datos de auditoría
+		ocupacion.setUsuario(usuario);
+		ocupacion.setFechaCreacion(LocalDateTime.now());
+		ocupacion.setUsuarioCreacion("GESTMANAGER");
+		ocupacion.setActivo(true);
+
+		// Valores por defecto
+		ocupacion.setImporte(BigDecimal.ZERO);
+		ocupacion.setPorcentajeRepre(BigDecimal.ZERO);
+		ocupacion.setIva(BigDecimal.ZERO);
+		ocupacion.setTarifa(actualizarTarifaSegunOcupacion(ocupacion.getArtista().getId(), ocupacion.getFecha(), ocupacion));
+		return ocupacion;
+	}
+
+
+
 
 }
