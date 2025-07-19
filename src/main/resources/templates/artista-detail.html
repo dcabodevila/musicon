@@ -149,7 +149,7 @@
                                                                                     th:target="_blank"></a></li>
                                 </ul>
 
-                                <hr class="my-0">
+
                                 <a th:if="${#authorization.expression('hasPermission(' + artistaDto.id + ', ''ARTISTA'', ''ARTISTAS_EDITAR'')')}"
                                    th:href="@{/artista/edit/__${artistaDto.id}__}" class="btn btn-pill btn-secondary m-1 col-12">Editar datos
                                     artista</a>

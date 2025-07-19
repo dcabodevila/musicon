@@ -16,12 +16,14 @@ $datos = [
 send($datos);
 
 function send($datos) {
-    $urlApi = 'http://localhost:8081/api/gestmanager/publicar';
+    $urlApi = 'https://gestmusica.onrender.com/api/gestmanager/publicar';
     $ch = curl_init($urlApi);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($datos));
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
     $response = curl_exec($ch);
     $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);

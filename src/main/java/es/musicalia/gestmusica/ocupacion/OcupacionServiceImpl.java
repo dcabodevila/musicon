@@ -96,10 +96,10 @@ public class OcupacionServiceImpl implements OcupacionService {
 		try {
 			this.emailService.enviarMensajePorEmail(ocupacion.getUsuario().getEmail(), EmailTemplateEnum.EMAIL_NOTIFICACION_ANULACION);
 		} catch (EnvioEmailException e) {
-			return DefaultResponseBody.builder().success(false).message("Ocupacion anulada correctamente, pero ha habido un error inesperado enviando la notificación por correo").messageType("warning").build();
+			return DefaultResponseBody.builder().success(true).message("Ocupacion anulada correctamente, pero ha habido un error inesperado enviando la notificación por correo").messageType("warning").build();
 		} catch (Exception e) {
 			log.error("error inesperado enviando notificacion de confirmación de ocupacion", e);
-			return DefaultResponseBody.builder().success(false).message("Ocupacion anulada correctamente, pero ha habido un error inesperado enviando la notificación por correo").messageType("warning").build();
+			return DefaultResponseBody.builder().success(true).message("Ocupacion anulada correctamente, pero ha habido un error inesperado enviando la notificación por correo").messageType("warning").build();
 		}
 
 		return DefaultResponseBody.builder().success(true).message("Ocupacion anulada correctamente").messageType("success").build();
@@ -120,10 +120,10 @@ public class OcupacionServiceImpl implements OcupacionService {
         try {
             this.emailService.enviarMensajePorEmail(ocupacion.getUsuario().getEmail(), EmailTemplateEnum.EMAIL_NOTIFICACION_CONFIRMACION);
         } catch (EnvioEmailException e) {
-			return DefaultResponseBody.builder().success(false).message("Ocupacion guardada correctamente, pero ha habido un error inesperado enviando la notificación por correo").messageType("warning").build();
+			return DefaultResponseBody.builder().success(true).message("Ocupacion guardada correctamente, pero ha habido un error inesperado enviando la notificación por correo").messageType("warning").build();
         } catch (Exception e) {
 			log.error("error inesperado enviando notificacion de confirmación de ocupacion", e);
-			return DefaultResponseBody.builder().success(false).message("Ocupacion confirmada correctamente, pero ha habido un error inesperado enviando la notificación por correo").messageType("warning").build();
+			return DefaultResponseBody.builder().success(true).message("Ocupacion confirmada correctamente, pero ha habido un error inesperado enviando la notificación por correo").messageType("warning").build();
 		}
 
 
@@ -191,7 +191,7 @@ public class OcupacionServiceImpl implements OcupacionService {
 				return DefaultResponseBody.builder().success(true).message("Ocupacion guardada correctamente. Pero no se ha podido enviar la notificación por correo").messageType("warning").build();
             }catch (Exception e) {
 				log.error("error inesperado enviando notificacion de solicitud de ocupacion", e);
-				return DefaultResponseBody.builder().success(false).message("Ocupacion guardada correctamente, pero ha habido un error inesperado enviando la notificación por correo").messageType("warning").build();
+				return DefaultResponseBody.builder().success(true).message("Ocupacion guardada correctamente, pero ha habido un error inesperado enviando la notificación por correo").messageType("warning").build();
 			}
 
         }
