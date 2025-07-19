@@ -623,4 +623,39 @@ if(isset($_POST['id_artista']) && $_POST['id_artista'] != '' ){
 
 
 if($error != ''){   echo "ERROR:".$error; 
-}else{	echo "CORRECTO: ".$correcto; } 
+}else{	echo "CORRECTO: ".$correcto; }
+
+// =====================================
+// Envío de datos a API REST Gestmanager
+// =====================================
+$datos_envio = [
+    'id_artista' => $id_artista,
+    'accion' => $accion,
+    'fecha' => $fecha,
+    'descripcion' => $descripcion,
+    'poblacion' => $poblacion,
+    'municipio' => $municipio,
+    'provincia' => $provincia,
+    'pais' => $pais,
+    'nombre_local' => $nombre_local,
+    'estado' => $estado,
+    'indicadores' => $indicadores,
+];
+
+$datos_json = json_encode($datos_envio);
+$url_api = "https://gestmusica.onrender.com/api/gestmanager/publicar";
+$ch = curl_init($url_api);
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_POSTFIELDS, $datos_json);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Content-Type: application/json'
+]);
+$response = curl_exec($ch);
+if (curl_errno($ch)) {
+    echo "Error al enviar a Gestmusica API: " . curl_error($ch);
+} else {
+    echo "Enviado a Gestmusica correctamente. Respuesta: " . $response;
+}
+curl_close($ch);
+
