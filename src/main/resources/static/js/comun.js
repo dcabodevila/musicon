@@ -125,6 +125,7 @@ function notifDuration(type, message, duration){
   }
 
   function confirmarOcupacion(idOcupacion){
+
       $.ajax({
           type: "GET",
           contentType: "application/json; charset=utf-8",
@@ -149,7 +150,6 @@ function notifDuration(type, message, duration){
           }
       });
 
-      $('#modalNuevaOcupacion').modal('toggle');
   }
 
   function anularOcupacion(idOcupacion){
@@ -177,7 +177,6 @@ function notifDuration(type, message, duration){
           }
       });
 
-      $('#modalNuevaOcupacion').modal('toggle');
   }
 
 function clearFlatpickrDate(inputId) {

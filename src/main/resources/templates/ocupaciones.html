@@ -22,6 +22,7 @@
         <main class="content">
 
             <div class="container-fluid p-0">
+
                 <div class="card">
                     <div class="card-header">
                         <h5 class="card-title mb-0">Listado de ocupaciones</h5>
@@ -44,7 +45,9 @@
                                     <div class="col-sm-3">
                                         <select id="artista" th:field="*{idArtista}" class="form-control choices-single">
                                             <option value="">Todos los artistas de la agencia</option>
-                                            <option th:each="artista : ${listaArtistas}" th:value="${artista.id}" th:text="${artista.nombre}"></option>
+                                            <option th:each="artista : ${listaArtistas}" th:value="${artista.id}"
+                                                    th:text="${artista.nombre}"></option>
+
                                         </select>
                                     </div>
                                 </div>
@@ -72,8 +75,18 @@
 
                             </div>
                         </div>
+                        <div class="row col-12 mb-3">
+
+                            <div class="card-body text-center">
+
+                                <div class="d-flex flex-column flex-sm-row justify-content-around">
+                                    <button type="submit" class="btn btn-pill btn-primary m-1 col-12 col-sm-3" >Buscar</button>
+                                </div>
+
+                            </div>
+                        </div>
+
                         <div class="text-center mb-3">
-                            <button type="submit" class="btn btn-primary">Buscar</button>
                         </div>
                     </form>
 
@@ -95,6 +108,21 @@
                     <div class="col-12 col-sm-12 col-md-12 col-lg-12" >
 
                         <div class="col-12 col-md-12 col-lg-12">
+                            <div class="row col-12 mb-3">
+
+                                <div class="card-body text-center">
+
+                                    <div class="d-flex flex-column flex-sm-row justify-content-around">
+
+                                        <button id="btn-nueva-ocupacion" type="button" data-bs-toggle="modal" data-bs-target="#nuevaOcupacionModal"
+                                            class="btn btn-pill btn-success m-1 col-12 col-sm-3">
+                                            Nueva ocupación
+                                        </button>
+
+                                    </div>
+
+                                </div>
+                            </div>
                             <div class="card">
                                 <div class="card-header">
                                     <h5 class="card-title">Lista de ocupaciones</h5>
@@ -176,6 +204,38 @@
         </main>
         <div th:replace="~{fragments/main-template :: footer}"/>
 
+    </div>
+</div>
+
+<!-- Modal para crear nueva ocupación -->
+<div class="modal fade" id="nuevaOcupacionModal" tabindex="-1"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nueva Ocupación</h5>
+                <button type="button" class="btn-close"
+                        data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Seleccione Artista</label>
+                    <select class="form-select" id="selectArtistasNuevaOcupacion" required>
+                        <option th:each="artista : ${listaArtistasPermisosOcupacion}"
+                                th:value="${artista.id}"
+                                th:text="${artista.nombre}"></option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary"
+                        data-bs-dismiss="modal">Cerrar
+                </button>
+                <button type="button" class="btn btn-primary"
+                        onclick="crearNuevaOcupacion()">Crear Ocupación
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 

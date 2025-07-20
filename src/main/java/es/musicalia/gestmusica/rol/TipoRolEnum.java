@@ -10,7 +10,9 @@ import java.util.Arrays;
 public enum TipoRolEnum {
     GENERAL(0, "GENERAL"),
     AGENCIA(1, "AGENCIA"),
-    ARTISTA(2, "ARTISTA");
+    ARTISTA(2, "ARTISTA"),
+    ADMIN(2, "ADMIN");
+
 
     private final Integer id;
     private final String descripcion;

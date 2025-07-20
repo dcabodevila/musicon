@@ -96,10 +96,10 @@ public class OcupacionServiceImpl implements OcupacionService {
 		try {
 			this.emailService.enviarMensajePorEmail(ocupacion.getUsuario().getEmail(), EmailTemplateEnum.EMAIL_NOTIFICACION_ANULACION);
 		} catch (EnvioEmailException e) {
-			return DefaultResponseBody.builder().success(true).message("Ocupacion anulada correctamente, pero ha habido un error inesperado enviando la notificación por correo").messageType("warning").build();
+			return DefaultResponseBody.builder().success(true).message("Ocupacion anulada correctamente, pero ha habido un error enviando la notificación por correo").messageType("warning").build();
 		} catch (Exception e) {
 			log.error("error inesperado enviando notificacion de confirmación de ocupacion", e);
-			return DefaultResponseBody.builder().success(true).message("Ocupacion anulada correctamente, pero ha habido un error inesperado enviando la notificación por correo").messageType("warning").build();
+			return DefaultResponseBody.builder().success(true).message("Ocupacion anulada correctamente, pero ha habido un error enviando la notificación por correo").messageType("warning").build();
 		}
 
 		return DefaultResponseBody.builder().success(true).message("Ocupacion anulada correctamente").messageType("success").build();
@@ -120,10 +120,10 @@ public class OcupacionServiceImpl implements OcupacionService {
         try {
             this.emailService.enviarMensajePorEmail(ocupacion.getUsuario().getEmail(), EmailTemplateEnum.EMAIL_NOTIFICACION_CONFIRMACION);
         } catch (EnvioEmailException e) {
-			return DefaultResponseBody.builder().success(true).message("Ocupacion guardada correctamente, pero ha habido un error inesperado enviando la notificación por correo").messageType("warning").build();
+			return DefaultResponseBody.builder().success(true).message("Ocupacion guardada correctamente, pero ha habido un error enviando la notificación por correo").messageType("warning").build();
         } catch (Exception e) {
 			log.error("error inesperado enviando notificacion de confirmación de ocupacion", e);
-			return DefaultResponseBody.builder().success(true).message("Ocupacion confirmada correctamente, pero ha habido un error inesperado enviando la notificación por correo").messageType("warning").build();
+			return DefaultResponseBody.builder().success(true).message("Ocupacion confirmada correctamente, pero ha habido un error enviando la notificación por correo").messageType("warning").build();
 		}
 
 
@@ -167,8 +167,20 @@ public class OcupacionServiceImpl implements OcupacionService {
 
 		final boolean permisoConfirmarOcupacionAgencia = this.permisoService.existePermisoUsuarioAgencia(artista.getAgencia().getId(), PermisoAgenciaEnum.CONFIRMAR_OCUPACION.name());
 
-		Long idEstadoOcupacion = getIdEstadoOcupacion(ocupacionSaveDto.getIdTipoOcupacion(), permisoConfirmarOcupacionAgencia);
-		ocupacion.setOcupacionEstado(this.ocupacionEstadoRepository.findById(idEstadoOcupacion).orElseThrow());
+
+		if (ocupacionSaveDto.getId()==null) {
+			final Long idEstadoOcupacion = getIdEstadoOcupacion(ocupacionSaveDto.getIdTipoOcupacion(), permisoConfirmarOcupacionAgencia);
+			ocupacion.setOcupacionEstado(this.ocupacionEstadoRepository.findById(idEstadoOcupacion).orElseThrow());
+		}
+		else {
+			if (TipoOcupacionEnum.RESERVADO.getId().equals(ocupacionSaveDto.getIdTipoOcupacion())){
+				ocupacion.setOcupacionEstado(this.ocupacionEstadoRepository.findById(OcupacionEstadoEnum.RESERVADO.getId()).orElseThrow());
+			}
+
+			//En otro caso no aplica setear el estado, se mantiene el estado que tenía antes.
+
+		}
+
 
 		ocupacion.setProvincia(this.provinciaRepository.findById(ocupacionSaveDto.getIdProvincia()).orElseThrow());
 		ocupacion.setMunicipio(this.municipioRepository.findById(ocupacionSaveDto.getIdMunicipio()).orElseThrow());
@@ -188,10 +200,10 @@ public class OcupacionServiceImpl implements OcupacionService {
                 this.emailService.enviarMensajePorEmail(ocupacion.getArtista().getAgencia().getUsuario().getEmail(), EmailTemplateEnum.EMAIL_NOTIFICACION_CONFIRMACION_PENDIENTE);
             } catch (EnvioEmailException e) {
                 log.error("error enviando notificacion de solicitud de ocupacion", e);
-				return DefaultResponseBody.builder().success(true).message("Ocupacion guardada correctamente. Pero no se ha podido enviar la notificación por correo").messageType("warning").build();
+				return DefaultResponseBody.builder().success(true).message("Ocupacion guardada correctamente. Pero no se ha podido enviar la notificación por correo").messageType("warning").idEntidad(ocupacionSave.getId()).build();
             }catch (Exception e) {
-				log.error("error inesperado enviando notificacion de solicitud de ocupacion", e);
-				return DefaultResponseBody.builder().success(true).message("Ocupacion guardada correctamente, pero ha habido un error inesperado enviando la notificación por correo").messageType("warning").build();
+				log.error("error enviando notificacion de solicitud de ocupacion", e);
+				return DefaultResponseBody.builder().success(true).message("Ocupacion guardada correctamente, pero ha habido un error enviando la notificación por correo").messageType("warning").idEntidad(ocupacionSave.getId()).build();
 			}
 
         }
@@ -203,7 +215,7 @@ public class OcupacionServiceImpl implements OcupacionService {
 
 
 		log.info("Completado guardado ocupacionSave: {}", ocupacionSave.getId());
-		return DefaultResponseBody.builder().success(true).message("Ocupacion guardada correctamente").messageType("success").build();
+		return DefaultResponseBody.builder().success(true).message("Ocupacion guardada correctamente").messageType("success").idEntidad(ocupacionSave.getId()).build();
 
 
 

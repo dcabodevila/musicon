@@ -89,4 +89,9 @@ $(document).ready(function(){
 
 });
 
+function crearNuevaOcupacion() {
+    const selectedArtistId = $('#selectArtistasNuevaOcupacion').val();
+    window.location.href = `/ocupacion/nueva/${selectedArtistId}`;
+}
+
 

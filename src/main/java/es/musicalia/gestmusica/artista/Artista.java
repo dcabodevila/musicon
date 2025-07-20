@@ -101,4 +101,7 @@ public class Artista {
     @Column(name = "biografia")
     private String biografia;
 
+    @Column(name = "permite_orquestas_de_galicia")
+    private boolean permiteOrquestasDeGalicia;
+
 }

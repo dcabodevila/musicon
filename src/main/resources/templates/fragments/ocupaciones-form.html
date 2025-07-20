@@ -15,7 +15,7 @@
     </div>
   </div>
 
-  <div  class="mb-3 row">
+  <div  class="mb-3 row" th:if="${ocupacionDto.estado != null}">
     <label for="badge-estado-ocupacion" class="col-form-label col-sm-3 text-sm-end">Estado</label>
     <div class="col-sm-1">
       <a href="#" id="badge-estado-ocupacion" class="badge bg-primary me-1 my-1" th:text="*{estado}">aaa</a>
@@ -126,7 +126,7 @@
 
     <div class="d-flex flex-column flex-sm-row justify-content-around">
       <button type="button" th:if="${#authorization.expression('hasPermission(' + ocupacionDto.idArtista + ', ''ARTISTA'', ''ANULAR_OCUPACION'')') && ocupacionDto.id!=null}" id="btn-anular-ocupacion" class="btn btn-pill btn-danger m-1 col-12 col-sm-2">Anular</button>
-      <button type="button" th:if="${#authorization.expression('hasPermission(' + ocupacionDto.idArtista + ', ''ARTISTA'', ''CONFIRMAR_OCUPACION'')') && ocupacionDto.estado!='Ocupado' }" id="btn-confirmar-ocupacion" class="btn btn-pill btn-success m-1 col-12 col-sm-2">Confirmar</button>
+      <button type="button" th:if="${#authorization.expression('hasPermission(' + ocupacionDto.idAgencia + ', ''AGENCIA'', ''CONFIRMAR_OCUPACION'')') && ocupacionDto.id!=null && ocupacionDto.estado!='Ocupado' }" id="btn-confirmar-ocupacion" class="btn btn-pill btn-success m-1 col-12 col-sm-2">Confirmar</button>
       <button type="submit"  id="btn-guardar-ocupacion" th:if="${tienePermisoOcupacion}" class="btn btn-pill btn-primary m-1 col-12 col-sm-2">Guardar</button>
 
     </div>

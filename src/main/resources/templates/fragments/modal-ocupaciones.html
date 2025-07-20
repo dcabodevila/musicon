@@ -119,7 +119,7 @@
   <div class="modal-footer">
     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
     <button type="button" th:if="${#authorization.expression('hasPermission(' + artistaDto.id + ', ''ARTISTA'', ''ANULAR_OCUPACION'')')}" id="btn-anular-ocupacion" class="btn btn-danger">Anular</button>
-    <button type="button" th:if="${#authorization.expression('hasPermission(' + artistaDto.id + ', ''ARTISTA'', ''CONFIRMAR_OCUPACION'')')}" id="btn-confirmar-ocupacion" class="btn btn-success">Confirmar</button>
+    <button type="button" th:if="${#authorization.expression('hasPermission(' + artistaDto.idAgencia + ', ''AGENCIA'', ''CONFIRMAR_OCUPACION'')')}" id="btn-confirmar-ocupacion" class="btn btn-success">Confirmar</button>
     <button type="submit" id="btn-guardar-ocupacion" class="btn btn-primary">Guardar</button>
   </div>
 </form>

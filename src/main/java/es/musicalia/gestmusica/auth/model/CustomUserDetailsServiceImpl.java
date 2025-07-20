@@ -7,6 +7,7 @@ import es.musicalia.gestmusica.acceso.AccesoService;
 import es.musicalia.gestmusica.accesoartista.AccesoArtistaService;
 import es.musicalia.gestmusica.permiso.Permiso;
 import es.musicalia.gestmusica.permiso.PermisoService;
+import es.musicalia.gestmusica.rol.TipoRolEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -42,6 +43,9 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService {
 		final Usuario usuario = trimmedUsername.matches(emailPattern) ? this.usuarioRepository.findUsuarioActivoByMail(trimmedUsername).orElseThrow( () -> new UsernameNotFoundException(username)) : this.usuarioRepository.findByUsername(trimmedUsername).orElseThrow(() -> new UsernameNotFoundException(username));
 
 		final List<GrantedAuthority> auth = new ArrayList<GrantedAuthority>();
+
+
+		boolean isUserAdmin = false;
 		if (usuario.getRolGeneral()!=null){
 			final Set<Permiso> permisos = usuario.getRolGeneral().getPermisos();
 
@@ -49,6 +53,9 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService {
 				GrantedAuthority authority = new SimpleGrantedAuthority(permiso.getCodigo());
 				auth.add(authority);
 			}
+
+			isUserAdmin = TipoRolEnum.ADMIN.name().equals(usuario.getRolGeneral().getNombre());
+
 		}
 
 		final Map<Long, Set<String>> mapPermisosArtista = this.accesoArtistaService.obtenerMapPermisosArtista(usuario.getId());

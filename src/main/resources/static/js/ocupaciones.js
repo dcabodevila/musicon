@@ -95,7 +95,9 @@ function sendOcupacionPost(ocupacionSaveDto){
             $("#btn-guardar-ocupacion").prop("disabled", false);
             if (data.success){
                 notif("success", data.message);
-                location.reload();
+                obtenerOcupacionDto(data.idEntidad);
+
+//                location.reload();
 
             }
             else {
@@ -185,3 +187,82 @@ function actualizarBadgeEstado(estado) {
 
 
 }
+
+function obtenerOcupacionDto(idOcupacion) {
+    $.ajax({
+        url: '/ocupacion/get/' + idOcupacion,
+        method: 'GET',
+        dataType: 'json',
+        success: function(ocupacionDto) {
+            // Establecer valores básicos
+            $("#id-ocupacion").val(ocupacionDto.id);
+            $("#id-artista-modal-ocupacion").val(ocupacionDto.idArtista);
+            $("#tipos-ocupacion").val(ocupacionDto.idTipoOcupacion);
+            
+            // Establecer fecha
+            if (ocupacionDto.start) {
+                $("#idFechaOcupacion").val(moment(ocupacionDto.start).format('DD-MM-YYYY'));
+            }
+            
+            // Gestionar ubicación
+            $("#ccaa-ocupacion").val(ocupacionDto.idCcaa);
+            cargarProvincias('#provincia-ocupacion', ocupacionDto.idCcaa, ocupacionDto.idProvincia)
+                .done(function() {
+                    cargarMunicipios('#municipio-ocupacion', ocupacionDto.idProvincia, ocupacionDto.idMunicipio);
+                });
+            
+            // Datos de localización
+            $("#localidad-ocupacion").val(ocupacionDto.localidad);
+            $("#lugar-ocupacion").val(ocupacionDto.lugar);
+            
+            // Datos económicos
+            $("#importe-ocupacion").val(ocupacionDto.importe || 0);
+            $("#porcentaje-repre-ocupacion").val(ocupacionDto.porcentajeRepre || 0);
+            $("#iva-ocupacion").val(ocupacionDto.iva || 0);
+            
+            // Checkboxes
+            $('#matinal-ocupacion').prop('checked', Boolean(ocupacionDto.matinal));
+            $('#solo-matinal-ocupacion').prop('checked', Boolean(ocupacionDto.soloMatinal));
+            
+            // Datos adicionales
+            $("#observaciones-ocupacion").val(ocupacionDto.observaciones);
+            
+            // Gestionar estado y UI
+            if (ocupacionDto.estado) {
+                actualizarBadgeEstado(ocupacionDto.estado);
+                $('#divEstadoOcupacion').show();
+                mostrarOcultarBotonesModalOcupacion(ocupacionDto.estado);
+            }
+
+        },
+        error: function(xhr, status, error) {
+            console.error('Error al obtener la ocupación:', error);
+            notif('error', 'Error al cargar los datos de la ocupación');
+        }
+    });
+}
+
+    // Al mostrar la modal
+    function mostrarOcultarBotonesModalOcupacion(estado) {
+        const $ocupacionInput = $('#id-ocupacion');
+        const $btnAnular = $('#btn-anular-ocupacion');
+        const $btnConfirmar = $('#btn-confirmar-ocupacion');
+
+        // Verificar el valor del input al mostrar la modal
+        if ($ocupacionInput.val().trim() !== "") {
+            $btnAnular.show();
+            $btnConfirmar.show();
+        } else {
+            $btnAnular.hide();
+            $btnConfirmar.hide();
+        }
+
+        if (estado!=null && estado!='Ocupado'){
+            $btnConfirmar.show();
+        }
+        else {
+            $btnConfirmar.hide();
+        }
+
+
+    }

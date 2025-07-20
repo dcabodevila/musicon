@@ -1,0 +1,50 @@
+
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+    <div class="card" th:fragment="ocupaciones-pendientes">
+        <div class="card-header">
+            <!-- El contenido existente de la tarjeta se mantiene igual -->
+            <div class="row">
+                <div class="col mt-0">
+                    <h5 class="card-title" th:text="${ocupacion.artista}">Ocupación pendiente</h5>
+                    <a th:if="${ocupacion.estado=='Reservado'}" href="#" class="badge bg-warning me-1 my-1" th:text="${ocupacion.estado}">Matinal</a>
+                </div>
+
+            </div>
+        </div>
+        <!-- Contenido de la tarjeta -->
+        <div class="card-body">
+
+            <p>
+            <div class="d-flex align-items-center">
+                <div class="stat text-primary">
+                    <i class="align-middle" data-feather="clock"></i>
+                </div>
+                <h1 class="mt-0 mb-0 ms-2 align-baseline" th:text="${@dateUtils.formatLocalDateTime(ocupacion.start, 'dd/MM/yyyy')}"></h1>
+            </div>
+            </p>
+            <p>
+            <div th:if="${ocupacion.importe!='0'}" class="d-flex align-items-center">
+                <div class="stat text-primary">
+                    <i class="align-middle" data-feather="dollar-sign"></i>
+                </div>
+                <h1 class="mt-0 mb-0 ms-2 align-baseline"  th:text="${ocupacion.importe}"></h1>
+            </div>
+            </p>
+
+            <ul class="list-unstyled mb-0">
+                <li class="mb-1"><span class="fas fa-user fa-fw me-1"></span> <a :href="#"  th:text="${ocupacion.nombreUsuario}"></a></li>
+                <li class="mb-1"><span class="fas fa-map-marked fa-fw me-1" ></span> <span th:text="${ocupacion.localidad + ', ' +ocupacion.municipio + ', ' + ocupacion.provincia}"></span></li>
+                <li class="mb-1" th:if="${ocupacion.matinal || ocupacion.soloMatinal}"><a th:if="${ocupacion.matinal}" href="#" class="badge bg-primary me-1 my-1">Matinal</a><a th:if="${ocupacion.soloMatinal}" href="#" class="badge bg-primary me-1 my-1">Solo matinal</a></li>
+            </ul>
+
+        </div>
+        <div class="card-footer d-flex justify-content-between">
+
+            <a type="button" th:href="@{'/ocupacion/{id}'(id=${ocupacion.id})}" class="btn btn-pill btn-primary m-1 col-12">Ver</a>
+
+        </div>
+    </div>
+
+</html>

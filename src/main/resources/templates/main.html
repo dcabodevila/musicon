@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,6 +7,7 @@
         <meta name="description" content="">
         <meta name="author" content=""><head>
         <div th:replace="~{fragments/main-template :: header-css}"/>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     </head>
 
     <body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
@@ -36,7 +37,7 @@
                                         <div class="card">
                                             <div class="card-body text-center py-5">
                                                 <img th:src="@{/logo/logo-name-transparente.png}" alt="Gestmusica Logo"
-                                                     class="img-fluid mb-3" style="max-height: 340px;">
+                                                     class="img-fluid mb-3" style="max-height: 200px;">
                                             </div>
                                         </div>
                                     </div>
@@ -72,7 +73,12 @@
                                     <i class="align-middle me-2 fas fa-fw fa-music"></i>
                                     <span class="align-middle">Mis artistas</span>
                                 </a>
-
+                                <a th:if="${hasPermisoOcupaciones != null and hasPermisoOcupaciones}"
+                                   th:href="@{/ocupacion/list}"
+                                   class="btn btn-pill btn-success m-1 col-12 col-sm-3">
+                                    <i class="align-middle me-2 fas fa-fw fa-calendar-plus"></i>
+                                    <span class="align-middle">Ocupaciones</span>
+                                </a>
                                 <a sec:authorize="hasAuthority('MENU_LISTADOS')" href="/listado"
                                    class="btn btn-pill btn-primary m-1 col-12 col-sm-3">
                                     <i class="align-middle me-2 fas fa-fw fa-calendar-alt"></i>
@@ -84,49 +90,51 @@
                     </div>
 
 
-                    <div class="row mb-4">
+                    <!-- Reemplazar el div existente por: -->
+                    <div class="row mb-4" th:if="${listaOcupacionPendiente != null && not #lists.isEmpty(listaOcupacionPendiente)}">
+                        <div class="col-12">
+                            <div id="carrousel-lista-ocupaciones-pendientes" class="carousel slide" data-bs-ride="carousel">
+                                <div class="carousel-inner">
+                                    <!-- Primera tarjeta activa -->
+                                    <div class="carousel-item active">
+                                        <div class="row">
+                                            <div th:each="ocupacion, iterStat : ${listaOcupacionPendiente}" 
+                                                 th:if="${iterStat.index < 4}"
+                                                 class="col-12 col-md-6 col-lg-3">
+                                                <div class="card card-max-width animate__animated animate__fadeIn">
+                                                    <div th:replace="~{fragments/ocupaciones-pendientes :: ocupaciones-pendientes}"/>
 
-                        <div class="col-12 col-md-6 col-lg-3" th:each="ocupacion : ${listaOcupacionPendiente}">
-
-                            <div class="card card-max-width">
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col mt-0">
-                                            <h5 class="card-title" th:text="${ocupacion.artista}">Ocupación pendiente</h5>
-                                            <a th:if="${ocupacion.estado=='Reservado'}" href="#" class="badge bg-warning me-1 my-1" th:text="${ocupacion.estado}">Matinal</a>
+                                                </div>
+                                            </div>
                                         </div>
-
                                     </div>
-                                    <p>
-                                    <div class="d-flex align-items-center">
-                                        <div class="stat text-primary">
-                                            <i class="align-middle" data-feather="clock"></i>
+
+                                    <!-- Resto de las tarjetas -->
+                                    <div th:each="batch : ${#numbers.sequence(4, #lists.size(listaOcupacionPendiente)-1, 4)}" 
+                                         class="carousel-item">
+                                        <div class="row">
+                                            <div th:each="ocupacion, iterStat : ${listaOcupacionPendiente}" 
+                                                 th:if="${iterStat.index >= batch && iterStat.index < batch + 4}"
+                                                 class="col-12 col-md-6 col-lg-3">
+                                                <div class="card card-max-width animate__animated animate__fadeIn">
+                                                    <!-- El mismo contenido de la tarjeta que arriba -->
+                                                    <div th:replace="~{fragments/ocupaciones-pendientes :: ocupaciones-pendientes}"/>
+
+                                                </div>
+                                            </div>
                                         </div>
-                                        <h1 class="mt-0 mb-0 ms-2 align-baseline" th:text="${@dateUtils.formatLocalDateTime(ocupacion.start, 'dd/MM/yyyy')}"></h1>
                                     </div>
-                                    </p>
-                                    <p>
-                                    <div th:if="${ocupacion.importe!='0'}" class="d-flex align-items-center">
-                                        <div class="stat text-primary">
-                                            <i class="align-middle" data-feather="dollar-sign"></i>
-                                        </div>
-                                        <h1 class="mt-0 mb-0 ms-2 align-baseline"  th:text="${ocupacion.importe}"></h1>
-                                    </div>
-                                    </p>
-
-                                    <ul class="list-unstyled mb-0">
-                                        <li class="mb-1"><span class="fas fa-user fa-fw me-1"></span> <a :href="#"  th:text="${ocupacion.nombreUsuario}"></a></li>
-                                        <li class="mb-1"><span class="fas fa-map-marked fa-fw me-1" ></span> <span th:text="${ocupacion.localidad + ', ' +ocupacion.municipio + ', ' + ocupacion.provincia}"></span></li>
-                                        <li class="mb-1" th:if="${ocupacion.matinal || ocupacion.soloMatinal}"><a th:if="${ocupacion.matinal}" href="#" class="badge bg-primary me-1 my-1">Matinal</a><a th:if="${ocupacion.soloMatinal}" href="#" class="badge bg-primary me-1 my-1">Solo matinal</a></li>
-                                    </ul>
-
                                 </div>
-                                <div class="card-footer d-flex justify-content-between">
 
-                                    <button type="button" th:data-idocupacion="${ocupacion.id}" class="btn btn-danger anular-ocupacion">Anular</button>
-                                    <button type="button" th:data-idocupacion="${ocupacion.id}" class="btn btn-success confirmar-ocupacion">Confirmar</button>
-
-                                </div>
+                                <!-- Controles del carrusel -->
+                                <button class="carousel-control-prev" type="button" data-bs-target="#carrousel-lista-ocupaciones-pendientes" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Anterior</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#carrousel-lista-ocupaciones-pendientes" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Siguiente</span>
+                                </button>
                             </div>
                         </div>
                     </div>

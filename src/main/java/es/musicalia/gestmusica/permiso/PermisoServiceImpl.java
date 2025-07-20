@@ -76,6 +76,7 @@ public class PermisoServiceImpl implements PermisoService {
 
 	@Override
 	public Map<Long, Set<String>> obtenerMapPermisosAgencia(Long idUsuario) {
+
 		return accesoRepository.findAllAccesosByIdUsuario(idUsuario)
 				.orElseGet(Collections::emptyList) // Evitar inicializaciones manuales
 				.stream()

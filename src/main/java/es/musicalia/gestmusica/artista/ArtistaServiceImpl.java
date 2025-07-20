@@ -158,6 +158,7 @@ public class ArtistaServiceImpl implements ArtistaService {
         artista.setTarifasPublicas(dto.getTarifasPublicas());
 		artista.setBiografia(dto.getBiografia());
 		artista.setCondicionesContratacion(dto.getCondicionesContratacion());
+		artista.setPermiteOrquestasDeGalicia(dto.isPermiteOrquestasDeGalicia());
     }
 
     private void actualizarTiposArtista(Artista artista, List<Long> idsTipoArtista) {

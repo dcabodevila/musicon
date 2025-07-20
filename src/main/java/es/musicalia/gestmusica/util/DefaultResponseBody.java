@@ -11,5 +11,6 @@ public class DefaultResponseBody {
     private String message;
     private boolean success;
     private String messageType;
+    private Long idEntidad;
 
 }

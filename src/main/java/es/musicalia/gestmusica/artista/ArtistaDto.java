@@ -57,6 +57,7 @@ public class ArtistaDto {
     private Boolean tarifasPublicas;
     private String condicionesContratacion;
     private String biografia;
+    private boolean permiteOrquestasDeGalicia = true;
 
     public ArtistaDto(){
         activo=true;

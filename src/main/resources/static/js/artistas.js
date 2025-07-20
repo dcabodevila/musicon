@@ -187,6 +187,9 @@ $(document).ready(function(){
     });
 
     $("#btn-confirmar-ocupacion").click(function (event) {
+
+        $('#modalNuevaOcupacion').modal('hide');
+
         showConfirmationModal(function (confirmed) {
             if (confirmed) {
                 confirmarOcupacion($('#id-ocupacion').val());
@@ -198,11 +201,16 @@ $(document).ready(function(){
     });
 
     $("#btn-anular-ocupacion").click(function (event) {
+
+        $('#modalNuevaOcupacion').modal('hide');
+
         showConfirmationModal(function (confirmed) {
+
             if (confirmed) {
                 anularOcupacion($('#id-ocupacion').val());
                 calendar.refetchEvents();
             }
+
         });
     });
 

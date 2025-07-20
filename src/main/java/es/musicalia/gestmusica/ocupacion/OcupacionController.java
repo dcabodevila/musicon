@@ -3,8 +3,11 @@ package es.musicalia.gestmusica.ocupacion;
 
 import es.musicalia.gestmusica.agencia.AgenciaRecord;
 import es.musicalia.gestmusica.agencia.AgenciaService;
+import es.musicalia.gestmusica.artista.ArtistaDto;
+import es.musicalia.gestmusica.artista.ArtistaRecord;
 import es.musicalia.gestmusica.artista.ArtistaService;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
+import es.musicalia.gestmusica.generic.CodigoNombreRecord;
 import es.musicalia.gestmusica.localizacion.LocalizacionService;
 import es.musicalia.gestmusica.util.DefaultResponseBody;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +19,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,18 +45,49 @@ public class OcupacionController {
         this.localizacionService = localizacionService;
     }
 
+
     @GetMapping("/{id}")
     public String getOcupacionModelAndView(@AuthenticationPrincipal CustomAuthenticatedUser user ,Model model, @PathVariable long id) {
         final OcupacionSaveDto ocupacion = ocupacionService.getOcupacionSaveDto(id);
-        model.addAttribute("ocupacionDto", ocupacion);
-        model.addAttribute("listaArtistas", this.artistaService.findMisArtistas(obtenerArtistasConPermisoOcupaciones(user.getMapPermisosArtista())));
-        model.addAttribute("listaCcaa", this.localizacionService.findAllComunidades());
-        model.addAttribute("listaProvinciasCcaaArtista", this.localizacionService.findAllProvinciasByCcaaId(ocupacion.getIdCcaa()));
-        model.addAttribute("listaMunicipioListado", this.localizacionService.findAllMunicipiosByIdProvincia(ocupacion.getIdProvincia()));
-        model.addAttribute("listaTiposOcupacion", this.ocupacionService.listarTiposOcupacion(ocupacion.getIdArtista()));
+        obtenerModelAttributeComun(user, model, ocupacion);
 
         return "ocupacion-detail";
 
+    }
+
+    @GetMapping("/nueva/{idArtista}")
+    public String getNuevaOcupacionModelAndView(@AuthenticationPrincipal CustomAuthenticatedUser user ,Model model, @PathVariable long idArtista) {
+
+        if (user.getMapPermisosArtista().containsKey(idArtista) && user.getMapPermisosArtista().get(idArtista).contains("OCUPACIONES")) {
+            ArtistaDto artista = this.artistaService.findArtistaDtoById(idArtista);
+            final OcupacionSaveDto ocupacion = new OcupacionSaveDto();
+            ocupacion.setIdArtista(idArtista);
+            ocupacion.setIdAgencia(artista.getIdAgencia());
+            ocupacion.setIdCcaa(artista.getIdCcaa());
+            ocupacion.setImporte(BigDecimal.ZERO);
+            ocupacion.setPorcentajeRepre(BigDecimal.ZERO);
+            ocupacion.setIva(BigDecimal.ZERO);
+            obtenerModelAttributeComun(user, model, ocupacion);
+        }
+        else {
+            throw new org.springframework.security.access.AccessDeniedException("No tiene permisos para crear ocupaciones para este artista");
+        }
+
+        return "ocupacion-detail";
+
+    }
+
+    private void obtenerModelAttributeComun(CustomAuthenticatedUser user, Model model, OcupacionSaveDto ocupacion) {
+        model.addAttribute("ocupacionDto", ocupacion);
+        List<ArtistaRecord> listaArtistasPermisosOcupacion = this.artistaService.findMisArtistas(obtenerArtistasConPermisoOcupaciones(user.getMapPermisosArtista()));
+
+        model.addAttribute("listaArtistas", listaArtistasPermisosOcupacion);
+        model.addAttribute("listaCcaa", this.localizacionService.findAllComunidades());
+
+        final List<CodigoNombreRecord> listaProvincias = this.localizacionService.findAllProvinciasByCcaaId(ocupacion.getIdCcaa());
+        model.addAttribute("listaProvinciasCcaaArtista", listaProvincias);
+        model.addAttribute("listaMunicipioListado", ocupacion.getIdProvincia() != null ? this.localizacionService.findAllMunicipiosByIdProvincia(ocupacion.getIdProvincia()): this.localizacionService.findAllMunicipiosByIdProvincia(listaProvincias.get(0).id()) );
+        model.addAttribute("listaTiposOcupacion", this.ocupacionService.listarTiposOcupacion(ocupacion.getIdArtista()));
     }
 
     public Set<Long> obtenerArtistasConPermisoOcupaciones(Map<Long, Set<String>> mapPermisosArtista) {
@@ -138,6 +173,8 @@ public class OcupacionController {
             model.addAttribute("listaAgencias", listaAgenciaRecord);
             model.addAttribute("listaArtistas", this.artistaService.findAllArtistasByAgenciaId(filter.getIdAgencia()!=null ? filter.getIdAgencia() : listaAgenciaRecord.get(0).id()));
         }
+
+        model.addAttribute("listaArtistasPermisosOcupacion", this.artistaService.findMisArtistas(obtenerArtistasConPermisoOcupaciones(user.getMapPermisosArtista())));
 
     }
 

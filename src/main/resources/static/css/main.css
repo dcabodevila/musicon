@@ -85,3 +85,47 @@
     .input-wrapper input {
         padding-right: 40px; /* Espacio para el botón de borrar */
     }
+
+
+#carrousel-lista-ocupaciones-pendientes {
+    padding: 20px 40px;
+}
+
+#carrousel-lista-ocupaciones-pendientes .carousel-control-prev,
+#carrousel-lista-ocupaciones-pendientes .carousel-control-next {
+    width: 40px;
+    background-color: rgba(0,0,0,0.2);
+    border-radius: 50%;
+    height: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+#carrousel-lista-ocupaciones-pendientes .card {
+    margin: 10px;
+    transition: transform 0.3s ease;
+}
+
+#carrousel-lista-ocupaciones-pendientes .card:hover {
+    transform: translateY(-5px);
+}
+
+.animate__animated {
+    animation-duration: 1s;
+    animation-fill-mode: both;
+}
+
+.animate__fadeIn {
+    animation-name: fadeIn;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
