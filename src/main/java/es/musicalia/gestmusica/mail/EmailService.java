@@ -27,6 +27,7 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
     private final SpringTemplateEngine templateEngine;
+    private final MailgunEmailService mailgunEmailService;
 
     @Value("${spring.mail.username}")
     private String fromEmail;
@@ -48,7 +49,8 @@ public class EmailService {
                 .build();
 
         try {
-            sendHtmlEmail(emailDto);
+            final MailgunResponse mailgunResponse = sendMailgunEmail(emailDto);
+            log.info("Email enviado correctamente a: {} - Respuesta: {}", email, mailgunResponse);
         } catch (Exception e) {
             log.error("Error email a {}: {}", email, e.getMessage());
             throw new EnvioEmailException("No se pudo enviar el la notificación por correo");
@@ -67,7 +69,8 @@ public class EmailService {
                     .build();
 
         try {
-            sendHtmlEmail(emailDto);
+            final MailgunResponse mailgunResponse = sendMailgunEmail(emailDto);
+            log.info("Email enviado correctamente a: {} - Respuesta: {}", email, mailgunResponse);
         } catch (Exception e) {
             log.error("Error enviando código de verificación a {}: {}", email, e.getMessage());
             throw new EnvioEmailException("No se pudo enviar el código de verificación");
@@ -126,31 +129,12 @@ public class EmailService {
       
         """.formatted(tipo.getMensaje(),  minutosExpiracion);
     }
-    /**
-     * Envía un email simple de texto plano
-     */
-    public void sendSimpleEmail(String to, String subject, String content) {
-        log.info("Enviando email simple a: {}", to);
 
-        try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(fromEmail);
-            message.setTo(to);
-            message.setSubject(subject);
-            message.setText(content);
-
-            mailSender.send(message);
-            log.info("Email enviado correctamente a: {}", to);
-
-        } catch (MailException e) {
-            log.error("Error enviando email simple a {}: {}", to, e.getMessage());
-            throw new RuntimeException("Error enviando email: " + e.getMessage(), e);
-        }
-    }
 
     /**
      * Envía un email con formato HTML y adjuntos
      */
+    @Deprecated
     public void sendHtmlEmail(EmailDto emailDto) throws EnvioEmailException {
         log.info("Enviando email HTML a: {}", emailDto.getTo());
 
@@ -194,79 +178,10 @@ public class EmailService {
         }
     }
 
-    /**
-     * Envía múltiples emails
-     */
-    public void sendBulkEmails(List<EmailDto> emails) {
-        log.info("Enviando {} emails en lote", emails.size());
-
-        for (EmailDto email : emails) {
-            try {
-                sendHtmlEmail(email);
-                // Pequeña pausa para evitar saturar el servidor SMTP
-                Thread.sleep(100);
-            } catch (Exception e) {
-                log.error("Error enviando email a {}: {}", email.getTo(), e.getMessage());
-                // Continúa con el siguiente email en caso de error
-            }
-        }
-
-        log.info("Envío en lote completado");
+    public MailgunResponse sendMailgunEmail(EmailDto emailDto) {
+        return mailgunEmailService.sendSimpleEmail(emailDto.getTo(), emailDto.getSubject(), emailDto.getContent());
     }
 
-    /**
-     * Envía email con plantilla HTML
-     */
-    public void sendTemplateEmail(String to, String subject, String templateContent,
-                                  Object... templateParams) throws EnvioEmailException {
-        String formattedContent = String.format(templateContent, templateParams);
-
-        EmailDto emailDto = EmailDto.builder()
-                .to(to)
-                .subject(subject)
-                .content(formattedContent)
-                .isHtml(true)
-                .build();
-
-        sendHtmlEmail(emailDto);
-    }
-
-    /**
-     * Envía email de notificación del sistema
-     */
-    public void sendSystemNotification(String to, String subject, String message) throws EnvioEmailException {
-        String htmlContent = buildSystemNotificationTemplate(subject, message);
-
-        EmailDto emailDto = EmailDto.builder()
-                .to(to)
-                .subject("[Gestmusica] " + subject)
-                .content(htmlContent)
-                .isHtml(true)
-                .build();
-
-        sendHtmlEmail(emailDto);
-    }
-
-    /**
-     * Verifica la configuración de email
-     */
-    public boolean testEmailConfiguration() {
-        try {
-            SimpleMailMessage testMessage = new SimpleMailMessage();
-            testMessage.setFrom(fromEmail);
-            testMessage.setTo("dcabodevila@gmail.com"); // Enviar a sí mismo
-            testMessage.setSubject("Test de configuración - Gestmusica");
-            testMessage.setText("Este es un email de prueba para verificar la configuración.");
-
-            mailSender.send(testMessage);
-            log.info("Test de email exitoso");
-            return true;
-
-        } catch (Exception e) {
-            log.error("Error en test de email: {}", e.getMessage());
-            return false;
-        }
-    }
 
     private void addAttachments(MimeMessageHelper helper, List<String> attachmentPaths)
             throws MessagingException {
@@ -284,34 +199,5 @@ public class EmailService {
         }
     }
 
-    private String buildSystemNotificationTemplate(String subject, String message) {
-        return """
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <meta charset="UTF-8">
-                <style>
-                    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
-                    .container { max-width: 600px; margin: 0 auto; }
-                    .header { background-color: #007bff; color: white; padding: 20px; text-align: center; }
-                    .content { padding: 20px; background-color: #f8f9fa; }
-                    .footer { padding: 10px; text-align: center; font-size: 12px; color: #666; }
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <div class="header">
-                        <h2>%s</h2>
-                    </div>
-                    <div class="content">
-                        <p>%s</p>
-                    </div>
-                    <div class="footer">
-                        <p>Este es un mensaje automático de Gestmusica</p>
-                    </div>
-                </div>
-            </body>
-            </html>
-            """.formatted(subject, message);
-    }
+
 }

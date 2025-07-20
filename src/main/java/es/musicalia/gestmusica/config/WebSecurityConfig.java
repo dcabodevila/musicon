@@ -52,8 +52,7 @@ public class WebSecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/auth/**").permitAll()
-                .requestMatchers("/fragments/**", "/static/**", "/adminkit/**", "/img/**", "/logo/**", "/favicon.ico", "/js**", "/api/sincronizacion/**").permitAll()
-					.requestMatchers("/api/gestmanager/**").permitAll()
+                .requestMatchers("/fragments/**", "/static/**", "/adminkit/**", "/img/**", "/logo/**", "/favicon.ico", "/js**", "/api/**").permitAll()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form

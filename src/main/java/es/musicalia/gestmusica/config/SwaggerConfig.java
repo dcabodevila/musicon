@@ -33,7 +33,7 @@ public class SwaggerConfig {
         return GroupedOpenApi.builder()
                 .group("api")
                 .displayName("GestMusica API")
-                .pathsToMatch("/api/sincronizacion/**", "/api/gestmanager/**")
+                .pathsToMatch("/api/**")
                 .build();
     }
 
