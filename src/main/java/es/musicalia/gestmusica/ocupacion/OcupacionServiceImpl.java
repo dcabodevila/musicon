@@ -401,10 +401,10 @@ public class OcupacionServiceImpl implements OcupacionService {
 						.toList();
 
 				if (ocupacionesFiltradas.size() > 1) {
-					DefaultResponseBody.builder().success(false).message("Se ha encontrado más de 1 ocupación que coincide con la ubicación especificada").messageType("warning").build();
+					return DefaultResponseBody.builder().success(false).message("Se ha encontrado más de 1 ocupación que coincide con la ubicación especificada").messageType("warning").build();
 				}
 				if (ocupacionesFiltradas.isEmpty()) {
-					DefaultResponseBody.builder().success(false).message("No se encontraron ocupaciones que coincidan con la ubicación especificada").messageType("warning").build();
+					return DefaultResponseBody.builder().success(false).message("No se encontraron ocupaciones que coincidan con la ubicación especificada").messageType("warning").build();
 				}
 				return this.anularOcupacion(ocupacionesFiltradas.get(0).getId());
 
