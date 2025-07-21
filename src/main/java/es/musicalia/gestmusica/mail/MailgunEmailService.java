@@ -24,7 +24,7 @@ public class MailgunEmailService {
     }
 
     public MailgunResponse sendSimpleEmail(String to, String subject, String text) {
-        String mailgunUrl = String.format("https://api.mailgun.net/v3/%s/messages", domain);
+        String mailgunUrl = String.format("https://api.eu.mailgun.net/v3/%s/messages", domain);
 
         MultiValueMap<String, String> request = new LinkedMultiValueMap<>();
         request.add("from", String.format("%s <gestmusica@%s>", senderName, domain));
