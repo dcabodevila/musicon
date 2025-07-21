@@ -1,0 +1,10 @@
+21-07-2025 14:52:28 -> CORRECTO:
+21-07-2025 14:52:28 -> Error API Gestmusica: SSL certificate problem: unable to get local issuer certificate
+21-07-2025 14:54:01 -> CORRECTO:
+21-07-2025 14:54:01 -> Enviado a Gestmusica correctamente. Respuesta: Datos recibidos correctamente
+21-07-2025 14:54:24 -> CORRECTO:
+21-07-2025 14:54:24 -> Enviado a Gestmusica correctamente. Respuesta: Datos recibidos correctamente
+21-07-2025 17:18:43 -> CORRECTO:
+21-07-2025 17:18:43 -> Enviado a Gestmusica correctamente. Respuesta: Datos recibidos correctamente
+21-07-2025 17:18:52 -> CORRECTO:
+21-07-2025 17:18:52 -> Enviado a Gestmusica correctamente. Respuesta: Datos recibidos correctamente
