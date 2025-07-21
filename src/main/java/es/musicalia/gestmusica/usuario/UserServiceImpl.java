@@ -3,6 +3,7 @@ package es.musicalia.gestmusica.usuario;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.auth.model.RegistrationForm;
 import es.musicalia.gestmusica.file.FileService;
+import es.musicalia.gestmusica.mail.EmailService;
 import es.musicalia.gestmusica.mail.EmailTemplateEnum;
 import es.musicalia.gestmusica.rol.RolEnum;
 import es.musicalia.gestmusica.rol.RolRepository;
@@ -28,14 +29,16 @@ public class UserServiceImpl implements UserService {
 	private final RolRepository rolRepository;
 	private final UsuarioMapper usuarioMapper;
 	private final FileService fileService;
+	private final EmailService emailService;
 
-	UserServiceImpl(UsuarioRepository userRepository, PasswordEncoder passwordEncoder, CodigoVerificacionService codigoVerificacionService, RolRepository rolRepository, UsuarioMapper usuarioMapper, FileService fileService) {
+	UserServiceImpl(UsuarioRepository userRepository, PasswordEncoder passwordEncoder, CodigoVerificacionService codigoVerificacionService, RolRepository rolRepository, UsuarioMapper usuarioMapper, FileService fileService, EmailService emailService) {
 		this.userRepository = userRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.codigoVerificacionService = codigoVerificacionService;
         this.rolRepository = rolRepository;
         this.usuarioMapper = usuarioMapper;
         this.fileService = fileService;
+        this.emailService = emailService;
     }
 
 
@@ -117,7 +120,21 @@ public class UserServiceImpl implements UserService {
 	public Usuario activateUserByEmail(String email) throws UsuarioNoEncontradoException {
 		Usuario usuario = userRepository.findUsuarioByMail(email).orElseThrow(() -> new UsuarioNoEncontradoException("No se encontró usuario con email: " + email));
 		usuario.setActivo(true);
-		return userRepository.save(usuario);
+		usuario = userRepository.save(usuario);
+
+		final List<Usuario> usuariosAdmin = findUsuariosAdmin();
+
+		for (Usuario admin : usuariosAdmin) {
+            try {
+                this.emailService.enviarMensajePorEmail(admin.getEmail(), EmailTemplateEnum.VALIDAR_USUARIO);
+            } catch (EnvioEmailException e) {
+				log.error("No se ha podido enviar el correo a {}", admin.getEmail(), e);
+            }
+        }
+
+
+
+		return usuario;
 	}
 
 	@Override
