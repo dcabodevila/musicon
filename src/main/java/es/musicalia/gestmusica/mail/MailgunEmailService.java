@@ -1,5 +1,6 @@
 package es.musicalia.gestmusica.mail;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -19,7 +20,7 @@ public class MailgunEmailService {
 
     private final RestTemplate restTemplate;
 
-    public MailgunEmailService(RestTemplate restTemplate) {
+    public MailgunEmailService(@Qualifier("mailgunRestTemplate") RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 

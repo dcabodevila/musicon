@@ -97,7 +97,7 @@ public class AgenciasController {
             final Agencia agencia = this.agenciaService.saveAgencia(agenciaDto);
             String uploadDir = "image/agencia-photos/" + agencia.getId();
             final String uploadedFile = this.fileService.guardarFichero(multipartFile);
-
+            agenciaDto.setId(agencia.getId());
             if (uploadedFile!=null){
                 agenciaDto.setLogo(uploadedFile);
                 this.agenciaService.saveAgencia(agenciaDto);
