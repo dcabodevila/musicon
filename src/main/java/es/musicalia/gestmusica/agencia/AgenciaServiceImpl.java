@@ -2,6 +2,8 @@ package es.musicalia.gestmusica.agencia;
 
 
 import es.musicalia.gestmusica.acceso.AccesoService;
+import es.musicalia.gestmusica.ajustes.Ajustes;
+import es.musicalia.gestmusica.ajustes.AjustesRepository;
 import es.musicalia.gestmusica.contacto.ContactoRepository;
 import es.musicalia.gestmusica.contacto.Contacto;
 import es.musicalia.gestmusica.localizacion.*;
@@ -29,8 +31,9 @@ public class AgenciaServiceImpl implements AgenciaService {
 	private final AccesoService accesoService;
 	private final RolRepository rolRepository;
 	private final AgenciaMapper agenciaMapper;
+	private final AjustesRepository ajustesRepository;
 
-	public AgenciaServiceImpl(AgenciaRepository agenciaRepository, MunicipioRepository municipioRepository, ProvinciaRepository provinciaRepository, UsuarioRepository usuarioRepository, ContactoRepository agenciaContactoRepository, AccesoService accesoService, RolRepository rolRepository, AgenciaMapper agenciaMapper){
+	public AgenciaServiceImpl(AgenciaRepository agenciaRepository, MunicipioRepository municipioRepository, ProvinciaRepository provinciaRepository, UsuarioRepository usuarioRepository, ContactoRepository agenciaContactoRepository, AccesoService accesoService, RolRepository rolRepository, AgenciaMapper agenciaMapper, AjustesRepository ajustesRepository){
 		this.agenciaRepository = agenciaRepository;
 		this.municipioRepository = municipioRepository;
 		this.provinciaRepository = provinciaRepository;
@@ -39,6 +42,7 @@ public class AgenciaServiceImpl implements AgenciaService {
         this.accesoService = accesoService;
         this.rolRepository = rolRepository;
         this.agenciaMapper = agenciaMapper;
+        this.ajustesRepository = ajustesRepository;
     }
 	@Override
 	public List<AgenciaRecord> findAllAgenciasForUser(){
@@ -153,6 +157,15 @@ public class AgenciaServiceImpl implements AgenciaService {
 		agencia = this.agenciaRepository.save(agencia);
 
 		this.accesoService.crearAccesoUsuarioAgenciaRol(agencia.getUsuario().getId(), agencia.getId(), this.rolRepository.findRolRecordByCodigo(RolEnum.ROL_AGENCIA.getCodigo()).id(), null);
+
+		Provincia provincia = agencia.getProvincia();
+		if (provincia != null && provincia.getCcaa() != null) {
+			List<Ajustes> ajustesList = this.ajustesRepository.findAjustesByCcaaId(provincia.getCcaa().getId());
+			for (Ajustes ajustes : ajustesList) {
+				ajustes.getAgencias().add(agencia);
+				this.ajustesRepository.save(ajustes);
+			}
+		}
 
 		return agencia;
 
