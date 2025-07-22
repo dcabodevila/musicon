@@ -158,17 +158,25 @@ public class AgenciaServiceImpl implements AgenciaService {
 
 		this.accesoService.crearAccesoUsuarioAgenciaRol(agencia.getUsuario().getId(), agencia.getId(), this.rolRepository.findRolRecordByCodigo(RolEnum.ROL_AGENCIA.getCodigo()).id(), null);
 
-		Provincia provincia = agencia.getProvincia();
-		if (provincia != null && provincia.getCcaa() != null) {
-			List<Ajustes> ajustesList = this.ajustesRepository.findAjustesByCcaaId(provincia.getCcaa().getId());
-			for (Ajustes ajustes : ajustesList) {
-				ajustes.getAgencias().add(agencia);
-				this.ajustesRepository.save(ajustes);
-			}
-		}
+		asignarAgenciaAjustesListadosPorComunidad((agenciaDto.getId()==null), agencia);
+
 
 		return agencia;
 
+	}
+
+	private void asignarAgenciaAjustesListadosPorComunidad(boolean isCreacion, Agencia agencia) {
+		if (isCreacion) {
+			Provincia provincia = agencia.getProvincia();
+			if (provincia != null && provincia.getCcaa() != null) {
+				List<Ajustes> ajustesList = this.ajustesRepository.findAjustesByCcaaId(provincia.getCcaa().getId());
+				for (Ajustes ajustes : ajustesList) {
+					ajustes.getAgencias().add(agencia);
+					this.ajustesRepository.save(ajustes);
+				}
+			}
+
+		}
 	}
 
 	private Agencia newAgencia(Long idAgencia) {

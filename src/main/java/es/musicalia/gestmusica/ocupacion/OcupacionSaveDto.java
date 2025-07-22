@@ -43,4 +43,6 @@ public class OcupacionSaveDto {
 
     private Boolean activo = Boolean.TRUE;
 
+    private Boolean provisional;
+
 }

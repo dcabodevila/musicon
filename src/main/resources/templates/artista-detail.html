@@ -39,7 +39,7 @@
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body m-3">
-                                    <div th:replace="~{fragments/modal-ocupaciones :: modal-ocupaciones}"/>
+                                    <div th:replace="~{fragments/ocupaciones-form :: ocupaciones-form}"/>
                                 </div>
                             </div>
                         </div>
@@ -181,7 +181,7 @@
                                         <button th:if="${permisoOcupaciones}" type="button" id="btnModalNuevaOcupacion"
                                                 class="btn btn-pill btn-success m-1 col-12 col-sm-3"
                                                 data-bs-toggle="modal" data-bs-target="#modalNuevaOcupacion">
-                                            <i class="far fa-calendar-plus"></i> Ocupación
+                                            <i class="far fa-calendar-plus"></i> Nueva ocupación
                                         </button>
 
                                         <a th:if="${permisoTarifaAnual}" type="button" id="btn-tarifa-anual"
@@ -239,8 +239,8 @@
 </body>
 <script th:src="@{/adminkit/js/fullcalendar.js}"></script>
 <script type="text/javascript" th:src="@{/js/comun.js}"></script>
+<script type="text/javascript" th:src="@{/js/ocupaciones-comun.js}"></script>
 <script type="text/javascript" th:src="@{/js/artistas.js}"></script>
-
 
 </body>
 </html>

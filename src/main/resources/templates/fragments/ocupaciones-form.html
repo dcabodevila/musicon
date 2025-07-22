@@ -37,6 +37,14 @@
     </div>
   </div>
   <div class="mb-3 row">
+    <label for="provisional-ocupacion" class="col-form-label col-sm-3 text-sm-end pt-sm-0" >Ocupación provisional</label>
+    <div class="col-sm-9">
+      <div class="form-check form-switch">
+        <input id="provisional-ocupacion" th:field="*{provisional}" class="form-check-input" type="checkbox"  checked="false" wfd-id="id17">
+      </div>
+    </div>
+  </div>
+  <div class="mb-3 row">
     <label for="ccaa-ocupacion" class="col-form-label col-sm-3 text-sm-end">Comunidad</label>
     <div class="col-sm-9">
       <select id="ccaa-ocupacion" th:field="*{idCcaa}" class="form-control choices-single" required>
@@ -71,7 +79,8 @@
     <div class="mb-3 row">
       <label for="importe-ocupacion" class="col-form-label col-sm-3 text-sm-end">Importe</label>
       <div class="col-sm-9">
-        <input id="importe-ocupacion" th:field="*{importe}" type="number" required class="form-control" placeholder="Importe" autocomplete="off" step="1">
+        <input id="importe-ocupacion" th:field="*{importe}" type="number" required class="form-control"
+               placeholder="Importe" autocomplete="off" step="1" pattern="[0-9]*">
       </div>
     </div>
     <div class="mb-3 row">

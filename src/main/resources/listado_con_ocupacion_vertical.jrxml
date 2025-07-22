@@ -100,25 +100,7 @@ CASE
              ELSE ''/R''
          END
 END AS escenario, t.fecha::date, 
-		CASE
-             WHEN COUNT(DISTINCT o.id) > 1 THEN ''DOBLA''
-             ELSE (CASE
-                      WHEN MAX(p.abreviatura) IS NOT NULL THEN
-                          (CASE
-                              WHEN MAX(o.estado_id) = 2 THEN ''RESER''
-                              WHEN MAX(o.estado_id) = 3 THEN ''PEND''
-                              WHEN bool_or(o.solo_matinal) THEN ''SMT'' || MAX(p.abreviatura)
-                              WHEN bool_or(o.matinal) THEN ''MT'' || MAX(p.abreviatura)
-                              ELSE MAX(p.abreviatura)
-                          END)
-                      ELSE
-                          (CASE
-                              WHEN MAX(ip.tipo_incremento_id) = 1 THEN TO_CHAR(SUM(t.importe + COALESCE(ip.incremento,0)), ''999999'')
-                              WHEN MAX(ip.tipo_incremento_id) = 2 THEN TO_CHAR(SUM(t.importe + (t.importe * ip.incremento)/100), ''999999'')
-                              ELSE TO_CHAR(SUM(t.importe), ''999999'')
-                          END)
-                  END)
-         END AS importe
+(CASE WHEN p.abreviatura is not null THEN (CASE WHEN o.estado_id=2 THEN ''RESER'' WHEN o.estado_id=3 THEN ''PEND'' WHEN o.solo_matinal THEN ''SMT''|| p.abreviatura WHEN o.matinal THEN ''MT''||p.abreviatura else p.abreviatura END) ELSE  (CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t.importe + COALESCE(ip.incremento,0),''999999'') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t.importe+(t.importe*ip.incremento)/100,''999999'') else TO_CHAR(t.importe,''999999'')  end) end) AS importe
    FROM gestmusica.tarifa t inner join gestmusica.artista a on t.artista_id=a.id inner join gestmusica.artista_tipo_artista ata on a.id=ata.artista_id inner join gestmusica.agencia ag on a.agencia_id=ag.id left join gestmusica.contacto cont on ag.agencia_contacto_id=cont.id
        LEFT JOIN gestmusica.ocupacion o ON (t.artista_id = o.artista_id 
         AND t.id = o.tarifa_id 
@@ -133,7 +115,6 @@ END AS escenario, t.fecha::date,
    AND a.id_ccaa in ($P!{idsComunidades})   	 
    AND a.activo
    AND a.tarifas_publicas
-        GROUP BY a.nombre, ag.nombre,cont.telefono, cont.telefono2,cont.telefono3,a.componentes, t.fecha, t.importe, a.escenario, a.tipo_escenario_id
    ORDER BY 2, 1',
   'SELECT unnest(gestmusica.fecha_crosstab_distintas($P!{fecha1}::date, $P!{fecha2}::date, $P!{fecha3}::date, $P!{fecha4}::date, $P!{fecha5}::date, $P!{fecha6}::date, $P!{fecha7}::date, $P!{fecha8}::date, $P!{fecha9}::date, $P!{fecha10}::date, $P!{fecha11}::date, $P!{fecha12}::date, $P!{fecha13}::date, $P!{fecha14}::date, $P!{fecha15}::date))'
 ) AS ct ($P!{colNames});]]>

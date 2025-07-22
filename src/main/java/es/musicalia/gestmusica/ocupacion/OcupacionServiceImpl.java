@@ -173,12 +173,7 @@ public class OcupacionServiceImpl implements OcupacionService {
 			ocupacion.setOcupacionEstado(this.ocupacionEstadoRepository.findById(idEstadoOcupacion).orElseThrow());
 		}
 		else {
-			if (TipoOcupacionEnum.RESERVADO.getId().equals(ocupacionSaveDto.getIdTipoOcupacion())){
-				ocupacion.setOcupacionEstado(this.ocupacionEstadoRepository.findById(OcupacionEstadoEnum.RESERVADO.getId()).orElseThrow());
-			}
-
-			//En otro caso no aplica setear el estado, se mantiene el estado que tenía antes.
-
+			ocupacion.setOcupacionEstado(this.ocupacionEstadoRepository.findById(ocupacionSaveDto.getIdTipoOcupacion()).orElseThrow());
 		}
 
 
@@ -190,6 +185,7 @@ public class OcupacionServiceImpl implements OcupacionService {
 		ocupacion.setObservaciones(ocupacionSaveDto.getObservaciones());
 		ocupacion.setMatinal(ocupacionSaveDto.getMatinal());
 		ocupacion.setSoloMatinal(ocupacionSaveDto.getSoloMatinal());
+		ocupacion.setProvisional(ocupacionSaveDto.getProvisional());
 		ocupacion.setActivo(true);
 
 		Ocupacion ocupacionSave = this.ocupacionRepository.save(ocupacion);
@@ -234,10 +230,8 @@ public class OcupacionServiceImpl implements OcupacionService {
 			return true;
 		}
 
-		boolean soloMatinalExistente = optionalOcupacion.get(0).soloMatinal();
-		boolean soloMatinalNuevo = ocupacionSaveDto.getSoloMatinal();
-
-		return soloMatinalExistente == soloMatinalNuevo;
+		// Si ambas tienen matinal => existe ocupación
+		return (optionalOcupacion.get(0).soloMatinal() == ocupacionSaveDto.getSoloMatinal()) || (optionalOcupacion.get(0).matinal() == ocupacionSaveDto.getMatinal());
 
 
 	}
@@ -477,6 +471,7 @@ public class OcupacionServiceImpl implements OcupacionService {
 		ocupacion.setPorcentajeRepre(BigDecimal.ZERO);
 		ocupacion.setIva(BigDecimal.ZERO);
 		ocupacion.setTarifa(actualizarTarifaSegunOcupacion(ocupacion.getArtista().getId(), ocupacion.getFecha(), ocupacion));
+
 		return ocupacion;
 	}
 

@@ -5,6 +5,7 @@ import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.file.FileService;
 import es.musicalia.gestmusica.incremento.IncrementoService;
 import es.musicalia.gestmusica.localizacion.LocalizacionService;
+import es.musicalia.gestmusica.ocupacion.OcupacionSaveDto;
 import es.musicalia.gestmusica.ocupacion.OcupacionService;
 import es.musicalia.gestmusica.tarifa.TarifaAnualDto;
 import es.musicalia.gestmusica.usuario.UserService;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.math.BigDecimal;
 import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
@@ -107,6 +109,8 @@ public class ArtistaController {
         final ArtistaDto artistaDto = this.artistaService.findArtistaDtoById(idArtista);
         getModelAttributeDetail(model, artistaDto);
         getModelAttributeArtistaOcupacion(model, artistaDto);
+        model.addAttribute("ocupacionDto", getNewOcupacionSaveDto(idArtista));
+        model.addAttribute("listaArtistas", List.of(this.artistaService.findArtistaDtoById(idArtista)));
 
         addTarifaAnualModelAttribute(model, idArtista);
 
@@ -173,5 +177,15 @@ public class ArtistaController {
     }
 
 
-
+    private OcupacionSaveDto getNewOcupacionSaveDto(long idArtista) {
+        ArtistaDto artista = this.artistaService.findArtistaDtoById(idArtista);
+        final OcupacionSaveDto ocupacion = new OcupacionSaveDto();
+        ocupacion.setIdArtista(idArtista);
+        ocupacion.setIdAgencia(artista.getIdAgencia());
+        ocupacion.setIdCcaa(artista.getIdCcaa());
+        ocupacion.setImporte(BigDecimal.ZERO);
+        ocupacion.setPorcentajeRepre(BigDecimal.ZERO);
+        ocupacion.setIva(BigDecimal.ZERO);
+        return ocupacion;
+    }
 }

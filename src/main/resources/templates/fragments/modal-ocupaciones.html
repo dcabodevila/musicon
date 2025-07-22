@@ -5,8 +5,15 @@
 <form th:fragment="modal-ocupaciones" method="POST" action="#" autocomplete="off">
 
   <input hidden id="id-ocupacion"/>
-  <input hidden id="id-artista-modal-ocupacion" th:value="${artistaDto.id}"/>
 
+  <div class="mb-3 row">
+    <label class="col-form-label col-sm-3 text-sm-end">Artista</label>
+    <div class="col-sm-9">
+      <select id="id-artista-modal-ocupacion" th:field="*{idArtista}" th:attr="disabled=${ocupacionDto != null}" class="form-control choices-single" required>
+        <option th:each="artista : ${listaArtistas}" th:value="${artista.id}" th:text="${artista.nombre}"></option>
+      </select>
+    </div>
+  </div>
   <div id="divEstadoOcupacion" class="mb-3 row">
     <label class="col-form-label col-sm-3 text-sm-end">Estado</label>
     <div class="col-sm-1">
