@@ -109,6 +109,9 @@ public class Ocupacion {
     @Column(name = "solo_matinal")
     private boolean soloMatinal;
 
+    @Column(name = "id_actuacion_externa")
+    private Integer idActuacionExterna;
+
 
 }
 
