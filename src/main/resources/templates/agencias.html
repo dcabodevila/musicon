@@ -32,20 +32,20 @@
                         <h1 class="h3 d-inline align-middle">Agencias</h1>
                     </div>
                     <div class="col-12 col-md-6 col-lg-3" th:each="agencia: ${listaAgencias}">
-                        <div class="card card-max-width">
-                            <img class="card-img-top img-max-height" th:if="${agencia.logo!=null}"
-                                 th:src="@{${agencia.logo}}" alt="Unsplash">
+                        <div class="card card-max-width" style="height: 550px">
+                            <div style="min-height: 340px; display: flex; align-items: center;">
+                                <img class="card-img-top img-max-height" th:if="${agencia.logo!=null}"
+                                     th:src="@{${agencia.logo}}" alt="Unsplash">
+                            </div>
                             <div class="card-header px-4 pt-4">
                                 <h5 class="card-title mb-0" th:text="${agencia.nombre}">Card with image and button</h5>
                             </div>
-
-
-                            <div class="card-body">
-
+                            <div class="card-body" style="min-height: 80px;">
                                 <p class="card-text" th:text="${agencia.descripcion}">Descripción</p>
                                 <ul class="list-unstyled mb-0">
-                                    <li class="mb-1"><span class="fas fa-user fa-fw me-1"></span> <a th:href="@{/usuarios/__${agencia.idUsuario}__}"
-                                                                                                     th:text="${agencia.nombreUsuario}"></a>
+                                    <li class="mb-1"><span class="fas fa-user fa-fw me-1"></span> <a
+                                            th:href="@{/usuarios/__${agencia.idUsuario}__}"
+                                            th:text="${agencia.nombreUsuario}"></a>
                                     </li>
                                 </ul>
                                 <div class="card-body text-center d-flex flex-column flex-sm-row justify-content-around">

@@ -4,7 +4,11 @@
 
 <form id="formNuevaOcupacion" th:fragment="ocupaciones-form" method="POST" action="#" th:object="${ocupacionDto}" autocomplete="off" th:with="tienePermisoOcupacion=${#authorization.expression('hasPermission(' + ocupacionDto.idArtista + ', ''ARTISTA'', ''OCUPACIONES'')')}">
 
-  <input hidden id="id-ocupacion" th:field="*{id}"/>
+  <input type="hidden" 
+       id="id-ocupacion" 
+       th:field="*{id}" 
+       aria-hidden="true"
+       autocomplete="off"/>
 
   <div class="mb-3 row">
     <label class="col-form-label col-sm-3 text-sm-end">Artista</label>

@@ -93,6 +93,8 @@
                     <!-- Reemplazar el div existente por: -->
                     <div class="row mb-4" th:if="${listaOcupacionPendiente != null && not #lists.isEmpty(listaOcupacionPendiente)}">
                         <div class="col-12">
+                            <h3 class="h3 d-inline align-middle"><strong>Ocupaciones</strong> pendientes de confirmación</h3>
+
                             <div id="carrousel-lista-ocupaciones-pendientes" class="carousel slide" data-bs-ride="carousel">
                                 <div class="carousel-inner">
                                     <!-- Primera tarjeta activa -->
@@ -103,7 +105,6 @@
                                                  class="col-12 col-md-6 col-lg-3">
                                                 <div class="card card-max-width animate__animated animate__fadeIn">
                                                     <div th:replace="~{fragments/ocupaciones-pendientes :: ocupaciones-pendientes}"/>
-
                                                 </div>
                                             </div>
                                         </div>

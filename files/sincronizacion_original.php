@@ -30,6 +30,14 @@
 # ============================================================================
 # Sincronización 
 
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+// Registrar un log de debug para cualquier error
+file_put_contents("debug_gestmusica.txt", "Inicio del script\n", FILE_APPEND);
+file_put_contents("debug_gestmusica.txt", "POST recibido:\n".print_r($_POST, true)."\n", FILE_APPEND);
+
 // Guardamos la información que me entra por POST 
 $archivo = "gfx/contenido.txt";
 $fp = fopen($archivo, "a");
@@ -54,7 +62,7 @@ function fecha_valida($fecha){
 		
 		if($mes > 0 && $mes < 13){
 			if(($ano % 4 == 0 && $ano % 100 != 0) || $ano % 400 == 0){
-			/*Año bisiesto*/
+
 				if($mes == 2 || $mes == 02){
 					if($dia > 0 && $dia < 30){
 						return true;					
@@ -623,4 +631,4 @@ if(isset($_POST['id_artista']) && $_POST['id_artista'] != '' ){
 
 
 if($error != ''){   echo "ERROR:".$error; 
-}else{	echo "CORRECTO: ".$correcto; } 
+}else{	echo "CORRECTO: ".$correcto; }
