@@ -134,15 +134,11 @@
   <div class="row card-body text-center mb-3">
 
     <div class="d-flex flex-column flex-sm-row justify-content-around">
-      <button type="button" th:if="${#authorization.expression('hasPermission(' + ocupacionDto.idArtista + ', ''ARTISTA'', ''ANULAR_OCUPACION'')') && ocupacionDto.id!=null}" id="btn-anular-ocupacion" class="btn btn-pill btn-danger m-1 col-12 col-sm-2">Anular</button>
-      <button type="button" th:if="${#authorization.expression('hasPermission(' + ocupacionDto.idAgencia + ', ''AGENCIA'', ''CONFIRMAR_OCUPACION'')') && ocupacionDto.id!=null && ocupacionDto.estado!='Ocupado' }" id="btn-confirmar-ocupacion" class="btn btn-pill btn-success m-1 col-12 col-sm-2">Confirmar</button>
+      <button type="button" th:if="${#authorization.expression('hasPermission(' + ocupacionDto.idArtista + ', ''ARTISTA'', ''ANULAR_OCUPACION'')') }" id="btn-anular-ocupacion" class="btn btn-pill btn-danger m-1 col-12 col-sm-2">Anular</button>
+      <button type="button" th:if="${#authorization.expression('hasPermission(' + ocupacionDto.idAgencia + ', ''AGENCIA'', ''CONFIRMAR_OCUPACION'')') && ocupacionDto.estado!='Ocupado' }" id="btn-confirmar-ocupacion" class="btn btn-pill btn-success m-1 col-12 col-sm-2">Confirmar</button>
       <button type="submit"  id="btn-guardar-ocupacion" th:if="${tienePermisoOcupacion}" class="btn btn-pill btn-primary m-1 col-12 col-sm-2">Guardar</button>
 
     </div>
   </div>
 
-  <div class="modal-footer">
-
-
-  </div>
 </form>
