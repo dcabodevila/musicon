@@ -67,10 +67,10 @@ public class GestManagerController {
 
             gestmanagerService.procesarDatosGestmanager(datos);
 
-            return ResponseEntity.ok("OK");
+            return ResponseEntity.ok("CORRECTO: El evento ha sido a&ntilde;adido correctamente");
         } catch (Exception e) {
             log.error("Error procesando datos de Gestmanager", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("ERROR");
+            return ResponseEntity.ok("ERROR:No existe ning&uacute;n evento con esas caracter&iacute;sticas");
         }
     }
 
