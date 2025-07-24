@@ -12,12 +12,14 @@ public class LocalizacionServiceImpl implements LocalizacionService {
 	private final CcaaRepository ccaaRepository;
 	private final ProvinciaRepository provinciaRepository;
 	private final MunicipioRepository municipioRepository;
+	private final LocalidadRepository localidadRepository;
 
-	public LocalizacionServiceImpl(ProvinciaRepository provinciaRepository, MunicipioRepository municipioRepository, CcaaRepository ccaaRepository){
+	public LocalizacionServiceImpl(ProvinciaRepository provinciaRepository, MunicipioRepository municipioRepository, CcaaRepository ccaaRepository, LocalidadRepository localidadRepository){
 		this.municipioRepository  = municipioRepository;
 		this.provinciaRepository = provinciaRepository;
 		this.ccaaRepository = ccaaRepository;
-	}
+        this.localidadRepository = localidadRepository;
+    }
 
 	@Override
 	@Cacheable(cacheNames  = "provincias")
@@ -44,4 +46,12 @@ public class LocalizacionServiceImpl implements LocalizacionService {
 	public List<CodigoNombreRecord> findAllComunidades(){
 		return this.ccaaRepository.findAllCcaaOrderedByName();
 	}
+
+	@Cacheable(cacheNames = "localidadesPorMunicipio", key = "#idMunicipio")
+	@Override
+	public List<CodigoNombreRecord> findLocalidadByIdMunicipio(long idMunicipio){
+		return this.localidadRepository.findLocalidadByIdMunicipio(idMunicipio);
+	}
+
+
 }

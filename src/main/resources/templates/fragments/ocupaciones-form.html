@@ -75,10 +75,43 @@
   <div class="mb-3 row">
     <label for="localidad-ocupacion" class="col-form-label col-sm-3 text-sm-end">Localidad</label>
     <div class="col-sm-9">
-      <input id="localidad-ocupacion" th:field="*{localidad}" class="form-control" placeholder="Localidad"  autocomplete="off" required>
+      <input multiple type="text" id="localidad-ocupacion" th:field="*{localidad}" class="form-control" placeholder="Localidad"  autocomplete="off" required list="localidades-list">
+      <datalist id="localidades-list">
+        <option th:each="localidad : ${listaLocalidadesListado}" th:value="${localidad.nombre}"></option>
+      </datalist>
     </div>
   </div>
-
+  <div th:if="${#authorization.expression('hasPermission(' + ocupacionDto.idAgencia + ', ''AGENCIA'', ''VER_DATOS_ACTUACION'')')}">
+    <div class="mb-3 row">
+      <label for="lugar-ocupacion" class="col-form-label col-sm-3 text-sm-end">Lugar</label>
+      <div class="col-sm-9">
+        <input id="lugar-ocupacion" th:field="*{lugar}" class="form-control" placeholder="Lugar"  autocomplete="off">
+      </div>
+    </div>
+    <div class="mb-3 row">
+      <label for="observaciones-ocupacion" class="col-form-label col-sm-3 text-sm-end">Observaciones</label>
+      <div class="col-sm-9">
+                  <textarea class="form-control" th:field="*{observaciones}" placeholder="Observaciones" id="observaciones-ocupacion"
+                            autocomplete="off" maxlength="1800"></textarea>
+      </div>
+    </div>
+  </div>
+  <div class="mb-3 row">
+    <label for="matinal-ocupacion" class="col-form-label col-sm-3 text-sm-end pt-sm-0" >Matinal</label>
+    <div class="col-sm-9">
+      <div class="form-check form-switch">
+        <input id="matinal-ocupacion" th:field="*{matinal}" class="form-check-input" type="checkbox"  checked="false" wfd-id="id17">
+      </div>
+    </div>
+  </div>
+  <div class="mb-3 row">
+    <label for="solo-matinal-ocupacion" class="col-form-label col-sm-3 text-sm-end pt-sm-0">Solo matinal</label>
+    <div class="col-sm-9">
+      <div class="form-check form-switch">
+        <input id="solo-matinal-ocupacion" th:field="*{soloMatinal}" class="form-check-input" type="checkbox"  checked="false" wfd-id="id17">
+      </div>
+    </div>
+  </div>
   <div th:if="${#authorization.expression('hasPermission(' + ocupacionDto.idArtista + ', ''ARTISTA'', ''VER_DATOS_ECONOMICOS'')')}">
     <div class="mb-3 row">
       <label for="importe-ocupacion" class="col-form-label col-sm-3 text-sm-end">Importe</label>
@@ -102,38 +135,9 @@
 
   </div>
 
-  <div class="mb-3 row">
-    <label for="matinal-ocupacion" class="col-form-label col-sm-3 text-sm-end pt-sm-0" >Matinal</label>
-    <div class="col-sm-9">
-      <div class="form-check form-switch">
-        <input id="matinal-ocupacion" th:field="*{matinal}" class="form-check-input" type="checkbox"  checked="false" wfd-id="id17">
-      </div>
-    </div>
-  </div>
-  <div class="mb-3 row">
-    <label for="solo-matinal-ocupacion" class="col-form-label col-sm-3 text-sm-end pt-sm-0">Solo matinal</label>
-    <div class="col-sm-9">
-      <div class="form-check form-switch">
-        <input id="solo-matinal-ocupacion" th:field="*{soloMatinal}" class="form-check-input" type="checkbox"  checked="false" wfd-id="id17">
-      </div>
-    </div>
-  </div>
 
-  <div th:if="${#authorization.expression('hasPermission(' + ocupacionDto.idAgencia + ', ''AGENCIA'', ''VER_DATOS_ACTUACION'')')}">
-    <div class="mb-3 row">
-      <label for="lugar-ocupacion" class="col-form-label col-sm-3 text-sm-end">Lugar</label>
-      <div class="col-sm-9">
-        <input id="lugar-ocupacion" th:field="*{lugar}" class="form-control" placeholder="Lugar"  autocomplete="off">
-      </div>
-    </div>
-    <div class="mb-3 row">
-      <label for="observaciones-ocupacion" class="col-form-label col-sm-3 text-sm-end">Observaciones</label>
-      <div class="col-sm-9">
-                  <textarea class="form-control" th:field="*{observaciones}" placeholder="Observaciones" id="observaciones-ocupacion"
-                            autocomplete="off" maxlength="1800"></textarea>
-      </div>
-    </div>
-  </div>
+
+
 
   <div class="row card-body text-center mb-3">
 

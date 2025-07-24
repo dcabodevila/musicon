@@ -1,4 +1,5 @@
 $(document).ready(function(){
+
         const municipioChoice = new Choices('#municipio-ocupacion');
         $('#municipio-ocupacion').data('choicesInstance', municipioChoice);
 
@@ -12,6 +13,10 @@ $(document).ready(function(){
 
         $('#provincia-ocupacion').on('change', function() {
             cargarMunicipios('#municipio-ocupacion', $(this).val(), null);
+        });
+
+        $('#municipio-ocupacion').on('change', function() {
+            cargarLocalidades('#localidad-ocupacion', $(this).val(), null);
         });
 
         $('#solo-matinal-ocupacion').on('change', function() {
@@ -185,7 +190,10 @@ function obtenerOcupacionDto(idOcupacion) {
                 $("#ccaa-ocupacion").val(ocupacionDto.idCcaa);
                 cargarProvincias('#provincia-ocupacion', ocupacionDto.idCcaa, ocupacionDto.idProvincia)
                     .done(function() {
-                        cargarMunicipios('#municipio-ocupacion', ocupacionDto.idProvincia, ocupacionDto.idMunicipio);
+                        cargarMunicipios('#municipio-ocupacion', ocupacionDto.idProvincia, ocupacionDto.idMunicipio).done(function() {
+                            cargarLocalidades('#localidad-ocupacion', ocupacionDto.idCcaa, ocupacionDto.localidad);
+                        });
+
                     });
 
                 // Datos de localización

@@ -48,4 +48,15 @@
         </resources>
     </cache>
 
+    <cache alias="localidadesPorMunicipio">
+        <key-type>java.lang.Object</key-type>
+        <value-type>java.lang.Object</value-type>
+        <expiry>
+            <ttl unit="hours">12</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">500</heap>
+        </resources>
+    </cache>
+
 </config>

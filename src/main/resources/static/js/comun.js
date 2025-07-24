@@ -62,6 +62,35 @@
         });
     }
 
+function cargarLocalidades(selectId, idMunicipio, valorSeleccionado) {
+
+    if (!idMunicipio) return $.Deferred().resolve();
+
+    return $.ajax({
+        url: '/localizacion/localidades/' + idMunicipio,
+        method: 'GET',
+        dataType: 'json',
+        success: function(data) {
+            $('#localidades-list').empty();
+
+            // Añadir opciones al datalist
+            data.forEach(item => {
+                $('#localidades-list').append(`<option value="${item.nombre}">`);
+            });
+
+            // Establecer valor seleccionado si existe
+            if (valorSeleccionado) {
+                $(inputId).val(valorSeleccionado);
+            }
+
+        },
+        error: function(xhr, status, error) {
+            console.error('Error al cargar localidades:', error);
+        }
+    });
+}
+
+
 function notif(type, message){
     let duration = "5000";
     let ripple = true;

@@ -88,7 +88,10 @@ public class OcupacionController {
 
         final List<CodigoNombreRecord> listaProvincias = this.localizacionService.findAllProvinciasByCcaaId(ocupacion.getIdCcaa());
         model.addAttribute("listaProvinciasCcaaArtista", listaProvincias);
-        model.addAttribute("listaMunicipioListado", ocupacion.getIdProvincia() != null ? this.localizacionService.findAllMunicipiosByIdProvincia(ocupacion.getIdProvincia()): this.localizacionService.findAllMunicipiosByIdProvincia(listaProvincias.get(0).id()) );
+        final List<CodigoNombreRecord> listaMunicipios = ocupacion.getIdProvincia() != null ? this.localizacionService.findAllMunicipiosByIdProvincia(ocupacion.getIdProvincia()): this.localizacionService.findAllMunicipiosByIdProvincia(listaProvincias.get(0).id());
+        model.addAttribute("listaMunicipioListado",  listaMunicipios);
+        model.addAttribute("listaLocalidadesListado", ocupacion.getIdMunicipio() != null ? this.localizacionService.findLocalidadByIdMunicipio(ocupacion.getIdMunicipio()): this.localizacionService.findLocalidadByIdMunicipio(listaMunicipios.get(0).id()) );
+
         model.addAttribute("listaTiposOcupacion", this.ocupacionService.listarTiposOcupacion(ocupacion.getIdArtista()));
     }
 

@@ -14,8 +14,7 @@ import java.util.List;
 @RequestMapping(value="localizacion")
 public class LocalizacionController {
 
-
-    private LocalizacionService localizacionService;
+    private final LocalizacionService localizacionService;
 
     private Logger logger = LoggerFactory.getLogger(LocalizacionController.class);
 
@@ -35,6 +34,13 @@ public class LocalizacionController {
     public ResponseEntity<List<CodigoNombreRecord>> listMunicipiosByIdProvincia(@PathVariable("idProvincia") Long idProvincia) {
 
         return ResponseEntity.ok(this.localizacionService.findAllMunicipiosByIdProvincia(idProvincia));
+
+    }
+
+    @GetMapping("/localidades/{idMunicipio}")
+    public ResponseEntity<List<CodigoNombreRecord>> listLocalidadesByIDMunicipio(@PathVariable("idMunicipio") Long idMunicipio) {
+
+        return ResponseEntity.ok(this.localizacionService.findLocalidadByIdMunicipio(idMunicipio));
 
     }
 
