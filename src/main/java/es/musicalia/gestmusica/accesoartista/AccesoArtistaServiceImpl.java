@@ -1,9 +1,13 @@
 package es.musicalia.gestmusica.accesoartista;
 
+import es.musicalia.gestmusica.artista.Artista;
 import es.musicalia.gestmusica.artista.ArtistaRepository;
+import es.musicalia.gestmusica.permiso.Permiso;
 import es.musicalia.gestmusica.permiso.PermisoRecord;
 import es.musicalia.gestmusica.permiso.PermisoRepository;
 import es.musicalia.gestmusica.permiso.TipoPermisoEnum;
+import es.musicalia.gestmusica.rol.TipoRolEnum;
+import es.musicalia.gestmusica.usuario.Usuario;
 import es.musicalia.gestmusica.usuario.UsuarioRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -81,6 +85,20 @@ public class AccesoArtistaServiceImpl implements AccesoArtistaService {
 	}
 	@Override
 	public Map<Long, Set<String>> obtenerMapPermisosArtista(Long idUsuario) {
+		
+		final Usuario u = this.usuarioRepository.findById(idUsuario).orElseThrow();
+		if (TipoRolEnum.ADMIN.getDescripcion().equals(u.getRolGeneral().getCodigo())) {
+			return this.artistaRepository.findAll().stream()
+					.collect(Collectors.toMap(
+							Artista::getId,
+							artista -> this.permisoRepository.findAll().stream()
+									.map(Permiso::getCodigo)
+									.collect(Collectors.toSet())
+					));
+		}
+
+		
+		
 		return accesoArtistaRepository.findAllAccesosArtistaByIdUsuario(idUsuario)
 			.orElse(Collections.emptyList())
 			.stream()

@@ -1,7 +1,15 @@
 package es.musicalia.gestmusica.permiso;
 
 import es.musicalia.gestmusica.acceso.AccesoRepository;
+import es.musicalia.gestmusica.agencia.Agencia;
+import es.musicalia.gestmusica.agencia.AgenciaRepository;
+import es.musicalia.gestmusica.artista.Artista;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
+import es.musicalia.gestmusica.rol.Rol;
+import es.musicalia.gestmusica.rol.RolRepository;
+import es.musicalia.gestmusica.rol.TipoRolEnum;
+import es.musicalia.gestmusica.usuario.Usuario;
+import es.musicalia.gestmusica.usuario.UsuarioRepository;
 import es.musicalia.gestmusica.util.GestmusicaUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.security.core.GrantedAuthority;
@@ -18,10 +26,16 @@ public class PermisoServiceImpl implements PermisoService {
 
 	private final AccesoRepository accesoRepository;
 	private final PermisoRepository permisoRepository;
+	private final UsuarioRepository usuarioRepository;
+	private final AgenciaRepository	agenciaRepository;
+	private final RolRepository rolRepository;
 
-	public PermisoServiceImpl(AccesoRepository accesoRepository, PermisoRepository permisoRepository){
+	public PermisoServiceImpl(AccesoRepository accesoRepository, PermisoRepository permisoRepository, UsuarioRepository usuarioRepository, AgenciaRepository agenciaRepository, RolRepository rolRepository){
 		this.accesoRepository = accesoRepository;
         this.permisoRepository = permisoRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.agenciaRepository = agenciaRepository;
+        this.rolRepository = rolRepository;
     }
 
 	@Override
@@ -76,6 +90,19 @@ public class PermisoServiceImpl implements PermisoService {
 
 	@Override
 	public Map<Long, Set<String>> obtenerMapPermisosAgencia(Long idUsuario) {
+
+		final Usuario u = this.usuarioRepository.findById(idUsuario).orElseThrow();
+		if (TipoRolEnum.ADMIN.getDescripcion().equals(u.getRolGeneral().getCodigo())) {
+			final Rol rol = this.rolRepository.findRolByCodigo(TipoRolEnum.AGENCIA.getDescripcion());
+
+			return this.agenciaRepository.findAll().stream()
+					.collect(Collectors.toMap(
+							Agencia::getId,
+							agencia -> this.permisoRepository.findAllPermisoRecordByRol(rol.getId()).stream()
+									.map(PermisoRecord::codigo)
+									.collect(Collectors.toSet())
+					));
+		}
 
 		return accesoRepository.findAllAccesosByIdUsuario(idUsuario)
 				.orElseGet(Collections::emptyList) // Evitar inicializaciones manuales
