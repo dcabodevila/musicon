@@ -71,7 +71,6 @@
                                             <div class="col-sm-9">
                                                 <select id="municipio-listado" th:field="*{idMunicipio}"  class="form-control choices-single">
                                                     <option th:each="municipio : ${listaMunicipioListado}" th:value="${municipio.id}" th:text="${municipio.nombre}"></option>
-
                                                 </select>
                                             </div>
                                         </div>

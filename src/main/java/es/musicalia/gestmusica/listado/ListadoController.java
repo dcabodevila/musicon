@@ -111,7 +111,7 @@ public class ListadoController {
     }
 
     @PostMapping("/generar")
-    public ResponseEntity<?> generarListado(@ModelAttribute("listadoDto") @Valid ListadoDto listadoDto,
+    public ResponseEntity<?> generarListado(@AuthenticationPrincipal CustomAuthenticatedUser user, @ModelAttribute("listadoDto") @Valid ListadoDto listadoDto,
                                        BindingResult bindingResult) {
         try {
             // Validar errores de binding
@@ -123,7 +123,7 @@ public class ListadoController {
                     .body(errorResponse);
             }
 
-            byte[] informeGenerado = this.listadoService.generarInformeListado(listadoDto);
+            byte[] informeGenerado = this.listadoService.generarInformeListado(listadoDto, user.getUserId());
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);

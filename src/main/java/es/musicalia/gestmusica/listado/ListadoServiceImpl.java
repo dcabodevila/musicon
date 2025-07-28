@@ -1,5 +1,7 @@
 package es.musicalia.gestmusica.listado;
 
+import es.musicalia.gestmusica.accesoartista.AccesoArtista;
+import es.musicalia.gestmusica.accesoartista.AccesoArtistaRepository;
 import es.musicalia.gestmusica.agencia.Agencia;
 import es.musicalia.gestmusica.agencia.AgenciaRepository;
 import es.musicalia.gestmusica.artista.ArtistaRepository;
@@ -9,6 +11,9 @@ import es.musicalia.gestmusica.localizacion.CodigoNombreDto;
 import es.musicalia.gestmusica.localizacion.Municipio;
 import es.musicalia.gestmusica.localizacion.MunicipioRepository;
 import es.musicalia.gestmusica.localizacion.ProvinciaRepository;
+import es.musicalia.gestmusica.permiso.PermisoArtistaEnum;
+import es.musicalia.gestmusica.permiso.PermisoRecord;
+import es.musicalia.gestmusica.permiso.PermisoRepository;
 import es.musicalia.gestmusica.util.DateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
@@ -34,8 +39,10 @@ public class ListadoServiceImpl implements ListadoService {
 	private final ListadoRepository listadoRepository;
 	private final AgenciaRepository agenciaRepository;
 	private final ArtistaRepository artistaRepository;
+	private final AccesoArtistaRepository accesoArtistaRepository;
+	private final PermisoRepository permisoRepository;
 
-	public ListadoServiceImpl(InformeService informeService, ProvinciaRepository provinciaRepository, MunicipioRepository municipioRepository, ListadoMapper listadoMapper, ListadoRepository listadoRepository, AgenciaRepository agenciaRepository, ArtistaRepository artistaRepository) {
+	public ListadoServiceImpl(InformeService informeService, ProvinciaRepository provinciaRepository, MunicipioRepository municipioRepository, ListadoMapper listadoMapper, ListadoRepository listadoRepository, AgenciaRepository agenciaRepository, ArtistaRepository artistaRepository, AccesoArtistaRepository accesoArtistaRepository, PermisoRepository permisoRepository) {
 		this.informeService = informeService;
 		this.provinciaRepository = provinciaRepository;
 		this.municipioRepository = municipioRepository;
@@ -43,6 +50,8 @@ public class ListadoServiceImpl implements ListadoService {
         this.listadoRepository = listadoRepository;
         this.agenciaRepository = agenciaRepository;
         this.artistaRepository = artistaRepository;
+        this.accesoArtistaRepository = accesoArtistaRepository;
+        this.permisoRepository = permisoRepository;
     }
 
 	@Override
@@ -111,9 +120,9 @@ private String convertSetLongToString(Set<Long> setIds) {
 }
 
 // Actualizar las llamadas en el método generarInformeListado
-	@Override
-	@Transactional
-	public byte[] generarInformeListado(ListadoDto listadoDto) {
+@Transactional
+@Override
+public byte[] generarInformeListado(ListadoDto listadoDto, Long idUsuario) {
 
 		log.info("Generando listado");
 		Map<String, Object> parametros = new HashMap<String, Object>();
@@ -133,6 +142,7 @@ private String convertSetLongToString(Set<Long> setIds) {
 		parametros.put("idsTipoArtista", convertSetLongToString(listadoDto.getIdsTipoArtista()));
 		parametros.put("idsAgencias", convertSetLongToString(listadoDto.getIdsAgencias()));
 		parametros.put("idsComunidades", convertSetLongToString(listadoDto.getIdsComunidades()));
+		parametros.put("idsArtistaRestringidos", obtenerIdsArtistaRestringidos(idUsuario));
 
 
 
@@ -156,6 +166,26 @@ private String convertSetLongToString(Set<Long> setIds) {
 		guardarListadoEntity(listadoDto);
 
 		return listado;
+	}
+
+	private String obtenerIdsArtistaRestringidos(Long idUsuario) {
+		final PermisoRecord permisoRecord = this.permisoRepository.findPermisoRecordByCodigo(PermisoArtistaEnum.PRESUPUESTOS_RESTRINGIDOS.name());
+
+		Optional<List<AccesoArtista>> optionalAccesosArtista = this.accesoArtistaRepository.findAllAccesosArtistaByIdUsuarioIdPermiso(idUsuario, permisoRecord.id());
+		Set<Long> idsArtistaRestringidos = new HashSet<>();
+		if (optionalAccesosArtista.isPresent() && !optionalAccesosArtista.get().isEmpty()) {
+			idsArtistaRestringidos = optionalAccesosArtista.get().stream()
+					.map(accesoArtista -> accesoArtista.getArtista().getId())
+					.collect(Collectors.toSet());
+		}
+
+		if (idsArtistaRestringidos.isEmpty()) {
+			return "-1";
+		}
+
+		return idsArtistaRestringidos.stream()
+				.map(String::valueOf)
+				.collect(Collectors.joining(", "));
 	}
 
 	@Override

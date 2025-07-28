@@ -28,14 +28,6 @@ $(document).ready(function(){
     });
 
 
-
-
-
-
-
-
-
-
     const municipioChoice = new Choices('#municipio-listado');
     $('#municipio-listado').data('choicesInstance', municipioChoice);
 
@@ -53,45 +45,6 @@ $(document).ready(function(){
         cargarMunicipios('#municipio-listado',$(this).val(), null);
     });
 
-    const form = document.getElementById('formGenerarListado');
-    form.addEventListener('submit', (event) => {
-        const fechaDesde = document.getElementById('idFechaDesdeListado').value;
-        const fechaHasta = document.getElementById('idFechaHastaListado').value;
-
-        const fechasIndividuales = [
-            document.getElementById('idFecha1').value,
-            document.getElementById('idFecha2').value,
-            document.getElementById('idFecha3').value,
-            document.getElementById('idFecha4').value,
-            document.getElementById('idFecha5').value,
-            document.getElementById('idFecha6').value,
-            document.getElementById('idFecha7').value
-        ];
-
-        // Validar que haya al menos un rango de fechas o una fecha individual
-        const hayRangoDeFechas = fechaDesde !== '' && fechaHasta !== '';
-        const hayFechasIndividuales = fechasIndividuales.some(fecha => fecha !== '');
-
-        if (!hayRangoDeFechas && !hayFechasIndividuales) {
-            event.preventDefault(); // Evita que se envíe el formulario
-            notif('error','Introduce las fecha inicial y final o alguna fecha individual');
-            return;
-        }
-        if ((fechaDesde !== '' || fechaHasta !== '') && hayFechasIndividuales) {
-            event.preventDefault(); // Evita que se envíe el formulario
-            notif('error','Si defines una fecha inicial o final, no puedes incluir fechas individuales. Por favor, corrige los campos.');
-            return;
-        }
-
-        // Validar que no haya fechas duplicadas
-        const todasLasFechas = [fechaDesde, fechaHasta, ...fechasIndividuales].filter(fecha => fecha !== '');
-        const fechasUnicas = new Set(todasLasFechas);
-
-        if (fechasUnicas.size !== todasLasFechas.length) {
-            event.preventDefault(); // Evita que se envíe el formulario
-            notif('error','Las fechas no pueden ser iguales. Por favor, corrige los campos.');
-        }
-    });
     const artistasSelect = document.querySelector('#tiposArtista');
 
     new Choices(artistasSelect, {
@@ -119,6 +72,13 @@ $(document).ready(function() {
     $('#formGenerarListado').off('submit').on('submit', function(e) {
         e.preventDefault();
 
+
+        const municipio = document.getElementById('municipio-listado').value;
+        if (!municipio) {
+            event.preventDefault();
+            notif('error','Indique el municipio para el que se solicita el presupuesto');
+            return;
+        }
         // Ejecutar primero las validaciones existentes
         const fechaDesde = document.getElementById('idFechaDesdeListado').value;
         const fechaHasta = document.getElementById('idFechaHastaListado').value;

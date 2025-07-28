@@ -78,6 +78,7 @@
 		<parameter name="fecha15" class="java.lang.String"/>
 		<parameter name="idsTipoArtista" class="java.lang.String"/>
 		<parameter name="idsAgencias" class="java.lang.String"/>
+		<parameter name="idsArtistaRestringidos" class="java.lang.String"/>
 		<parameter name="idsComunidades" class="java.lang.String"/>
 		<queryString language="SQL">
 			<![CDATA[SELECT *
@@ -104,6 +105,7 @@ END AS escenario, t.fecha::date,
    AND ata.tipo_artista_id in ($P!{idsTipoArtista})
    AND a.agencia_id in ($P!{idsAgencias})
    AND a.id_ccaa in ($P!{idsComunidades})
+   AND a.id not in ($P!{idsArtistaRestringidos})
    AND a.activo
    AND a.tarifas_publicas
    ORDER BY 2, 1',
@@ -229,6 +231,7 @@ END AS escenario, t.fecha::date,
 	<parameter name="solicitante" class="java.lang.String"/>
 	<parameter name="idsTipoArtista" class="java.lang.String"/>
 	<parameter name="idsAgencias" class="java.lang.String"/>
+	<parameter name="idsArtistaRestringidos" class="java.lang.String"/>
 	<parameter name="idsComunidades" class="java.lang.String"/>
 	<queryString>
 		<![CDATA[]]>
@@ -496,6 +499,9 @@ SMT = Solo sesión Matinal
 						</datasetParameter>
 						<datasetParameter name="idsAgencias">
 							<datasetParameterExpression><![CDATA[$P{idsAgencias}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="idsArtistaRestringidos">
+							<datasetParameterExpression><![CDATA[$P{idsArtistaRestringidos}]]></datasetParameterExpression>
 						</datasetParameter>
 						<datasetParameter name="idsComunidades">
 							<datasetParameterExpression><![CDATA[$P{idsComunidades}]]></datasetParameterExpression>

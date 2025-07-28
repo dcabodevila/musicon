@@ -22,4 +22,7 @@ public interface PermisoRepository extends JpaRepository<Permiso, Long> {
 
     @Query("select new es.musicalia.gestmusica.permiso.PermisoRecord(p.id, p.codigo, p.descripcion) from Permiso p where p.tipoPermiso=?1 order by p.descripcion")
     List<PermisoRecord> findAllPermisoRecordByTipo(Integer idTipoPermiso);
+
+    @Query("select new es.musicalia.gestmusica.permiso.PermisoRecord(p.id, p.codigo, p.descripcion) from Permiso p where p.codigo = ?1")
+    PermisoRecord findPermisoRecordByCodigo(String codigo);
 }
