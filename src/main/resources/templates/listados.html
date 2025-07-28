@@ -29,7 +29,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 </div>
-                <form id="formGenerarListado" method="POST" th:object="${listadoDto}" th:action=@{/listado/generar} autocomplete="off">
+                <form id="formGenerarListado" method="POST" th:object="${listadoDto}" th:action="@{/listado/generar}" autocomplete="off">
 
                 <div class="row">
                     <div class="col-12 col-lg-6 order-1 order-lg-2">
