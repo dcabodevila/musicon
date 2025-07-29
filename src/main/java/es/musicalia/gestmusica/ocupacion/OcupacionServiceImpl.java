@@ -11,6 +11,8 @@ import es.musicalia.gestmusica.localizacion.MunicipioRepository;
 import es.musicalia.gestmusica.localizacion.ProvinciaRepository;
 import es.musicalia.gestmusica.mail.EmailService;
 import es.musicalia.gestmusica.mail.EmailTemplateEnum;
+import es.musicalia.gestmusica.orquestasdegalicia.ActuacionExterna;
+import es.musicalia.gestmusica.orquestasdegalicia.OrquestasDeGaliciaService;
 import es.musicalia.gestmusica.permiso.PermisoAgenciaEnum;
 import es.musicalia.gestmusica.permiso.PermisoArtistaEnum;
 import es.musicalia.gestmusica.permiso.PermisoService;
@@ -24,6 +26,7 @@ import es.musicalia.gestmusica.util.DefaultResponseBody;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,8 +54,9 @@ public class OcupacionServiceImpl implements OcupacionService {
 	private final AccesoRepository accesoRepository;
 	private final EmailService emailService;
 	private final OcupacionMapper ocupacionMapper;
+	private final OrquestasDeGaliciaService orquestasDeGaliciaService;
 
-	public OcupacionServiceImpl(OcupacionRepository ocupacionRepository, ArtistaRepository artistaRepository, ProvinciaRepository provinciaRepository, MunicipioRepository municipioRepository, TipoOcupacionRepository tipoOcupacionRepository, OcupacionEstadoRepository ocupacionEstadoRepository, TarifaRepository tarifaRepository, UserService userService, PermisoService permisoService, AccesoRepository accesoRepository, EmailService emailService, OcupacionMapper ocupacionMapper){
+	public OcupacionServiceImpl(OcupacionRepository ocupacionRepository, ArtistaRepository artistaRepository, ProvinciaRepository provinciaRepository, MunicipioRepository municipioRepository, TipoOcupacionRepository tipoOcupacionRepository, OcupacionEstadoRepository ocupacionEstadoRepository, TarifaRepository tarifaRepository, UserService userService, PermisoService permisoService, AccesoRepository accesoRepository, EmailService emailService, OcupacionMapper ocupacionMapper, OrquestasDeGaliciaService orquestasDeGaliciaService){
 		this.ocupacionRepository = ocupacionRepository;
 		this.artistaRepository = artistaRepository;
         this.provinciaRepository = provinciaRepository;
@@ -65,6 +69,7 @@ public class OcupacionServiceImpl implements OcupacionService {
         this.accesoRepository = accesoRepository;
         this.emailService = emailService;
         this.ocupacionMapper = ocupacionMapper;
+        this.orquestasDeGaliciaService = orquestasDeGaliciaService;
     }
 
 	@Override
@@ -91,10 +96,22 @@ public class OcupacionServiceImpl implements OcupacionService {
 		ocupacion.setOcupacionEstado(this.ocupacionEstadoRepository.findById(OcupacionEstadoEnum.ANULADO.getId()).orElseThrow());
 		this.ocupacionRepository.save(ocupacion);
 
-		//TODO: llamar a Orquestas de galicia
-
 		try {
 			this.emailService.enviarMensajePorEmail(ocupacion.getUsuario().getEmail(), EmailTemplateEnum.EMAIL_NOTIFICACION_ANULACION);
+
+			if (ocupacion.getArtista().isPermiteOrquestasDeGalicia()){
+				ResponseEntity<String> response = this.orquestasDeGaliciaService.eliminarActuacion(ocupacion.getId().intValue());
+				if (response.getStatusCode().is2xxSuccessful()){
+					log.info("Se ha eliminado correctamente la actuacion de la ocupacion: {}", ocupacion.getId());
+				}
+				else {
+					throw new OrquestasDeGaliciaException("Error eliminado la actuacion de la ocupacion a OrquestasDeGalicia: " + ocupacion.getId());
+				}
+
+			}
+
+		} catch (OrquestasDeGaliciaException e) {
+			return DefaultResponseBody.builder().success(true).message("Ocupacion anulada correctamente, pero ha habido un error publicadando en OrquestasDeGalicia").messageType("warning").build();
 		} catch (EnvioEmailException e) {
 			return DefaultResponseBody.builder().success(true).message("Ocupacion anulada correctamente, pero ha habido un error enviando la notificación por correo").messageType("warning").build();
 		} catch (Exception e) {
@@ -115,10 +132,19 @@ public class OcupacionServiceImpl implements OcupacionService {
 		ocupacion.setUsuarioConfirmacion(this.userService.obtenerUsuarioAutenticado());
 		this.ocupacionRepository.save(ocupacion);
 
-		//TODO: llamar a Orquestas de galicia
-
         try {
-            this.emailService.enviarMensajePorEmail(ocupacion.getUsuario().getEmail(), EmailTemplateEnum.EMAIL_NOTIFICACION_CONFIRMACION);
+
+			ActuacionExterna actuacionExterna = getActuacionExterna(ocupacion.getArtista(), ocupacion);
+			ResponseEntity<String> response = this.orquestasDeGaliciaService.crearActuacion(actuacionExterna);
+			this.emailService.enviarMensajePorEmail(ocupacion.getUsuario().getEmail(), EmailTemplateEnum.EMAIL_NOTIFICACION_CONFIRMACION);
+
+			if (response.getStatusCode().is2xxSuccessful()){
+				log.info("Se ha enviado correctamente la actuacion de la ocupacion: {}", ocupacion.getId());
+			}
+			else {
+				throw new OrquestasDeGaliciaException("Error enviando la actuacion de la ocupacion a OrquestasDeGalicia: " + ocupacion.getId());
+			}
+
         } catch (EnvioEmailException e) {
 			return DefaultResponseBody.builder().success(true).message("Ocupacion guardada correctamente, pero ha habido un error enviando la notificación por correo").messageType("warning").build();
         } catch (Exception e) {
@@ -186,28 +212,47 @@ public class OcupacionServiceImpl implements OcupacionService {
 		ocupacion.setMatinal(ocupacionSaveDto.getMatinal());
 		ocupacion.setSoloMatinal(ocupacionSaveDto.getSoloMatinal());
 		ocupacion.setProvisional(ocupacionSaveDto.getProvisional());
+		ocupacion.setTextoOrquestasDeGalicia(ocupacionSaveDto.getTextoOrquestasDeGalicia());
 		ocupacion.setActivo(true);
 
 		Ocupacion ocupacionSave = this.ocupacionRepository.save(ocupacion);
 
-		if (!permisoConfirmarOcupacionAgencia){
+		try {
+			if (!permisoConfirmarOcupacionAgencia){
 
-            try {
-                this.emailService.enviarMensajePorEmail(ocupacion.getArtista().getAgencia().getUsuario().getEmail(), EmailTemplateEnum.EMAIL_NOTIFICACION_CONFIRMACION_PENDIENTE);
-            } catch (EnvioEmailException e) {
-                log.error("error enviando notificacion de solicitud de ocupacion", e);
-				return DefaultResponseBody.builder().success(true).message("Ocupacion guardada correctamente. Pero no se ha podido enviar la notificación por correo").messageType("warning").idEntidad(ocupacionSave.getId()).build();
-            }catch (Exception e) {
-				log.error("error enviando notificacion de solicitud de ocupacion", e);
-				return DefaultResponseBody.builder().success(true).message("Ocupacion guardada correctamente, pero ha habido un error enviando la notificación por correo").messageType("warning").idEntidad(ocupacionSave.getId()).build();
+
+					this.emailService.enviarMensajePorEmail(ocupacion.getArtista().getAgencia().getUsuario().getEmail(), EmailTemplateEnum.EMAIL_NOTIFICACION_CONFIRMACION_PENDIENTE);
+
+
 			}
+			else {
 
-        }
-		else {
+				if (artista.isPermiteOrquestasDeGalicia() && ocupacion.getOcupacionEstado().getNombre().equals(OcupacionEstadoEnum.OCUPADO.getDescripcion())){
 
-			//TODO notificar a orquestas de galicia si aplica
+					ActuacionExterna actuacionExterna = getActuacionExterna(artista, ocupacion);
+					ResponseEntity<String> response = ocupacionSaveDto.getId()==null ? this.orquestasDeGaliciaService.crearActuacion(actuacionExterna) : this.orquestasDeGaliciaService.modificarActuacion(ocupacion.getId().intValue(), actuacionExterna);
 
+					if (response.getStatusCode().is2xxSuccessful()){
+						log.info("Se ha enviado correctamente la actuacion de la ocupacion: {}", ocupacionSave.getId());
+					}
+					else {
+						throw new OrquestasDeGaliciaException("Error enviando la actuacion de la ocupacion a OrquestasDeGalicia: " + ocupacionSave.getId());
+					}
+
+				}
+
+			}
+		} catch (OrquestasDeGaliciaException e) {
+			log.error("Error enviando la actuacion de la ocupacion a OrquestasDeGalicia: {}", ocupacionSave.getId());
+			return DefaultResponseBody.builder().success(true).message("Ocupacion guardada correctamente. Pero no se ha podido publicar la actuación a OrquestasDeGalicia.es").messageType("warning").idEntidad(ocupacionSave.getId()).build();
+		} catch (EnvioEmailException e) {
+			log.error("error enviando notificacion de solicitud de ocupacion", e);
+			return DefaultResponseBody.builder().success(true).message("Ocupacion guardada correctamente. Pero no se ha podido enviar la notificación por correo").messageType("warning").idEntidad(ocupacionSave.getId()).build();
+		} catch (Exception e) {
+			log.error("error enviando notificacion de solicitud de ocupacion", e);
+			return DefaultResponseBody.builder().success(true).message("Ocupacion guardada correctamente, pero ha habido un error enviando la notificación por correo").messageType("warning").idEntidad(ocupacionSave.getId()).build();
 		}
+
 
 
 		log.info("Completado guardado ocupacionSave: {}", ocupacionSave.getId());
@@ -215,6 +260,20 @@ public class OcupacionServiceImpl implements OcupacionService {
 
 
 
+	}
+
+	private static ActuacionExterna getActuacionExterna(Artista artista, Ocupacion ocupacion) {
+		ActuacionExterna actuacionExterna = new ActuacionExterna();
+		actuacionExterna.setIdFormacionExterno(artista.getId().intValue());
+		actuacionExterna.setIdActuacionExterno(ocupacion.getId().intValue());
+		actuacionExterna.setFecha(ocupacion.getFecha().toLocalDate());
+		actuacionExterna.setLugar(ocupacion.getPoblacion());
+		actuacionExterna.setProvincia(ocupacion.getProvincia().getNombreOrquestasdegalicia());
+		actuacionExterna.setVermu(ocupacion.isMatinal() || ocupacion.isSoloMatinal());
+		actuacionExterna.setTarde(false);
+		actuacionExterna.setNoche(!ocupacion.isSoloMatinal());
+		actuacionExterna.setInformacion(ocupacion.getTextoOrquestasDeGalicia());
+		return actuacionExterna;
 	}
 
 	@Override
@@ -360,9 +419,23 @@ public class OcupacionServiceImpl implements OcupacionService {
 	@Transactional(readOnly = false)
 	public Ocupacion saveOcupacionFromGestmanager(DatosGestmanagerConvertedDTO datos) {
 		Ocupacion ocupacion = gestManagerSincroToOcupacion(datos);
-		return this.ocupacionRepository.save(ocupacion);
+		ocupacion = this.ocupacionRepository.save(ocupacion);
 
-		//TODO: llamar a Orquestas de galicia
+		try {
+
+			ActuacionExterna actuacionExterna = getActuacionExterna(ocupacion.getArtista(), ocupacion);
+			ResponseEntity<String> response = this.orquestasDeGaliciaService.crearActuacion(actuacionExterna);
+
+			if (response.getStatusCode().is2xxSuccessful()) {
+				log.info("Se ha enviado correctamente la actuacion de la ocupacion: {}", ocupacion.getId());
+			} else {
+				throw new OrquestasDeGaliciaException("Error enviando la actuacion de la ocupacion a OrquestasDeGalicia: " + ocupacion.getId());
+			}
+		} catch (OrquestasDeGaliciaException e){
+			log.error("No se ha podido enviar a OrquestasDeGalicia", e);
+		}
+
+		return ocupacion;
 	}
 
 	@Transactional(readOnly = false)
@@ -377,9 +450,9 @@ public class OcupacionServiceImpl implements OcupacionService {
 			throw new IllegalArgumentException("Campo descripcion no puede estar vacio o tener menos de 3 elementos separados por * ");
 		}
 
-		String provincia = listaDatos.get(0);
-		String municipio = listaDatos.get(1);
-		String localidad = listaDatos.get(2);
+		String municipio = listaDatos.get(0);
+		String localidad = listaDatos.get(1);
+		String lugar = listaDatos.get(2);
 
 		final Artista artista = this.artistaRepository.findArtistaByIdArtistaGestmanager(datos.getIdArtistaGestmanager()).orElseThrow(() -> new IllegalArgumentException("Artista no encontrado con el idArtistaGestmanager: " + datos.getIdArtistaGestmanager()));
 
@@ -389,9 +462,9 @@ public class OcupacionServiceImpl implements OcupacionService {
 
 			if (listaOcupaciones.get().size() > 1) {
 				List<Ocupacion> ocupacionesFiltradas = listaOcupaciones.get().stream()
-						.filter(o -> o.getProvincia().getNombre().equalsIgnoreCase(provincia.trim()) &&
-								o.getMunicipio().getNombre().equalsIgnoreCase(municipio.trim()) &&
-								o.getPoblacion().equalsIgnoreCase(localidad.trim()))
+						.filter(o -> o.getMunicipio().getNombre().equalsIgnoreCase(municipio.trim()) &&
+								(o.getPoblacion() == null || localidad == null || o.getPoblacion().equalsIgnoreCase(localidad.trim())) &&
+								(o.getLugar() == null || lugar == null || o.getLugar().equalsIgnoreCase(lugar.trim())))
 						.toList();
 
 				if (ocupacionesFiltradas.size() > 1) {

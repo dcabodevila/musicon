@@ -95,7 +95,7 @@ public class ListadoController {
         List<ListadoRecord> listadosGenerados = new ArrayList<>();
         model.addAttribute("listadosGenerados", listadosGenerados);
         model.addAttribute("listadoAudienciasDto", ListadoAudienciasDto.builder()
-                .fechaDesde(LocalDate.now().minusMonths(1))
+                .fechaDesde(LocalDate.now().minusMonths(2))
                 .fechaHasta(LocalDate.now())
                 .build());
         obtenerModelComun(model, user.getUserId());

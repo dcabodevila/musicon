@@ -45,4 +45,6 @@ public class OcupacionSaveDto {
 
     private Boolean provisional;
 
+    private String textoOrquestasDeGalicia;
+
 }

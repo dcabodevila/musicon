@@ -21,5 +21,6 @@ public class Provincia {
     @Column(name = "abreviatura")
     private String abreviatura;
 
-
+    @Column(name = "nombre_orquestasdegalicia")
+    private String nombreOrquestasdegalicia;
 }

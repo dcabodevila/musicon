@@ -1,5 +1,6 @@
 package es.musicalia.gestmusica.orquestasdegalicia;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface OrquestasDeGaliciaService {
@@ -7,11 +8,11 @@ public interface OrquestasDeGaliciaService {
     ActuacionExterna obtenerActuacion(Integer idActuacionExterno);
 
     @Transactional
-    void crearActuacion(ActuacionExterna actuacion);
+    ResponseEntity<String> crearActuacion(ActuacionExterna actuacion);
 
     @Transactional
-    void modificarActuacion(Integer idActuacionExterno, ActuacionExterna actuacion);
+    ResponseEntity<String> modificarActuacion(Integer idActuacionExterno, ActuacionExterna actuacion);
 
     @Transactional
-    void eliminarActuacion(Integer idActuacionExterno);
+    ResponseEntity<String> eliminarActuacion(Integer idActuacionExterno);
 }

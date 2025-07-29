@@ -1,91 +1,56 @@
-<?php 
-# ============================================================================
-# GLOBAL WEB: Control Avanzado Contenido
-# ============================================================================
-# Desarrollado y programado por: ACV Galaica
-# Copyright (c) ACV Galaica - http://www.acvgalaica.com
-# ============================================================================
-# ============================================================================
-# Código para recibir los datos de la aplicación que tienes ellos e insertalos en 
-# la web de una forma sencilla. Los datos que se reciben son: 
-# --> id_artista= Id_del artista
-# --> situacion= poblacion,municipio,provincia,pais
-# --> descripcion= valores viejos de fecha y/o agrupacion,que han de ser sustituidos 
-# --> fecha= fecha de la actuacion
-# --> poblacion= Poblacion de actuacion
-# --> municipio= Municipio de actuacion
-# --> provincia= Provincia de actuacion
-# --> pais=  Pais de actuacion
-# --> nombre_local= Local de Actuacion
-# --> accion= Accion que se realizara sobre la Tabla.
-# -----------> alta =  alta de una nueva actuacion
-# -----------> delete = eliminar la fecha
-# -----------> Mod_fecha = modificar la fecha de una actuacion
-# -----------> Mod_agr = modificar la agrupacion de una actuacion
-# -----------> Mod_fecha_agr = modificar la agrupacion y fecha de una actuacion
-# ----------->  Modificar = modificar algún otro dato 
-# -----------> Cualquier otra acutacion sería añadirlo a la base de datos 
+<?php
+// Forzar que toda salida sea UTF-8 (importante para caracteres en español)
+header('Content-Type: text/plain; charset=utf-8');
 
-# ============================================================================
-# ============================================================================
-# Sincronización 
-
-// Guardamos la información que me entra por POST 
-$archivo = "gfx/contenido.txt";
+// Archivo para registro de logs
+$archivo = "logs.txt";
 $fp = fopen($archivo, "a");
-if($fp){
-	fwrite($fp, "-------  ACTUALIZACIÓN ".date("d-m-Y H:i:s")."  ------------\n\n");
-	foreach($_POST as $nombre_campo => $valor){
-		$asignacion = "\$" . $nombre_campo . "='" . $valor . "';";
-		fwrite($fp, $asignacion."\n\"");
-	}
-	fwrite($fp, "------- xxxxxxxxxx ------------\n\n");
-	fclose($fp);
-}
 
-
-function registrarResultado($error, $correcto, $archivo) {
-    $fp = fopen($archivo, "a");
-    if ($fp) {
-        if (!empty($error)) {
-
-            $salida = "ERROR:".$error."\n";
-        } else {
-            $salida = "CORRECTO:".$correcto."\n";
-        }
-        fwrite($fp, date("d-m-Y H:i:s")." -> ".$salida);
-        fclose($fp);
+if ($fp) {
+    fwrite($fp, "-------  ACTUALIZACIÓN " . date("d-m-Y H:i:s") . "  ------------\n\n");
+    foreach ($_POST as $nombre_campo => $valor) {
+        $asignacion = "\$" . $nombre_campo . "='" . $valor . "';";
+        fwrite($fp, $asignacion . "\n");
     }
+    fwrite($fp, "------- xxxxxxxxxx ------------\n\n");
+    fclose($fp);
 }
 
 function enviarDatosAGestmusica($datos_envio, $archivo) {
     $datos_json = json_encode($datos_envio);
     $url_api = "https://gestmusica.onrender.com/api/gestmanager/publicar";
     $ch = curl_init($url_api);
+
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $datos_json);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_TIMEOUT, 5);
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Content-Type: application/json'
+        'Content-Type: application/json',
     ]);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
     $response = curl_exec($ch);
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $fp = fopen($archivo, "a");
+
     if (curl_errno($ch)) {
-        $mensaje_api = "Error API Gestmusica: ".curl_error($ch);
-    } elseif ($http_code !== 200) {
-        $mensaje_api = "Error API Gestmusica: HTTP ".$http_code."\nRespuesta: ".$response;
+        echo "ERROR: Fallo en conexión CURL - " . curl_error($ch);
+        curl_close($ch);
+        return;
+    }
+
+    if ($http_code !== 200) {
+        echo "ERROR: Respuesta HTTP " . $http_code . " - " . $response;
+        curl_close($ch);
+        return;
+    }
+
+    if (empty($response)) {
+        echo "ERROR: Respuesta vacía del servidor.";
     } else {
-        $mensaje_api = "Enviado a Gestmusica correctamente. Respuesta: ".$response;
+        echo "CORRECTO: " . trim($response);
     }
-    if ($fp) {
-        fwrite($fp, date("d-m-Y H:i:s")." -> ".$mensaje_api."\n");
-        fclose($fp);
-    }
-    echo "\n".$mensaje_api;
+
     curl_close($ch);
 }
 
@@ -112,11 +77,13 @@ $datos_envio = [
     'pais' => $pais,
     'nombre_local' => $nombre_local,
     'estado' => $estado,
-    'indicadores' => $indicadores
+    'indicadores' => $indicadores,
 ];
+
 $acciones_enviar = ['Modificar', 'alta', 'delete', 'Mod_fecha_agr', 'Mod_agr', 'Mod_fecha'];
+
 if (in_array($accion, $acciones_enviar)) {
     enviarDatosAGestmusica($datos_envio, $archivo);
+} else {
+    echo "CORRECTO: Accion no aceptada, pero registrada por el sistema.";
 }
-registrarResultado($error ?? '', $correcto ?? '', $archivo);
-

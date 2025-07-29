@@ -93,6 +93,8 @@ public class OcupacionController {
         model.addAttribute("listaLocalidadesListado", ocupacion.getIdMunicipio() != null ? this.localizacionService.findLocalidadByIdMunicipio(ocupacion.getIdMunicipio()): this.localizacionService.findLocalidadByIdMunicipio(listaMunicipios.get(0).id()) );
 
         model.addAttribute("listaTiposOcupacion", this.ocupacionService.listarTiposOcupacion(ocupacion.getIdArtista()));
+        model.addAttribute("isArtistaPermiteOrquestasDeGalicia", this.artistaService.findArtistaDtoById(ocupacion.getIdArtista()).isPermiteOrquestasDeGalicia());
+
     }
 
     public Set<Long> obtenerArtistasConPermisoOcupaciones(Map<Long, Set<String>> mapPermisosArtista) {

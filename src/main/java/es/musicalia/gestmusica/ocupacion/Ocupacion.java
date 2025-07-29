@@ -21,7 +21,7 @@ public class Ocupacion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "artista_id")
     @NotNull
@@ -114,6 +114,10 @@ public class Ocupacion {
 
     @Column(name = "provisional")
     private boolean provisional;
+
+    @Column(name = "texto_orquestasdegalicia")
+    private String textoOrquestasDeGalicia;
+
 
 }
 

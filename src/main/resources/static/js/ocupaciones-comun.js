@@ -122,7 +122,7 @@ function crearOcupacionSaveDto() {
     ocupacionSaveDto["soloMatinal"] = $('#solo-matinal-ocupacion').is(':checked');
     ocupacionSaveDto["observaciones"] = $("#observaciones-ocupacion").val();
     ocupacionSaveDto["provisional"] = $("#provisional-ocupacion").val();
-
+    ocupacionSaveDto["textoOrquestasDeGalicia"] = $("#orquestasdegalicia-ocupacion").val();
 
     return ocupacionSaveDto;
 }
@@ -211,6 +211,7 @@ function obtenerOcupacionDto(idOcupacion) {
 
                 // Datos adicionales
                 $("#observaciones-ocupacion").val(ocupacionDto.observaciones);
+                $("#orquestasdegalicia-ocupacion").val(ocupacionDto.textoOrquestasDeGalicia);
 
                 // Gestionar estado y UI
                 if (ocupacionDto.estado) {
