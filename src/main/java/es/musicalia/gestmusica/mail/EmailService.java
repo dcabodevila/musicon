@@ -37,9 +37,16 @@ public class EmailService {
     private int minutosExpiracion;
     @Value("${app.verificacion.max-intentos:3}")
     private int maxIntentos;
+    @Value("${app.mail.enabled:true}")
+    private boolean isMailEnabled;
 
 
     public void enviarMensajePorEmail(String email, EmailTemplateEnum tipo) throws EnvioEmailException {
+        if (!isMailEnabled) {
+            log.info("Envío de correo deshabilitado por configuración. No se enviará el mensaje a: {}", email);
+            return;
+        }
+
         EmailDto emailDto = EmailDto.builder()
                 .to(email)
                 .subject(tipo.getAsunto())
@@ -60,6 +67,7 @@ public class EmailService {
 
 
     public void enviarCodigoPorEmail(String email, String codigo, EmailTemplateEnum tipo) throws EnvioEmailException {
+
             EmailDto emailDto = EmailDto.builder()
                     .to(email)
                     .subject(tipo.getAsunto())
@@ -131,54 +139,8 @@ public class EmailService {
     }
 
 
-    /**
-     * Envía un email con formato HTML y adjuntos
-     */
-    @Deprecated
-    public void sendHtmlEmail(EmailDto emailDto) throws EnvioEmailException {
-        log.info("Enviando email HTML a: {}", emailDto.getTo());
-
-        try {
-            MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-
-            // Configurar remitente
-            helper.setFrom(fromEmail, senderName);
-
-            // Configurar destinatario principal
-            helper.setTo(emailDto.getTo());
-
-            // Configurar CC si existe
-            if (emailDto.getCc() != null && !emailDto.getCc().isEmpty()) {
-                helper.setCc(emailDto.getCc().toArray(new String[0]));
-            }
-
-            // Configurar BCC si existe
-            if (emailDto.getBcc() != null && !emailDto.getBcc().isEmpty()) {
-                helper.setBcc(emailDto.getBcc().toArray(new String[0]));
-            }
-
-            // Configurar asunto y contenido
-            helper.setSubject(emailDto.getSubject());
-            //helper.setText(emailDto.getContent(), emailDto.isHtml());
-            helper.setText(emailDto.getPlainContent(), emailDto.getContent());
-
-
-            // Agregar adjuntos si existen
-            if (emailDto.getAttachments() != null && !emailDto.getAttachments().isEmpty()) {
-                addAttachments(helper, emailDto.getAttachments());
-            }
-
-            mailSender.send(mimeMessage);
-            log.info("Email HTML enviado correctamente a: {}", emailDto.getTo());
-
-        } catch (MessagingException | MailException | UnsupportedEncodingException e) {
-            log.error("Error enviando email HTML a {}: {}", emailDto.getTo(), e.getMessage());
-            throw new EnvioEmailException("Error enviando email: " + e.getMessage());
-        }
-    }
-
     public MailgunResponse sendMailgunEmail(EmailDto emailDto) {
+
         return mailgunEmailService.sendSimpleEmail(emailDto.getTo(), emailDto.getSubject(), emailDto.getContent());
     }
 

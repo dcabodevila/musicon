@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
-    <div class="card card-max-width" th:fragment="ocupaciones-pendientes" style="height: 415px">
+    <div class="card card-max-width" th:fragment="ocupaciones-pendientes" style="height: 400px">
         <div class="card-header">
             <!-- El contenido existente de la tarjeta se mantiene igual -->
             <div class="row">
@@ -32,7 +32,7 @@
                 <h1 class="mt-0 mb-0 ms-2 align-baseline"  th:text="${ocupacion.importe}"></h1>
             </div>
             </p>
-            <div class="card-footer">
+            <div>
                 <ul class="list-unstyled mb-0">
                     <li class="mb-1"><span class="fas fa-user fa-fw me-1"></span> <a :href="#"  th:text="${ocupacion.nombreUsuario}"></a></li>
                     <li class="mb-1"><span class="fas fa-map-marked fa-fw me-1" ></span> <span th:text="${ocupacion.localidad + ', ' +ocupacion.municipio + ', ' + ocupacion.provincia}"></span></li>

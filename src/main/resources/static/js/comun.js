@@ -80,7 +80,7 @@ function cargarLocalidades(selectId, idMunicipio, valorSeleccionado) {
 
             // Establecer valor seleccionado si existe
             if (valorSeleccionado) {
-                $(inputId).val(valorSeleccionado);
+                $(selectId).val(valorSeleccionado);
             }
 
         },

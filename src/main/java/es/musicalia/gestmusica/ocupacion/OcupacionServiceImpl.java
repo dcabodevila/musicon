@@ -135,15 +135,11 @@ public class OcupacionServiceImpl implements OcupacionService {
         try {
 
 			ActuacionExterna actuacionExterna = getActuacionExterna(ocupacion.getArtista(), ocupacion);
-			ResponseEntity<String> response = this.orquestasDeGaliciaService.crearActuacion(actuacionExterna);
+
+			this.orquestasDeGaliciaService.enviarActuacionOrquestasDeGalicia(false, actuacionExterna, OcupacionEstadoEnum.OCUPADO.getDescripcion());
 			this.emailService.enviarMensajePorEmail(ocupacion.getUsuario().getEmail(), EmailTemplateEnum.EMAIL_NOTIFICACION_CONFIRMACION);
 
-			if (response.getStatusCode().is2xxSuccessful()){
-				log.info("Se ha enviado correctamente la actuacion de la ocupacion: {}", ocupacion.getId());
-			}
-			else {
-				throw new OrquestasDeGaliciaException("Error enviando la actuacion de la ocupacion a OrquestasDeGalicia: " + ocupacion.getId());
-			}
+
 
         } catch (EnvioEmailException e) {
 			return DefaultResponseBody.builder().success(true).message("Ocupacion guardada correctamente, pero ha habido un error enviando la notificación por correo").messageType("warning").build();
@@ -160,7 +156,47 @@ public class OcupacionServiceImpl implements OcupacionService {
 	@Override
 	@Transactional(readOnly = false)
 	public DefaultResponseBody saveOcupacion(OcupacionSaveDto ocupacionSaveDto) throws es.musicalia.gestmusica.ocupacion.ModificacionOcupacionException {
+		final Artista artista = this.artistaRepository.findById(ocupacionSaveDto.getIdArtista()).orElseThrow();
 
+		final boolean permisoConfirmarOcupacionAgencia = this.permisoService.existePermisoUsuarioAgencia(artista.getAgencia().getId(), PermisoAgenciaEnum.CONFIRMAR_OCUPACION.name());
+
+		final Ocupacion ocupacion = guardarOcupacion(ocupacionSaveDto, permisoConfirmarOcupacionAgencia);
+
+		try {
+			if (!permisoConfirmarOcupacionAgencia){
+
+					this.emailService.enviarMensajePorEmail(ocupacion.getArtista().getAgencia().getUsuario().getEmail(), EmailTemplateEnum.EMAIL_NOTIFICACION_CONFIRMACION_PENDIENTE);
+
+			}
+			else {
+				if (artista.isPermiteOrquestasDeGalicia()) {
+					ActuacionExterna actuacionExterna = getActuacionExterna(artista, ocupacion);
+
+					this.orquestasDeGaliciaService.enviarActuacionOrquestasDeGalicia(ocupacionSaveDto.getId()==null, actuacionExterna, ocupacion.getOcupacionEstado().getNombre());
+				}
+
+			}
+		} catch (OrquestasDeGaliciaException e) {
+			log.error("Error enviando la actuacion de la ocupacion a OrquestasDeGalicia: {}", ocupacion.getId());
+			return DefaultResponseBody.builder().success(true).message("Ocupacion guardada correctamente. Pero no se ha podido publicar la actuación a OrquestasDeGalicia.es").messageType("warning").idEntidad(ocupacion.getId()).build();
+		} catch (EnvioEmailException e) {
+			log.error("error enviando notificacion de solicitud de ocupacion", e);
+			return DefaultResponseBody.builder().success(true).message("Ocupacion guardada correctamente. Pero no se ha podido enviar la notificación por correo").messageType("warning").idEntidad(ocupacion.getId()).build();
+		} catch (Exception e) {
+			log.error("error enviando notificacion de solicitud de ocupacion", e);
+			return DefaultResponseBody.builder().success(true).message("Ocupacion guardada correctamente, pero ha habido un error enviando la notificación por correo").messageType("warning").idEntidad(ocupacion.getId()).build();
+		}
+
+
+
+		log.info("Completado guardado ocupacionSave: {}", ocupacion.getId());
+		return DefaultResponseBody.builder().success(true).message("Ocupacion guardada correctamente").messageType("success").idEntidad(ocupacion.getId()).build();
+
+
+
+	}
+
+	private Ocupacion guardarOcupacion(OcupacionSaveDto ocupacionSaveDto, boolean permisoConfirmarOcupacionAgencia) throws ModificacionOcupacionException {
 		log.info("Empezando saveOcupacion: {}", ocupacionSaveDto.toString());
 
 		final Ocupacion ocupacion = ocupacionSaveDto.getId()!=null? this.ocupacionRepository.findById(ocupacionSaveDto.getId()).orElse(new Ocupacion())  : new Ocupacion();
@@ -180,10 +216,7 @@ public class OcupacionServiceImpl implements OcupacionService {
 			ocupacion.setFechaCreacion(LocalDateTime.now());
 			ocupacion.setUsuarioCreacion(usuario.getUsername());
 		}
-
-
 		final Artista artista = this.artistaRepository.findById(ocupacionSaveDto.getIdArtista()).orElseThrow();
-
 		ocupacion.setArtista(artista);
 		ocupacion.setFecha(ocupacionSaveDto.getFecha());
 		ocupacion.setImporte(ocupacionSaveDto.getImporte()!=null? ocupacionSaveDto.getImporte() : BigDecimal.ZERO);
@@ -191,16 +224,9 @@ public class OcupacionServiceImpl implements OcupacionService {
 		ocupacion.setIva(ocupacionSaveDto.getIva()!=null?ocupacionSaveDto.getIva(): BigDecimal.ZERO);
 		ocupacion.setTipoOcupacion(this.tipoOcupacionRepository.findById(ocupacionSaveDto.getIdTipoOcupacion()).orElseThrow());
 
-		final boolean permisoConfirmarOcupacionAgencia = this.permisoService.existePermisoUsuarioAgencia(artista.getAgencia().getId(), PermisoAgenciaEnum.CONFIRMAR_OCUPACION.name());
 
-
-		if (ocupacionSaveDto.getId()==null) {
-			final Long idEstadoOcupacion = getIdEstadoOcupacion(ocupacionSaveDto.getIdTipoOcupacion(), permisoConfirmarOcupacionAgencia);
-			ocupacion.setOcupacionEstado(this.ocupacionEstadoRepository.findById(idEstadoOcupacion).orElseThrow());
-		}
-		else {
-			ocupacion.setOcupacionEstado(this.ocupacionEstadoRepository.findById(ocupacionSaveDto.getIdTipoOcupacion()).orElseThrow());
-		}
+		final Long idEstadoOcupacion = getIdEstadoOcupacion(ocupacionSaveDto.getIdTipoOcupacion(), permisoConfirmarOcupacionAgencia, ocupacionSaveDto.getId()==null, ocupacion.getOcupacionEstado() != null ? ocupacion.getOcupacionEstado().getNombre() : null);
+		ocupacion.setOcupacionEstado(this.ocupacionEstadoRepository.findById(idEstadoOcupacion).orElseThrow());
 
 
 		ocupacion.setProvincia(this.provinciaRepository.findById(ocupacionSaveDto.getIdProvincia()).orElseThrow());
@@ -215,52 +241,13 @@ public class OcupacionServiceImpl implements OcupacionService {
 		ocupacion.setTextoOrquestasDeGalicia(ocupacionSaveDto.getTextoOrquestasDeGalicia());
 		ocupacion.setActivo(true);
 
-		Ocupacion ocupacionSave = this.ocupacionRepository.save(ocupacion);
-
-		try {
-			if (!permisoConfirmarOcupacionAgencia){
-
-
-					this.emailService.enviarMensajePorEmail(ocupacion.getArtista().getAgencia().getUsuario().getEmail(), EmailTemplateEnum.EMAIL_NOTIFICACION_CONFIRMACION_PENDIENTE);
-
-
-			}
-			else {
-
-				if (artista.isPermiteOrquestasDeGalicia() && ocupacion.getOcupacionEstado().getNombre().equals(OcupacionEstadoEnum.OCUPADO.getDescripcion())){
-
-					ActuacionExterna actuacionExterna = getActuacionExterna(artista, ocupacion);
-					ResponseEntity<String> response = ocupacionSaveDto.getId()==null ? this.orquestasDeGaliciaService.crearActuacion(actuacionExterna) : this.orquestasDeGaliciaService.modificarActuacion(ocupacion.getId().intValue(), actuacionExterna);
-
-					if (response.getStatusCode().is2xxSuccessful()){
-						log.info("Se ha enviado correctamente la actuacion de la ocupacion: {}", ocupacionSave.getId());
-					}
-					else {
-						throw new OrquestasDeGaliciaException("Error enviando la actuacion de la ocupacion a OrquestasDeGalicia: " + ocupacionSave.getId());
-					}
-
-				}
-
-			}
-		} catch (OrquestasDeGaliciaException e) {
-			log.error("Error enviando la actuacion de la ocupacion a OrquestasDeGalicia: {}", ocupacionSave.getId());
-			return DefaultResponseBody.builder().success(true).message("Ocupacion guardada correctamente. Pero no se ha podido publicar la actuación a OrquestasDeGalicia.es").messageType("warning").idEntidad(ocupacionSave.getId()).build();
-		} catch (EnvioEmailException e) {
-			log.error("error enviando notificacion de solicitud de ocupacion", e);
-			return DefaultResponseBody.builder().success(true).message("Ocupacion guardada correctamente. Pero no se ha podido enviar la notificación por correo").messageType("warning").idEntidad(ocupacionSave.getId()).build();
-		} catch (Exception e) {
-			log.error("error enviando notificacion de solicitud de ocupacion", e);
-			return DefaultResponseBody.builder().success(true).message("Ocupacion guardada correctamente, pero ha habido un error enviando la notificación por correo").messageType("warning").idEntidad(ocupacionSave.getId()).build();
-		}
-
-
-
-		log.info("Completado guardado ocupacionSave: {}", ocupacionSave.getId());
-		return DefaultResponseBody.builder().success(true).message("Ocupacion guardada correctamente").messageType("success").idEntidad(ocupacionSave.getId()).build();
-
-
+		return this.ocupacionRepository.save(ocupacion);
 
 	}
+
+
+
+
 
 	private static ActuacionExterna getActuacionExterna(Artista artista, Ocupacion ocupacion) {
 		ActuacionExterna actuacionExterna = new ActuacionExterna();
@@ -296,12 +283,29 @@ public class OcupacionServiceImpl implements OcupacionService {
 	}
 
 
-	private static Long getIdEstadoOcupacion(final Long idTipoOcupacion, boolean permisoConfirmarOcupacionAgencia) {
-		Long idEstadoOcupacion = permisoConfirmarOcupacionAgencia ? OcupacionEstadoEnum.OCUPADO.getId()  : OcupacionEstadoEnum.PENDIENTE.getId();
-		if (TipoOcupacionEnum.RESERVADO.getId().equals(idTipoOcupacion)){
-			idEstadoOcupacion = OcupacionEstadoEnum.RESERVADO.getId();
+	private static Long getIdEstadoOcupacion(final Long idTipoOcupacion, boolean permisoConfirmarOcupacionAgencia, boolean isNuevaOcupacion, String estadoOcupacionActual) {
+
+
+		if (permisoConfirmarOcupacionAgencia){
+
+			if (isNuevaOcupacion){
+				return idTipoOcupacion.equals(TipoOcupacionEnum.RESERVADO.getId()) ? TipoOcupacionEnum.RESERVADO.getId() : OcupacionEstadoEnum.OCUPADO.getId();
+			}
+			else {
+				return OcupacionEstadoEnum.PENDIENTE.getDescripcion().equals(estadoOcupacionActual) ? OcupacionEstadoEnum.PENDIENTE.getId() :  idTipoOcupacion;
+			}
+
 		}
-		return idEstadoOcupacion;
+		else {
+			if (TipoOcupacionEnum.RESERVADO.getId().equals(idTipoOcupacion)){
+				return TipoOcupacionEnum.RESERVADO.getId();
+			}
+			else {
+				return OcupacionEstadoEnum.PENDIENTE.getId();
+			}
+
+		}
+
 	}
 
 	private Tarifa actualizarTarifaSegunOcupacion(Long idArtista, LocalDateTime fecha, Ocupacion ocupacion) {
@@ -424,13 +428,8 @@ public class OcupacionServiceImpl implements OcupacionService {
 		try {
 
 			ActuacionExterna actuacionExterna = getActuacionExterna(ocupacion.getArtista(), ocupacion);
-			ResponseEntity<String> response = this.orquestasDeGaliciaService.crearActuacion(actuacionExterna);
+			this.orquestasDeGaliciaService.enviarActuacionOrquestasDeGalicia(true, actuacionExterna, OcupacionEstadoEnum.OCUPADO.getDescripcion());
 
-			if (response.getStatusCode().is2xxSuccessful()) {
-				log.info("Se ha enviado correctamente la actuacion de la ocupacion: {}", ocupacion.getId());
-			} else {
-				throw new OrquestasDeGaliciaException("Error enviando la actuacion de la ocupacion a OrquestasDeGalicia: " + ocupacion.getId());
-			}
 		} catch (OrquestasDeGaliciaException e){
 			log.error("No se ha podido enviar a OrquestasDeGalicia", e);
 		}

@@ -17,6 +17,7 @@ $(document).ready(function(){
 
         $('#municipio-ocupacion').on('change', function() {
             cargarLocalidades('#localidad-ocupacion', $(this).val(), null);
+            $('#localidad-ocupacion').val('');
         });
 
         $('#solo-matinal-ocupacion').on('change', function() {
@@ -115,9 +116,9 @@ function crearOcupacionSaveDto() {
     ocupacionSaveDto["idMunicipio"] = $("#municipio-ocupacion").val();
     ocupacionSaveDto["localidad"] = $("#localidad-ocupacion").val();
     ocupacionSaveDto["lugar"] = $("#lugar-ocupacion").val();
-    ocupacionSaveDto["importe"] = $("#importe-ocupacion").val();
-    ocupacionSaveDto["porcentajeRepre"] = $("#porcentaje-repre-ocupacion").val();
-    ocupacionSaveDto["iva"] = $("#iva-ocupacion").val();
+    ocupacionSaveDto["importe"] = $("#importe-ocupacion").val() || "0";
+    ocupacionSaveDto["porcentajeRepre"] = $("#porcentaje-repre-ocupacion").val() || "0";
+    ocupacionSaveDto["iva"] = $("#iva-ocupacion").val() || "0";
     ocupacionSaveDto["matinal"] = $('#matinal-ocupacion').is(':checked');
     ocupacionSaveDto["soloMatinal"] = $('#solo-matinal-ocupacion').is(':checked');
     ocupacionSaveDto["observaciones"] = $("#observaciones-ocupacion").val();
@@ -226,6 +227,8 @@ function obtenerOcupacionDto(idOcupacion) {
                 notif('error', 'Error al cargar los datos de la ocupación');
             }
         });
+    } else {
+        mostrarOcultarBotonesModalOcupacion(null);
     }
 }
 

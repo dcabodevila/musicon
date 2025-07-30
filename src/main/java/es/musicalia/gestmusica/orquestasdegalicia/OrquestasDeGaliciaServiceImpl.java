@@ -1,5 +1,7 @@
 package es.musicalia.gestmusica.orquestasdegalicia;
 
+import es.musicalia.gestmusica.ocupacion.OcupacionEstadoEnum;
+import es.musicalia.gestmusica.ocupacion.OrquestasDeGaliciaException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -53,6 +55,10 @@ public class OrquestasDeGaliciaServiceImpl implements OrquestasDeGaliciaService 
                 ActuacionExterna.class
             );
 
+            if (response.getStatusCode() != HttpStatus.OK) {
+                return null;
+            }
+
             // Registrar y devolver la respuesta
             ActuacionExterna actuacionExterna = response.getBody();
             log.info("Actuación obtenida correctamente: {}", actuacionExterna);
@@ -73,7 +79,7 @@ public class OrquestasDeGaliciaServiceImpl implements OrquestasDeGaliciaService 
     public ResponseEntity<String> crearActuacion(ActuacionExterna actuacion) {
         if (!apiEnabled) {
             log.warn("La API de Orquestas de Galicia está deshabilitada. No se realizó la llamada para crear la actuación.");
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+            return ResponseEntity.status(HttpStatus.OK)
                     .body("API deshabilitada");
         }
 
@@ -102,7 +108,7 @@ public class OrquestasDeGaliciaServiceImpl implements OrquestasDeGaliciaService 
     public ResponseEntity<String> modificarActuacion(Integer idActuacionExterno, ActuacionExterna actuacion) {
         if (!apiEnabled) {
             log.warn("La API de Orquestas de Galicia está deshabilitada. No se realizó la llamada para modificar la actuación.");
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+            return ResponseEntity.status(HttpStatus.OK)
                     .body("API deshabilitada");
         }
 
@@ -131,7 +137,7 @@ public class OrquestasDeGaliciaServiceImpl implements OrquestasDeGaliciaService 
     public ResponseEntity<String> eliminarActuacion(Integer idActuacionExterno) {
         if (!apiEnabled) {
             log.warn("La API de Orquestas de Galicia está deshabilitada. No se realizó la llamada para eliminar la actuación.");
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+            return ResponseEntity.status(HttpStatus.OK)
                     .body("API deshabilitada");
         }
 
@@ -154,6 +160,46 @@ public class OrquestasDeGaliciaServiceImpl implements OrquestasDeGaliciaService 
                     .body(e.getResponseBodyAsString());
         }
     }
+
+    @Transactional
+    @Override
+    public void enviarActuacionOrquestasDeGalicia(boolean isCreacion, ActuacionExterna actuacionExterna, String nombreEstadoOcupacion) throws OrquestasDeGaliciaException {
+        if (actuacionExterna == null || nombreEstadoOcupacion == null) {
+            throw new IllegalArgumentException("Parámetros obligatorios no pueden ser nulos");
+        }
+
+        ResponseEntity<String> response = null;
+        try {
+            if (OcupacionEstadoEnum.OCUPADO.getDescripcion().equals(nombreEstadoOcupacion)) {
+                response = (isCreacion)
+                        ? crearActuacion(actuacionExterna)
+                        : procesarModificacion(actuacionExterna);
+            } else {
+                response = (isCreacion)
+                        ? ResponseEntity.ok("No es necesario actualizar")
+                        : eliminarActuacion(actuacionExterna.getIdActuacionExterno());
+            }
+
+            if (response != null && response.getStatusCode().is2xxSuccessful()) {
+                log.info("Actuación enviada correctamente: {}", actuacionExterna.getIdActuacionExterno());
+            } else {
+                throw new OrquestasDeGaliciaException("Error en la operación. Respuesta: " + response != null ? response.getStatusCode().toString() : "null");
+            }
+        } catch (Exception e) {
+            throw new OrquestasDeGaliciaException("Fallo inesperado al procesar la actuación: " + e.getMessage());
+        }
+    }
+
+    private ResponseEntity<String> procesarModificacion(ActuacionExterna actuacionExterna) {
+        ActuacionExterna actuacionExternaResponse =
+                obtenerActuacion(actuacionExterna.getIdActuacionExterno());
+        if (actuacionExternaResponse != null) {
+            return modificarActuacion(actuacionExterna.getIdActuacionExterno(), actuacionExterna);
+        } else {
+            return crearActuacion(actuacionExterna);
+        }
+    }
+
 
     private HttpHeaders crearHeaders() {
         HttpHeaders headers = new HttpHeaders();
