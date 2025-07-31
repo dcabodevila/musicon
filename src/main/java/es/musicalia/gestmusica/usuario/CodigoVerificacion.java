@@ -27,10 +27,10 @@ public class CodigoVerificacion {
     @Column(nullable = false, length = 4)
     private String codigo;
 
-    @Column(nullable = false)
+    @Column(name="fecha_creacion", nullable = false)
     private LocalDateTime fechaCreacion;
 
-    @Column(nullable = false)
+    @Column(name="fecha_expiracion",nullable = false)
     private LocalDateTime fechaExpiracion;
 
     @Column(nullable = false)

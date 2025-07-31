@@ -95,7 +95,7 @@ public class Artista {
     @Column(name = "id_artista_gestmanager")
     private Long idArtistaGestmanager;
 
-    @Column(name = "condicionesContratacion")
+    @Column(name = "condiciones_contratacion")
     private String condicionesContratacion;
 
     @Column(name = "biografia")

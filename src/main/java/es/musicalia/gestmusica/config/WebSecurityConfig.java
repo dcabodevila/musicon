@@ -52,7 +52,9 @@ public class WebSecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/auth/**").permitAll()
-                .requestMatchers("/fragments/**", "/static/**", "/adminkit/**", "/img/**", "/logo/**", "/favicon.ico", "/js**", "/api/**").permitAll()
+                .requestMatchers("/fragments/**", "/static/**", "/adminkit/**", "/img/**", "/logo/**", "/favicon.ico", "/js**").permitAll()
+					//TODO: Quitar
+				.requestMatchers("/api/sincronizacion/**").permitAll()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form

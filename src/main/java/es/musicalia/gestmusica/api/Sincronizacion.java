@@ -19,7 +19,7 @@ public class Sincronizacion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    @Column(name="id_artista")
     private Long idArtista;
 
     @Column(length = 1000)
@@ -32,19 +32,20 @@ public class Sincronizacion {
     private String pais;
 
     @Column(name = "nombre_local")
-    private String nombreLocal;
+    private String lugar;
 
     private String accion;
     private String estado;
-    private String indicadores;
 
+    @Column(name="fecha_recepcion")
     private LocalDateTime fechaRecepcion;
-    @Column(name= "caddatos", length = 1000)
-    private String cadDatos;
-
     private Boolean procesado;
 
     @Column(name= "codigo_error", length = 1000)
     private String codigoError;
+
+    private Boolean matinal;
+    @Column(name="solo_matinal")
+    private Boolean soloMatinal;
 }
 

@@ -23,4 +23,6 @@ public class Provincia {
 
     @Column(name = "nombre_orquestasdegalicia")
     private String nombreOrquestasdegalicia;
+    @Column(name = "ID_PROVINCIA_LEGACY")
+    private Integer idProvinciaLegacy;
 }

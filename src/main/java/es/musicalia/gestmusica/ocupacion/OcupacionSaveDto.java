@@ -23,7 +23,6 @@ public class OcupacionSaveDto {
     private Long idCcaa;
     @NotNull
     private Long idProvincia;
-    @NotNull
     private Long idMunicipio;
     @NotNull
     private String localidad;
@@ -46,5 +45,7 @@ public class OcupacionSaveDto {
     private Boolean provisional;
 
     private String textoOrquestasDeGalicia;
+
+    private Integer idOcupacionLegacy;
 
 }

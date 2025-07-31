@@ -14,6 +14,6 @@ public interface MunicipioRepository extends JpaRepository<Municipio, Long> {
     @Query("select new es.musicalia.gestmusica.generic.CodigoNombreRecord(m.id, m.nombre) from Municipio m where m.provincia.id = ?1")
     List<CodigoNombreRecord> findMunicipioByProvinciaId(long idProvincia);
 
-    @Query("select m from Municipio m where upper(m.nombre) = upper(?1)")
-    Optional<Municipio> findMunicipioByNombreUpperCase(String nombre);
+    @Query("select m from Municipio m where translate(upper(m.nombre), 'ÁÉÍÓÚÜ', 'AEIOUU') like translate(upper(concat('%', ?1, '%')), 'ÁÉÍÓÚÜ', 'AEIOUU') and m.provincia.id = ?2")
+    Optional<List<Municipio>> findMunicipioByNombreLike(String nombre, Long provinciaId);
 }

@@ -7,8 +7,20 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum TipoOcupacionEnum {
     OCUPADO(1L, "Ocupado"),
-    RESERVADO(2L, "Reservado");
+    RESERVADO(2L, "Reservado"),
+    OTRO(3L, "Otro");
 
     private final Long id;
     private final String descripcion;
+
+
+    public static TipoOcupacionEnum findByDescripcion(String descripcion) {
+        for (TipoOcupacionEnum tipo : values()) {
+            if (tipo.getDescripcion().toLowerCase().equals(descripcion.toLowerCase())) {
+                return tipo;
+            }
+        }
+        return null;
+    }
+
 }

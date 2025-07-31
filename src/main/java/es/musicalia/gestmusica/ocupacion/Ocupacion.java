@@ -118,6 +118,9 @@ public class Ocupacion {
     @Column(name = "texto_orquestasdegalicia")
     private String textoOrquestasDeGalicia;
 
+    @Column(name = "id_ocupacion_legacy")
+    private Integer idOcupacionLegacy;
+
 
 }
 

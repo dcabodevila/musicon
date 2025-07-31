@@ -7,6 +7,7 @@ import es.musicalia.gestmusica.util.DefaultResponseBody;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public interface OcupacionService {
@@ -22,6 +23,8 @@ public interface OcupacionService {
     @Transactional(readOnly = false)
     DefaultResponseBody saveOcupacion(OcupacionSaveDto ocupacionSaveDto) throws ModificacionOcupacionException;
 
+    Ocupacion guardarOcupacion(OcupacionSaveDto ocupacionSaveDto, boolean permisoConfirmarOcupacionAgencia) throws ModificacionOcupacionException;
+
     boolean existeOcupacionFecha(OcupacionSaveDto ocupacionSaveDto);
 
     List<OcupacionRecord> findOcupacionesDtoByAgenciaPendientes(Set<Long> idsAgencia);
@@ -30,8 +33,5 @@ public interface OcupacionService {
 
     OcupacionSaveDto getOcupacionSaveDto(Long idOcupacion);
 
-    Ocupacion saveOcupacionFromGestmanager(DatosGestmanagerConvertedDTO datos);
-
-    @Transactional(readOnly = false)
-    DefaultResponseBody deleteOcupacionFromGestmanager(DatosGestmanagerConvertedDTO datos);
+    Optional<Ocupacion> buscarPorIdOcupacionLegacy(Integer idOcupacionLegacy);
 }

@@ -19,4 +19,8 @@ public interface ProvinciaRepository extends JpaRepository<Provincia, Long> {
 
     @Query("select p from Provincia p where upper(p.nombre) = upper(?1)")
     Optional<Provincia> findProvinciaByNombreUpperCase(String nombre);
+
+    @Query("select p from Provincia p where p.idProvinciaLegacy = ?1")
+    Optional<Provincia> findProvinciaByIdProvinciaLegacy(Integer idProvinciaLegacy);
+
 }

@@ -272,7 +272,7 @@ END AS escenario, t.fecha::date,
 				<textFieldExpression><![CDATA[$P{solicitante}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="339" y="0" width="236" height="56" uuid="448fa279-ad1e-47f0-a127-d3ca0dfab6f2"/>
+				<reportElement x="339" y="0" width="220" height="56" uuid="448fa279-ad1e-47f0-a127-d3ca0dfab6f2"/>
 				<textElement>
 					<font fontName="SansSerif"/>
 				</textElement>

@@ -22,6 +22,7 @@ import es.musicalia.gestmusica.tarifa.TarifaRepository;
 import es.musicalia.gestmusica.usuario.EnvioEmailException;
 import es.musicalia.gestmusica.usuario.UserService;
 import es.musicalia.gestmusica.usuario.Usuario;
+import es.musicalia.gestmusica.util.ConstantsGestmusica;
 import es.musicalia.gestmusica.util.DefaultResponseBody;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -196,25 +197,25 @@ public class OcupacionServiceImpl implements OcupacionService {
 
 	}
 
-	private Ocupacion guardarOcupacion(OcupacionSaveDto ocupacionSaveDto, boolean permisoConfirmarOcupacionAgencia) throws ModificacionOcupacionException {
+	@Override
+	public Ocupacion guardarOcupacion(OcupacionSaveDto ocupacionSaveDto, boolean permisoConfirmarOcupacionAgencia) throws ModificacionOcupacionException {
 		log.info("Empezando saveOcupacion: {}", ocupacionSaveDto.toString());
 
 		final Ocupacion ocupacion = ocupacionSaveDto.getId()!=null? this.ocupacionRepository.findById(ocupacionSaveDto.getId()).orElse(new Ocupacion())  : new Ocupacion();
 		final Usuario usuario = this.userService.obtenerUsuarioAutenticado();
 
 		if (ocupacionSaveDto.getId()!=null){
-			final Usuario usuarioAutenticado = this.userService.obtenerUsuarioAutenticado();
-			if (!(ocupacion.getUsuario().getId().equals(usuarioAutenticado.getId())) &&
+			if (usuario!=null && !(ocupacion.getUsuario().getId().equals(usuario.getId())) &&
 					!this.permisoService.existePermisoUsuarioAgencia(ocupacion.getArtista().getAgencia().getId(), PermisoAgenciaEnum.MODIFICAR_OCUPACION_OTROS.name())) {
 				throw new es.musicalia.gestmusica.ocupacion.ModificacionOcupacionException("No tiene permisos para modificar ocupaciones de otros usuarios");
 			}
 			ocupacion.setFechaModificacion(LocalDateTime.now());
-			ocupacion.setUsuarioModificacion(usuario.getUsername());
+			ocupacion.setUsuarioModificacion(usuario!=null ? usuario.getUsername() : ConstantsGestmusica.USUARIO_SINCRONIZACION);
 
 		}else {
-			ocupacion.setUsuario(usuario);
+			ocupacion.setUsuario(usuario!=null ? usuario : this.userService.findUsuariosAdmin().get(0));
 			ocupacion.setFechaCreacion(LocalDateTime.now());
-			ocupacion.setUsuarioCreacion(usuario.getUsername());
+			ocupacion.setUsuarioCreacion(usuario != null ? usuario.getUsername(): ConstantsGestmusica.USUARIO_SINCRONIZACION);
 		}
 		final Artista artista = this.artistaRepository.findById(ocupacionSaveDto.getIdArtista()).orElseThrow();
 		ocupacion.setArtista(artista);
@@ -230,7 +231,12 @@ public class OcupacionServiceImpl implements OcupacionService {
 
 
 		ocupacion.setProvincia(this.provinciaRepository.findById(ocupacionSaveDto.getIdProvincia()).orElseThrow());
-		ocupacion.setMunicipio(this.municipioRepository.findById(ocupacionSaveDto.getIdMunicipio()).orElseThrow());
+		if (ocupacionSaveDto.getIdMunicipio()!=null) {
+			ocupacion.setMunicipio(this.municipioRepository.findById(ocupacionSaveDto.getIdMunicipio()).orElseThrow());
+		} else {
+			// Use a default municipality when not specified
+			ocupacion.setMunicipio(this.municipioRepository.findById(ConstantsGestmusica.ID_MUNICIPIO_PROVISIONAL).orElseThrow());
+		}
 		ocupacion.setPoblacion(ocupacionSaveDto.getLocalidad());
 		ocupacion.setLugar(ocupacionSaveDto.getLugar());
 		ocupacion.setTarifa(actualizarTarifaSegunOcupacion(ocupacionSaveDto.getIdArtista(), ocupacionSaveDto.getFecha(), ocupacion));
@@ -239,6 +245,7 @@ public class OcupacionServiceImpl implements OcupacionService {
 		ocupacion.setSoloMatinal(ocupacionSaveDto.getSoloMatinal());
 		ocupacion.setProvisional(ocupacionSaveDto.getProvisional());
 		ocupacion.setTextoOrquestasDeGalicia(ocupacionSaveDto.getTextoOrquestasDeGalicia());
+		ocupacion.setIdOcupacionLegacy(ocupacionSaveDto.getIdOcupacionLegacy());
 		ocupacion.setActivo(true);
 
 		return this.ocupacionRepository.save(ocupacion);
@@ -420,134 +427,9 @@ public class OcupacionServiceImpl implements OcupacionService {
 	}
 
 	@Override
-	@Transactional(readOnly = false)
-	public Ocupacion saveOcupacionFromGestmanager(DatosGestmanagerConvertedDTO datos) {
-		Ocupacion ocupacion = gestManagerSincroToOcupacion(datos);
-		ocupacion = this.ocupacionRepository.save(ocupacion);
-
-		try {
-
-			ActuacionExterna actuacionExterna = getActuacionExterna(ocupacion.getArtista(), ocupacion);
-			this.orquestasDeGaliciaService.enviarActuacionOrquestasDeGalicia(true, actuacionExterna, OcupacionEstadoEnum.OCUPADO.getDescripcion());
-
-		} catch (OrquestasDeGaliciaException e){
-			log.error("No se ha podido enviar a OrquestasDeGalicia", e);
-		}
-
-		return ocupacion;
+	public Optional<Ocupacion> buscarPorIdOcupacionLegacy(Integer idOcupacionLegacy) {
+		return this.ocupacionRepository.findOcupacionByIdOcupacionLegacy(idOcupacionLegacy);
 	}
-
-	@Transactional(readOnly = false)
-	@Override
-	public DefaultResponseBody deleteOcupacionFromGestmanager(DatosGestmanagerConvertedDTO datos) {
-
-		Long idArtista = datos.getIdArtistaGestmanager();
-		LocalDateTime fecha = datos.getFecha();
-
-		List<String> listaDatos = Arrays.asList(datos.getDescripcion().split("\\*"));
-		if (CollectionUtils.isEmpty(listaDatos) || listaDatos.size() < 3) {
-			throw new IllegalArgumentException("Campo descripcion no puede estar vacio o tener menos de 3 elementos separados por * ");
-		}
-
-		String municipio = listaDatos.get(0);
-		String localidad = listaDatos.get(1);
-		String lugar = listaDatos.get(2);
-
-		final Artista artista = this.artistaRepository.findArtistaByIdArtistaGestmanager(datos.getIdArtistaGestmanager()).orElseThrow(() -> new IllegalArgumentException("Artista no encontrado con el idArtistaGestmanager: " + datos.getIdArtistaGestmanager()));
-
-		Optional<List<Ocupacion>> listaOcupaciones = this.ocupacionRepository.findOcupacionesDtoByArtistaIdAndDatesCualquiera(artista.getId(), fecha.withHour(0).withMinute(0).withSecond(0), fecha.withHour(23).withMinute(59).withSecond(59));
-
-		if (listaOcupaciones.isPresent() && !listaOcupaciones.get().isEmpty()) {
-
-			if (listaOcupaciones.get().size() > 1) {
-				List<Ocupacion> ocupacionesFiltradas = listaOcupaciones.get().stream()
-						.filter(o -> o.getMunicipio().getNombre().equalsIgnoreCase(municipio.trim()) &&
-								(o.getPoblacion() == null || localidad == null || o.getPoblacion().equalsIgnoreCase(localidad.trim())) &&
-								(o.getLugar() == null || lugar == null || o.getLugar().equalsIgnoreCase(lugar.trim())))
-						.toList();
-
-				if (ocupacionesFiltradas.size() > 1) {
-					return DefaultResponseBody.builder().success(false).message("Se ha encontrado más de 1 ocupación que coincide con la ubicación especificada").messageType("warning").build();
-				}
-				if (ocupacionesFiltradas.isEmpty()) {
-					return DefaultResponseBody.builder().success(false).message("No se encontraron ocupaciones que coincidan con la ubicación especificada").messageType("warning").build();
-				}
-				return this.anularOcupacion(ocupacionesFiltradas.get(0).getId());
-
-			} else {
-				return this.anularOcupacion(listaOcupaciones.get().get(0).getId());
-			}
-
-		}
-		else {
-			throw new IllegalArgumentException("No se encontraron ocupaciones para el artista con id: " + idArtista + " y fecha: " + fecha);
-		}
-
-
-
-
-	}
-
-
-	private Ocupacion gestManagerSincroToOcupacion(DatosGestmanagerConvertedDTO datos) {
-
-		Ocupacion ocupacion = new Ocupacion();
-
-		// Datos básicos
-		ocupacion.setFecha(datos.getFecha());
-		ocupacion.setPoblacion(datos.getPoblacion());
-		ocupacion.setLugar(datos.getNombreLocal());
-		ocupacion.setMatinal(datos.getMatinal());
-		ocupacion.setSoloMatinal(datos.getSoloMatinal());
-
-		// Entidades relacionadas
-		ocupacion.setArtista(artistaRepository.findArtistaByIdArtistaGestmanager(datos.getIdArtistaGestmanager())
-				.orElseThrow(() -> new IllegalArgumentException("Artista no encontrado: " + datos.getIdArtistaGestmanager())));
-
-		ocupacion.setProvincia(provinciaRepository.findProvinciaByNombreUpperCase(datos.getProvincia().trim().toUpperCase())
-				.orElseThrow(() -> new IllegalArgumentException("Provincia no encontrada: " + datos.getProvincia())));
-
-		ocupacion.setMunicipio(municipioRepository.findMunicipioByNombreUpperCase(datos.getMunicipio().trim().toUpperCase())
-				.orElseThrow(() -> new IllegalArgumentException("Municipio no encontrado: " + datos.getMunicipio())));
-
-		// Estado y tipo según el estado recibido
-		if (datos.getEstado() == TipoEstadoGestmanagerEnum.OCUPADO) {
-			ocupacion.setTipoOcupacion(tipoOcupacionRepository.findById(TipoOcupacionEnum.OCUPADO.getId())
-					.orElseThrow(() -> new IllegalArgumentException("Tipo ocupación no encontrado: OCUPADO")));
-			ocupacion.setOcupacionEstado(ocupacionEstadoRepository.findById(OcupacionEstadoEnum.OCUPADO.getId())
-					.orElseThrow(() -> new IllegalArgumentException("Estado ocupación no encontrado: OCUPADO")));
-		} else {
-			ocupacion.setTipoOcupacion(tipoOcupacionRepository.findById(TipoOcupacionEnum.RESERVADO.getId())
-					.orElseThrow(() -> new IllegalArgumentException("Tipo ocupación no encontrado: RESERVADO")));
-			ocupacion.setOcupacionEstado(ocupacionEstadoRepository.findById(OcupacionEstadoEnum.RESERVADO.getId())
-					.orElseThrow(() -> new IllegalArgumentException("Estado ocupación no encontrado: RESERVADO")));
-		}
-
-
-		final List<Usuario> usuariosAdmin = this.userService.findUsuariosAdmin();
-
-		if (usuariosAdmin.isEmpty()) {
-			throw new IllegalArgumentException("No hay usuarios administradores registrados");
-		}
-
-		final Usuario usuario = usuariosAdmin.get(0);
-
-		// Datos de auditoría
-		ocupacion.setUsuario(usuario);
-		ocupacion.setFechaCreacion(LocalDateTime.now());
-		ocupacion.setUsuarioCreacion("GESTMANAGER");
-		ocupacion.setActivo(true);
-
-		// Valores por defecto
-		ocupacion.setImporte(BigDecimal.ZERO);
-		ocupacion.setPorcentajeRepre(BigDecimal.ZERO);
-		ocupacion.setIva(BigDecimal.ZERO);
-		ocupacion.setTarifa(actualizarTarifaSegunOcupacion(ocupacion.getArtista().getId(), ocupacion.getFecha(), ocupacion));
-
-		return ocupacion;
-	}
-
-
 
 
 }
