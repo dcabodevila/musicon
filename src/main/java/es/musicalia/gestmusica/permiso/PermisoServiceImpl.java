@@ -92,38 +92,45 @@ public class PermisoServiceImpl implements PermisoService {
 	public Map<Long, Set<String>> obtenerMapPermisosAgencia(Long idUsuario) {
 
 		final Usuario u = this.usuarioRepository.findById(idUsuario).orElseThrow();
-		if (TipoRolEnum.ADMIN.getDescripcion().equals(u.getRolGeneral().getCodigo())) {
-			final Rol rol = this.rolRepository.findRolByCodigo(TipoRolEnum.AGENCIA.getDescripcion());
 
-			return this.agenciaRepository.findAll().stream()
+		if (u.getRolGeneral()!=null && u.getRolGeneral().getCodigo()!=null) {
+			if (TipoRolEnum.ADMIN.getDescripcion().equals(u.getRolGeneral().getCodigo())) {
+				final Rol rol = this.rolRepository.findRolByCodigo(TipoRolEnum.AGENCIA.getDescripcion());
+
+				return this.agenciaRepository.findAll().stream()
+						.collect(Collectors.toMap(
+								Agencia::getId,
+								agencia -> this.permisoRepository.findAllPermisoRecordByRol(rol.getId()).stream()
+										.map(PermisoRecord::codigo)
+										.collect(Collectors.toSet())
+						));
+			}
+
+			return accesoRepository.findAllAccesosByIdUsuario(idUsuario)
+					.orElseGet(Collections::emptyList) // Evitar inicializaciones manuales
+					.stream()
+					.filter(acceso -> acceso.getRol() != null && CollectionUtils.isNotEmpty(acceso.getRol().getPermisos())) // Filtrar roles nulos y permisos vacíos
+					.collect(Collectors.groupingBy(
+							acceso -> acceso.getAgencia().getId(),
+							Collectors.flatMapping(
+									acceso -> acceso.getRol().getPermisos().stream()
+											.filter(permiso -> TipoPermisoEnum.AGENCIA.getId().equals(permiso.getTipoPermiso())) // Filtrar permisos de tipo AGENCIA
+											.map(Permiso::getCodigo),
+									Collectors.toSet()
+							)
+					))
+					.entrySet().stream()
 					.collect(Collectors.toMap(
-							Agencia::getId,
-							agencia -> this.permisoRepository.findAllPermisoRecordByRol(rol.getId()).stream()
-									.map(PermisoRecord::codigo)
-									.collect(Collectors.toSet())
+							Map.Entry::getKey,
+							Map.Entry::getValue,
+							(v1, v2) -> v1,
+							HashMap::new
 					));
 		}
 
-		return accesoRepository.findAllAccesosByIdUsuario(idUsuario)
-				.orElseGet(Collections::emptyList) // Evitar inicializaciones manuales
-				.stream()
-				.filter(acceso -> acceso.getRol() != null && CollectionUtils.isNotEmpty(acceso.getRol().getPermisos())) // Filtrar roles nulos y permisos vacíos
-				.collect(Collectors.groupingBy(
-						acceso -> acceso.getAgencia().getId(),
-						Collectors.flatMapping(
-								acceso -> acceso.getRol().getPermisos().stream()
-										.filter(permiso -> TipoPermisoEnum.AGENCIA.getId().equals(permiso.getTipoPermiso())) // Filtrar permisos de tipo AGENCIA
-										.map(Permiso::getCodigo),
-								Collectors.toSet()
-						)
-				))
-				.entrySet().stream()
-				.collect(Collectors.toMap(
-						Map.Entry::getKey,
-						Map.Entry::getValue,
-						(v1, v2) -> v1,
-						HashMap::new
-				));
+
+		return Collections.emptyMap();
+
 	}
 
 	@Override

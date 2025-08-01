@@ -87,32 +87,33 @@ public class AccesoArtistaServiceImpl implements AccesoArtistaService {
 	public Map<Long, Set<String>> obtenerMapPermisosArtista(Long idUsuario) {
 		
 		final Usuario u = this.usuarioRepository.findById(idUsuario).orElseThrow();
-		if (TipoRolEnum.ADMIN.getDescripcion().equals(u.getRolGeneral().getCodigo())) {
-			return this.artistaRepository.findAll().stream()
-					.collect(Collectors.toMap(
-							Artista::getId,
-							artista -> this.permisoRepository.findAll().stream()
-									.map(Permiso::getCodigo)
-									.collect(Collectors.toSet())
+		
+		if (u.getRolGeneral()!=null && u.getRolGeneral().getCodigo()!=null) {
+			if (TipoRolEnum.ADMIN.getDescripcion().equals(u.getRolGeneral().getCodigo())) {
+				return this.artistaRepository.findAll().stream()
+						.collect(Collectors.toMap(
+								Artista::getId,
+								artista -> this.permisoRepository.findAll().stream()
+										.map(Permiso::getCodigo)
+										.collect(Collectors.toSet())
+						));
+			}
+			return accesoArtistaRepository.findAllAccesosArtistaByIdUsuario(idUsuario)
+					.orElse(Collections.emptyList())
+					.stream()
+					.filter(accesoArtista ->
+							accesoArtista != null &&
+									accesoArtista.getPermiso() != null &&
+									accesoArtista.getArtista() != null)
+					.collect(Collectors.groupingBy(
+							accesoArtista -> accesoArtista.getArtista().getId(),
+							Collectors.mapping(
+									accesoArtista -> accesoArtista.getPermiso().getCodigo(),
+									Collectors.toSet()
+							)
 					));
 		}
-
-		
-		
-		return accesoArtistaRepository.findAllAccesosArtistaByIdUsuario(idUsuario)
-			.orElse(Collections.emptyList())
-			.stream()
-			.filter(accesoArtista ->
-				accesoArtista != null &&
-				accesoArtista.getPermiso() != null &&
-				accesoArtista.getArtista() != null)
-			.collect(Collectors.groupingBy(
-				accesoArtista -> accesoArtista.getArtista().getId(),
-				Collectors.mapping(
-					accesoArtista -> accesoArtista.getPermiso().getCodigo(),
-					Collectors.toSet()
-				)
-			));
+		return Collections.emptyMap();
 	}
 
 }
