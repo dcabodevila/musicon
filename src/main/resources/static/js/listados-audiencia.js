@@ -131,7 +131,7 @@ function initializeChart() {
             data: {
                 labels: labels,
                 datasets: [{
-                    label: "Listados Generados",
+                    label: "Número de impresiones",
                     backgroundColor: "transparent",
                     borderColor: window.theme.primary,
                     data: data
