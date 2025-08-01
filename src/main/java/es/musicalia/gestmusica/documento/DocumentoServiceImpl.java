@@ -47,7 +47,7 @@ public class DocumentoServiceImpl implements DocumentoService {
             documento.setResourceType(response.getResourceType());
             documento.setActivo(true);
             documento.setFechaCreacion(java.time.LocalDateTime.now());
-            documento.setUsuarioCreacion(this.userService.obtenerUsuarioAutenticado());
+            documento.setUsuarioCreacion(this.userService.obtenerUsuarioAutenticado().orElseThrow());
             documento.setArtista(artistaRepository.findById(documentoDto.getIdArtista())
                 .orElseThrow(() -> new EntityNotFoundException("Artista no encontrado con ID: " + documentoDto.getIdArtista())));
 
@@ -127,7 +127,7 @@ public class DocumentoServiceImpl implements DocumentoService {
         documentoRepository.findById(id).ifPresent(documento -> {
 //            fileService.deleteFile(documento.getUrl(), documento.getResourceType());
 			documento.setActivo(false);
-			documento.setUsuarioModificacion(this.userService.obtenerUsuarioAutenticado());
+			documento.setUsuarioModificacion(this.userService.obtenerUsuarioAutenticado().orElseThrow());
 			documento.setFechaModificacion(java.time.LocalDateTime.now());
             documentoRepository.save(documento);
 

@@ -1,7 +1,6 @@
-package es.musicalia.gestmusica.api;
+package es.musicalia.gestmusica.sincronizacion;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -55,7 +54,7 @@ public class SincronizacionController {
     }
 
     @PostMapping(value = "/sincronizar-all", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Sincroniza todas las fechas desde 2020", description = "Ejecuta el proceso de sincronización de datos")
+    @Operation(summary = "Sincroniza todas las fechas desde 2025", description = "Ejecuta el proceso de sincronización de datos")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Sincronización completada"),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content)
@@ -64,12 +63,10 @@ public class SincronizacionController {
         Map<String, Object> response = new HashMap<>();
         try {
 
-
-            SincronizacionResult sincronizacionResult = sincronizacionService.sincronizarOcupacionesDesde(LocalDate.of(2024, 1, 1));
+            final SincronizacionResult sincronizacionResult = sincronizacionService.sincronizarOcupacionesDesde(LocalDate.of(2025, 1, 1));
             response.put("ocupacionesCreadas", sincronizacionResult.getCreadas());
             response.put("ocupacionesActualizadas", sincronizacionResult.getActualizadas());
             response.put("ocupacionesErrores", sincronizacionResult.getErrores());
-
             response.put("mensaje", "Sincronización completada");
             response.put("timestamp", LocalDateTime.now());
             return ResponseEntity.ok(response);

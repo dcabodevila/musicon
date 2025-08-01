@@ -1,4 +1,4 @@
-package es.musicalia.gestmusica.api;
+package es.musicalia.gestmusica.sincronizacion;
 
 public class SincronizacionException extends Exception {
     public SincronizacionException(String message) {

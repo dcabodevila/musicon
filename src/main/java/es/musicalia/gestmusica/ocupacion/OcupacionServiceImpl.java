@@ -1,8 +1,6 @@
 package es.musicalia.gestmusica.ocupacion;
 
 import es.musicalia.gestmusica.acceso.AccesoRepository;
-import es.musicalia.gestmusica.api.DatosGestmanagerConvertedDTO;
-import es.musicalia.gestmusica.api.TipoEstadoGestmanagerEnum;
 import es.musicalia.gestmusica.artista.Artista;
 import es.musicalia.gestmusica.artista.ArtistaRepository;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
@@ -24,8 +22,8 @@ import es.musicalia.gestmusica.usuario.UserService;
 import es.musicalia.gestmusica.usuario.Usuario;
 import es.musicalia.gestmusica.util.ConstantsGestmusica;
 import es.musicalia.gestmusica.util.DefaultResponseBody;
+import es.musicalia.gestmusica.util.GestmusicaUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -130,7 +128,7 @@ public class OcupacionServiceImpl implements OcupacionService {
 		final Ocupacion ocupacion =  this.ocupacionRepository.findById(id).orElseThrow();
 		ocupacion.setOcupacionEstado(this.ocupacionEstadoRepository.findById(OcupacionEstadoEnum.OCUPADO.getId()).orElseThrow());
 		ocupacion.setTipoOcupacion(this.tipoOcupacionRepository.findById(TipoOcupacionEnum.OCUPADO.getId()).orElseThrow());
-		ocupacion.setUsuarioConfirmacion(this.userService.obtenerUsuarioAutenticado());
+		ocupacion.setUsuarioConfirmacion(this.userService.obtenerUsuarioAutenticado().orElseThrow());
 		this.ocupacionRepository.save(ocupacion);
 
         try {
@@ -161,7 +159,7 @@ public class OcupacionServiceImpl implements OcupacionService {
 
 		final boolean permisoConfirmarOcupacionAgencia = this.permisoService.existePermisoUsuarioAgencia(artista.getAgencia().getId(), PermisoAgenciaEnum.CONFIRMAR_OCUPACION.name());
 
-		final Ocupacion ocupacion = guardarOcupacion(ocupacionSaveDto, permisoConfirmarOcupacionAgencia);
+		final Ocupacion ocupacion = guardarOcupacion(ocupacionSaveDto, permisoConfirmarOcupacionAgencia, false);
 
 		try {
 			if (!permisoConfirmarOcupacionAgencia){
@@ -197,26 +195,16 @@ public class OcupacionServiceImpl implements OcupacionService {
 
 	}
 
+
+
 	@Override
-	public Ocupacion guardarOcupacion(OcupacionSaveDto ocupacionSaveDto, boolean permisoConfirmarOcupacionAgencia) throws ModificacionOcupacionException {
+	public Ocupacion guardarOcupacion(OcupacionSaveDto ocupacionSaveDto, boolean permisoConfirmarOcupacionAgencia, boolean isSincronizacion) throws ModificacionOcupacionException {
 		log.info("Empezando saveOcupacion: {}", ocupacionSaveDto.toString());
 
 		final Ocupacion ocupacion = ocupacionSaveDto.getId()!=null? this.ocupacionRepository.findById(ocupacionSaveDto.getId()).orElse(new Ocupacion())  : new Ocupacion();
-		final Usuario usuario = this.userService.obtenerUsuarioAutenticado();
 
-		if (ocupacionSaveDto.getId()!=null){
-			if (usuario!=null && !(ocupacion.getUsuario().getId().equals(usuario.getId())) &&
-					!this.permisoService.existePermisoUsuarioAgencia(ocupacion.getArtista().getAgencia().getId(), PermisoAgenciaEnum.MODIFICAR_OCUPACION_OTROS.name())) {
-				throw new es.musicalia.gestmusica.ocupacion.ModificacionOcupacionException("No tiene permisos para modificar ocupaciones de otros usuarios");
-			}
-			ocupacion.setFechaModificacion(LocalDateTime.now());
-			ocupacion.setUsuarioModificacion(usuario!=null ? usuario.getUsername() : ConstantsGestmusica.USUARIO_SINCRONIZACION);
+		setDatosUsuarioCreacionModificacion(ocupacionSaveDto.getId()==null, isSincronizacion, ocupacion);
 
-		}else {
-			ocupacion.setUsuario(usuario!=null ? usuario : this.userService.findUsuariosAdmin().get(0));
-			ocupacion.setFechaCreacion(LocalDateTime.now());
-			ocupacion.setUsuarioCreacion(usuario != null ? usuario.getUsername(): ConstantsGestmusica.USUARIO_SINCRONIZACION);
-		}
 		final Artista artista = this.artistaRepository.findById(ocupacionSaveDto.getIdArtista()).orElseThrow();
 		ocupacion.setArtista(artista);
 		ocupacion.setFecha(ocupacionSaveDto.getFecha());
@@ -239,7 +227,7 @@ public class OcupacionServiceImpl implements OcupacionService {
 		}
 		ocupacion.setPoblacion(ocupacionSaveDto.getLocalidad());
 		ocupacion.setLugar(ocupacionSaveDto.getLugar());
-		ocupacion.setTarifa(actualizarTarifaSegunOcupacion(ocupacionSaveDto.getIdArtista(), ocupacionSaveDto.getFecha(), ocupacion));
+		ocupacion.setTarifa(actualizarTarifaSegunOcupacion(ocupacionSaveDto.getIdArtista(), ocupacionSaveDto.getFecha(), ocupacion, isSincronizacion));
 		ocupacion.setObservaciones(ocupacionSaveDto.getObservaciones());
 		ocupacion.setMatinal(ocupacionSaveDto.getMatinal());
 		ocupacion.setSoloMatinal(ocupacionSaveDto.getSoloMatinal());
@@ -252,8 +240,41 @@ public class OcupacionServiceImpl implements OcupacionService {
 
 	}
 
+	private void setDatosUsuarioCreacionModificacion(boolean isCreacion, boolean isSincronizacion, Ocupacion ocupacion) throws ModificacionOcupacionException {
+		if (isSincronizacion){
+			if (isCreacion){
+				ocupacion.setUsuarioCreacion(ConstantsGestmusica.USUARIO_SINCRONIZACION);
+				ocupacion.setUsuario(this.userService.findUsuariosAdmin().get(0));
+				ocupacion.setFechaCreacion(LocalDateTime.now());
+				ocupacion.setUsuarioCreacion(ConstantsGestmusica.USUARIO_SINCRONIZACION);
 
+			}
+			else {
 
+				ocupacion.setUsuarioModificacion(ConstantsGestmusica.USUARIO_SINCRONIZACION);
+				ocupacion.setFechaModificacion(LocalDateTime.now());
+
+			}
+		}
+		else {
+			final Usuario usuario = this.userService.obtenerUsuarioAutenticado().orElseThrow();
+
+			if (isCreacion){
+				ocupacion.setUsuario(usuario);
+				ocupacion.setFechaCreacion(LocalDateTime.now());
+				ocupacion.setUsuarioCreacion(usuario.getUsername());
+
+			}else {
+				if (!(ocupacion.getUsuario().getId().equals(usuario.getId())) &&
+						!this.permisoService.existePermisoUsuarioAgencia(ocupacion.getArtista().getAgencia().getId(), PermisoAgenciaEnum.MODIFICAR_OCUPACION_OTROS.name())) {
+					throw new ModificacionOcupacionException("No tiene permisos para modificar ocupaciones de otros usuarios");
+				}
+				ocupacion.setUsuarioModificacion(usuario.getUsername());
+				ocupacion.setFechaModificacion(LocalDateTime.now());
+
+			}
+		}
+	}
 
 
 	private static ActuacionExterna getActuacionExterna(Artista artista, Ocupacion ocupacion) {
@@ -315,7 +336,7 @@ public class OcupacionServiceImpl implements OcupacionService {
 
 	}
 
-	private Tarifa actualizarTarifaSegunOcupacion(Long idArtista, LocalDateTime fecha, Ocupacion ocupacion) {
+	private Tarifa actualizarTarifaSegunOcupacion(Long idArtista, LocalDateTime fecha, Ocupacion ocupacion, boolean isSincronizacion) {
 
 		Tarifa nuevaTarifa = obtenerTarifaByOcupacion(idArtista, fecha,ocupacion);
 
@@ -324,16 +345,31 @@ public class OcupacionServiceImpl implements OcupacionService {
 		nuevaTarifa.setFecha(fecha);
 		nuevaTarifa.setActivo(Boolean.TRUE);
 
-		final String userName = this.userService.isUserAutheticated() ? this.userService.obtenerUsuarioAutenticado().getUsername() : "GESTMANAGER";
+		if (isSincronizacion){
+			if (nuevaTarifa.getFechaCreacion()==null){
+				nuevaTarifa.setFechaCreacion(LocalDateTime.now());
+				nuevaTarifa.setUsuarioCreacion(ConstantsGestmusica.USUARIO_SINCRONIZACION);
+			}
+			else {
+				nuevaTarifa.setFechaModificacion(LocalDateTime.now());
+				nuevaTarifa.setUsuarioModificacion(ConstantsGestmusica.USUARIO_SINCRONIZACION);
+			}
 
-		if (nuevaTarifa.getFechaCreacion()==null){
-			nuevaTarifa.setFechaCreacion(LocalDateTime.now());
-			nuevaTarifa.setUsuarioCreacion(userName);
 		}
 		else {
-			nuevaTarifa.setFechaModificacion(LocalDateTime.now());
-			nuevaTarifa.setUsuarioModificacion(userName);
+			final String userName = this.userService.obtenerUsuarioAutenticado().orElseThrow().getUsername();
+
+			if (nuevaTarifa.getFechaCreacion()==null){
+				nuevaTarifa.setFechaCreacion(LocalDateTime.now());
+				nuevaTarifa.setUsuarioCreacion(userName);
+			}
+			else {
+				nuevaTarifa.setFechaModificacion(LocalDateTime.now());
+				nuevaTarifa.setUsuarioModificacion(userName);
+			}
+
 		}
+
 
 		return this.tarifaRepository.save(nuevaTarifa);
 

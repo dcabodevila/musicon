@@ -1,4 +1,4 @@
-package es.musicalia.gestmusica.api;
+package es.musicalia.gestmusica.sincronizacion;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

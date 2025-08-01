@@ -1,4 +1,4 @@
-package es.musicalia.gestmusica.api;
+package es.musicalia.gestmusica.sincronizacion;
 
 import lombok.Data;
 

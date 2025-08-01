@@ -16,11 +16,11 @@ public enum TipoOcupacionEnum {
 
     public static TipoOcupacionEnum findByDescripcion(String descripcion) {
         for (TipoOcupacionEnum tipo : values()) {
-            if (tipo.getDescripcion().toLowerCase().equals(descripcion.toLowerCase())) {
+            if (tipo.getDescripcion().equalsIgnoreCase(descripcion)) {
                 return tipo;
             }
         }
-        return null;
+        return OCUPADO;
     }
 
 }

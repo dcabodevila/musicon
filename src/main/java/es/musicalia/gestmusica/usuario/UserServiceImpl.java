@@ -138,15 +138,10 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public Usuario obtenerUsuarioAutenticado() {
+	public Optional<Usuario> obtenerUsuarioAutenticado() {
 
-		if (isUserAutheticated()) {
-
-			return ((CustomAuthenticatedUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
-					.getUsuario();
-
-		}
-		return null;
+		return isUserAutheticated() ? Optional.of(((CustomAuthenticatedUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
+				.getUsuario()) : Optional.empty();
 
 	}
 

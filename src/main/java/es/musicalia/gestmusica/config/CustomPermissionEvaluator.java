@@ -52,7 +52,7 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
             Object permission
     ) {
 
-        if (this.userService.obtenerUsuarioAutenticado().getRolGeneral() !=null && RolEnum.ROL_ADMINISTRADOR.getCodigo().equals(this.userService.obtenerUsuarioAutenticado().getRolGeneral().getCodigo()) ){
+        if (this.userService.obtenerUsuarioAutenticado().orElseThrow().getRolGeneral() !=null && RolEnum.ROL_ADMINISTRADOR.getCodigo().equals(this.userService.obtenerUsuarioAutenticado().orElseThrow().getRolGeneral().getCodigo()) ){
             return true;
         }
 

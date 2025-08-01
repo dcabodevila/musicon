@@ -38,8 +38,8 @@ public interface ArtistaRepository extends JpaRepository<Artista, Long> {
 		@Param("idsTipoArtista") Set<Long> idsTipoArtista
 	);
 
-	@Query("select a from Artista a where a.idArtistaGestmanager = :idArtistaGestmanager")
-	Optional<Artista> findArtistaByIdArtistaGestmanager(@Param("idArtistaGestmanager") Long idArtistaGestmanager);
+	@Query("select new es.musicalia.gestmusica.artista.ArtistaAgenciaRecord(a.id, a.agencia.id) from Artista a where a.idArtistaGestmanager = :idArtistaGestmanager")
+	Optional<ArtistaAgenciaRecord> findArtistaByIdArtistaGestmanager(@Param("idArtistaGestmanager") Long idArtistaGestmanager);
 
 
 }

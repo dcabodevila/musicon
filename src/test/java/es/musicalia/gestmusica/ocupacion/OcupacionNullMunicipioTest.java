@@ -82,7 +82,7 @@ public class OcupacionNullMunicipioTest {
         // Act & Assert
         // This should not throw an exception even though municipio is null
         assertDoesNotThrow(() -> {
-            Ocupacion ocupacion = ocupacionService.guardarOcupacion(ocupacionSaveDto, true);
+            Ocupacion ocupacion = ocupacionService.guardarOcupacion(ocupacionSaveDto, true, false);
             assertNotNull(ocupacion);
             assertNotNull(ocupacion.getMunicipio(), "Municipio should not be null after saving");
             System.out.println("Successfully saved Ocupacion with null municipio input. Default municipio ID used: " + ocupacion.getMunicipio().getId());

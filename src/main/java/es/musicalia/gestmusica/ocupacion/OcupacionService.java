@@ -1,6 +1,5 @@
 package es.musicalia.gestmusica.ocupacion;
 
-import es.musicalia.gestmusica.api.DatosGestmanagerConvertedDTO;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.localizacion.CodigoNombreDto;
 import es.musicalia.gestmusica.util.DefaultResponseBody;
@@ -23,7 +22,7 @@ public interface OcupacionService {
     @Transactional(readOnly = false)
     DefaultResponseBody saveOcupacion(OcupacionSaveDto ocupacionSaveDto) throws ModificacionOcupacionException;
 
-    Ocupacion guardarOcupacion(OcupacionSaveDto ocupacionSaveDto, boolean permisoConfirmarOcupacionAgencia) throws ModificacionOcupacionException;
+    Ocupacion guardarOcupacion(OcupacionSaveDto ocupacionSaveDto, boolean permisoConfirmarOcupacionAgencia, boolean isSincronizacion) throws ModificacionOcupacionException;
 
     boolean existeOcupacionFecha(OcupacionSaveDto ocupacionSaveDto);
 

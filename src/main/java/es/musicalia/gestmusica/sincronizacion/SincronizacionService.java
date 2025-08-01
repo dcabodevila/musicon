@@ -1,6 +1,6 @@
-package es.musicalia.gestmusica.api;
+package es.musicalia.gestmusica.sincronizacion;
 
-import es.musicalia.gestmusica.artista.Artista;
+import es.musicalia.gestmusica.artista.ArtistaAgenciaRecord;
 import es.musicalia.gestmusica.artista.ArtistaRepository;
 import es.musicalia.gestmusica.localizacion.Municipio;
 import es.musicalia.gestmusica.localizacion.MunicipioRepository;
@@ -28,25 +28,26 @@ import java.util.Optional;
 @Slf4j
 public class SincronizacionService {
 
-
     private final OcupacionService ocupacionService;
     private final OcupacionLegacyService ocupacionLegacyService;
     private final ArtistaRepository artistaRepository;
     private final SincronizacionRepository sincronizacionRepository;
     private final ProvinciaRepository provinciaRepository;
     private final MunicipioRepository municipioRepository;
+    private final OcupacionRepository ocupacionRepository;
 
     @Autowired
     public SincronizacionService(
             OcupacionService ocupacionService,
             @Qualifier("ocupacionLegacyService")
-            OcupacionLegacyService ocupacionLegacyService, ArtistaRepository artistaRepository, SincronizacionRepository sincronizacionRepository, ProvinciaRepository provinciaRepository, MunicipioRepository municipioRepository) {
+            OcupacionLegacyService ocupacionLegacyService, ArtistaRepository artistaRepository, SincronizacionRepository sincronizacionRepository, ProvinciaRepository provinciaRepository, MunicipioRepository municipioRepository, OcupacionRepository ocupacionRepository) {
         this.ocupacionService = ocupacionService;
         this.ocupacionLegacyService = ocupacionLegacyService;
         this.artistaRepository = artistaRepository;
         this.sincronizacionRepository = sincronizacionRepository;
         this.provinciaRepository = provinciaRepository;
         this.municipioRepository = municipioRepository;
+        this.ocupacionRepository = ocupacionRepository;
     }
 
     /**
@@ -58,33 +59,19 @@ public class SincronizacionService {
         
         try {
             // 1. Obtener datos del sistema legacy
-            List<OcupacionLegacy> ocupacionesLegacy =
+            final List<OcupacionLegacy> ocupacionesLegacy =
                 ocupacionLegacyService.findOcupacionLegacyFromGestmusicaLegacy(fechaDesde);
             
             // 2. Procesar cada ocupación
-            for (OcupacionLegacy legacyOcupacion : ocupacionesLegacy) {
+            for (final OcupacionLegacy legacyOcupacion : ocupacionesLegacy) {
                 Sincronizacion nuevaSincronizacion = toSincronizacion(legacyOcupacion);
-                nuevaSincronizacion = this.sincronizacionRepository.saveAndFlush(nuevaSincronizacion);
+                DefaultResponseBody response = sincronizarOcupacionIndividual(legacyOcupacion, result);
+                nuevaSincronizacion.setProcesado(response.isSuccess());
 
-                try {
-                    sincronizarOcupacionIndividual(legacyOcupacion, result);
-
-                    nuevaSincronizacion.setProcesado(Boolean.TRUE);
-                } catch (SincronizacionException e) {
-                    log.error("Error SincronizacionException ocupación ID: {}",
-                            legacyOcupacion.getIdOcupacion(), e);
-                    result.addError(legacyOcupacion.getIdOcupacion(), e.getMessage());
-                    nuevaSincronizacion.setProcesado(false);
-                    nuevaSincronizacion.setCodigoError(e.getMessage() != null ? (e.getMessage().length() > 800 ? e.getMessage().substring(0, 800) : e.getMessage()) : null);
+                if (!response.isSuccess()){
+                    nuevaSincronizacion.setCodigoError(response.getMessage() != null ? (response.getMessage().length() > 800 ? response.getMessage().substring(0, 800) : response.getMessage()) : null);
                 }
 
-                catch (Exception e) {
-                    log.error("Error sincronizando ocupación ID: {}", 
-                             legacyOcupacion.getIdOcupacion(), e);
-                    result.addError(legacyOcupacion.getIdOcupacion(), e.getMessage());
-                    nuevaSincronizacion.setProcesado(false);
-                    nuevaSincronizacion.setCodigoError(e.getMessage() != null ? (e.getMessage().length() > 800 ? e.getMessage().substring(0, 800) : e.getMessage()) : null);
-                }
                 this.sincronizacionRepository.save(nuevaSincronizacion);
 
             }
@@ -118,51 +105,88 @@ public class SincronizacionService {
                 .build();
     }
 
-    private void sincronizarOcupacionIndividual(OcupacionLegacy legacy, SincronizacionResult result) throws SincronizacionException, ModificacionOcupacionException {
+    private DefaultResponseBody sincronizarOcupacionIndividual(OcupacionLegacy legacy, SincronizacionResult result) {
+        try {
+            // Usar caché para artistas
+            Optional<ArtistaAgenciaRecord> optionalArtista = this.artistaRepository.findArtistaByIdArtistaGestmanager(legacy.getIdArtista().longValue());
 
+            if (optionalArtista.isEmpty()) {
+                return DefaultResponseBody.builder()
+                    .success(false)
+                    .message("No existe el id artista: " + legacy.getIdArtista())
+                    .messageType("danger")
+                    .idEntidad(legacy.getIdArtista().longValue())
+                    .build();
+            }
 
-        Optional<Artista> optionalArtista = this.artistaRepository.findArtistaByIdArtistaGestmanager(legacy.getIdArtista().longValue());
-        
-        if (optionalArtista.isPresent()){
-            final Artista artista = optionalArtista.get();
-            // Verificar si ya existe en el sistema nuevo
-            Optional<Ocupacion> existente = ocupacionService
-                    .buscarPorIdOcupacionLegacy(legacy.getIdOcupacion());
+            ArtistaAgenciaRecord artista = optionalArtista.get();
+            
+            // Verificar existencia usando caché
+            Optional<Ocupacion> existente = ocupacionService.buscarPorIdOcupacionLegacy(legacy.getIdOcupacion());
 
             if (existente.isPresent()) {
-                final Ocupacion ocupacion = existente.get();
-                if (ocupacion.getUsuarioModificacion()==null || ConstantsGestmusica.USUARIO_SINCRONIZACION.equalsIgnoreCase(ocupacion.getUsuarioModificacion())){
-                    OcupacionSaveDto ocupacionSaveDto = getOcupacionSaveDto(legacy, artista.getAgencia().getId(), artista.getId());
-                    ocupacionSaveDto.setId(ocupacion.getId());
-                    this.ocupacionService.guardarOcupacion(ocupacionSaveDto, true);
-                    result.incrementarActualizadas();
-                }
-                else {
-                    result.incrementarSinCambios();
-                }
-
-
+                procesarOcupacionExistente(existente.get(), legacy, artista, result);
             } else {
-
-                DefaultResponseBody response = guardarOcupacionSincronizacion(legacy, artista.getAgencia().getId(), artista.getId());
-
-                if (response.isSuccess()){
-                    result.incrementarCreadas();
-                }
-
-
-
+                procesarNuevaOcupacion(legacy, artista, result);
             }
 
             result.incrementarExitosas();
-        } 
-        else {
-            throw new SincronizacionException("No existe el id artista: "+ legacy.getIdArtista());
-        }
-        
-        
-        
+            return crearResponseExitoso(legacy);
 
+        } catch (Exception e) {
+            log.error("Error procesando ocupación: {}", legacy.getIdArtista(), e);
+            return crearResponseError(legacy);
+        }
+    }
+
+    private void procesarOcupacionExistente(Ocupacion ocupacion, OcupacionLegacy legacy, 
+                                          ArtistaAgenciaRecord artista, SincronizacionResult result) throws ModificacionOcupacionException {
+        if (puedeModificarse(ocupacion)) {
+            actualizarOcupacionExistente(ocupacion, legacy, artista);
+            result.incrementarActualizadas();
+        } else {
+            result.incrementarSinCambios();
+        }
+    }
+
+    private boolean puedeModificarse(Ocupacion ocupacion) {
+        return ocupacion.getUsuarioModificacion() == null || 
+               ConstantsGestmusica.USUARIO_SINCRONIZACION.equalsIgnoreCase(
+                   ocupacion.getUsuarioModificacion());
+    }
+
+    @Transactional
+    private void actualizarOcupacionExistente(Ocupacion ocupacion, OcupacionLegacy legacy, 
+                                             ArtistaAgenciaRecord artista) throws ModificacionOcupacionException {
+        OcupacionSaveDto dto = getOcupacionSaveDto(legacy, artista.idAgencia(), artista.id());
+        dto.setId(ocupacion.getId());
+        this.ocupacionService.guardarOcupacion(dto, true, true);
+    }
+
+    private DefaultResponseBody crearResponseError(OcupacionLegacy legacy) {
+        return DefaultResponseBody.builder()
+            .success(false)
+            .message("Error inesperado guardando la ocupacion: " + legacy.getIdArtista())
+            .messageType("danger")
+            .idEntidad(legacy.getIdOcupacion().longValue())
+            .build();
+    }
+
+    private DefaultResponseBody crearResponseExitoso(OcupacionLegacy legacy) {
+        return DefaultResponseBody.builder()
+            .success(true)
+            .message("Ocupacion guardada" + legacy.getIdArtista())
+            .messageType("success")
+            .idEntidad(legacy.getIdArtista().longValue())
+            .build();
+    }
+
+    private void procesarNuevaOcupacion(OcupacionLegacy legacy, ArtistaAgenciaRecord artista, 
+                                         SincronizacionResult result) throws ModificacionOcupacionException {
+        DefaultResponseBody response = guardarOcupacionSincronizacion(legacy, artista.idAgencia(), artista.id());
+        if (response.isSuccess()) {
+            result.incrementarCreadas();
+        }
     }
 
     private Boolean isOcupacionProvisional(String pais){
@@ -181,15 +205,15 @@ public class SincronizacionService {
         return pais!=null && pais.equalsIgnoreCase("PORTUGAL");
     }
 
-    private DefaultResponseBody guardarOcupacionSincronizacion(OcupacionLegacy legacy, Long idAgencia, Long idArtista) throws ModificacionOcupacionException, SincronizacionException {
+    private DefaultResponseBody guardarOcupacionSincronizacion(OcupacionLegacy legacy, Long idAgencia, Long idArtista) throws ModificacionOcupacionException {
 
         if (isOcupacionVacaciones(legacy.getPais())){
-            throw new SincronizacionException("Ocupación de tipo vacaciones no implementada "+ legacy.getIdArtista());
+            return DefaultResponseBody.builder().success(false).message("Ocupación de tipo vacaciones no implementada " + legacy.getIdArtista()).messageType("danger").idEntidad(legacy.getIdOcupacion().longValue()).build();
         }
 
         OcupacionSaveDto ocupacionSaveDto = getOcupacionSaveDto(legacy, idAgencia, idArtista);
 
-        final Ocupacion ocupacion = this.ocupacionService.guardarOcupacion(ocupacionSaveDto, true);
+        final Ocupacion ocupacion = this.ocupacionService.guardarOcupacion(ocupacionSaveDto, true, true);
 
         return DefaultResponseBody.builder().success(true).message("Ocupación guardada correctamente").messageType("success").idEntidad(ocupacion.getId()).build();
     }
@@ -240,7 +264,6 @@ public class SincronizacionService {
         if (isOcupacionPortugal(legacy.getPais())){
             ocupacionSaveDto.setIdCcaa(ConstantsGestmusica.ID_CCAA_PORTUGAL);
             ocupacionSaveDto.setIdProvincia(ConstantsGestmusica.ID_PROVINCIA_PORTUGAL);
-            // Ensure Portugal occupations also have a municipality set
             ocupacionSaveDto.setIdMunicipio(ConstantsGestmusica.ID_MUNICIPIO_PROVISIONAL);
         }
 
@@ -251,7 +274,6 @@ public class SincronizacionService {
 
         ocupacionSaveDto.setLocalidad(legacy.getPoblacion());
         ocupacionSaveDto.setLugar(legacy.getLugar());
-        ocupacionSaveDto.setProvisional(Boolean.FALSE);
 
         ocupacionSaveDto.setObservaciones(legacy.getObservaciones());
         ocupacionSaveDto.setImporte(BigDecimal.ZERO);

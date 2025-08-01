@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserService {
 
@@ -19,7 +20,7 @@ public interface UserService {
 	@Transactional(readOnly = false)
 	Usuario activateUserByEmail(String email) throws UsuarioNoEncontradoException;
 
-	Usuario obtenerUsuarioAutenticado();
+	Optional<Usuario> obtenerUsuarioAutenticado();
 
 	boolean usernameExists(final String username);
 

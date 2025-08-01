@@ -96,7 +96,7 @@ public class TarifaServiceImpl implements TarifaService {
 		tarifa.setImporte(tarifaSaveDto.getImporte());
 		tarifa.setActivo(tarifaSaveDto.getActivo()!=null? tarifaSaveDto.getActivo() : Boolean.TRUE);
 
-		final String userName = this.userService.obtenerUsuarioAutenticado().getUsername();
+		final String userName = this.userService.obtenerUsuarioAutenticado().orElseThrow().getUsername();
 
 		if (tarifa.getFechaCreacion()==null){
 			tarifa.setFechaCreacion(LocalDateTime.now());
