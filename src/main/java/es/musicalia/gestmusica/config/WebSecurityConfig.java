@@ -12,15 +12,10 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 
 @Configuration
@@ -57,6 +52,11 @@ public class WebSecurityConfig {
 				.requestMatchers("/api/sincronizacion/**").permitAll()
                 .anyRequest().authenticated()
             )
+			.sessionManagement(session -> session
+					.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+					.maximumSessions(1)
+					.expiredUrl("/auth/login?expired")
+			)
             .formLogin(form -> form
                 .loginPage("/auth/login")
                 .permitAll()
