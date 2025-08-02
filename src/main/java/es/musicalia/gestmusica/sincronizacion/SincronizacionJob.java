@@ -25,11 +25,12 @@ public class SincronizacionJob {
             SincronizacionResult resultado = sincronizacionService.sincronizarOcupacionesDesde(LocalDate.now());
             
             Duration tiempoEjecucion = Duration.between(inicio, Instant.now());
-            log.info("Sincronizacion completada en {} segundos. Creadas: {}, Actualizadas: {}, Errores: {}",
+            log.info("Sincronizacion completada en {} segundos. Creadas: {}, Actualizadas: {}, Eliminadas: {}, Errores: {}",
                 tiempoEjecucion.toSeconds(),
                 resultado.getCreadas(), 
-                resultado.getActualizadas(), 
-                resultado.getErrores());
+                resultado.getActualizadas(),
+                    resultado.getEliminadas(),
+                    resultado.getErrores());
         } catch (Exception e) {
             log.error("Error durante la sincronizacion programada", e);
         }

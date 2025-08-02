@@ -10,7 +10,6 @@ import es.musicalia.gestmusica.localizacion.ProvinciaRepository;
 import es.musicalia.gestmusica.mail.EmailService;
 import es.musicalia.gestmusica.mail.EmailTemplateEnum;
 import es.musicalia.gestmusica.orquestasdegalicia.ActuacionExterna;
-import es.musicalia.gestmusica.orquestasdegalicia.OrquestasDeGaliciaService;
 import es.musicalia.gestmusica.permiso.PermisoAgenciaEnum;
 import es.musicalia.gestmusica.permiso.PermisoArtistaEnum;
 import es.musicalia.gestmusica.permiso.PermisoService;
@@ -22,10 +21,8 @@ import es.musicalia.gestmusica.usuario.UserService;
 import es.musicalia.gestmusica.usuario.Usuario;
 import es.musicalia.gestmusica.util.ConstantsGestmusica;
 import es.musicalia.gestmusica.util.DefaultResponseBody;
-import es.musicalia.gestmusica.util.GestmusicaUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,9 +50,8 @@ public class OcupacionServiceImpl implements OcupacionService {
 	private final AccesoRepository accesoRepository;
 	private final EmailService emailService;
 	private final OcupacionMapper ocupacionMapper;
-	private final OrquestasDeGaliciaService orquestasDeGaliciaService;
 
-	public OcupacionServiceImpl(OcupacionRepository ocupacionRepository, ArtistaRepository artistaRepository, ProvinciaRepository provinciaRepository, MunicipioRepository municipioRepository, TipoOcupacionRepository tipoOcupacionRepository, OcupacionEstadoRepository ocupacionEstadoRepository, TarifaRepository tarifaRepository, UserService userService, PermisoService permisoService, AccesoRepository accesoRepository, EmailService emailService, OcupacionMapper ocupacionMapper, OrquestasDeGaliciaService orquestasDeGaliciaService){
+	public OcupacionServiceImpl(OcupacionRepository ocupacionRepository, ArtistaRepository artistaRepository, ProvinciaRepository provinciaRepository, MunicipioRepository municipioRepository, TipoOcupacionRepository tipoOcupacionRepository, OcupacionEstadoRepository ocupacionEstadoRepository, TarifaRepository tarifaRepository, UserService userService, PermisoService permisoService, AccesoRepository accesoRepository, EmailService emailService, OcupacionMapper ocupacionMapper){
 		this.ocupacionRepository = ocupacionRepository;
 		this.artistaRepository = artistaRepository;
         this.provinciaRepository = provinciaRepository;
@@ -68,7 +64,6 @@ public class OcupacionServiceImpl implements OcupacionService {
         this.accesoRepository = accesoRepository;
         this.emailService = emailService;
         this.ocupacionMapper = ocupacionMapper;
-        this.orquestasDeGaliciaService = orquestasDeGaliciaService;
     }
 
 	@Override
@@ -98,19 +93,19 @@ public class OcupacionServiceImpl implements OcupacionService {
 		try {
 			this.emailService.enviarMensajePorEmail(ocupacion.getUsuario().getEmail(), EmailTemplateEnum.EMAIL_NOTIFICACION_ANULACION);
 
-			if (ocupacion.getArtista().isPermiteOrquestasDeGalicia()){
-				ResponseEntity<String> response = this.orquestasDeGaliciaService.eliminarActuacion(ocupacion.getId().intValue());
-				if (response.getStatusCode().is2xxSuccessful()){
-					log.info("Se ha eliminado correctamente la actuacion de la ocupacion: {}", ocupacion.getId());
-				}
-				else {
-					throw new OrquestasDeGaliciaException("Error eliminado la actuacion de la ocupacion a OrquestasDeGalicia: " + ocupacion.getId());
-				}
-
-			}
-
-		} catch (OrquestasDeGaliciaException e) {
-			return DefaultResponseBody.builder().success(true).message("Ocupacion anulada correctamente, pero ha habido un error publicadando en OrquestasDeGalicia").messageType("warning").build();
+//			if (ocupacion.getArtista().isPermiteOrquestasDeGalicia()){
+//				ResponseEntity<String> response = this.orquestasDeGaliciaService.eliminarActuacion(ocupacion.getId().intValue());
+//				if (response.getStatusCode().is2xxSuccessful()){
+//					log.info("Se ha eliminado correctamente la actuacion de la ocupacion: {}", ocupacion.getId());
+//				}
+//				else {
+//					throw new OrquestasDeGaliciaException("Error eliminado la actuacion de la ocupacion a OrquestasDeGalicia: " + ocupacion.getId());
+//				}
+//
+//			}
+//
+//		} catch (OrquestasDeGaliciaException e) {
+//			return DefaultResponseBody.builder().success(true).message("Ocupacion anulada correctamente, pero ha habido un error publicadando en OrquestasDeGalicia").messageType("warning").build();
 		} catch (EnvioEmailException e) {
 			return DefaultResponseBody.builder().success(true).message("Ocupacion anulada correctamente, pero ha habido un error enviando la notificación por correo").messageType("warning").build();
 		} catch (Exception e) {
@@ -135,7 +130,7 @@ public class OcupacionServiceImpl implements OcupacionService {
 
 			ActuacionExterna actuacionExterna = getActuacionExterna(ocupacion.getArtista(), ocupacion);
 
-			this.orquestasDeGaliciaService.enviarActuacionOrquestasDeGalicia(false, actuacionExterna, OcupacionEstadoEnum.OCUPADO.getDescripcion());
+//			this.orquestasDeGaliciaService.enviarActuacionOrquestasDeGalicia(false, actuacionExterna, OcupacionEstadoEnum.OCUPADO.getDescripcion());
 			this.emailService.enviarMensajePorEmail(ocupacion.getUsuario().getEmail(), EmailTemplateEnum.EMAIL_NOTIFICACION_CONFIRMACION);
 
 
@@ -167,17 +162,17 @@ public class OcupacionServiceImpl implements OcupacionService {
 					this.emailService.enviarMensajePorEmail(ocupacion.getArtista().getAgencia().getUsuario().getEmail(), EmailTemplateEnum.EMAIL_NOTIFICACION_CONFIRMACION_PENDIENTE);
 
 			}
-			else {
-				if (artista.isPermiteOrquestasDeGalicia()) {
-					ActuacionExterna actuacionExterna = getActuacionExterna(artista, ocupacion);
-
-					this.orquestasDeGaliciaService.enviarActuacionOrquestasDeGalicia(ocupacionSaveDto.getId()==null, actuacionExterna, ocupacion.getOcupacionEstado().getNombre());
-				}
-
-			}
-		} catch (OrquestasDeGaliciaException e) {
-			log.error("Error enviando la actuacion de la ocupacion a OrquestasDeGalicia: {}", ocupacion.getId());
-			return DefaultResponseBody.builder().success(true).message("Ocupacion guardada correctamente. Pero no se ha podido publicar la actuación a OrquestasDeGalicia.es").messageType("warning").idEntidad(ocupacion.getId()).build();
+//			else {
+//				if (artista.isPermiteOrquestasDeGalicia()) {
+//					ActuacionExterna actuacionExterna = getActuacionExterna(artista, ocupacion);
+//
+//					this.orquestasDeGaliciaService.enviarActuacionOrquestasDeGalicia(ocupacionSaveDto.getId()==null, actuacionExterna, ocupacion.getOcupacionEstado().getNombre());
+//				}
+//
+//			}
+//		} catch (OrquestasDeGaliciaException e) {
+//			log.error("Error enviando la actuacion de la ocupacion a OrquestasDeGalicia: {}", ocupacion.getId());
+//			return DefaultResponseBody.builder().success(true).message("Ocupacion guardada correctamente. Pero no se ha podido publicar la actuación a OrquestasDeGalicia.es").messageType("warning").idEntidad(ocupacion.getId()).build();
 		} catch (EnvioEmailException e) {
 			log.error("error enviando notificacion de solicitud de ocupacion", e);
 			return DefaultResponseBody.builder().success(true).message("Ocupacion guardada correctamente. Pero no se ha podido enviar la notificación por correo").messageType("warning").idEntidad(ocupacion.getId()).build();
