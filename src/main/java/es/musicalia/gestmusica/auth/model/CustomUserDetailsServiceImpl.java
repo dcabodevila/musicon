@@ -45,7 +45,6 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService {
 		final List<GrantedAuthority> auth = new ArrayList<GrantedAuthority>();
 
 
-		boolean isUserAdmin = false;
 		if (usuario.getRolGeneral()!=null){
 			final Set<Permiso> permisos = usuario.getRolGeneral().getPermisos();
 
@@ -53,9 +52,6 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService {
 				GrantedAuthority authority = new SimpleGrantedAuthority(permiso.getCodigo());
 				auth.add(authority);
 			}
-
-			isUserAdmin = TipoRolEnum.ADMIN.name().equals(usuario.getRolGeneral().getNombre());
-
 		}
 
 		final Map<Long, Set<String>> mapPermisosArtista = this.accesoArtistaService.obtenerMapPermisosArtista(usuario.getId());

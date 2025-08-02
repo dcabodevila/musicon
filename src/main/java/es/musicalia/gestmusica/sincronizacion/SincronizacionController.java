@@ -41,6 +41,7 @@ public class SincronizacionController {
             response.put("ocupacionesCreadas", sincronizacionResult.getCreadas());
             response.put("ocupacionesActualizadas", sincronizacionResult.getActualizadas());
             response.put("ocupacionesErrores", sincronizacionResult.getErrores());
+            response.put("ocupacionesEliminadas", sincronizacionResult.getEliminadas());
 
             response.put("mensaje", "Sincronización completada");
             response.put("timestamp", LocalDateTime.now());
@@ -67,6 +68,7 @@ public class SincronizacionController {
             response.put("ocupacionesCreadas", sincronizacionResult.getCreadas());
             response.put("ocupacionesActualizadas", sincronizacionResult.getActualizadas());
             response.put("ocupacionesErrores", sincronizacionResult.getErrores());
+            response.put("ocupacionesEliminadas", sincronizacionResult.getEliminadas());
             response.put("mensaje", "Sincronización completada");
             response.put("timestamp", LocalDateTime.now());
             return ResponseEntity.ok(response);

@@ -21,8 +21,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -75,9 +77,11 @@ public class SincronizacionService {
                 this.sincronizacionRepository.save(nuevaSincronizacion);
 
             }
-            
-            log.info("Sincronización completada: {} exitosas, {} errores", 
-                    result.getExitosas(), result.getErrores().size());
+
+            result.setEliminadas(eliminarOcupacionesBorradasLegacy(fechaDesde));
+
+            log.info("Sincronización completada: {} exitosas, {} errores, {} eliminadas",
+                    result.getExitosas(), result.getErrores().size(), result.getEliminadas());
             
         } catch (Exception e) {
             log.error("Error general en sincronización", e);
@@ -86,6 +90,29 @@ public class SincronizacionService {
         
         return result;
     }
+
+    private int eliminarOcupacionesBorradasLegacy(LocalDate fechaDesde) {
+        int eliminadas = 0;
+        Optional<Set<Integer>> listaIdsOcupaciones = this.ocupacionLegacyService.findIdsOcupacionesFromDate(fechaDesde);
+
+        try {
+
+            if (listaIdsOcupaciones.isPresent() && !listaIdsOcupaciones.get().isEmpty()) {
+                List<Ocupacion> listaOcupacionesEliminar = this.ocupacionRepository.findByIdOcupacionLegacyNotIn(fechaDesde.atStartOfDay(), listaIdsOcupaciones.get()).orElse(new ArrayList<>());
+
+                for (Ocupacion ocupacion : listaOcupacionesEliminar) {
+                    ocupacion.setActivo(false);
+                    this.ocupacionRepository.save(ocupacion);
+                    eliminadas++;
+                }
+
+            }
+        }catch (Exception e){
+            log.error("Error al eliminar ocupaciones borradas", e);
+        }
+        return eliminadas;
+    }
+
 
     public static Sincronizacion toSincronizacion(OcupacionLegacy legacyOcupacion) {
         return Sincronizacion.builder()

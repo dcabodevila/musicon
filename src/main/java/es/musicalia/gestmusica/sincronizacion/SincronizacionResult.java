@@ -10,6 +10,7 @@ public class SincronizacionResult {
     private int exitosas;
     private int creadas;
     private int actualizadas;
+    private int eliminadas;
     private int sinCambios;
     private String errorGeneral;
     private Map<Integer, String> errores = new HashMap<>();
@@ -25,5 +26,6 @@ public class SincronizacionResult {
     public void incrementarExitosas() { exitosas++; }
     public void incrementarCreadas() { creadas++; }
     public void incrementarActualizadas() { actualizadas++; }
+    public void incrementarEliminadas() { eliminadas++; }
     public void incrementarSinCambios() { sinCambios++; }
 }

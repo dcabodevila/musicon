@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "gw_netmanager_ocupaciones")
@@ -52,6 +53,9 @@ public class OcupacionLegacy {
 
     @Column(name = "sf", nullable = false, columnDefinition = "TINYINT(2) DEFAULT 0")
     private Boolean sf = false;
+
+    @Column(name = "fecha_modificacion", nullable = false)
+    private LocalDateTime fechaModificacion;
 
     // Enum para el estado
     public enum EstadoOcupacion {
