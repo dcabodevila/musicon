@@ -1,6 +1,4 @@
-
-
-  function cargarProvincias(input,ccaaId, provinciaSelectId) {
+function cargarProvincias(input,ccaaId, provinciaSelectId) {
 
       const url = '/localizacion/provincias/' + ccaaId;
       // Retornamos la promesa que devuelve $.ajax

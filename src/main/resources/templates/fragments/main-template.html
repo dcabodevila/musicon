@@ -2,19 +2,20 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-	<title>Gestmusica</title>
-	<meta property="og:title" content="Gestmusica" />
+	<title>festia.es</title>
+	<meta property="og:title" content="Festia.es" />
 	<meta property="og:description" content="Plataforma profesionales del espectáculo" />
 	<meta property="og:image" th:src="@{/logo/logo-name-transparente.png}"
-		  content="https://gestmusica.onrender.com/logo.png"/>
-	<meta property="og:url" content="https://gestmusica.onrender.com/"/>
-
+		  content="https://festia.es/logo.png"/>
+	<meta property="og:url" content="https://festia.es/"/>
+	<meta name="theme-color" content="#000000">
+	<link rel="manifest" href="/manifest.json">
     <div th:fragment="header-css">
 
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="description" content="Plataforma profesionales del espectáculo">
-		<meta name="author" content="Gestmusica">
+		<meta name="author" content="Festia">
 
 	    <meta http-equiv="x-ua-compatible" content="ie=edge">
 
@@ -26,6 +27,7 @@
 		<link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
 		<link rel="icon" type="image/png" sizes="32x32" th:href="@{/favicon-32x32.png}">
 		<link rel="icon" type="image/png" sizes="16x16" th:href="@{/favicon-16x16.png}">
+
 
 	</div>
 	<style>
@@ -81,7 +83,7 @@
 			<a class="sidebar-brand d-flex align-items-center" href="/">
 				<img th:src="@{/logo/logo_transparente.png}" style="height: 32px; margin-right: 8px;"/>
 				<span class="sidebar-brand-text">
-					Gestmusica
+					festia.es
 				</span>
 				<svg class="sidebar-brand-icon ms-2" width="32px" height="32px" viewBox="0 0 24 24" fill="none"
 					 stroke="#FFFFFF" stroke-width="1.5"
@@ -189,13 +191,13 @@
 			<div class="row text-muted">
 				<div class="col-6 text-start">
 					<p class="mb-0">
-						<a href="https://gestmusica.com/" target="_blank" class="text-muted"><strong>Gestmusica</strong></a> &copy;
+						<a href="https://festia.es/" target="_blank" class="text-muted"><strong>festia.es</strong></a> &copy;
 					</p>
 				</div>
 				<div class="col-6 text-end">
 					<ul class="list-inline">
 						<li class="list-inline-item">
-							<a class="text-muted" href="mailto:gestmusica@gestmusica.com">Contacto</a>
+							<a class="text-muted" href="mailto:info@festia.es">info@festia.es</a>
 						</li>
 					</ul>
 				</div>
@@ -205,6 +207,7 @@
 		<script th:src="@{/adminkit/flatpickr/es.js}"></script>
 		<script th:src="@{/js/moment.js}"></script>
 		<script th:src="@{/js/comun.js}"></script>
+		<script th:src="@{/js/service-worker.js}"></script>
 	</footer>
 
 

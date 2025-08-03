@@ -48,8 +48,6 @@ public class WebSecurityConfig {
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/fragments/**", "/static/**", "/adminkit/**", "/img/**", "/logo/**", "/favicon.ico", "/js**").permitAll()
-					//TODO: Quitar
-				.requestMatchers("/api/sincronizacion/**").permitAll()
                 .anyRequest().authenticated()
             )
 			.sessionManagement(session -> session

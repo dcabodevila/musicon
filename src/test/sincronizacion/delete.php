@@ -16,7 +16,7 @@ $datos = [
 send($datos);
 
 function send($datos) {
-    $urlApi = 'https://gestmusica.onrender.com/api/gestmanager/publicar';
+    $urlApi = 'https://festia.es/api/gestmanager/publicar';
     $ch = curl_init($urlApi);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POST, true);

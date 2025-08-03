@@ -257,7 +257,7 @@ END AS escenario, t.fecha::date,
 			</textField>
 			<image>
 				<reportElement x="0" y="0" width="60" height="55" uuid="5c409dfd-6760-40a3-a545-77e52a85fe16"/>
-				<imageExpression><![CDATA["https://res.cloudinary.com/hseoceuyz/image/upload/v1751997731/logo-name-transparente_mini_vignve.png"]]></imageExpression>
+				<imageExpression><![CDATA["https://res.cloudinary.com/hseoceuyz/image/upload/v1754229791/logo-name-transparente_mini_yfdyvi.png"]]></imageExpression>
 			</image>
 		</band>
 	</title>

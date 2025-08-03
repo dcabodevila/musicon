@@ -1,16 +1,16 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
 	  xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
-	<title>Gestmusica</title>
-	<meta property="og:title" content="Gestmusica" />
+	<title>festia.es</title>
+	<meta property="og:title" content="festia.es" />
 	<meta property="og:description" content="Plataforma profesionales del espectáculo" />
 	<meta property="og:image" th:src="@{/logo/logo-name-transparente.png}"
-		  content="https://gestmusica.onrender.com/logo.png"/>
-	<meta property="og:url" content="https://gestmusica.onrender.com/"/>
+		  content="https://festia.es/logo.png"/>
+	<meta property="og:url" content="https://festia.es/"/>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="description" content="Plataforma profesionales del espectáculo">
-	<meta name="author" content="Gestmusica">
+	<meta name="author" content="festia.es">
 	<div th:replace="~{fragments/main-template :: header-css}"/>
 </head>
 
@@ -28,7 +28,7 @@
 
 							<div class="card-body">
 								<div class="text-center mt-4">
-									<img th:src="@{/logo/logo-name-transparente.png}" alt="Gestmusica Logo"
+									<img th:src="@{/logo/logo-name-transparente.png}" alt="Festia Logo"
 										 class="img-fluid mb-3" style="max-height: 300px;">
 								</div>
 								<div class="m-sm-4">
@@ -53,7 +53,7 @@
 											 <button type="submit" class="btn btn-lg btn-primary">Iniciar sesión</button>
 										</div>
 										<div class="text-center mt-3">
-											<a class="btn btn-outline-primary" th:href="@{/auth/registration}">Registrarse</a>
+											<a class="btn btn-outline-primary" th:href="@{/auth/registration}">Nuevo usuario</a>
 										</div>
 
 									</form>
@@ -67,8 +67,8 @@
 		</div>
 	</main>
 
-	<script src="js/app.js"></script>
-
+	<script th:src="@{/js/app.js}"></script>
+	<script th:src="@{/js/service-worker.js}"></script>
 	</body>
 
    

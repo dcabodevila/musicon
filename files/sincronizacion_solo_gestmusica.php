@@ -18,7 +18,7 @@ if ($fp) {
 
 function enviarDatosAGestmusica($datos_envio, $archivo) {
     $datos_json = json_encode($datos_envio);
-    $url_api = "https://gestmusica.onrender.com/api/gestmanager/publicar";
+    $url_api = "https://festia.es/api/gestmanager/publicar";
     $ch = curl_init($url_api);
 
     curl_setopt($ch, CURLOPT_POST, true);

@@ -237,7 +237,7 @@ END AS escenario, t.fecha::date, (CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR
 			</textField>
 			<image>
 				<reportElement x="0" y="0" width="60" height="55" uuid="08d7f0ad-e5c3-4346-9d3b-964e6b13fe53"/>
-				<imageExpression><![CDATA["https://res.cloudinary.com/hseoceuyz/image/upload/v1751997731/logo-name-transparente_mini_vignve.png"]]></imageExpression>
+				<imageExpression><![CDATA["https://res.cloudinary.com/hseoceuyz/image/upload/v1754229791/logo-name-transparente_mini_yfdyvi.png"]]></imageExpression>
 			</image>
 		</band>
 	</title>
