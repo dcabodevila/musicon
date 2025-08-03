@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cglib.core.Local;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,7 +37,7 @@ public class SincronizacionController {
         try {
 
 
-            SincronizacionResult sincronizacionResult = sincronizacionService.sincronizarOcupacionesDesde(LocalDate.now());
+            SincronizacionResult sincronizacionResult = sincronizacionService.sincronizarOcupacionesDesde(LocalDate.now(), LocalDateTime.now().minusHours(2));
 
             response.put("ocupacionesCreadas", sincronizacionResult.getCreadas());
             response.put("ocupacionesActualizadas", sincronizacionResult.getActualizadas());
@@ -64,7 +65,7 @@ public class SincronizacionController {
         Map<String, Object> response = new HashMap<>();
         try {
 
-            final SincronizacionResult sincronizacionResult = sincronizacionService.sincronizarOcupacionesDesde(LocalDate.of(2025, 1, 1));
+            final SincronizacionResult sincronizacionResult = sincronizacionService.sincronizarOcupacionesDesde(LocalDate.of(2025, 1, 1), LocalDate.of(2025,1,1).atStartOfDay());
             response.put("ocupacionesCreadas", sincronizacionResult.getCreadas());
             response.put("ocupacionesActualizadas", sincronizacionResult.getActualizadas());
             response.put("ocupacionesErrores", sincronizacionResult.getErrores());

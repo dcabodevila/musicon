@@ -56,13 +56,13 @@ public class SincronizacionService {
      * Sincronización unidireccional: Legacy → Nueva
      */
     @Transactional
-    public SincronizacionResult sincronizarOcupacionesDesde(LocalDate fechaDesde) {
+    public SincronizacionResult sincronizarOcupacionesDesde(LocalDate fechaDesde, LocalDateTime fechaModificacionDesde) {
         SincronizacionResult result = new SincronizacionResult();
         
         try {
             // 1. Obtener datos del sistema legacy
             final List<OcupacionLegacy> ocupacionesLegacy =
-                ocupacionLegacyService.findOcupacionLegacyFromGestmusicaLegacy(fechaDesde);
+                ocupacionLegacyService.findOcupacionLegacyFromGestmusicaLegacyDesdeMofidicaic(fechaDesde, fechaModificacionDesde);
             
             // 2. Procesar cada ocupación
             for (final OcupacionLegacy legacyOcupacion : ocupacionesLegacy) {

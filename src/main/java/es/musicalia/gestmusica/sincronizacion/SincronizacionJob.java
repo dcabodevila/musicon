@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Slf4j
 @Component
@@ -22,7 +23,7 @@ public class SincronizacionJob {
             log.info("Iniciando sincronizacion programada");
             Instant inicio = Instant.now();
             
-            SincronizacionResult resultado = sincronizacionService.sincronizarOcupacionesDesde(LocalDate.now());
+            SincronizacionResult resultado = sincronizacionService.sincronizarOcupacionesDesde(LocalDate.now(), LocalDateTime.now().minusHours(2));
             
             Duration tiempoEjecucion = Duration.between(inicio, Instant.now());
             log.info("Sincronizacion completada en {} segundos. Creadas: {}, Actualizadas: {}, Eliminadas: {}, Errores: {}",
