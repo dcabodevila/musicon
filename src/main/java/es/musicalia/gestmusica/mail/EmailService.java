@@ -31,7 +31,7 @@ public class EmailService {
 
     @Value("${spring.mail.username}")
     private String fromEmail;
-    @Value("${spring.mail.sender.name:Gestmusica}")
+    @Value("${spring.mail.sender.name:festia}")
     private String senderName;
     @Value("${app.verificacion.expiracion-minutos:15}")
     private int minutosExpiracion;

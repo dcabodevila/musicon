@@ -15,7 +15,7 @@ public class MailgunEmailService {
     private String domain;
     @Value("${spring.mail.username}")
     private String fromEmail;
-    @Value("${spring.mail.sender.name:Gestmusica}")
+    @Value("${spring.mail.sender.name:festia}")
     private String senderName;
 
     private final RestTemplate restTemplate;
@@ -28,7 +28,7 @@ public class MailgunEmailService {
         String mailgunUrl = String.format("https://api.eu.mailgun.net/v3/%s/messages", domain);
 
         MultiValueMap<String, String> request = new LinkedMultiValueMap<>();
-        request.add("from", String.format("%s <gestmusica@gestmusica.com>", senderName));
+        request.add("from", String.format("%s <info@festia.es>", senderName));
         request.add("to", to);
         request.add("subject", subject);
         request.add("html", text);
