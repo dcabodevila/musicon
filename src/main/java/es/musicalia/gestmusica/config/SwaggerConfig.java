@@ -17,12 +17,12 @@ public class SwaggerConfig {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("GestMusica API")
+                        .title("Festia.es API")
                         .version("0.0.13")
                         .description("API para la gestión de agrupaciones musicales")
                         .contact(new Contact()
-                                .name("Gestmusica")
-                                .email("gestmusica@gestmusica.com")))
+                                .name("Festia")
+                                .email("info@festia.es")))
                 .servers(List.of(
                         new Server().url(System.getenv("SERVER_URL") != null ? System.getenv("SERVER_URL") : "http://localhost:8081").description("Servidor local")
                 ));
@@ -32,7 +32,7 @@ public class SwaggerConfig {
     public GroupedOpenApi apiGroup() {
         return GroupedOpenApi.builder()
                 .group("api")
-                .displayName("GestMusica API")
+                .displayName("Festia API")
                 .pathsToMatch("/api/**")
                 .build();
     }

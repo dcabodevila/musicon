@@ -39,7 +39,7 @@ public interface UserService {
 
 	UsuarioEdicionDTO getUsuarioEdicionDTO(Long idUsuario);
 
-	UsuarioEdicionDTO getMiPerfil(Usuario usuario);
+	UsuarioEdicionDTO getMiPerfil(Long idUsuario);
 
 	@Transactional(readOnly = false)
 	Usuario guardarUsuario(UsuarioEdicionDTO usuarioEdicionDTO, MultipartFile multipartFile);

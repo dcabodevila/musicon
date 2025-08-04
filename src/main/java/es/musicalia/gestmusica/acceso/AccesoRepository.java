@@ -36,4 +36,9 @@ public interface AccesoRepository extends JpaRepository<Acceso, Long> {
            "where a.usuario.id = :idUsuario " +
            "and a.activo order by a.agencia.nombre")
     List<AccesoDetailRecord> findAllAccesosDetailRecordByIdUsuario(@Param("idUsuario") Long idUsuario);
+
+    @Query("select count(a) > 0 from Acceso a where a.usuario.id = :idUsuario and a.agencia.id in (:idsAgencia) and a.activo = true and a.rol.codigo <> 'RESTRINGIR'")
+    boolean existsActiveAccessByUserIdAndAgencyIds(@Param("idUsuario") Long idUsuario, @Param("idsAgencia") Set<Long> idsAgencia);
+
+
 }

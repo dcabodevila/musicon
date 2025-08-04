@@ -24,5 +24,9 @@ public class UsuarioEdicionDTO {
     @Email
     private String email;
     private String imagen;
+    private String telefono;
+    private String nombreComercial;
+    private Long idProvincia;
+    private String provincia;
 
 }

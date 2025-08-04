@@ -66,7 +66,26 @@
                                             <input id="email" class="form-control" th:field="*{email}" placeholder="email" autocomplete="off"></input>
                                         </div>
                                     </div>
-
+                                    <div class="mb-3 row">
+                                        <label class="col-form-label col-sm-3 text-sm-end">Nombre comercial</label>
+                                        <div class="col-sm-9">
+                                            <input id="nombre-comercial" class="form-control" th:field="*{nombreComercial}" placeholder="Nombre comercial" autocomplete="off"></input>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 row">
+                                        <label class="col-form-label col-sm-3 text-sm-end">Teléfono</label>
+                                        <div class="col-sm-9">
+                                            <input id="telefono" class="form-control" th:field="*{telefono}" placeholder="Teléfono" autocomplete="off"></input>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 row">
+                                        <label class="col-form-label col-sm-3 text-sm-end">Provincia</label>
+                                        <div class="col-sm-9">
+                                            <select id="provincia-listado" th:field="*{idProvincia}" class="form-control choices-single" required>
+                                                <option th:each="provincia : ${listaProvincias}" th:value="${provincia.id}" th:text="${provincia.nombre}"></option>
+                                            </select>
+                                        </div>
+                                    </div>
                                     <div class="mb-3 row">
                                         <label class="col-form-label col-sm-3 text-sm-end">Imagen</label>
                                         <div class="col-sm-9">

@@ -11,5 +11,7 @@ public interface OcupacionLegacyService {
 
     List<OcupacionLegacy> findOcupacionLegacyFromGestmusicaLegacyDesdeMofidicaic(LocalDate localDate, LocalDateTime fechaModificacionDesde);
 
+    List<OcupacionLegacy> findOcupacionLegacyArtistaFromGestmusicaLegacyDesdeMofidicaic(LocalDate localDate, LocalDateTime fechaModificacionDesde, Integer idArtistaLegacy);
+
     Optional<Set<Integer>> findIdsOcupacionesFromDate(LocalDate localDate);
 }

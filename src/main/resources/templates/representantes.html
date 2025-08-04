@@ -54,7 +54,8 @@
                                                         <th></th>
                                                         <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Nombre</th>
                                                         <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Apellidos</th>
-
+                                                        <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Nombre comercial</th>
+                                                        <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Provincia</th>
                                                         <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Rol principal</th>
                                                         <th>Ver</th>
                                                     </tr>
@@ -67,7 +68,8 @@
                                                             </td>
                                                             <td class="dtr-control sorting_1" tabindex="0" th:text="${usuario.nombre}"></td>
                                                             <td class="dtr-control sorting_1" tabindex="0" th:text="${usuario.apellidos}" ></td>
-
+                                                            <td class="dtr-control sorting_1" tabindex="0" th:text="${usuario.nombreComercial}" ></td>
+                                                            <td class="dtr-control sorting_1" tabindex="0" th:text="${usuario.provincia}" ></td>
                                                             <td class="dtr-control sorting_1" tabindex="0" th:text="${usuario.rol}" ></td>
                                                             <td>
                                                                 <a th:href="@{/usuarios/{id}(id=${usuario.id})}"

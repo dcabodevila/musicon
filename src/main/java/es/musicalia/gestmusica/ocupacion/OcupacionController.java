@@ -21,7 +21,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -56,7 +59,8 @@ public class OcupacionController {
     public String getNuevaOcupacionModelAndView(@AuthenticationPrincipal CustomAuthenticatedUser user ,Model model, @PathVariable long idArtista) {
 
         if (user.getMapPermisosArtista().containsKey(idArtista) && user.getMapPermisosArtista().get(idArtista).contains("OCUPACIONES")) {
-            final OcupacionSaveDto ocupacion = getNewOcupacionSaveDto(idArtista);
+
+            final OcupacionSaveDto ocupacion = getNewOcupacionSaveDto(idArtista, user.getUserId() );
             obtenerModelAttributeComun(user, model, ocupacion);
             List<ArtistaRecord> listaArtistasPermisosOcupacion = this.artistaService.findMisArtistas(obtenerArtistasConPermisoOcupaciones(user.getMapPermisosArtista()));
             model.addAttribute("listaArtistas", listaArtistasPermisosOcupacion);
@@ -69,12 +73,13 @@ public class OcupacionController {
 
     }
 
-    private OcupacionSaveDto getNewOcupacionSaveDto(long idArtista) {
+    private OcupacionSaveDto getNewOcupacionSaveDto(long idArtista, Long idUsuario) {
         ArtistaDto artista = this.artistaService.findArtistaDtoById(idArtista);
         final OcupacionSaveDto ocupacion = new OcupacionSaveDto();
         ocupacion.setIdArtista(idArtista);
         ocupacion.setIdAgencia(artista.getIdAgencia());
-        ocupacion.setIdCcaa(artista.getIdCcaa());
+        ocupacion.setIdCcaa(this.localizacionService.findCcaaByUsuarioId(idUsuario).getId());
+        ocupacion.setIdProvincia(this.localizacionService.findProvinciaByUsuarioId(idUsuario).getId());
         ocupacion.setImporte(BigDecimal.ZERO);
         ocupacion.setPorcentajeRepre(BigDecimal.ZERO);
         ocupacion.setIva(BigDecimal.ZERO);

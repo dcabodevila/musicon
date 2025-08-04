@@ -3,6 +3,7 @@ package es.musicalia.gestmusica.usuario;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.auth.model.RegistrationForm;
 import es.musicalia.gestmusica.file.FileService;
+import es.musicalia.gestmusica.localizacion.ProvinciaRepository;
 import es.musicalia.gestmusica.mail.EmailService;
 import es.musicalia.gestmusica.mail.EmailTemplateEnum;
 import es.musicalia.gestmusica.rol.RolEnum;
@@ -30,8 +31,9 @@ public class UserServiceImpl implements UserService {
 	private final UsuarioMapper usuarioMapper;
 	private final FileService fileService;
 	private final EmailService emailService;
+	private final ProvinciaRepository provinciaRepository;
 
-	UserServiceImpl(UsuarioRepository userRepository, PasswordEncoder passwordEncoder, CodigoVerificacionService codigoVerificacionService, RolRepository rolRepository, UsuarioMapper usuarioMapper, FileService fileService, EmailService emailService) {
+	UserServiceImpl(UsuarioRepository userRepository, PasswordEncoder passwordEncoder, CodigoVerificacionService codigoVerificacionService, RolRepository rolRepository, UsuarioMapper usuarioMapper, FileService fileService, EmailService emailService, ProvinciaRepository provinciaRepository) {
 		this.userRepository = userRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.codigoVerificacionService = codigoVerificacionService;
@@ -39,6 +41,7 @@ public class UserServiceImpl implements UserService {
         this.usuarioMapper = usuarioMapper;
         this.fileService = fileService;
         this.emailService = emailService;
+        this.provinciaRepository = provinciaRepository;
     }
 
 
@@ -83,6 +86,9 @@ public class UserServiceImpl implements UserService {
 		user.setActivateKey(UUID.randomUUID().toString());
 		user.setEmail(registrationForm.getEmail().trim());
 		user.setFechaRegistro(new Timestamp(new Date().getTime()));
+		user.setNombreComercial(registrationForm.getNombreComercial());
+		user.setTelefono(registrationForm.getTelefono());
+		user.setProvincia(this.provinciaRepository.findById(registrationForm.getIdProvincia()).orElseThrow());
 		user.setActivo(false);
 		return user;
 	}
@@ -193,9 +199,9 @@ public class UserServiceImpl implements UserService {
 
 
 	@Override
-	public UsuarioEdicionDTO getMiPerfil(final Usuario usuario){
-
-		return this.usuarioMapper.toUsuarioEdicionDTO(usuario);
+	public UsuarioEdicionDTO getMiPerfil(final Long idUsuario){
+		final Usuario usuarioActual = this.userRepository.findById(idUsuario).orElseThrow();
+		return this.usuarioMapper.toUsuarioEdicionDTO(usuarioActual);
 	}
 
 
@@ -208,6 +214,9 @@ public class UserServiceImpl implements UserService {
 		usuario.setNombre( usuarioEdicionDTO.getNombre() );
 		usuario.setApellidos( usuarioEdicionDTO.getApellidos() );
 		usuario.setEmail( usuarioEdicionDTO.getEmail() );
+		usuario.setTelefono( usuarioEdicionDTO.getTelefono() );
+		usuario.setProvincia(this.provinciaRepository.findById(usuarioEdicionDTO.getIdProvincia()).orElseThrow());
+		usuario.setNombreComercial( usuarioEdicionDTO.getNombreComercial() );
 
 		if (multipartFile!=null){
 			final String uploadedFile = this.fileService.guardarFichero(multipartFile);

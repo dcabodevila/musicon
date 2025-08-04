@@ -64,7 +64,7 @@
                                         <label class="col-form-label col-sm-3 text-sm-end">Administrador</label>
                                         <div class="col-sm-9">
                                             <select id="usuario" th:field="*{idUsuario}" class="form-control choices-single" required>
-                                                <option th:each="usuario : ${listaUsuarios}" th:value="${usuario.id}" th:text="${usuario.nombreApellidos}"></option>
+                                                <option th:each="usuario : ${listaUsuarios}" th:value="${usuario.id}" th:text="${usuario.nombreComercial != null and !usuario.nombreComercial.isEmpty()} ? ${usuario.nombreApellidos + ' (' + usuario.nombreComercial + ')'} : ${usuario.nombreApellidos}"></option>
                                             </select>
                                         </div>
                                     </div>

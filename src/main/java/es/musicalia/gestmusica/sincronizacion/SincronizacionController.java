@@ -27,7 +27,7 @@ public class SincronizacionController {
     private final SincronizacionService sincronizacionService;
 
     @PostMapping(value = "/sincronizar", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Sincroniza los datos", description = "Ejecuta el proceso de sincronización de datos")
+    @Operation(summary = "Sincroniza los datos desde el día actual en adelante", description = "Ejecuta el proceso de sincronización de datos")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Sincronización completada"),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content)
@@ -36,8 +36,8 @@ public class SincronizacionController {
         Map<String, Object> response = new HashMap<>();
         try {
 
-
-            SincronizacionResult sincronizacionResult = sincronizacionService.sincronizarOcupacionesDesde(LocalDate.now(), LocalDateTime.now().minusHours(2));
+            log.info("Sincronizando ocupaciones desde "+ LocalDateTime.now() + " con fecha modificación posterior a " + LocalDateTime.now().minusHours(1));
+            SincronizacionResult sincronizacionResult = sincronizacionService.sincronizarOcupacionesDesde(LocalDate.now(), LocalDateTime.now().minusHours(1));
 
             response.put("ocupacionesCreadas", sincronizacionResult.getCreadas());
             response.put("ocupacionesActualizadas", sincronizacionResult.getActualizadas());
@@ -56,7 +56,7 @@ public class SincronizacionController {
     }
 
     @PostMapping(value = "/sincronizar-all", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Sincroniza todas las fechas desde 2025", description = "Ejecuta el proceso de sincronización de datos")
+    @Operation(summary = "Sincroniza todas las fechas desde 2025 para todos los artistas", description = "Ejecuta el proceso de sincronización de datos")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Sincronización completada"),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content)
@@ -66,6 +66,32 @@ public class SincronizacionController {
         try {
 
             final SincronizacionResult sincronizacionResult = sincronizacionService.sincronizarOcupacionesDesde(LocalDate.of(2025, 1, 1), LocalDate.of(2025,1,1).atStartOfDay());
+            response.put("ocupacionesCreadas", sincronizacionResult.getCreadas());
+            response.put("ocupacionesActualizadas", sincronizacionResult.getActualizadas());
+            response.put("ocupacionesErrores", sincronizacionResult.getErrores());
+            response.put("ocupacionesEliminadas", sincronizacionResult.getEliminadas());
+            response.put("mensaje", "Sincronización completada");
+            response.put("timestamp", LocalDateTime.now());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error en la sincronización", e);
+            response.put("error", "Error en la sincronización: " + e.getMessage());
+            response.put("timestamp", LocalDateTime.now());
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+    @PostMapping(value = "/sincronizar/{idArtistaLegacy}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Sincroniza todas las fechas desde 2025 para el artista", description = "Ejecuta el proceso de sincronización de datos")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Sincronización completada"),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content)
+    })
+    public ResponseEntity<Map<String, Object>> sincronizarAll(@PathVariable("idArtistaLegacy") Integer idArtistaLegacy) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+
+            final SincronizacionResult sincronizacionResult = sincronizacionService.sincronizarOcupacionesArtista(LocalDate.of(2025, 1, 1), LocalDate.of(2025,1,1).atStartOfDay(), idArtistaLegacy);
             response.put("ocupacionesCreadas", sincronizacionResult.getCreadas());
             response.put("ocupacionesActualizadas", sincronizacionResult.getActualizadas());
             response.put("ocupacionesErrores", sincronizacionResult.getErrores());

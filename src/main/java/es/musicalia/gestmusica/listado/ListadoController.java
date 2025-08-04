@@ -60,13 +60,15 @@ public class ListadoController {
 
         ListadoDto listado = new ListadoDto();
         listado.setSolicitadoPara(user.getUsuario().getNombreCompleto());
-        listado.setIdCcaa(12L);
-        listado.setIdProvincia(27L);
+        final Long idCcaa = this.localizacionService.findCcaaByUsuarioId(user.getUserId()).getId();
+        final Long idProvincia = this.localizacionService.findProvinciaByUsuarioId(user.getUserId()).getId();
+        listado.setIdCcaa(idCcaa);
+        listado.setIdProvincia(idProvincia);
         listado.setIdTipoOcupacion(1L);
         model.addAttribute("listadoDto", listado);
         model.addAttribute("listaCcaa", this.localizacionService.findAllComunidades());
-        model.addAttribute("listaProvinciasCcaaListado", this.localizacionService.findAllProvinciasByCcaaId(12L));
-        model.addAttribute("listaMunicipioListado", this.localizacionService.findAllMunicipiosByIdProvincia(27L));
+        model.addAttribute("listaProvinciasCcaaListado", this.localizacionService.findAllProvinciasByCcaaId(idCcaa));
+        model.addAttribute("listaMunicipioListado", this.localizacionService.findAllMunicipiosByIdProvincia(idProvincia));
         model.addAttribute("listaTiposOcupacion", this.listadoService.findAllTiposOcupacion());
         model.addAttribute("listaTipoArtista", this.artistaService.listaTipoArtista());
         model.addAttribute("listaAgencias", this.agenciaService.listaAgenciasRecordActivasTarifasPublicas());

@@ -4,10 +4,12 @@ import java.sql.Timestamp;
 import java.util.Set;
 
 import es.musicalia.gestmusica.acceso.Acceso;
+import es.musicalia.gestmusica.localizacion.Provincia;
 import es.musicalia.gestmusica.rol.Rol;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -61,6 +63,14 @@ public class Usuario {
 	private String imagen;
 	@OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY)
 	private Set<Acceso> accesos;
+	@Column(name = "telefono")
+	private String telefono;
+	@Column(name = "nombre_comercial")
+	private String nombreComercial;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "provincia_id")
+	@NotNull(message = "La provincia no puede ser nula")
+	private Provincia provincia;
 
 
 	public Usuario(String nombre, String password) {

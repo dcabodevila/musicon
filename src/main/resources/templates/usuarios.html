@@ -55,6 +55,8 @@
                                                         <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Nombre</th>
                                                         <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Apellidos</th>
                                                         <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >email</th>
+                                                        <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Nombre comercial</th>
+                                                        <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Provincia</th>
                                                         <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Rol principal</th>
                                                         <th>Fecha último acceso</th>
                                                         <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Activo</th>
@@ -70,8 +72,10 @@
                                                             <img th:if="${usuario.imagen}!=null" th:src="${usuario.imagen}" class="rounded-circle my-n1" width="32" height="32" alt="Charles Hall">
                                                         </td>
                                                         <td class="dtr-control sorting_1" tabindex="0" th:text="${usuario.nombre}"></td>
-                                                        <td class="dtr-control sorting_1" tabindex="0" th:text="${usuario.apellidos}" ></td>
-                                                        <td class="dtr-control sorting_1" tabindex="0" th:text="${usuario.email}" ></td>
+                                                        <td class="dtr-control sorting_1" tabindex="0" th:text="${usuario.apellidos}"></td>
+                                                        <td class="dtr-control sorting_1" tabindex="0" th:text="${usuario.email}"></td>
+                                                        <td class="dtr-control sorting_1" tabindex="0" th:text="${usuario.nombreComercial}"></td>
+                                                        <td class="dtr-control sorting_1" tabindex="0" th:text="${usuario.provincia}"></td>
                                                         <td class="dtr-control sorting_1" tabindex="0" th:text="${usuario.rol}" ></td>
                                                         <td th:text="${usuario.fechaUltimoAcceso != null ? #dates.format(usuario.fechaUltimoAcceso, 'dd/MM/yyyy HH:mm') : '-'}"></td>
 

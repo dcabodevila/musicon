@@ -21,6 +21,9 @@ public interface OcupacionLegacyRepository extends JpaRepository<OcupacionLegacy
     @Query("SELECT o FROM OcupacionLegacy o WHERE o.fecha >= :fechaDesde AND o.fechaModificacion >= :fechaModificacionDesde ")
     Optional<List<OcupacionLegacy>> findOcupacionesModificadasFromDate(@Param("fechaDesde") LocalDate fechaDesde, @Param("fechaModificacionDesde") LocalDateTime fechaModificacionDesde);
 
+    @Query("SELECT o FROM OcupacionLegacy o WHERE o.fecha >= :fechaDesde AND o.idArtista = :idArtistaLegacy AND o.fechaModificacion >= :fechaModificacionDesde ")
+    Optional<List<OcupacionLegacy>> findOcupacionesArtistaModificadasFromDate(@Param("fechaDesde") LocalDate fechaDesde, @Param("fechaModificacionDesde") LocalDateTime fechaModificacionDesde, @Param("idArtistaLegacy") Integer idARtistaLegacy);
+
     @Query("SELECT o.id FROM OcupacionLegacy o WHERE o.fecha >= :fechaDesde ")
     Optional<Set<Integer>> findIdsOcupacionesFromDate(@Param("fechaDesde") LocalDate fechaDesde);
 

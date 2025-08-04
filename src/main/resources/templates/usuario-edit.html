@@ -31,7 +31,7 @@
                         <div class="card">
 
                             <div class="card-header">
-                                <h5 class="card-title" >Perfil usuario</h5>
+                                <h5 class="card-title" th:text="${usuarioEdicionDTO.nombre + ' ' + usuarioEdicionDTO.apellidos}">Perfil usuario</h5>
                                 <div class="text-center">
                                     <img class="rounded-circle img-responsive mt-2" width="128" height="128"
                                          th:src="${usuarioEdicionDTO.imagen != null ? usuarioEdicionDTO.imagen : '/img/avatars/avatar.jpg'}" alt="Unsplash">
@@ -39,11 +39,14 @@
                             </div>
                             <div class="card-body">
                                 <ul class="list-unstyled mb-0">
-                                    <li class="mb-1"> <span class="fas fa-user fa-fw me-1"></span> <a href="#"  th:text="${usuarioEdicionDTO.nombre}"></a></li>
-
-                                    <li class="mb-1" th:if="${usuarioEdicionDTO.email!=null && usuarioEdicionDTO.email!=''}"><span class="fas fa-envelope fa-fw me-1"></span> <a th:href="${'mailto:'+ usuarioEdicionDTO.email}"  th:text="${usuarioEdicionDTO.email}"></a></li>
-
+                                    <li class="mb-1" th:if="${usuarioEdicionDTO.nombreComercial!=null && usuarioEdicionDTO.nombreComercial!=''}"> <span class="fas fa-user fa-fw me-1"></span> <label href="#"  th:text="${usuarioEdicionDTO.nombreComercial}"></label></li>
+                                    <li class="mb-1" th:if="${usuarioEdicionDTO.provincia!=null && usuarioEdicionDTO.provincia!=''}"> <span class="fas fa-location-dot fa-fw me-1"></span> <label href="#"  th:text="${usuarioEdicionDTO.provincia}"></label></li>
                                 </ul>
+                                <ul class="list-unstyled mb-0" th:if="${permisoVerDatosUsuario}">
+                                    <li class="mb-1" th:if="${usuarioEdicionDTO.email!=null && usuarioEdicionDTO.email!=''}"><span class="fas fa-envelope fa-fw me-1"></span> <a th:href="${'mailto:'+ usuarioEdicionDTO.email}"  th:text="${usuarioEdicionDTO.email}"></a></li>
+                                    <li class="mb-1" th:if="${usuarioEdicionDTO.telefono!=null && usuarioEdicionDTO.telefono!=''}"><span class="fas fa-phone fa-fw me-1"></span> <a th:href="${'tel:'+ usuarioEdicionDTO.telefono}"  th:text="${usuarioEdicionDTO.telefono}"></a></li>
+                                </ul>
+
                             </div>
                         </div>
                     </div>

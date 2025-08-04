@@ -2,6 +2,7 @@ package es.musicalia.gestmusica.usuario;
 
 import es.musicalia.gestmusica.acceso.AccesoService;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
+import es.musicalia.gestmusica.localizacion.LocalizacionService;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,10 +19,12 @@ public class UsuarioController {
 
     private final UserService userService;
     private final AccesoService accesoService;
+    private final LocalizacionService localizacionService;
 
-    public UsuarioController(UserService userService, AccesoService accesoService){
+    public UsuarioController(UserService userService, AccesoService accesoService, LocalizacionService localizacionService){
         this.userService = userService;
         this.accesoService = accesoService;
+        this.localizacionService = localizacionService;
     }
 
     @GetMapping
@@ -51,8 +54,9 @@ public class UsuarioController {
     }
 
     @GetMapping("/{id}")
-    public String verUsuario(@PathVariable Long id, ModelMap model) {
+    public String verUsuario(@AuthenticationPrincipal CustomAuthenticatedUser user,@PathVariable Long id, ModelMap model) {
         model.addAttribute("usuarioEdicionDTO", this.userService.getUsuarioEdicionDTO(id));
+        model.addAttribute("permisoVerDatosUsuario", this.accesoService.isUsuarioAccesoEnAgencia(user.getMapPermisosAgencia().keySet(), id));
         return "usuario-edit";
     }
 
@@ -60,6 +64,7 @@ public class UsuarioController {
     public String editarUsuario(@PathVariable Long id, ModelMap model) {
         model.addAttribute("usuarioEdicionDTO", this.userService.getUsuarioEdicionDTO(id));
         model.addAttribute("listaAccesos", this.accesoService.findAllAccesosDetailRecordByIdUsuario(id));
+        model.addAttribute("listaProvincias", this.localizacionService.findAllProvincias());
 
         return "usuario-detail-edit";
     }
@@ -75,9 +80,9 @@ public class UsuarioController {
     @GetMapping("/mi-perfil")
     public String miPerfil(@AuthenticationPrincipal CustomAuthenticatedUser user, ModelMap model) {
 
-        model.addAttribute("usuarioEdicionDTO", this.userService.getMiPerfil(user.getUsuario()));
+        model.addAttribute("usuarioEdicionDTO", this.userService.getMiPerfil(user.getUserId()));
         model.addAttribute("listaAccesos", this.accesoService.getMisAccesos(user.getUserId()));
-
+        model.addAttribute("listaProvincias", this.localizacionService.findAllProvincias());
         return "usuario-detail-edit";
     }
 

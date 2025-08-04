@@ -48,7 +48,7 @@ public class WebSecurityConfig {
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/fragments/**", "/static/**", "/adminkit/**", "/img/**", "/logo/**", "/favicon.ico", "/js**").permitAll()
-                .anyRequest().authenticated()
+					.anyRequest().authenticated()
             )
 			.sessionManagement(session -> session
 					.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)

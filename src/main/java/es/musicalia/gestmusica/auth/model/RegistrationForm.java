@@ -32,4 +32,17 @@ public class RegistrationForm {
 	@Email
 	private String email;
 
+	@NotNull
+	@NotEmpty
+	private String nombreComercial;
+
+	@NotNull
+	@NotEmpty
+	private String telefono;
+
+	@NotNull
+	private Long idProvincia;
+
+
+
 }

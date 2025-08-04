@@ -1,5 +1,6 @@
 package es.musicalia.gestmusica.auth.model;
 
+import es.musicalia.gestmusica.localizacion.LocalizacionService;
 import es.musicalia.gestmusica.mail.EmailTemplateEnum;
 import es.musicalia.gestmusica.usuario.*;
 import jakarta.validation.Valid;
@@ -21,10 +22,12 @@ public class AuthController {
 
     private final UserService userService;
     private final CodigoVerificacionService codigoVerificacionService;
+    private final LocalizacionService localizacionService;
 
-    public AuthController(UserService userService, CodigoVerificacionService codigoVerificacionService){
+    public AuthController(UserService userService, CodigoVerificacionService codigoVerificacionService, LocalizacionService localizacionService){
         this.userService = userService;
         this.codigoVerificacionService = codigoVerificacionService;
+        this.localizacionService = localizacionService;
     }
 
     @GetMapping(value = "/login")
@@ -44,6 +47,7 @@ public class AuthController {
     @GetMapping("/registration")
     public String registration(Model model) {
         model.addAttribute("registrationForm", new RegistrationForm());
+        model.addAttribute("listaProvincias", this.localizacionService.findAllProvincias());
 
         return "registration";
     }
@@ -65,6 +69,7 @@ public class AuthController {
         }
 
         if (bindingResult.hasErrors()) {
+            model.addAttribute("listaProvincias", this.localizacionService.findAllProvincias());
             return "registration";
         }
 
@@ -74,15 +79,17 @@ public class AuthController {
         }
         catch (EmailYaExisteException e){
             bindingResult.rejectValue("email", "error.email", "El email ya está registrado por otro usuario");
+            model.addAttribute("listaProvincias", this.localizacionService.findAllProvincias());
             return "registration";
         }
         catch (EnvioEmailException m){
             bindingResult.rejectValue("email", "error.email", "No se ha podido enviar el código al email seleccionado");
+            model.addAttribute("listaProvincias", this.localizacionService.findAllProvincias());
             return "registration";
         }
         catch (Exception e){
             model.addAttribute("errors", errors);
-
+            model.addAttribute("listaProvincias", this.localizacionService.findAllProvincias());
             log.error("Error en el guardado del registro", e);
             return "registration";
 

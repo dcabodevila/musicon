@@ -21,9 +21,10 @@ public class SincronizacionJob {
     public void ejecutarSincronizacion() {
         try {
             log.info("Iniciando sincronizacion programada");
+            log.info("Sincronizando ocupaciones desde "+ LocalDateTime.now() + " con fecha modificación posterior a " + LocalDateTime.now().minusHours(1));
             Instant inicio = Instant.now();
             
-            SincronizacionResult resultado = sincronizacionService.sincronizarOcupacionesDesde(LocalDate.now(), LocalDateTime.now().minusHours(2));
+            SincronizacionResult resultado = sincronizacionService.sincronizarOcupacionesDesde(LocalDate.now(), LocalDateTime.now().minusHours(1));
             
             Duration tiempoEjecucion = Duration.between(inicio, Instant.now());
             log.info("Sincronizacion completada en {} segundos. Creadas: {}, Actualizadas: {}, Eliminadas: {}, Errores: {}",

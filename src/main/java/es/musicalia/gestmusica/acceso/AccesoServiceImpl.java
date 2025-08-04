@@ -241,4 +241,12 @@ public class AccesoServiceImpl implements AccesoService {
 
 	}
 
+	@Override
+	public boolean isUsuarioAccesoEnAgencia(final Set<Long> idsAgencia, Long idUsuarioConsulta){
+
+		return accesoRepository.existsActiveAccessByUserIdAndAgencyIds(idUsuarioConsulta, idsAgencia);
+
+
+	}
+
 }

@@ -42,6 +42,17 @@ public class OcupacionLegacyServiceImpl implements OcupacionLegacyService{
     }
 
     @Override
+    public List<OcupacionLegacy> findOcupacionLegacyArtistaFromGestmusicaLegacyDesdeMofidicaic(LocalDate localDate, LocalDateTime fechaModificacionDesde, Integer idArtistaLegacy){
+
+        Optional<List<OcupacionLegacy>> optionalList = this.ocupacionLegacyRepository.findOcupacionesArtistaModificadasFromDate(localDate, fechaModificacionDesde, idArtistaLegacy);
+        return optionalList.orElseGet(ArrayList::new);
+
+    }
+
+
+
+
+    @Override
     public Optional<Set<Integer>> findIdsOcupacionesFromDate(LocalDate localDate){
         return this.ocupacionLegacyRepository.findIdsOcupacionesFromDate(localDate);
     }

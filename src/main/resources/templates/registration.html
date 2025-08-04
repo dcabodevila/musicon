@@ -16,7 +16,7 @@
                   <div class="d-table-cell align-middle">
 
                       <div class="text-center mt-4">
-                          <h1 class="h2">Crear una nueva cuenta</h1>
+                          <h1 class="h2">Crear una nueva cuenta de usuario</h1>
                       </div>
 
                       <div class="card">
@@ -25,7 +25,7 @@
                                   <form method="POST" th:object="${registrationForm}" th:action=@{/auth/registration} class="form-signin">
                                       <div class="mb-3">
                                           <label class="form-label">Nombre de usuario</label>
-                                          <input class="form-control form-control-lg" type="text" th:field="*{username}" name="username" placeholder="Nombre de usuario" autofocus="true" required/>
+                                          <input class="form-control form-control-lg" type="text" th:field="*{username}" name="username" placeholder="Nombre de usuario con el que iniciar sesión" autofocus="true" required maxlength="50"/>
                                           <div class="col-sm-12">
                                               <small class="text-danger">
                                                   <p th:each="error: ${#fields.errors('username')}"
@@ -36,7 +36,7 @@
 
                                       <div class="mb-3">
                                           <label class="form-label">Contraseña</label>
-                                          <input type="password" th:field="*{password}" class="form-control form-control-lg" placeholder="Contraseña" required></input>
+                                          <input type="password" th:field="*{password}" class="form-control form-control-lg" placeholder="Contraseña" required maxlength="200"/>
                                           <div class="col-sm-12">
                                               <small id="passwordHelp" class="text-danger">
                                                   <p th:each="error: ${#fields.errors('password')}"
@@ -47,7 +47,7 @@
                                       </div>
                                       <div class="mb-3">
                                           <label class="form-label">Repetir contraseña</label>
-                                          <input type="password" th:field="*{retryPassword}" class="form-control form-control-lg" placeholder="Repite la contraseña" required></input>
+                                          <input type="password" th:field="*{retryPassword}" class="form-control form-control-lg" placeholder="Repite la contraseña" required maxlength="200"/>
                                           <div class="col-sm-12">
                                               <small class="text-danger">
                                                   <p th:each="error: ${#fields.errors('retryPassword')}"
@@ -57,7 +57,7 @@
                                       </div>
                                       <div class="mb-3">
                                           <label class="form-label">e-mail</label>
-                                          <input type="email" th:field="*{email}" class="form-control form-control-lg" placeholder="e-mail" required></input>
+                                          <input type="email" th:field="*{email}" class="form-control form-control-lg" placeholder="e-mail" required maxlength="200"/>
                                           <div class="col-sm-12">
                                               <small class="text-danger">
                                                   <p th:each="error: ${#fields.errors('email')}"
@@ -68,8 +68,8 @@
                                       <div class="mb-3">
                                           <label class="form-label">Nombre</label>
                                           <input type="text" th:field="*{nombre}" class="form-control form-control-lg" placeholder="Nombre"
-                                                 autofocus="true" required></input>
-                                          <div class="alert alert-warning" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></div>
+                                                 autofocus="true" required/>
+                                          <div class="alert alert-warning" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}" maxlength="200"></div>
                                           <div class="col-sm-12">
                                               <small class="text-danger">
                                                   <p th:each="error: ${#fields.errors('nombre')}"
@@ -80,7 +80,7 @@
                                       <div class="mb-3">
                                           <label class="form-label">Apellidos</label>
                                           <input type="text" th:field="*{apellidos}" class="form-control form-control-lg" placeholder="Apellidos"
-                                                 autofocus="true"></input>
+                                                 autofocus="true" maxlength="200"/>
                                           <div class="alert alert-warning" th:if="${#fields.hasErrors('apellidos')}" th:errors="*{apellidos}"></div>
                                           <div class="col-sm-12">
                                               <small class="text-danger">
@@ -89,11 +89,47 @@
                                               </small>
                                           </div>
                                       </div>
-                                      <div class="text-center mt-3">
-                                           <button type="submit" class="btn btn-lg btn-primary">Registrarse</button>
+                                      <div class="mb-3">
+                                          <label class="form-label">Nombre comercial</label>
+                                          <input class="form-control form-control-lg" type="text"
+                                                 th:field="*{nombreComercial}" name="nombreComercial" maxlength="120"
+                                                 placeholder="Nombre comercial por el que seas reconocido"
+                                                 autofocus="true" required/>
+                                          <div class="col-sm-12">
+                                              <small class="text-danger">
+                                                  <p th:each="error: ${#fields.errors('nombreComercial')}"
+                                                     th:text="${error}">Validation error</p>
+                                              </small>
+                                          </div>
+                                      </div>
+                                      <div class="mb-3">
+                                          <label class="form-label">Teléfono</label>
+                                          <input class="form-control form-control-lg" type="text" th:field="*{telefono}" name="telefono" placeholder="Número de teléfono" autofocus="true" maxlength="16" required/>
+                                          <div class="col-sm-12">
+                                              <small class="text-danger">
+                                                  <p th:each="error: ${#fields.errors('telefono')}"
+                                                     th:text="${error}">Validation error</p>
+                                              </small>
+                                          </div>
+                                      </div>
+                                      <div class="mb-3">
+                                          <label class="form-label">Provincia</label>
+                                          <select id="provincia" th:field="*{idProvincia}" class="form-control choices-single" required>
+                                              <option value="">Seleccione una provincia</option>
+                                              <option th:each="provincia : ${listaProvincias}" th:value="${provincia.id}" th:text="${provincia.nombre}"></option>
+                                          </select>
+                                          <div class="col-sm-12">
+                                              <small class="text-danger">
+                                                  <p th:each="error: ${#fields.errors('idProvincia')}"
+                                                     th:text="${error}">Validation error</p>
+                                              </small>
+                                          </div>
                                       </div>
                                       <div class="text-center mt-3">
-                                          <a class="btn btn-outline-primary" th:href="@{/auth/login}">Iniciar sesión</a>
+                                           <button type="submit" class="btn btn-lg btn-primary">Crear nueva cuenta de usuario</button>
+                                      </div>
+                                      <div class="text-center mt-3">
+                                          <a class="btn btn-outline-primary" th:href="@{/auth/login}">Volver a Iniciar sesión</a>
                                       </div>
                                   </form>
                               </div>

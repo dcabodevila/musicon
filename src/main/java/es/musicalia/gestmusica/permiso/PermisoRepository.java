@@ -1,7 +1,5 @@
 package es.musicalia.gestmusica.permiso;
 
-import es.musicalia.gestmusica.rol.Rol;
-import es.musicalia.gestmusica.usuario.UsuarioRecord;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

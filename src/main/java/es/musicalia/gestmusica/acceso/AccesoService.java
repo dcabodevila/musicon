@@ -4,6 +4,7 @@ import es.musicalia.gestmusica.permiso.PermisoRecord;
 import es.musicalia.gestmusica.rol.RolRecord;
 
 import java.util.List;
+import java.util.Set;
 
 public interface AccesoService {
 
@@ -25,4 +26,6 @@ public interface AccesoService {
     List<AccesoDetailRecord> findAllAccesosDetailRecordByIdUsuario(Long idUsuario);
 
 	List<AccesoDetailRecord> getMisAccesos(Long userId);
+
+    boolean isUsuarioAccesoEnAgencia(Set<Long> idsAgencia, Long idUsuarioConsulta);
 }

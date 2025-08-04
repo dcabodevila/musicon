@@ -52,6 +52,43 @@ public class SincronizacionService {
         this.ocupacionRepository = ocupacionRepository;
     }
 
+
+    @Transactional
+    public SincronizacionResult sincronizarOcupacionesArtista(LocalDate fechaDesde, LocalDateTime fechaModificacionDesde, Integer idArtistaLegacy) {
+        SincronizacionResult result = new SincronizacionResult();
+
+        try {
+            // 1. Obtener datos del sistema legacy
+            final List<OcupacionLegacy> ocupacionesLegacy =
+                    ocupacionLegacyService.findOcupacionLegacyArtistaFromGestmusicaLegacyDesdeMofidicaic(fechaDesde, fechaModificacionDesde, idArtistaLegacy);
+
+            // 2. Procesar cada ocupación
+            for (final OcupacionLegacy legacyOcupacion : ocupacionesLegacy) {
+                Sincronizacion nuevaSincronizacion = toSincronizacion(legacyOcupacion);
+                DefaultResponseBody response = sincronizarOcupacionIndividual(legacyOcupacion, result);
+                nuevaSincronizacion.setProcesado(response.isSuccess());
+
+                if (!response.isSuccess()){
+                    nuevaSincronizacion.setCodigoError(response.getMessage() != null ? (response.getMessage().length() > 800 ? response.getMessage().substring(0, 800) : response.getMessage()) : null);
+                }
+
+                this.sincronizacionRepository.save(nuevaSincronizacion);
+
+            }
+
+            result.setEliminadas(eliminarOcupacionesBorradasLegacy(fechaDesde));
+
+            log.info("Sincronización completada: {} exitosas, {} errores, {} eliminadas",
+                    result.getExitosas(), result.getErrores().size(), result.getEliminadas());
+
+        } catch (Exception e) {
+            log.error("Error general en sincronización", e);
+            result.setErrorGeneral(e.getMessage());
+        }
+
+        return result;
+    }
+
     /**
      * Sincronización unidireccional: Legacy → Nueva
      */
@@ -168,18 +205,14 @@ public class SincronizacionService {
 
     private void procesarOcupacionExistente(Ocupacion ocupacion, OcupacionLegacy legacy, 
                                           ArtistaAgenciaRecord artista, SincronizacionResult result) throws ModificacionOcupacionException {
-        if (puedeModificarse(ocupacion)) {
-            actualizarOcupacionExistente(ocupacion, legacy, artista);
-            result.incrementarActualizadas();
-        } else {
-            result.incrementarSinCambios();
-        }
+
+        actualizarOcupacionExistente(ocupacion, legacy, artista);
+        result.incrementarActualizadas();
+
     }
 
     private boolean puedeModificarse(Ocupacion ocupacion) {
-        return ocupacion.getUsuarioModificacion() == null || 
-               ConstantsGestmusica.USUARIO_SINCRONIZACION.equalsIgnoreCase(
-                   ocupacion.getUsuarioModificacion());
+        return true;
     }
 
     @Transactional
@@ -187,6 +220,11 @@ public class SincronizacionService {
                                              ArtistaAgenciaRecord artista) throws ModificacionOcupacionException {
         OcupacionSaveDto dto = getOcupacionSaveDto(legacy, artista.idAgencia(), artista.id());
         dto.setId(ocupacion.getId());
+        dto.setImporte(ocupacion.getImporte());
+        dto.setIva(ocupacion.getIva());
+        dto.setPorcentajeRepre(ocupacion.getPorcentajeRepre());
+        dto.setTextoOrquestasDeGalicia(ocupacion.getTextoOrquestasDeGalicia());
+
         this.ocupacionService.guardarOcupacion(dto, true, true);
     }
 
@@ -245,6 +283,8 @@ public class SincronizacionService {
         return DefaultResponseBody.builder().success(true).message("Ocupación guardada correctamente").messageType("success").idEntidad(ocupacion.getId()).build();
     }
 
+
+
     private OcupacionSaveDto getOcupacionSaveDto(OcupacionLegacy legacy, Long idAgencia, Long idArtista) {
         OcupacionSaveDto ocupacionSaveDto = new OcupacionSaveDto();
         ocupacionSaveDto.setIdOcupacionLegacy(legacy.getIdOcupacion());
@@ -256,11 +296,11 @@ public class SincronizacionService {
         if (optionalProvincia.isPresent()){
             final Provincia p = optionalProvincia.get();
             ocupacionSaveDto.setIdProvincia(p.getId());
-            ocupacionSaveDto.setIdCcaa(p.getCcaa()!=null ? p.getCcaa().getId() : ConstantsGestmusica.ID_COMUNIDAD_OTROS);
+            ocupacionSaveDto.setIdCcaa(p.getCcaa()!=null ? p.getCcaa().getId() : ConstantsGestmusica.ID_CCAA_PROVISIONAL);
         }
         else {
-            ocupacionSaveDto.setIdProvincia(ConstantsGestmusica.ID_PROVINCIA_OTROS);
-            ocupacionSaveDto.setIdCcaa(ConstantsGestmusica.ID_COMUNIDAD_OTROS);
+            ocupacionSaveDto.setIdProvincia(ConstantsGestmusica.ID_PROVINCIA_PROVISIONAL);
+            ocupacionSaveDto.setIdCcaa(ConstantsGestmusica.ID_CCAA_PROVISIONAL);
         }
         ocupacionSaveDto.setIdMunicipio(ConstantsGestmusica.ID_MUNICIPIO_PROVISIONAL);
 
@@ -291,7 +331,7 @@ public class SincronizacionService {
         if (isOcupacionPortugal(legacy.getPais())){
             ocupacionSaveDto.setIdCcaa(ConstantsGestmusica.ID_CCAA_PORTUGAL);
             ocupacionSaveDto.setIdProvincia(ConstantsGestmusica.ID_PROVINCIA_PORTUGAL);
-            ocupacionSaveDto.setIdMunicipio(ConstantsGestmusica.ID_MUNICIPIO_PROVISIONAL);
+            ocupacionSaveDto.setIdMunicipio(ConstantsGestmusica.ID_MUNICIPIO_PORTUGAL);
         }
 
 
