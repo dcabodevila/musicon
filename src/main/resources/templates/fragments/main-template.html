@@ -4,29 +4,31 @@
 <head>
     <title>festia.es</title>
 	<meta property="og:title" content="Festia.es" />
-	<meta property="og:description" content="Plataforma profesionales del espectáculo" />
+	<meta property="og:description" content="Plataforma para profesionales del espectáculo" />
 	<meta property="og:image" th:src="@{/logo/logo-name-transparente.png}"
 		  content="https://festia.es/logo.png"/>
 	<meta property="og:url" content="https://festia.es/"/>
-	<meta name="theme-color" content="#000000">
-	<link rel="manifest" href="/manifest.json">
+
     <div th:fragment="header-css">
 
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="description" content="Plataforma profesionales del espectáculo">
 		<meta name="author" content="Festia">
-
+<!--		<link rel="manifest" th:href="@{/manifest.json}"/>-->
+		<meta name="theme-color" content="#000000">
 	    <meta http-equiv="x-ua-compatible" content="ie=edge">
 
 		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
 		<link th:href="@{/adminkit/css/light.css}" rel="stylesheet"></link>
 		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 		<script th:src="@{/adminkit/flatpickr/es.js}"></script>
 		<link th:href="@{/css/main.css}" rel="stylesheet"></link>
 		<link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
-		<link rel="icon" type="image/png" sizes="32x32" th:href="@{/favicon-32x32.png}">
-		<link rel="icon" type="image/png" sizes="16x16" th:href="@{/favicon-16x16.png}">
+
+		<link rel="icon" type="image/png" sizes="192x192" th:href="@{/android-icon-192x192.png}">
+		<link rel="apple-touch-icon" sizes="180x180" th:href="@{/apple-icon-180x180.png}">
 
 
 	</div>

@@ -7,10 +7,12 @@
 	<meta property="og:image" th:src="@{/logo/logo-name-transparente.png}"
 		  content="https://festia.es/logo.png"/>
 	<meta property="og:url" content="https://festia.es/"/>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta name="description" content="Plataforma profesionales del espectáculo">
-	<meta name="author" content="festia.es">
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+	<meta name="description" content="Plataforma profesionales del espectáculo"/>
+	<meta name="author" content="festia.es"/>
+	<link rel="manifest" href="/manifest.json"/>
+
 	<div th:replace="~{fragments/main-template :: header-css}"/>
 </head>
 
@@ -29,7 +31,7 @@
 							<div class="card-body">
 								<div class="text-center mt-4">
 									<img th:src="@{/logo/logo-name-transparente.png}" alt="Festia Logo"
-										 class="img-fluid mb-3" style="max-height: 300px;">
+										 class="img-fluid mb-3" style="max-height: 300px;"/>
 								</div>
 								<div class="m-sm-4">
 									<form th:action="@{/auth/login}" method="post">
@@ -42,7 +44,6 @@
 										<div class="mb-3">
 											<label class="form-label">Contraseña</label>
 											<input id="password" name="password" class="form-control form-control-lg" type="password" placeholder="Introduce tu contraseña" />
-<!--											<label class="form-label">Recordar contraseña </label><input type="checkbox" name="remember-me" />-->
 											<div class="mb-3">
 												<small>
 													<a th:href="@{/auth/remember-password}">He olvidado mi contraseña</a>
@@ -67,8 +68,8 @@
 		</div>
 	</main>
 
-	<script th:src="@{/js/app.js}"></script>
-	<script th:src="@{/js/service-worker.js}"></script>
+<!--	<script th:src="@{/js/app.js}"></script>-->
+<!--	<script th:src="@{/js/service-worker.js}"></script>-->
 	</body>
 
    
