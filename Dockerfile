@@ -26,5 +26,5 @@ COPY --from=build /app/target/gestmusica.war /app/gestmusica.war
 # Exponer el puerto que utiliza la aplicación
 EXPOSE 8080
 
-# Comando para ejecutar la aplicación
-CMD ["java", "-jar", "/app/gestmusica.war"]
+# Comando para ejecutar la aplicación con la zona horaria configurada
+CMD ["java", "-Duser.timezone=Europe/Madrid", "-jar", "/app/gestmusica.war"]
