@@ -212,3 +212,32 @@ function clearFlatpickrDate(inputId) {
         input._flatpickr.clear(); // Limpia la fecha seleccionada
     }
 }
+
+function marcarMensajeLeido(id) {
+    $.ajax({
+        type: "GET",
+        url: "/mensaje/marcarLeido/" + id,
+        dataType: 'json',
+        cache: false,
+        success: function () {
+
+            $("#message-" + id).fadeOut('slow', function() {
+                $(this).remove();
+            });
+            
+            const indicator = document.querySelector('.indicator');
+            if (indicator) {
+                const currentCount = parseInt(indicator.textContent);
+                if (currentCount > 0) {
+                    indicator.textContent = currentCount - 1;
+                }
+            }
+
+        },
+        error: function (e) {
+            console.log(e);
+            notif("error", "Error al marcar mensaje como leído");
+        }
+    });
+}
+

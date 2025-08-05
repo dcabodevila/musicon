@@ -6,6 +6,8 @@ import es.musicalia.gestmusica.file.FileService;
 import es.musicalia.gestmusica.localizacion.ProvinciaRepository;
 import es.musicalia.gestmusica.mail.EmailService;
 import es.musicalia.gestmusica.mail.EmailTemplateEnum;
+import es.musicalia.gestmusica.mensaje.Mensaje;
+import es.musicalia.gestmusica.mensaje.MensajeService;
 import es.musicalia.gestmusica.rol.RolEnum;
 import es.musicalia.gestmusica.rol.RolRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +19,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 @Slf4j
 @Service
 @Transactional(readOnly = true)
@@ -32,8 +37,9 @@ public class UserServiceImpl implements UserService {
 	private final FileService fileService;
 	private final EmailService emailService;
 	private final ProvinciaRepository provinciaRepository;
+	private final MensajeService mensajeService;
 
-	UserServiceImpl(UsuarioRepository userRepository, PasswordEncoder passwordEncoder, CodigoVerificacionService codigoVerificacionService, RolRepository rolRepository, UsuarioMapper usuarioMapper, FileService fileService, EmailService emailService, ProvinciaRepository provinciaRepository) {
+	UserServiceImpl(UsuarioRepository userRepository, PasswordEncoder passwordEncoder, CodigoVerificacionService codigoVerificacionService, RolRepository rolRepository, UsuarioMapper usuarioMapper, FileService fileService, EmailService emailService, ProvinciaRepository provinciaRepository, MensajeService mensajeService) {
 		this.userRepository = userRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.codigoVerificacionService = codigoVerificacionService;
@@ -42,6 +48,7 @@ public class UserServiceImpl implements UserService {
         this.fileService = fileService;
         this.emailService = emailService;
         this.provinciaRepository = provinciaRepository;
+        this.mensajeService = mensajeService;
     }
 
 
@@ -132,6 +139,7 @@ public class UserServiceImpl implements UserService {
 
 		for (Usuario admin : usuariosAdmin) {
             try {
+				enviarMensajeInternoNuevoUsuario(admin, usuario);
                 this.emailService.enviarMensajePorEmail(admin.getEmail(), EmailTemplateEnum.VALIDAR_USUARIO);
             } catch (EnvioEmailException e) {
 				log.error("No se ha podido enviar el correo a {}", admin.getEmail(), e);
@@ -143,6 +151,15 @@ public class UserServiceImpl implements UserService {
 		return usuario;
 	}
 
+	private void enviarMensajeInternoNuevoUsuario(Usuario usuarioAdmin, Usuario nuevoUsuario) {
+		Mensaje mensaje = new Mensaje();
+		mensaje.setUsuarioRemite(nuevoUsuario);
+		mensaje.setUsuarioReceptor(usuarioAdmin);
+		mensaje.setAsunto("Nuevo usuario");
+		mensaje.setMensaje("Nuevo usuario registrado " + nuevoUsuario.getNombre() + " " + nuevoUsuario.getApellidos());
+		mensaje.setImagen("fa-users text-success");
+		this.mensajeService.enviarMensaje(mensaje, usuarioAdmin.getId());
+	}
 	@Override
 	public Optional<Usuario> obtenerUsuarioAutenticado() {
 

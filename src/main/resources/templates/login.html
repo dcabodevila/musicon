@@ -36,18 +36,16 @@
 								<div class="m-sm-4">
 									<form th:action="@{/auth/login}" method="post">
 										<div class="mb-3">
-											<label class="form-label">Nombre de usuario ó e-mail</label>
+											<label for="username" class="form-label">Nombre de usuario ó e-mail</label>
 											<input id="username" name="username" autofocus="autofocus" class="form-control form-control-lg" type="text" placeholder="Introduce nombre de usuario" />
 										</div>
 										<div th:if="${error}" class="alert alert-danger" role="alert"
 											 th:text="${error}"></div>
 										<div class="mb-3">
-											<label class="form-label">Contraseña</label>
+											<label for="password" class="form-label">Contraseña</label>
 											<input id="password" name="password" class="form-control form-control-lg" type="password" placeholder="Introduce tu contraseña" />
-											<div class="mb-3">
-												<small>
-													<a th:href="@{/auth/remember-password}">He olvidado mi contraseña</a>
-												</small>
+											<div class="mt-3">
+												<a th:href="@{/auth/remember-password}">He olvidado mi contraseña</a>
 											</div>
 										</div>
 										<div class="text-center mt-3">

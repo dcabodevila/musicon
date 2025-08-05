@@ -49,7 +49,49 @@
 
 		<div class="navbar-collapse collapse">
 			<ul class="navbar-nav navbar-align">
+				<li class="nav-item dropdown">
+					<a class="nav-icon dropdown-toggle" href="#" id="alertsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+						<div class="position-relative">
+							<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-bell align-middle"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+							<span class="indicator" th:if="${mensajesNoLeidos!=null && !mensajesNoLeidos.isEmpty()}"
+								  th:text="${mensajesNoLeidos.size()}">0</span>
+						</div>
+					</a>
+					<div class="dropdown-menu dropdown-menu-lg dropdown-menu-end py-0" aria-labelledby="alertsDropdown">
+						<div class="dropdown-menu-header">
+							Nuevas notificaciones
+						</div>
+						<div class="list-group">
+							<div th:each="mensaje : ${mensajesNoLeidos}"
+							   th:id="'message-' + ${mensaje.id}" class="list-group-item">
+							<div class="row g-0 align-items-center">
+									<div class="col-2">
+										<i class="align-middle me-2 fas fa-fw" th:classappend="${mensaje.imagen}"></i>
+									</div>
+									<div class="col-10">
+										<div class="text-dark" th:text="${mensaje.usuarioRemite}">Remitente</div>
+<!--										<div class="text-muted small mt-1" th:text="${mensaje.asunto}">Asunto</div>-->
+										<div class="text-muted small mt-1" th:text="${mensaje.mensaje}">Mensaje</div>
+									</div>
+								</div>
+								<div class="row g-0 align-items-center mt-2">
 
+									<div class="col-12 text-end">
+										<button class="btn btn-sm btn-light"
+												th:onclick="'marcarMensajeLeido(' + ${mensaje.id} + ')'">
+											<i class="align-middle me-1 fas fa-check"></i>
+											Marcar como leído
+										</button>
+									</div>
+								</div>
+							</div>
+
+						</div>
+<!--						<div class="dropdown-menu-footer">-->
+<!--							<a href="#" class="text-muted">Ver todas las notificaciones</a>-->
+<!--						</div>-->
+					</div>
+				</li>
 				<div class="sidebar-user">
 					<div class="d-flex justify-content-center">
 						<div class="flex-shrink-0">
@@ -134,7 +176,6 @@
 						<a class="sidebar-link" th:href="@{/listado}">
 							<i class="align-middle me-2 fas fa-fw fa-calendar-alt" ></i> <span class="align-middle">Listado presupuestos</span>
 						</a>
-
 						<a class="sidebar-link" sec:authorize="hasAuthority('AUDIENCIA_LISTADOS')" th:href="@{/listado/audiencia-listados}">
 							<i class="align-middle me-2 fas fa-fw fa-chart-simple" ></i> <span class="align-middle">Audiencia presupuestos</span>
 						</a>
@@ -209,6 +250,7 @@
 		<script th:src="@{/js/moment.js}"></script>
 		<script th:src="@{/js/comun.js}"></script>
 		<script th:src="@{/js/service-worker.js}"></script>
+
 	</footer>
 
 

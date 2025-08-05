@@ -9,6 +9,8 @@ import es.musicalia.gestmusica.localizacion.MunicipioRepository;
 import es.musicalia.gestmusica.localizacion.ProvinciaRepository;
 import es.musicalia.gestmusica.mail.EmailService;
 import es.musicalia.gestmusica.mail.EmailTemplateEnum;
+import es.musicalia.gestmusica.mensaje.Mensaje;
+import es.musicalia.gestmusica.mensaje.MensajeService;
 import es.musicalia.gestmusica.orquestasdegalicia.ActuacionExterna;
 import es.musicalia.gestmusica.permiso.PermisoAgenciaEnum;
 import es.musicalia.gestmusica.permiso.PermisoArtistaEnum;
@@ -29,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -50,8 +53,9 @@ public class OcupacionServiceImpl implements OcupacionService {
 	private final AccesoRepository accesoRepository;
 	private final EmailService emailService;
 	private final OcupacionMapper ocupacionMapper;
+	private final MensajeService mensajeService;
 
-	public OcupacionServiceImpl(OcupacionRepository ocupacionRepository, ArtistaRepository artistaRepository, ProvinciaRepository provinciaRepository, MunicipioRepository municipioRepository, TipoOcupacionRepository tipoOcupacionRepository, OcupacionEstadoRepository ocupacionEstadoRepository, TarifaRepository tarifaRepository, UserService userService, PermisoService permisoService, AccesoRepository accesoRepository, EmailService emailService, OcupacionMapper ocupacionMapper){
+	public OcupacionServiceImpl(OcupacionRepository ocupacionRepository, ArtistaRepository artistaRepository, ProvinciaRepository provinciaRepository, MunicipioRepository municipioRepository, TipoOcupacionRepository tipoOcupacionRepository, OcupacionEstadoRepository ocupacionEstadoRepository, TarifaRepository tarifaRepository, UserService userService, PermisoService permisoService, AccesoRepository accesoRepository, EmailService emailService, OcupacionMapper ocupacionMapper, MensajeService mensajeService){
 		this.ocupacionRepository = ocupacionRepository;
 		this.artistaRepository = artistaRepository;
         this.provinciaRepository = provinciaRepository;
@@ -64,6 +68,7 @@ public class OcupacionServiceImpl implements OcupacionService {
         this.accesoRepository = accesoRepository;
         this.emailService = emailService;
         this.ocupacionMapper = ocupacionMapper;
+        this.mensajeService = mensajeService;
     }
 
 	@Override
@@ -91,6 +96,8 @@ public class OcupacionServiceImpl implements OcupacionService {
 		this.ocupacionRepository.save(ocupacion);
 
 		try {
+			enviarMensajeInternoOcupacionAnulada(ocupacion.getUsuario(), ocupacion);
+
 			this.emailService.enviarMensajePorEmail(ocupacion.getUsuario().getEmail(), EmailTemplateEnum.EMAIL_NOTIFICACION_ANULACION);
 
 //			if (ocupacion.getArtista().isPermiteOrquestasDeGalicia()){
@@ -131,6 +138,7 @@ public class OcupacionServiceImpl implements OcupacionService {
 			ActuacionExterna actuacionExterna = getActuacionExterna(ocupacion.getArtista(), ocupacion);
 
 //			this.orquestasDeGaliciaService.enviarActuacionOrquestasDeGalicia(false, actuacionExterna, OcupacionEstadoEnum.OCUPADO.getDescripcion());
+			enviarMensajeInternoOcupacionConfirmada(ocupacion.getUsuario(), ocupacion);
 			this.emailService.enviarMensajePorEmail(ocupacion.getUsuario().getEmail(), EmailTemplateEnum.EMAIL_NOTIFICACION_CONFIRMACION);
 
 
@@ -158,21 +166,17 @@ public class OcupacionServiceImpl implements OcupacionService {
 
 		try {
 			if (!permisoConfirmarOcupacionAgencia){
-
-					this.emailService.enviarMensajePorEmail(ocupacion.getArtista().getAgencia().getUsuario().getEmail(), EmailTemplateEnum.EMAIL_NOTIFICACION_CONFIRMACION_PENDIENTE);
+				final Usuario usuario = ocupacion.getArtista().getAgencia().getUsuario();
+				if (ocupacionSaveDto.getId() == null) {
+					enviarMensajeInternoNuevaOcupacionPendiente(usuario, ocupacion);
+				}
+				else {
+					enviarMensajeInternoModificacionOcupacionPendiente(usuario, ocupacion);
+				}
+				this.emailService.enviarMensajePorEmail(usuario.getEmail(), EmailTemplateEnum.EMAIL_NOTIFICACION_CONFIRMACION_PENDIENTE);
 
 			}
-//			else {
-//				if (artista.isPermiteOrquestasDeGalicia()) {
-//					ActuacionExterna actuacionExterna = getActuacionExterna(artista, ocupacion);
-//
-//					this.orquestasDeGaliciaService.enviarActuacionOrquestasDeGalicia(ocupacionSaveDto.getId()==null, actuacionExterna, ocupacion.getOcupacionEstado().getNombre());
-//				}
-//
-//			}
-//		} catch (OrquestasDeGaliciaException e) {
-//			log.error("Error enviando la actuacion de la ocupacion a OrquestasDeGalicia: {}", ocupacion.getId());
-//			return DefaultResponseBody.builder().success(true).message("Ocupacion guardada correctamente. Pero no se ha podido publicar la actuación a OrquestasDeGalicia.es").messageType("warning").idEntidad(ocupacion.getId()).build();
+
 		} catch (EnvioEmailException e) {
 			log.error("error enviando notificacion de solicitud de ocupacion", e);
 			return DefaultResponseBody.builder().success(true).message("Ocupacion guardada correctamente. Pero no se ha podido enviar la notificación por correo").messageType("warning").idEntidad(ocupacion.getId()).build();
@@ -190,7 +194,47 @@ public class OcupacionServiceImpl implements OcupacionService {
 
 	}
 
+	private void enviarMensajeInternoNuevaOcupacionPendiente(Usuario usuario, Ocupacion ocupacion) {
+		Mensaje mensaje = new Mensaje();
+		mensaje.setUsuarioRemite(this.userService.obtenerUsuarioAutenticado().orElseThrow());
+		mensaje.setUsuarioReceptor(usuario);
+		mensaje.setAsunto("Nueva ocupación pendiente de confirmación");
+		mensaje.setMensaje("Nueva ocupación pendiente para " + ocupacion.getArtista().getNombre() + " el " + ocupacion.getFecha().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + " en "+ (ocupacion.getPoblacion()!=null? ocupacion.getPoblacion()+", " : "") + ocupacion.getMunicipio().getNombre() + ", " + ocupacion.getProvincia().getNombre());
+		mensaje.setImagen("fa-calendar-plus text-secondary");
+		mensaje.setUrlEnlace("/ocupacion/".concat(ocupacion.getId().toString()));
+		this.mensajeService.enviarMensaje(mensaje, usuario.getId());
+	}
 
+	private void enviarMensajeInternoModificacionOcupacionPendiente(Usuario usuario, Ocupacion ocupacion) {
+		Mensaje mensaje = new Mensaje();
+		mensaje.setUsuarioRemite(this.userService.obtenerUsuarioAutenticado().orElseThrow());
+		mensaje.setUsuarioReceptor(usuario);
+		mensaje.setAsunto("Modificación ocupación pendiente de confirmación");
+		mensaje.setMensaje("Modificación ocupación pendiente para " + ocupacion.getArtista().getNombre() + " el " + ocupacion.getFecha().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + " en "+ (ocupacion.getPoblacion()!=null? ocupacion.getPoblacion()+", " : "") + ocupacion.getMunicipio().getNombre() + ", " + ocupacion.getProvincia().getNombre());
+		mensaje.setImagen("fa-calendar-plus text-secondary");
+		mensaje.setUrlEnlace("/ocupacion/".concat(ocupacion.getId().toString()));
+		this.mensajeService.enviarMensaje(mensaje, usuario.getId());
+	}
+
+	private void enviarMensajeInternoOcupacionConfirmada(Usuario usuario, Ocupacion ocupacion) {
+		Mensaje mensaje = new Mensaje();
+		mensaje.setUsuarioRemite(this.userService.obtenerUsuarioAutenticado().orElseThrow());
+		mensaje.setUsuarioReceptor(usuario);
+		mensaje.setAsunto("Ocupación confirmada");
+		mensaje.setMensaje("Ocupación confirmada para " + ocupacion.getArtista().getNombre() + " el " + ocupacion.getFecha().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + " en "+ (ocupacion.getPoblacion()!=null? ocupacion.getPoblacion()+", " : "") + ocupacion.getMunicipio().getNombre() + ", " + ocupacion.getProvincia().getNombre());
+		mensaje.setImagen("fa-calendar-plus text-success");
+		this.mensajeService.enviarMensaje(mensaje, usuario.getId());
+	}
+
+	private void enviarMensajeInternoOcupacionAnulada(Usuario usuario, Ocupacion ocupacion) {
+		Mensaje mensaje = new Mensaje();
+		mensaje.setUsuarioRemite(this.userService.obtenerUsuarioAutenticado().orElseThrow());
+		mensaje.setUsuarioReceptor(usuario);
+		mensaje.setAsunto("Ocupación anulada");
+		mensaje.setMensaje("Ocupación anulada para " + ocupacion.getArtista().getNombre() + " el " + ocupacion.getFecha().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + " en "+ (ocupacion.getPoblacion()!=null? ocupacion.getPoblacion()+", " : "") + ocupacion.getMunicipio().getNombre() + ", " + ocupacion.getProvincia().getNombre());
+		mensaje.setImagen("fa-calendar-plus text-danger");
+		this.mensajeService.enviarMensaje(mensaje, usuario.getId());
+	}
 
 	@Override
 	public Ocupacion guardarOcupacion(OcupacionSaveDto ocupacionSaveDto, boolean permisoConfirmarOcupacionAgencia, boolean isSincronizacion) throws ModificacionOcupacionException {
