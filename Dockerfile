@@ -27,4 +27,4 @@ COPY --from=build /app/target/gestmusica.war /app/gestmusica.war
 EXPOSE 8080
 
 # Comando para ejecutar la aplicación con la zona horaria configurada
-CMD ["java", "-jar", "/app/gestmusica.war"]
+CMD ["java", "-Duser.timezone=Europe/Madrid", "-jar", "/app/gestmusica.war"]
