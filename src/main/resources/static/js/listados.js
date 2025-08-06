@@ -134,7 +134,7 @@ $(document).ready(function() {
             xhrFields: {
                 responseType: 'blob'
             },
-            success: function(data, status, xhr) {
+            success: function (data, status, xhr) {
                 // Rehabilitar el botón
                 $btn.prop('disabled', false).text(textoOriginal);
 
@@ -156,51 +156,82 @@ $(document).ready(function() {
                     }
                 }
 
-                // Crear blob y URL
+                // Crear Blob y URL
                 const blob = new Blob([data], { type: 'application/pdf' });
                 const url = window.URL.createObjectURL(blob);
 
-                // 1. Descarga automática
-                const downloadLink = document.createElement('a');
-                downloadLink.style.display = 'none';
-                downloadLink.href = url;
-                downloadLink.download = filename;
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
+                // Crear ID único para el archivo
+                const fileId = 'pdf_' + Date.now();
+                window[fileId] = {
+                    blob: blob,
+                    url: url,
+                    filename: filename
+                };
 
-                // 2. Notificación con opción de abrir (solo si el navegador soporta object URLs)
-                if (window.URL && window.URL.createObjectURL) {
-                    // Crear un ID único para este archivo
-                    const fileId = 'pdf_' + Date.now();
-                    
-                    // Guardar referencia temporal
-                    window[fileId] = {
-                        url: url,
-                        filename: filename
-                    };
-                    
-                    notifDuration('success',
-                        `Presupuesto descargado<br>
-                        <button onclick="window.open(window.${fileId}.url, '_blank')" 
-                                class="btn btn-sm btn-outline-light mt-2">
+                // Mostrar notificación con botones
+                notifDuration(
+                    'success',
+                    `<div class="d-flex gap-2">
+                        <button onclick="window.open(window.${fileId}.url, '_blank')"
+                        class="btn btn-sm btn-outline-light w-50">
                             <i class="fas fa-eye"></i> Ver PDF
-                        </button>`, 15000
-                    );
-                    
-                    // Cleanup después de 30 segundos
-                    setTimeout(() => {
-                        document.body.removeChild(downloadLink);
-                        window.URL.revokeObjectURL(url);
-                        delete window[fileId];
-                    }, 30000);
-                } else {
-                    // Fallback para navegadores antiguos
-                    notif('success', 'Presupuesto descargado correctamente');
-                    setTimeout(() => {
-                        document.body.removeChild(downloadLink);
-                        window.URL.revokeObjectURL(url);
-                    }, 1000);
-                }
+                        </button>
+                        <button id="btn-share-pdf" class="btn btn-sm btn-outline-light w-50" data-file-id="${fileId}">
+                            <i class="fas fa-share"></i> Compartir PDF
+                        </button>
+                    </div>`,
+                    60000
+                );
+
+                // Evento para compartir (debe ser dinámico porque el botón se genera en la notificación)
+                $(document).on('click', '#btn-share-pdf', function () {
+                    const $btn = $(this); // Guardamos una referencia al botón
+                    const fileIdToShare = $btn.data('file-id');
+                    const fileMetadata = window[fileIdToShare];
+
+                    // Prevenir múltiples solicitudes de compartir
+                    if ($btn.prop('disabled')) {
+                        return;
+                    }
+
+                    if (navigator.share && navigator.canShare) {
+                        const file = new File([fileMetadata.blob], fileMetadata.filename, { type: 'application/pdf' });
+
+                        // Verificar si el navegador y dispositivo soportan la funcionalidad de compartir
+                        if (navigator.canShare({ files: [file] })) {
+                            // Deshabilitar el botón para evitar interacciones múltiples
+                            $btn.prop('disabled', true);
+
+                            navigator
+                                .share({
+                                    files: [file],
+                                    title: 'Presupuesto Generado',
+                                    text: 'Aquí tienes el PDF generado.',
+                                })
+                                .then(() => {
+                                    console.log('Archivo compartido exitosamente.');
+                                })
+                                .catch((error) => {
+                                    console.error('Error al compartir:', error);
+                                    notif('error', 'No se pudo compartir el archivo.');
+                                })
+                                .finally(() => {
+                                    // Vuelve a habilitar el botón después de completar o fallar el proceso
+                                    $btn.prop('disabled', false);
+                                });
+                        } else {
+                            notif('error', 'Tu dispositivo no admite la funcionalidad de compartir archivos.');
+                        }
+                    } else {
+                        notif('error', 'Compartir archivos no está disponible en este navegador.');
+                    }
+                });
+
+                // Limpieza del Blob después de 60 segundos
+                setTimeout(() => {
+                    delete window[fileId]; // Elimina la referencia temporal
+                    window.URL.revokeObjectURL(url);
+                }, 60000);
             },
             error: function(xhr, status, error) {
                 // Rehabilitar el botón

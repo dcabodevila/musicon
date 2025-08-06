@@ -258,62 +258,91 @@ $(document).ready(function(){
                 // Rehabilitar el botón
                 $btn.prop('disabled', false).text(textoOriginal);
 
-                // Verificar si la respuesta es realmente un PDF
                 const contentType = xhr.getResponseHeader('Content-Type');
                 if (!contentType || (!contentType.includes('application/pdf') && !contentType.includes('application/octet-stream'))) {
                     notif('error', 'Error: La respuesta del servidor no es válida');
                     return;
                 }
 
-                // Obtener el nombre del archivo
+                // Obtener el nombre y crear Blob
                 const contentDisposition = xhr.getResponseHeader('Content-Disposition');
                 let filename = 'tarifa_anual_' + new Date().getTime() + '.pdf';
-
                 if (contentDisposition) {
                     const matches = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
                     if (matches != null && matches[1]) {
                         filename = matches[1].replace(/['"]/g, '');
                     }
                 }
-                // Crear y descargar el archivo
-                const blob = new Blob([data], { type: 'application/pdf' });
 
-                // Para navegadores modernos
+                const blob = new Blob([data], { type: 'application/pdf' });
                 const url = window.URL.createObjectURL(blob);
 
-                // 1. Descarga automática
-                const downloadLink = document.createElement('a');
-                downloadLink.style.display = 'none';
-                downloadLink.href = url;
-                downloadLink.download = filename;
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
+                // Generar un ID único para el archivo
+                const fileId = 'pdf_' + Date.now();
+                window[fileId] = { blob: blob, url: url, filename: filename };
 
-                // 2. Mostrar notificación con opción de abrir
-                const notification = notifDuration('success',
-                    `Tarifa anual descargada
-                    <br><button onclick="window.open('${url}', '_blank')" class="btn btn-sm btn-outline-light mt-2">
-                        <i class="fas fa-eye"></i> Abrir PDF
-                    </button>`,15000
+                // Notificación con botones para abrir y compartir
+                notifDuration(
+                    'success',
+                    `<div class="d-flex gap-2">
+                        <button onclick="window.open(window.${fileId}.url, '_blank')" class="btn btn-sm btn-outline-light w-50">
+                            <i class="fas fa-eye"></i> Ver PDF
+                        </button>
+                        <button id="btn-share-pdf" class="btn btn-sm btn-outline-light w-50" data-file-id="${fileId}">
+                            <i class="fas fa-share"></i> Compartir PDF
+                        </button>
+                    </div>`,
+                    60000
                 );
 
-                // Cleanup después de un tiempo
+                // Configuración para compartir el archivo
+                $(document).on('click', '#btn-share-pdf', function () {
+                    const $btn = $(this);
+                    const fileToShare = window[$btn.data('file-id')];
+
+                    if ($btn.prop('disabled')) {
+                        return;
+                    }
+
+                    if (navigator.share && navigator.canShare) {
+                        const file = new File([fileToShare.blob], fileToShare.filename, { type: 'application/pdf' });
+
+                        if (navigator.canShare({ files: [file] })) {
+                            $btn.prop('disabled', true);
+
+                            navigator
+                                .share({
+                                    files: [file],
+                                    title: 'Tarifa Anual Generada',
+                                    text: 'Aquí tienes el PDF generado.',
+                                })
+                                .then(() => console.log('Archivo compartido exitosamente.'))
+                                .catch(error => {
+                                    console.error('Error al compartir:', error);
+                                    notif('error', 'No se pudo compartir el archivo.');
+                                })
+                                .finally(() => $btn.prop('disabled', false));
+                        } else {
+                            notif('error', 'Tu dispositivo no admite compartir este archivo.');
+                        }
+                    } else {
+                        notif('error', 'Compartir archivos no está disponible en tu navegador.');
+                    }
+                });
+
+                // Limpieza del recurso Blob
                 setTimeout(() => {
-                    document.body.removeChild(downloadLink);
+                    delete window[fileId];
                     window.URL.revokeObjectURL(url);
-                }, 5000);
-                // Cerrar el modal y mostrar notificación de éxito
+                }, 60000);
+
+                // Ocultar el modal
                 $('#modalTarifaAnual').modal('hide');
             },
             error: function(xhr, status, error) {
-                // Rehabilitar el botón
                 $btn.prop('disabled', false).text(textoOriginal);
 
-                console.error('Error al generar tarifa anual:', error);
-
                 let errorMessage = 'Error al generar la tarifa anual';
-
-                // Si la respuesta es texto/JSON, intentar leerla
                 if (xhr.responseText) {
                     try {
                         const reader = new FileReader();
@@ -324,31 +353,26 @@ $(document).ready(function(){
                                     notif('error', errorData.message);
                                     return;
                                 }
-                            } catch (e) {
-                                // No es JSON, usar mensaje genérico
-                            }
+                            } catch (e) {}
                             notif('error', errorMessage);
                         };
                         reader.readAsText(new Blob([xhr.response]));
                         return;
-                    } catch (e) {
-                        // Error al leer la respuesta
-                    }
+                    } catch (e) {}
                 }
 
-                // Mensajes específicos por código de estado
                 switch (xhr.status) {
                     case 400:
-                        errorMessage = 'Datos del formulario inválidos. Verifica provincia, año y ocupación.';
+                        errorMessage = 'Formulario inválido. Verifica los datos.';
                         break;
                     case 403:
-                        errorMessage = 'No tienes permisos para generar esta tarifa anual';
+                        errorMessage = 'No tienes permisos para esta operación.';
                         break;
                     case 500:
-                        errorMessage = 'Error interno del servidor al generar la tarifa';
+                        errorMessage = 'Error interno del servidor.';
                         break;
-                    case 0:
-                        errorMessage = 'Error de conexión con el servidor';
+                    default:
+                        errorMessage = 'Error desconocido.';
                         break;
                 }
 
