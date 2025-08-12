@@ -318,15 +318,6 @@ END AS escenario, t.fecha::date, (CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR
 	</pageHeader>
 	<pageFooter>
 		<band height="60" splitType="Stretch">
-			<textField>
-				<reportElement x="346" y="39" width="110" height="20" uuid="ca14cf77-aa46-4b41-b450-e2e921dea9e3">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="8"/>
-				</textElement>
-				<textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER}]]></textFieldExpression>
-			</textField>
 			<textField pattern="dd/MM/yyyy">
 				<reportElement x="0" y="39" width="92" height="20" uuid="c3700a41-cd5f-4d69-b976-b41e3b2e3f9a">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>

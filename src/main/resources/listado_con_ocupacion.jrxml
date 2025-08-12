@@ -248,7 +248,6 @@ END AS escenario, t.fecha::date,
 			</textField>
 			<image>
 				<reportElement x="0" y="0" width="60" height="55" uuid="5c409dfd-6760-40a3-a545-77e52a85fe16"/>
-
 				<imageExpression><![CDATA["https://res.cloudinary.com/hseoceuyz/image/upload/v1754229791/logo-name-transparente_mini_yfdyvi.png"]]></imageExpression>
 			</image>
 		</band>
@@ -320,7 +319,7 @@ END AS escenario, t.fecha::date,
 				<textFieldExpression><![CDATA[$P{lugar}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="372" y="0" width="59" height="14" uuid="aad52031-1d8b-4b4d-bd17-8d607fc8b514"/>
+				<reportElement x="372" y="0" width="68" height="14" uuid="aad52031-1d8b-4b4d-bd17-8d607fc8b514"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="SansSerif" size="8"/>
 				</textElement>
@@ -331,15 +330,6 @@ END AS escenario, t.fecha::date,
 	<pageFooter>
 		<band height="62" splitType="Stretch">
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
-			<textField>
-				<reportElement x="341" y="39" width="120" height="20" uuid="072b4409-a038-42b3-8feb-a492c1d9dbe6">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="SansSerif" size="8"/>
-				</textElement>
-				<textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER}]]></textFieldExpression>
-			</textField>
 			<textField pattern="dd/MM/yyyy">
 				<reportElement x="0" y="39" width="92" height="20" uuid="c87d2171-518b-45de-a4da-afda31d6f010">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>

@@ -272,7 +272,7 @@ END AS escenario, t.fecha::date,
 				<textFieldExpression><![CDATA[$P{solicitante}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="339" y="0" width="220" height="56" uuid="448fa279-ad1e-47f0-a127-d3ca0dfab6f2"/>
+				<reportElement x="347" y="0" width="212" height="56" uuid="448fa279-ad1e-47f0-a127-d3ca0dfab6f2"/>
 				<textElement>
 					<font fontName="SansSerif"/>
 				</textElement>
@@ -328,7 +328,7 @@ END AS escenario, t.fecha::date,
 				<textFieldExpression><![CDATA[$P{lugar}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="280" y="0" width="59" height="14" uuid="aad52031-1d8b-4b4d-bd17-8d607fc8b514"/>
+				<reportElement x="280" y="0" width="67" height="14" uuid="aad52031-1d8b-4b4d-bd17-8d607fc8b514"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="SansSerif" size="8"/>
 				</textElement>
@@ -339,15 +339,6 @@ END AS escenario, t.fecha::date,
 	<pageFooter>
 		<band height="62" splitType="Stretch">
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
-			<textField>
-				<reportElement x="227" y="40" width="120" height="20" uuid="072b4409-a038-42b3-8feb-a492c1d9dbe6">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="SansSerif" size="8"/>
-				</textElement>
-				<textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER}]]></textFieldExpression>
-			</textField>
 			<textField pattern="dd/MM/yyyy">
 				<reportElement x="0" y="39" width="92" height="20" uuid="c87d2171-518b-45de-a4da-afda31d6f010">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
