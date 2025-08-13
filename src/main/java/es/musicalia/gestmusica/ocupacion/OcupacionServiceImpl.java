@@ -264,7 +264,7 @@ public class OcupacionServiceImpl implements OcupacionService {
 			// Use a default municipality when not specified
 			ocupacion.setMunicipio(this.municipioRepository.findById(ConstantsGestmusica.ID_MUNICIPIO_PROVISIONAL).orElseThrow());
 		}
-		ocupacion.setPoblacion(ocupacionSaveDto.getLocalidad());
+		ocupacion.setPoblacion(ocupacionSaveDto.getLocalidad()!=null ? ocupacionSaveDto.getLocalidad() : ConstantsGestmusica.LOCALIDAD_PROVISIONAL);
 		ocupacion.setLugar(ocupacionSaveDto.getLugar());
 		ocupacion.setTarifa(actualizarTarifaSegunOcupacion(ocupacionSaveDto.getIdArtista(), ocupacionSaveDto.getFecha(), ocupacion, isSincronizacion));
 		ocupacion.setObservaciones(ocupacionSaveDto.getObservaciones());

@@ -14,5 +14,6 @@ public class ConstantsGestmusica {
     public static final long ID_CCAA_PORTUGAL = 21L;
     public static final long ID_PROVINCIA_PORTUGAL = 54L;
     public static final long ID_MUNICIPIO_PORTUGAL = 8118L;
+    public static final String LOCALIDAD_PROVISIONAL = "Provisional";
 
 }

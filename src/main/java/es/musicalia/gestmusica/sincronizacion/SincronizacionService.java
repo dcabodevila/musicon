@@ -339,7 +339,7 @@ public class SincronizacionService {
         ocupacionSaveDto.setEstado(legacy.getEstado().name());
         ocupacionSaveDto.setIdTipoOcupacion(legacy.getEstado()!=null? TipoOcupacionEnum.findByDescripcion(legacy.getEstado().name()).getId() : TipoOcupacionEnum.OCUPADO.getId());
 
-        ocupacionSaveDto.setLocalidad(legacy.getPoblacion());
+        ocupacionSaveDto.setLocalidad(legacy.getPoblacion()!=null? legacy.getPoblacion() : ConstantsGestmusica.LOCALIDAD_PROVISIONAL);
         ocupacionSaveDto.setLugar(legacy.getLugar());
 
         ocupacionSaveDto.setObservaciones(legacy.getObservaciones());
