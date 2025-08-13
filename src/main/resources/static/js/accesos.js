@@ -19,9 +19,17 @@ $(document).ready(function () {
         let idRol = $('#rol-accesos').val(); // Obtiene el ID del rol seleccionado
         if (idRol) {
             cargarPermisos(idRol);
+            if (idRol!=4){
+                $('#div-acceso-artista').hide();
+                $('#acceso-artista').prop('required', false).val(null);
+            }
+            else {
+                $('#div-acceso-artista').show();
+                $('#acceso-artista').prop('required', true);
+            }
+
         }
-        $('#div-acceso-artista').hide();
-        $('#acceso-artista').prop('required', false).val(null);
+
 
     });
 
@@ -49,11 +57,15 @@ $(document).ready(function () {
         let idUsuario = $(this).data('idusuario'); // Obtiene el idUsuario del botón
         let idRol = $(this).data('idrol'); // Obtiene el idRol del botón
         let idAcceso = $(this).data('idacceso'); // Obtiene el idacceso del botón
+        let idArtista = $(this).data('idartista');
         $('#id-acceso').val(idAcceso).trigger('change'); // Actualiza el select de rol
         // Asigna los valores a los selects en la modal
         choicesUsuarios.setChoiceByValue(idUsuario.toString());
         $('#rol-accesos').val(idRol).trigger('change'); // Actualiza el select de rol
         // Si existe un ID, mostrar botón de eliminar
+        if (idArtista){
+            $('#acceso-artista').val(idArtista).trigger('change');
+        }
         if (idAcceso) {
             $('#btn-eliminar-acceso').removeClass('d-none').attr('data-id', idAcceso);
         } else {

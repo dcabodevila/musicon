@@ -184,21 +184,21 @@ public class ArtistaServiceImpl implements ArtistaService {
         return contacto;
     }
 
-    private void crearAccesosUsuarioArtista(Usuario usuario, Long idAgencia, Long idArtista) {
-
-        accesoService.crearAccesoUsuarioAgenciaRol(usuario.getId(), idAgencia, rolRepository.findRolRecordByCodigo(RolEnum.ROL_ARTISTA.getCodigo()).id(), idArtista);
-
-        Set<String> rolesPermitidos = Set.of(
-                RolEnum.ROL_REPRESENTANTE.getCodigo(),
-                RolEnum.ROL_AGENCIA.getCodigo()
-        );
-
-		Optional<List<Acceso>> accesosUsuario = accesoRepository.findAllAccesosByAndIdAgenciaAndCodigoRolAndActivo(rolesPermitidos, idAgencia);
-
-		accesosUsuario.ifPresent(accesos ->
-				accesos.forEach(acceso -> accesoService.guardarPermisosArtistas(acceso, idArtista))
-		);
-    }
+//    private void crearAccesosUsuarioArtista(Usuario usuario, Long idAgencia, Long idArtista) {
+//
+//        accesoService.crearAccesoUsuarioAgenciaRol(usuario.getId(), idAgencia, rolRepository.findRolRecordByCodigo(RolEnum.ROL_ARTISTA.getCodigo()).id(), idArtista);
+//
+//        Set<String> rolesPermitidos = Set.of(
+//                RolEnum.ROL_REPRESENTANTE.getCodigo(),
+//                RolEnum.ROL_AGENCIA.getCodigo()
+//        );
+//
+//		Optional<List<Acceso>> accesosUsuario = accesoRepository.findAllAccesosByAndIdAgenciaAndCodigoRolAndActivo(rolesPermitidos, idAgencia);
+//
+//		accesosUsuario.ifPresent(accesos ->
+//				accesos.forEach(acceso -> accesoService.guardarPermisosArtistas(acceso, idArtista))
+//		);
+//    }
 	@Override
 	public List<CodigoNombreDto> listaTipoEscenario(){
 		return this.tipoEscenarioRepository.findAll().stream()

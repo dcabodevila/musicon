@@ -90,7 +90,6 @@ public class AccesoServiceImpl implements AccesoService {
             accesoDto.setId(null);
         }
 
-
 		Acceso acceso = getAcceso(accesoDto);
 
 		guardarPermisosArtistas(acceso, accesoDto.getIdArtista());
@@ -151,6 +150,9 @@ public class AccesoServiceImpl implements AccesoService {
 
 	@Transactional(readOnly = false)
 	public void guardarPermisosArtistas(Acceso acceso, Long idArtista) {
+
+        eliminarPermisosArtistas(acceso.getUsuario().getId(), acceso.getAgencia().getId(), acceso.getRol().getId());
+
 		Set<Permiso> permisosArtista = obtenerPermisosArtista(acceso.getRol().getId());
 
 		List<Artista> artistasAgencia = idArtista != null ?
@@ -166,6 +168,24 @@ public class AccesoServiceImpl implements AccesoService {
 				)
 		);
 	}
+
+    @Transactional
+    public void eliminarPermisosArtistaRolArtista(Long idArtista, Long idUsuario, Long idRol) {
+        Objects.requireNonNull(idArtista, "El ID del artista no puede ser null");
+        Objects.requireNonNull(idUsuario, "El ID del usuario no puede ser null");
+        Objects.requireNonNull(idRol, "El ID del rol no puede ser null");
+
+        final Set<Permiso> permisosArtista = permisoRepository
+                .findAllPermisosByIdRolAndTipoPermiso(
+                        idRol,
+                        TipoPermisoEnum.ARTISTA.getId()
+                )
+                .orElseThrow(() -> new EntityNotFoundException("No se encontraron permisos para el rol especificado"));
+
+        permisosArtista.forEach(permiso ->
+                revocarPermisoArtista(idArtista, idUsuario, permiso.getId())
+        );
+    }
 
 	@Transactional
 	public void eliminarPermisosArtistas(Long idAgencia, Long idUsuario, Long idRol) {
@@ -230,7 +250,12 @@ public class AccesoServiceImpl implements AccesoService {
 
 		Acceso acceso = this.accesoRepository.findById(idAcceso).orElseThrow();
 
-		this.eliminarPermisosArtistas(acceso.getAgencia().getId(), acceso.getUsuario().getId(),acceso.getRol().getId());
+        if (RolEnum.ROL_ARTISTA.getCodigo().equals(acceso.getRol().getCodigo())) {
+            eliminarPermisosArtistaRolArtista(acceso.getArtista().getId(), acceso.getUsuario().getId(), acceso.getRol().getId());
+        } else {
+            this.eliminarPermisosArtistas(acceso.getAgencia().getId(), acceso.getUsuario().getId(),acceso.getRol().getId());
+        }
+
 
 		this.accesoRepository.delete(acceso);
 
