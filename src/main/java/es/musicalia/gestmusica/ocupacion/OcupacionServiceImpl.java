@@ -382,7 +382,13 @@ public class OcupacionServiceImpl implements OcupacionService {
 		Tarifa nuevaTarifa = obtenerTarifaByOcupacion(idArtista, fecha,ocupacion);
 
 		nuevaTarifa.setArtista(ocupacion.getArtista());
-		nuevaTarifa.setImporte(ocupacion.getImporte()!=null ? ocupacion.getImporte() : BigDecimal.ZERO);
+
+        if (nuevaTarifa.getId()!=null && nuevaTarifa.getImporte()!=null){
+            nuevaTarifa.setImporte(nuevaTarifa.getImporte());
+        } else {
+            nuevaTarifa.setImporte(ocupacion.getImporte()!=null ? ocupacion.getImporte() : BigDecimal.ZERO);
+        }
+
 		nuevaTarifa.setFecha(fecha);
 		nuevaTarifa.setActivo(Boolean.TRUE);
 

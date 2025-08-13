@@ -16,7 +16,7 @@ public class Tarifa {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
     @Column(name = "fecha")
     @NotNull
     private LocalDateTime fecha;
