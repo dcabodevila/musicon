@@ -250,5 +250,9 @@ public class UserServiceImpl implements UserService {
 	public List<Usuario> findUsuariosAdmin() {
 		return userRepository.findUsuariosByRolGeneralCodigo(RolEnum.ROL_ADMINISTRADOR.getCodigo());
 	}
+    @Override
+    public Usuario findUsuarioById(Long idUsuario){
+        return userRepository.findById(idUsuario).orElseThrow();
+    }
 
 }

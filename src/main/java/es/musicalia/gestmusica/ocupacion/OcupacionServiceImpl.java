@@ -285,7 +285,7 @@ public class OcupacionServiceImpl implements OcupacionService {
 		if (isSincronizacion){
 			if (isCreacion){
 				ocupacion.setUsuarioCreacion(ConstantsGestmusica.USUARIO_SINCRONIZACION);
-				ocupacion.setUsuario(this.userService.findUsuariosAdmin().get(0));
+				ocupacion.setUsuario(this.userService.findUsuarioById(ConstantsGestmusica.USUARIO_SINCRONIZADOR_ID));
 				ocupacion.setFechaCreacion(LocalDateTime.now());
 				ocupacion.setUsuarioCreacion(ConstantsGestmusica.USUARIO_SINCRONIZACION);
 

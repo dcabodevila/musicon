@@ -7,6 +7,7 @@ public class ConstantsGestmusica {
     }
 
     public static final String USUARIO_SINCRONIZACION = "usuario_sincronizacion";
+    public static final Long USUARIO_SINCRONIZADOR_ID = 49L;
     public static final long ID_CCAA_PROVISIONAL = 20L;
     public static final long ID_PROVINCIA_PROVISIONAL = 53L;
     public static final long ID_MUNICIPIO_PROVISIONAL = 8117L;
