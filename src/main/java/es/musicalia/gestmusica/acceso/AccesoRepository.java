@@ -15,8 +15,6 @@ public interface AccesoRepository extends JpaRepository<Acceso, Long> {
     @Query("select a from Acceso a where a.usuario.id = ?1 and a.activo")
     Optional<List<Acceso>> findAllAccesosByIdUsuario(Long idUsuario);
 
-    @Query("select a from Acceso a where a.usuario.id = ?1 and a.agencia.id= ?2 and a.activo")
-    Optional<Acceso> findAccesoByIdUsuarioAndIdAgencia(Long idUsuario, Long idAgencia);
 
     @Query("select a from Acceso a where a.usuario.id = ?1 and a.agencia.id= ?2 and a.rol.codigo=?3 and a.activo")
     Optional<Acceso> findAccesoByIdUsuarioAndIdAgenciaAndCodigoRol(Long idUsuario, Long idAgencia, String codigoRol);

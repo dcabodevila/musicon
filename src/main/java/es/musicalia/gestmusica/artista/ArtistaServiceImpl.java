@@ -127,10 +127,8 @@ public class ArtistaServiceImpl implements ArtistaService {
         artista.setContacto(contacto);
 
 		artista = artistaRepository.save(artista);
-        // Crear accesos si es nuevo artista
-        if (artistaDto.getId() == null) {
-            crearAccesosUsuarioArtista(artista.getUsuario(), artistaDto.getIdAgencia(), artista.getId());
-        }
+
+//        crearAccesosUsuarioArtista(artista.getUsuario(), artistaDto.getIdAgencia(), artista.getId());
 
         return artista;
     }

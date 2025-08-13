@@ -84,6 +84,13 @@ public class AccesoServiceImpl implements AccesoService {
 	@Transactional
 	@Override
 	public Acceso guardarAcceso(AccesoDto accesoDto) {
+
+        if (accesoDto.getId() != null) {
+            eliminarAcceso(accesoDto.getId());
+            accesoDto.setId(null);
+        }
+
+
 		Acceso acceso = getAcceso(accesoDto);
 
 		guardarPermisosArtistas(acceso, accesoDto.getIdArtista());
@@ -107,7 +114,7 @@ public class AccesoServiceImpl implements AccesoService {
 
 	private Acceso obtenerOCrearAcceso(Long idUsuario, Long idAgencia, Long idRol) {
 		Acceso acceso = this.accesoRepository
-				.findAccesoByIdUsuarioAndIdAgencia(idUsuario, idAgencia)
+				.findAccesoByIdUsuarioAndIdAgenciaAndCodigoRol(idUsuario, idAgencia, RolEnum.ROL_AGENCIA.getCodigo())
 				.orElseGet(Acceso::new);
 
 		acceso.setUsuario(this.usuarioRepository.findById(idUsuario).orElseThrow());
