@@ -139,6 +139,8 @@ public class SincronizacionService {
 
                 for (Ocupacion ocupacion : listaOcupacionesEliminar) {
                     ocupacion.setActivo(false);
+                    ocupacion.setFechaModificacion(LocalDateTime.now());
+                    ocupacion.setUsuarioModificacion("usuario_sincronizacion");
                     this.ocupacionRepository.save(ocupacion);
                     eliminadas++;
                 }
