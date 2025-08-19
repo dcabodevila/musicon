@@ -32,7 +32,7 @@ public interface UserService {
 	List<UsuarioAdminListRecord> findAllUsuarioAdminListRecords();
 
 	@Transactional(readOnly = false)
-	void validarUsuario(Long id);
+    Usuario validarUsuario(Long id);
 
 	@Transactional(readOnly = false)
 	void toggleActivarUsuario(Long id);

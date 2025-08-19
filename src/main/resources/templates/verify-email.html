@@ -112,11 +112,6 @@
                             <!-- Mensajes de estado -->
                             <div id="message-container"></div>
 
-                            <!-- Botón verificar -->
-                            <button type="submit" class="btn btn-primary btn-lg w-100 mb-3" id="verifyBtn">
-                                Verificar Email
-                            </button>
-
                             <!-- Botón reenviar -->
                             <button type="button" class="btn btn-outline-secondary w-100 mb-3" id="resendBtn">
                                 Reenviar Código
@@ -137,7 +132,6 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('verificationForm');
-    const verifyBtn = document.getElementById('verifyBtn');
     const resendBtn = document.getElementById('resendBtn');
     const messageContainer = document.getElementById('message-container');
     const codigoInput = document.getElementById('codigo');
@@ -160,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Verificar código
     form.addEventListener('submit', function(e) {
         e.preventDefault();
-        
+
         const email = emailInput.value;
         const codigo = codigoInput.value;
 
@@ -168,9 +162,6 @@ document.addEventListener('DOMContentLoaded', function() {
             showMessage('El código debe tener 4 dígitos', 'danger');
             return;
         }
-
-        verifyBtn.disabled = true;
-        verifyBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Verificando...';
 
         fetch('/auth/verify-email', {
             method: 'POST',
@@ -194,10 +185,6 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
             showMessage('Error de conexión. Inténtalo de nuevo.', 'danger');
-        })
-        .finally(() => {
-            verifyBtn.disabled = false;
-            verifyBtn.innerHTML = 'Verificar Email';
         });
     });
 

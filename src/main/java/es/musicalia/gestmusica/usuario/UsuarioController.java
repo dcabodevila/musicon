@@ -3,7 +3,10 @@ package es.musicalia.gestmusica.usuario;
 import es.musicalia.gestmusica.acceso.AccesoService;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.localizacion.LocalizacionService;
+import es.musicalia.gestmusica.mail.EmailService;
+import es.musicalia.gestmusica.mail.EmailTemplateEnum;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -12,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+@Slf4j
 @Controller
 @RequestMapping("usuarios")
 public class UsuarioController {
@@ -20,11 +24,13 @@ public class UsuarioController {
     private final UserService userService;
     private final AccesoService accesoService;
     private final LocalizacionService localizacionService;
+    private final EmailService emailService;
 
-    public UsuarioController(UserService userService, AccesoService accesoService, LocalizacionService localizacionService){
+    public UsuarioController(UserService userService, AccesoService accesoService, LocalizacionService localizacionService, EmailService emailService){
         this.userService = userService;
         this.accesoService = accesoService;
         this.localizacionService = localizacionService;
+        this.emailService = emailService;
     }
 
     @GetMapping
@@ -37,7 +43,14 @@ public class UsuarioController {
     @GetMapping("/validar/{id}")
     @PreAuthorize("hasAuthority('USUARIOS')")
     public String validarUsuario(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        this.userService.validarUsuario(id);
+        final Usuario usuarioValidado = this.userService.validarUsuario(id);
+        try {
+            this.emailService.enviarMensajePorEmail(usuarioValidado.getEmail(), EmailTemplateEnum.USUARIO_VALIDADO);
+        } catch (Exception e) {
+            log.error("Error enviando correos validar usuario {}", e.getMessage());
+        }
+
+
         redirectAttributes.addFlashAttribute("alertClass", "success");
         redirectAttributes.addFlashAttribute("message", "Usuario validado correctamente");
 

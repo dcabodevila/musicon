@@ -192,13 +192,13 @@ public class UserServiceImpl implements UserService {
 
 	@Transactional(readOnly = false)
 	@Override
-	public void validarUsuario(Long id) {
+	public Usuario validarUsuario(Long id) {
 		Usuario usuario = userRepository.findById(id).orElseThrow();
 		usuario.setValidado(true);
 		if (usuario.getRolGeneral()==null){
 			usuario.setRolGeneral(this.rolRepository.findRolByCodigo(RolEnum.ROL_AGENTE.getCodigo()));
 		}
-		userRepository.save(usuario);
+		return userRepository.save(usuario);
 	}
 
 	@Transactional(readOnly = false)

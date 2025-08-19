@@ -108,7 +108,7 @@
 								<div class="dropdown-divider"></div>
 								<a class="dropdown-item" th:href="@{/ajustes}"><i class="align-middle me-1" data-feather="settings"></i> Configuración presupuestos</a>
 								<div class="dropdown-divider"></div>
-								<a class="dropdown-item sign-out-alt" th:href=@{/logout}><i class="align-middle me-1" ></i>Log out</a>
+								<a class="dropdown-item sign-out-alt" th:href=@{/logout}><i class="align-middle me-1" data-feather="log-out"></i>Cerrar sesión</a>
 							</div>
 						</div>
 					</div>
@@ -220,8 +220,13 @@
 						</li>
 					</div>
 				</div>
-
+                <li class="sidebar-item">
+                    <a class="sidebar-link" th:href="@{/logout}">
+                        <i class="align-middle me-2 fas fa-fw fa-sign-out-alt"></i> <span class="align-middle">Cerrar sesión</span>
+                    </a>
+                </li>
 			</ul>
+
 		</div>
 	</nav>
 </div>
