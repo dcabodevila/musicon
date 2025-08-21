@@ -77,7 +77,7 @@
                                                         <td class="dtr-control sorting_1" tabindex="0" th:text="${usuario.nombreComercial}"></td>
                                                         <td class="dtr-control sorting_1" tabindex="0" th:text="${usuario.provincia}"></td>
                                                         <td class="dtr-control sorting_1" tabindex="0" th:text="${usuario.rol}" ></td>
-                                                        <td th:text="${usuario.fechaUltimoAcceso != null ? #dates.format(usuario.fechaUltimoAcceso, 'dd/MM/yyyy HH:mm') : '-'}"></td>
+                                                        <td th:text="${usuario.fechaUltimoAcceso != null ? #temporals.format(usuario.fechaUltimoAcceso.toInstant().atZone(T(java.time.ZoneId).of('Europe/Madrid')), 'dd/MM/yyyy HH:mm') : '-'}"></td>
 
                                                         <td class="dtr-control sorting_1" tabindex="0">
                                                             <span th:class="${'badge ' + (usuario.activo ? 'bg-success' : 'bg-warning')}"
