@@ -112,7 +112,7 @@
 
                                                     <tr th:each="listadosGenerados : ${listadosGenerados}">
                                                         <td class="dtr-control " tabindex="0"
-                                                            th:text="${#temporals.format(listadosGenerados.fechaCreacion, 'dd/MM/yyyy HH:mm')}"></td>
+                                                            th:text="${listadosGenerados.fechaCreacion != null ? #temporals.format(listadosGenerados.fechaCreacion.atZone(T(java.time.ZoneId).of('Europe/Madrid')), 'dd/MM/yyyy HH:mm') : '-'}"></td>
                                                         <td class="dtr-control sorting_1" tabindex="0" th:text="${listadosGenerados.solicitadoPara}"></td>
                                                         <td class="dtr-control sorting_1" tabindex="0" th:text="${listadosGenerados.nombreRepresentante}"></td>
                                                         <td class="dtr-control sorting_1" tabindex="0" th:text="${listadosGenerados.municipio}"></td>
