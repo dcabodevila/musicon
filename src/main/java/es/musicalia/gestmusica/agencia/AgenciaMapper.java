@@ -11,8 +11,8 @@ public interface AgenciaMapper {
     @Mapping(source = "usuario", target = "nombreUsuario", qualifiedByName = "mapUsuarioToNombreUsuario")
     @Mapping(source = "usuario.id", target = "idUsuario")
     @Mapping(source = "municipio.id", target = "idMunicipio")
-    @Mapping(source = "municipio.provincia.id", target = "idProvincia")
-    @Mapping(source = "municipio.provincia.nombre", target = "nombreProvincia")
+    @Mapping(source = "provincia.id", target = "idProvincia")
+    @Mapping(source = "provincia.nombre", target = "nombreProvincia")
     @Mapping(source = "agenciaContacto", target = ".", qualifiedByName = "mapContactoToDto")
     AgenciaDto toDto(Agencia agencia);
 
