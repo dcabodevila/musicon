@@ -77,7 +77,16 @@ public class UserServiceImpl implements UserService {
 			throw e;
 		}
 
+        final List<Usuario> usuariosAdmin = findUsuariosAdmin();
 
+        for (Usuario admin : usuariosAdmin) {
+            try {
+                enviarMensajeInternoNuevoUsuario(admin, user);
+                this.emailService.enviarMensajePorEmail(admin.getEmail(), EmailTemplateEnum.VALIDAR_USUARIO);
+            } catch (EnvioEmailException e) {
+                log.error("No se ha podido enviar el correo a {}", admin.getEmail(), e);
+            }
+        }
 		return user;
 	}
 	
@@ -133,22 +142,8 @@ public class UserServiceImpl implements UserService {
 	public Usuario activateUserByEmail(String email) throws UsuarioNoEncontradoException {
 		Usuario usuario = userRepository.findUsuarioByMail(email).orElseThrow(() -> new UsuarioNoEncontradoException("No se encontró usuario con email: " + email));
 		usuario.setActivo(true);
-		usuario = userRepository.save(usuario);
+		return userRepository.save(usuario);
 
-		final List<Usuario> usuariosAdmin = findUsuariosAdmin();
-
-		for (Usuario admin : usuariosAdmin) {
-            try {
-				enviarMensajeInternoNuevoUsuario(admin, usuario);
-                this.emailService.enviarMensajePorEmail(admin.getEmail(), EmailTemplateEnum.VALIDAR_USUARIO);
-            } catch (EnvioEmailException e) {
-				log.error("No se ha podido enviar el correo a {}", admin.getEmail(), e);
-            }
-        }
-
-
-
-		return usuario;
 	}
 
 	private void enviarMensajeInternoNuevoUsuario(Usuario usuarioAdmin, Usuario nuevoUsuario) {
