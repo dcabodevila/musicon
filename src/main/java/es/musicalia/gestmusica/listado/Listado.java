@@ -85,6 +85,8 @@ public class Listado {
     @Column(name = "fecha_creacion")
     @NotNull
     private LocalDateTime fechaCreacion;
+    @Column(name = "activo")
+    private boolean activo;
 
     @ManyToMany
     @JoinTable(

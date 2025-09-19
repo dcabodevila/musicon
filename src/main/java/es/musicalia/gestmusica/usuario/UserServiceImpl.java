@@ -105,7 +105,8 @@ public class UserServiceImpl implements UserService {
 		user.setNombreComercial(registrationForm.getNombreComercial());
 		user.setTelefono(registrationForm.getTelefono());
 		user.setProvincia(this.provinciaRepository.findById(registrationForm.getIdProvincia()).orElseThrow());
-		user.setActivo(false);
+		user.setActivo(true);
+        user.setEmailVerified(false);
 		return user;
 	}
 
@@ -142,6 +143,7 @@ public class UserServiceImpl implements UserService {
 	public Usuario activateUserByEmail(String email) throws UsuarioNoEncontradoException {
 		Usuario usuario = userRepository.findUsuarioByMail(email).orElseThrow(() -> new UsuarioNoEncontradoException("No se encontró usuario con email: " + email));
 		usuario.setActivo(true);
+        usuario.setEmailVerified(true);
 		return userRepository.save(usuario);
 
 	}

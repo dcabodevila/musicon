@@ -26,7 +26,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
 	@Query("select new es.musicalia.gestmusica.usuario.UsuarioRecord(u.id, u.nombre || ' ' || u.apellidos, u.nombreComercial) from Usuario u where u.activo and u.rolGeneral.codigo<>'ADMIN' order by u.nombre || ' ' || u.apellidos")
 	List<UsuarioRecord> findAllUsuarioRecords();
-	@Query("select new es.musicalia.gestmusica.usuario.UsuarioAdminListRecord(u.id, u.nombre,u.apellidos, u.email, rol.nombre, u.fechaUltimoAcceso, u.imagen, u.activo, u.validado, u.nombreComercial, u.provincia.nombre) from Usuario u left join u.rolGeneral rol order by u.nombre || ' ' || u.apellidos")
+	@Query("select new es.musicalia.gestmusica.usuario.UsuarioAdminListRecord(u.id, u.nombre,u.apellidos, u.email, rol.nombre, u.fechaUltimoAcceso, u.imagen, u.activo, u.validado, u.nombreComercial, u.provincia.nombre) from Usuario u left join u.rolGeneral rol order by u.id desc")
 	List<UsuarioAdminListRecord> findAllUsuarioAdminListRecords();
 
 	@Query("select new es.musicalia.gestmusica.usuario.RepresentanteRecord(u.id, u.nombre,u.apellidos, rol.nombre, u.imagen, u.nombreComercial, u.provincia.nombre) from Usuario u left join u.rolGeneral rol where (rol.codigo<>'ADMIN' or rol.id is null) order by u.nombre || ' ' || u.apellidos")

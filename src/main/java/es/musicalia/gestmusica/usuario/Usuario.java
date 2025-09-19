@@ -71,6 +71,8 @@ public class Usuario {
 	@JoinColumn(name = "provincia_id")
 	@NotNull(message = "La provincia no puede ser nula")
 	private Provincia provincia;
+    @Column(name = "email_valido")
+    private boolean emailVerified;
 
 
 	public Usuario(String nombre, String password) {

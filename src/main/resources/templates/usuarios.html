@@ -52,6 +52,8 @@
                                                     <thead>
                                                     <tr>
                                                         <td></td>
+                                                        <th class="sorting sorting_asc" hidden tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Id</th>
+
                                                         <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Nombre</th>
                                                         <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Apellidos</th>
                                                         <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >email</th>
@@ -68,9 +70,11 @@
                                                     <tbody>
 
                                                     <tr th:each="usuario : ${listaUsuarios}">
+
                                                         <td>
                                                             <img th:if="${usuario.imagen}!=null" th:src="${usuario.imagen}" class="rounded-circle my-n1" width="32" height="32" alt="Charles Hall">
                                                         </td>
+                                                        <td class="dtr-control sorting_1" hidden tabindex="0" th:text="${usuario.id}"></td>
                                                         <td class="dtr-control sorting_1" tabindex="0" th:text="${usuario.nombre}"></td>
                                                         <td class="dtr-control sorting_1" tabindex="0" th:text="${usuario.apellidos}"></td>
                                                         <td class="dtr-control sorting_1" tabindex="0" th:text="${usuario.email}"></td>

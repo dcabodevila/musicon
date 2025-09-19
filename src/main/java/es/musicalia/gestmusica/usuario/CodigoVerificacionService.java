@@ -22,7 +22,7 @@ public class CodigoVerificacionService {
     private final CodigoVerificacionRepository codigoRepository;
     private final EmailService emailService;
     private final SecureRandom secureRandom = new SecureRandom();
-
+    private final UsuarioRepository usuarioRepository;
     @Value("${app.verificacion.expiracion-minutos:15}")
     private int minutosExpiracion;
 
@@ -84,6 +84,14 @@ public class CodigoVerificacionService {
         // Marcar código como usado
         codigoVerificacion.setUsado(true);
         codigoRepository.save(codigoVerificacion);
+
+        final Optional<Usuario> usuarioOptional = this.usuarioRepository.findUsuarioByMail(email.trim());
+        if (usuarioOptional.isPresent()){
+            final Usuario usuario = usuarioOptional.get();
+            usuario.setEmailVerified(true);
+            usuarioRepository.save(usuario);
+        }
+
 
         log.info("Código verificado correctamente para email: {}", email);
         return true;

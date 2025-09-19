@@ -225,8 +225,38 @@ public class ListadoSpecifications {
     // Método de conveniencia para combinar criterios similares a findListadosByAgenciaAndFechasOpcionales
     public static Specification<Listado> findListadosByAgenciaAndFechas(Long idAgencia, LocalDateTime fechaDesde, LocalDateTime fechaHasta) {
         return Specification.where(hasAgencia(idAgencia))
-                .and(hasFechaCreacionEntre(fechaDesde, fechaHasta));
+                .and(hasFechaCreacionEntre(fechaDesde, fechaHasta)).and(isActivo());
     }
+
+    public static Specification<Listado> isActivo() {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("activo"), true);
+    }
+
+    public static Specification<Listado> hasUsuarioNoAdmin() {
+        return (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            // Siempre filtrar por activo = true
+            predicates.add(criteriaBuilder.equal(root.get("activo"), true));
+
+            // Filtrar usuarios que NO son admin
+            Join<Listado, Usuario> usuarioJoin = root.join("usuario", JoinType.INNER);
+
+            // Opción 1: Si el usuario tiene un rol general, que no sea 'ADMIN'
+            // Opción 2: Si el usuario no tiene rol general (LEFT JOIN)
+            predicates.add(
+                    criteriaBuilder.or(
+                            // Usuario sin rol general (rol nulo)
+                            criteriaBuilder.isNull(usuarioJoin.get("rolGeneral")),
+                            // Usuario con rol general diferente a 'ADMIN'
+                            criteriaBuilder.notEqual(usuarioJoin.get("rolGeneral").get("codigo"), "ADMIN")
+                    )
+            );
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+    }
+
 
     // Método de conveniencia para búsquedas complejas
     public static Specification<Listado> findListadosCompleto(
