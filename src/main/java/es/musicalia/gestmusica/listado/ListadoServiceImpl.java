@@ -251,7 +251,7 @@ private ListadoRecord mapToListadoRecord(Listado listado) {
 		}
 
 		listadoEntity.setArtistas(this.artistaRepository.findArtistasByComunidadesAndTipos(listadoDto.getIdsComunidades(),listadoDto.getIdsTipoArtista()));
-
+        listadoEntity.setActivo(true);
 		this.listadoRepository.save(listadoEntity);
 	}
 
