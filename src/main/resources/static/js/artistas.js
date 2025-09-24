@@ -77,6 +77,7 @@ $(document).ready(function(){
                             pickerFechaHasta.setDate(moment(info.event.start).format('DD-MM-YYYY'));
                             $("#importe").val(info.event.title);
                             $('#modalNuevaTarifa').modal('show');
+
                         }
                     })
 
@@ -236,6 +237,9 @@ $(document).ready(function(){
         e.preventDefault();
 
         generarTarifaAnualAjax();
+    });
+    $('#modalNuevaTarifa').on('shown.bs.modal', function () {
+        $('#importe').focus().select();
     });
 
     function generarTarifaAnualAjax() {
