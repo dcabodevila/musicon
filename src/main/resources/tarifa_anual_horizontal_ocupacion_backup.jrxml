@@ -43,235 +43,177 @@
 		<parameter name="idProvincia" class="java.lang.Integer"/>
 		<parameter name="conOcupacion" class="java.lang.Boolean"/>
 		<queryString language="SQL">
-			<![CDATA[WITH cal AS (
-  SELECT gs::date AS fecha,
-         EXTRACT(MONTH FROM gs)::int AS mes,
-         EXTRACT(DAY   FROM gs)::int AS dia,
-         EXTRACT(DOW   FROM gs)::int AS dow          -- 0..6 (D..S)
-  FROM generate_series(
-         make_date($P!{ano}, 1, 1),
-         make_date($P!{ano}, 12, 31),
-         interval '1 day'
-       ) AS gs
-),
-art AS (
-  SELECT a.id, a.nombre, ag.nombre AS agencia
-  FROM gestmusica.artista a
-  JOIN gestmusica.agencia ag ON ag.id = a.agencia_id
-  WHERE a.id = $P{idArtista}
-),
-t AS (
-  SELECT t.artista_id, t.fecha::date AS f, t.importe, t.activo
-  FROM gestmusica.tarifa t
-  WHERE t.artista_id = $P{idArtista}
-    AND t.activo
-),
-o AS (
-  SELECT o.artista_id, o.fecha::date AS f, o.estado_id, o.provincia_id, o.activo
-  FROM gestmusica.ocupacion o
-  WHERE o.artista_id = $P{idArtista}
-    AND o.activo
-    AND o.estado_id IN (1,2,3)
-),
-ip AS (
-  SELECT ip.artista_id, ip.provincia_id, ip.tipo_incremento_id, ip.incremento
-  FROM gestmusica.incremento_provincial ip
-  WHERE ip.artista_id = $P{idArtista}
-    AND ip.provincia_id = $P{idProvincia}::bigint
-)
-SELECT
-  art.nombre  AS "Nombre",
-  ag.nombre AS "Agencia",
-  (ARRAY['D','L','M','X','J','V','S'])[ (MAX(CASE WHEN cal.mes=1  THEN cal.dow END) + 1) ]
-    || MAX(CASE WHEN cal.mes=1  THEN to_char(cal.fecha,'DD') END) AS "Enero",
-  COALESCE(
-    MAX(CASE WHEN cal.mes=1  AND ($P{conOcupacion}) AND o.estado_id=2 THEN 'RESER' END),
-    MAX(CASE WHEN cal.mes=1  AND ($P{conOcupacion}) AND o.estado_id=3 THEN 'PEND'  END),
-    MAX(CASE WHEN cal.mes=1  AND ($P{conOcupacion}) THEN p.abreviatura END),
-    MAX(CASE WHEN cal.mes=1  THEN
-      CASE
-        WHEN ip.tipo_incremento_id=1 AND t.importe>0 THEN to_char(t.importe + COALESCE(ip.incremento,0), 'FM999999')
-        WHEN ip.tipo_incremento_id=2 AND t.importe>0 THEN to_char(t.importe + (t.importe*ip.incremento)/100.0, 'FM999999')
-        ELSE to_char(t.importe, 'FM999999')
-      END
-    END)
-  ) AS "to_char",
+			<![CDATA[SELECT a.nombre as "Nombre", ag.nombre as "Agencia",  CASE extract(dow from d.enero)
+        WHEN 0 THEN 'D'
+        WHEN 1 THEN 'L'
+        WHEN 2 THEN 'M'
+        WHEN 3 THEN 'X'
+        WHEN 4 THEN 'J'
+        WHEN 5 THEN 'V'
+        WHEN 6 THEN 'S'
+    END ||  EXTRACT(day FROM d.enero::date)	  as "Enero",  case when o1.estado_id=2 then 'RESER' when o1.estado_id=3 then 'PEND' else  coalesce(p1.abreviatura, CASE WHEN (ip.tipo_incremento_id=1 and t1.importe>0) THEN TO_CHAR(t1.importe + COALESCE(ip.incremento,0),'999999') WHEN (ip.tipo_incremento_id=2  and t1.importe>0) THEN TO_CHAR(t1.importe+(t1.importe*ip.incremento)/100,'999999') else TO_CHAR(t1.importe,'999999')  end) end as to_char,
+       CASE extract(dow from d.febrero)
+        WHEN 0 THEN 'D'
+        WHEN 1 THEN 'L'
+        WHEN 2 THEN 'M'
+        WHEN 3 THEN 'X'
+        WHEN 4 THEN 'J'
+        WHEN 5 THEN 'V'
+        WHEN 6 THEN 'S'
+    END || EXTRACT(day FROM d.febrero::date) as "Febrero", case when o2.estado_id=2 then 'RESER' when o1.estado_id=3 then 'PEND' else  coalesce(p2.abreviatura, CASE WHEN (ip.tipo_incremento_id=1 and t2.importe>0) THEN TO_CHAR(t2.importe + COALESCE(ip.incremento,0),'999999') WHEN (ip.tipo_incremento_id=2 and t2.importe>0) THEN TO_CHAR(t2.importe+(t2.importe*ip.incremento)/100,'999999') else TO_CHAR(t2.importe,'999999')  end) end as Marzo1,
+              CASE extract(dow from d.marzo)
+        WHEN 0 THEN 'D'
+        WHEN 1 THEN 'L'
+        WHEN 2 THEN 'M'
+        WHEN 3 THEN 'X'
+        WHEN 4 THEN 'J'
+        WHEN 5 THEN 'V'
+        WHEN 6 THEN 'S'
+    END || EXTRACT(day FROM d.marzo::date) as "Marzo", case when o3.estado_id=2 then 'RESER' when o1.estado_id=3 then 'PEND' else  coalesce(p3.abreviatura, CASE WHEN (ip.tipo_incremento_id=1  and t3.importe>0) THEN TO_CHAR(t3.importe + COALESCE(ip.incremento,0),'999999') WHEN (ip.tipo_incremento_id=2  and t3.importe>0) THEN TO_CHAR(t3.importe+(t3.importe*ip.incremento)/100,'999999') else TO_CHAR(t3.importe,'999999')  end) end,
+              CASE extract(dow from d.abril)
+        WHEN 0 THEN 'D'
+        WHEN 1 THEN 'L'
+        WHEN 2 THEN 'M'
+        WHEN 3 THEN 'X'
+        WHEN 4 THEN 'J'
+        WHEN 5 THEN 'V'
+        WHEN 6 THEN 'S'
+    END || EXTRACT(day FROM d.abril::date) as "Abril", case when o4.estado_id=2 then 'RESER' when o1.estado_id=3 then 'PEND' else  coalesce(p4.abreviatura, CASE WHEN (ip.tipo_incremento_id=1  and t4.importe>0) THEN TO_CHAR(t4.importe + COALESCE(ip.incremento,0),'999999') WHEN (ip.tipo_incremento_id=2  and t4.importe>0) THEN TO_CHAR(t4.importe+(t4.importe*ip.incremento)/100,'999999') else TO_CHAR(t4.importe,'999999')  end) end,
+              CASE extract(dow from d.mayo)
+        WHEN 0 THEN 'D'
+        WHEN 1 THEN 'L'
+        WHEN 2 THEN 'M'
+        WHEN 3 THEN 'X'
+        WHEN 4 THEN 'J'
+        WHEN 5 THEN 'V'
+        WHEN 6 THEN 'S'
+    END ||EXTRACT(day FROM d.mayo::date) as "Mayo", case when o5.estado_id=2 then 'RESER' when o1.estado_id=3 then 'PEND' else  coalesce(p5.abreviatura, CASE WHEN (ip.tipo_incremento_id=1  and t5.importe>0) THEN TO_CHAR(t5.importe + COALESCE(ip.incremento,0),'999999') WHEN (ip.tipo_incremento_id=2  and t5.importe>0) THEN TO_CHAR(t5.importe+(t5.importe*ip.incremento)/100,'999999') else TO_CHAR(t5.importe,'999999')  end) end,
+              CASE extract(dow from d.junio)
+        WHEN 0 THEN 'D'
+        WHEN 1 THEN 'L'
+        WHEN 2 THEN 'M'
+        WHEN 3 THEN 'X'
+        WHEN 4 THEN 'J'
+        WHEN 5 THEN 'V'
+        WHEN 6 THEN 'S'
+    END ||EXTRACT(day FROM d.junio::date) as "Junio", case when o6.estado_id=2 then 'RESER' when o1.estado_id=3 then 'PEND' else  coalesce(p6.abreviatura, CASE WHEN (ip.tipo_incremento_id=1  and t6.importe>0) THEN TO_CHAR(t6.importe + COALESCE(ip.incremento,0),'999999') WHEN (ip.tipo_incremento_id=2  and t6.importe>0) THEN TO_CHAR(t6.importe+(t6.importe*ip.incremento)/100,'999999') else TO_CHAR(t6.importe,'999999')  end) end,
+              CASE extract(dow from d.julio)
+        WHEN 0 THEN 'D'
+        WHEN 1 THEN 'L'
+        WHEN 2 THEN 'M'
+        WHEN 3 THEN 'X'
+        WHEN 4 THEN 'J'
+        WHEN 5 THEN 'V'
+        WHEN 6 THEN 'S'
+    END ||EXTRACT(day FROM d.julio::date) as "Julio", case when o7.estado_id=2 then 'RESER' when o1.estado_id=3 then 'PEND' else  coalesce(p7.abreviatura, CASE WHEN (ip.tipo_incremento_id=1  and t7.importe>0) THEN TO_CHAR(t7.importe + COALESCE(ip.incremento,0),'999999') WHEN (ip.tipo_incremento_id=2  and t7.importe>0) THEN TO_CHAR(t7.importe+(t7.importe*ip.incremento)/100,'999999') else TO_CHAR(t7.importe,'999999')  end) end,
+              CASE extract(dow from d.agosto)
+        WHEN 0 THEN 'D'
+        WHEN 1 THEN 'L'
+        WHEN 2 THEN 'M'
+        WHEN 3 THEN 'X'
+        WHEN 4 THEN 'J'
+        WHEN 5 THEN 'V'
+        WHEN 6 THEN 'S'
+    END ||EXTRACT(day FROM d.agosto::date) as "Agosto", case when o8.estado_id=2 then 'RESER' when o1.estado_id=3 then 'PEND' else  coalesce(p8.abreviatura, CASE WHEN (ip.tipo_incremento_id=1  and t8.importe>0) THEN TO_CHAR(t8.importe + COALESCE(ip.incremento,0),'999999') WHEN (ip.tipo_incremento_id=2  and t8.importe>0) THEN TO_CHAR(t8.importe+(t8.importe*ip.incremento)/100,'999999') else TO_CHAR(t8.importe,'999999')  end) end,
+              CASE extract(dow from d.septiembre)
+        WHEN 0 THEN 'D'
+        WHEN 1 THEN 'L'
+        WHEN 2 THEN 'M'
+        WHEN 3 THEN 'X'
+        WHEN 4 THEN 'J'
+        WHEN 5 THEN 'V'
+        WHEN 6 THEN 'S'
+    END ||EXTRACT(day FROM d.septiembre::date) as "Septiembre", case when o9.estado_id=2 then 'RESER' when o1.estado_id=3 then 'PEND' else  coalesce(p9.abreviatura, CASE WHEN (ip.tipo_incremento_id=1  and t9.importe>0) THEN TO_CHAR(t9.importe + COALESCE(ip.incremento,0),'999999') WHEN (ip.tipo_incremento_id=2  and t9.importe>0) THEN TO_CHAR(t9.importe+(t9.importe*ip.incremento)/100,'999999') else TO_CHAR(t9.importe,'999999')  end) end,
+              CASE extract(dow from d.octubre)
+        WHEN 0 THEN 'D'
+        WHEN 1 THEN 'L'
+        WHEN 2 THEN 'M'
+        WHEN 3 THEN 'X'
+        WHEN 4 THEN 'J'
+        WHEN 5 THEN 'V'
+        WHEN 6 THEN 'S'
+    END ||EXTRACT(day FROM d.octubre::date) as "Octubre", case when o10.estado_id=2 then 'RESER' when o1.estado_id=3 then 'PEND' else  coalesce(p10.abreviatura, CASE WHEN (ip.tipo_incremento_id=1  and t10.importe>0) THEN TO_CHAR(t10.importe + COALESCE(ip.incremento,0),'999999') WHEN (ip.tipo_incremento_id=2  and t10.importe>0) THEN TO_CHAR(t10.importe+(t10.importe*ip.incremento)/100,'999999') else TO_CHAR(t10.importe,'999999')  end) end,
+              CASE extract(dow from d.noviembre)
+        WHEN 0 THEN 'D'
+        WHEN 1 THEN 'L'
+        WHEN 2 THEN 'M'
+        WHEN 3 THEN 'X'
+        WHEN 4 THEN 'J'
+        WHEN 5 THEN 'V'
+        WHEN 6 THEN 'S'
+    END ||EXTRACT(day FROM d.noviembre::date) as "Noviembre", case when o11.estado_id=2 then 'RESER' when o1.estado_id=3 then 'PEND' else  coalesce(p11.abreviatura, CASE WHEN (ip.tipo_incremento_id=1  and t11.importe>0) THEN TO_CHAR(t11.importe + COALESCE(ip.incremento,0),'999999') WHEN (ip.tipo_incremento_id=2  and t11.importe>0) THEN TO_CHAR(t11.importe+(t11.importe*ip.incremento)/100,'999999') else TO_CHAR(t11.importe,'999999')  end) end,
+              CASE extract(dow from d.diciembre)
+        WHEN 0 THEN 'D'
+        WHEN 1 THEN 'L'
+        WHEN 2 THEN 'M'
+        WHEN 3 THEN 'X'
+        WHEN 4 THEN 'J'
+        WHEN 5 THEN 'V'
+        WHEN 6 THEN 'S'
+    END ||EXTRACT(day FROM d.diciembre::date) as "Diciembre", case when o12.estado_id=2 then 'RESER' when o1.estado_id=3 then 'PEND' else  coalesce(p12.abreviatura, CASE WHEN (ip.tipo_incremento_id=1  and t12.importe>0) THEN TO_CHAR(t12.importe + COALESCE(ip.incremento,0),'999999') WHEN (ip.tipo_incremento_id=2  and t12.importe>0) THEN TO_CHAR(t12.importe+(t12.importe*ip.incremento)/100,'999999') else TO_CHAR(t12.importe,'999999')  end) end
+FROM (
+	SELECT 
+		generate_series('$P!{ano}-01-01'::date, '$P!{ano}-01-31'::date, '1 day') AS enero,
+		generate_series('$P!{ano}-02-01'::date, '$P!{ano}-02-28'::date, '1 day') AS febrero,	
+		generate_series('$P!{ano}-03-01'::date, '$P!{ano}-03-31'::date, '1 day') AS marzo,
+		generate_series('$P!{ano}-04-01'::date, '$P!{ano}-04-30'::date, '1 day') AS abril,
+		generate_series('$P!{ano}-05-01'::date, '$P!{ano}-05-31'::date, '1 day') AS mayo,
+		generate_series('$P!{ano}-06-01'::date, '$P!{ano}-06-30'::date, '1 day') AS junio,
+		generate_series('$P!{ano}-07-01'::date, '$P!{ano}-07-31'::date, '1 day') AS julio,
+		generate_series('$P!{ano}-08-01'::date, '$P!{ano}-08-31'::date, '1 day') AS agosto,
+		generate_series('$P!{ano}-09-01'::date, '$P!{ano}-09-30'::date, '1 day') AS septiembre,
+		generate_series('$P!{ano}-10-01'::date, '$P!{ano}-10-31'::date, '1 day') AS octubre,
+		generate_series('$P!{ano}-11-01'::date, '$P!{ano}-11-30'::date, '1 day') AS noviembre,
+		generate_series('$P!{ano}-12-01'::date, '$P!{ano}-12-31'::date, '1 day') AS diciembre
 
-  (ARRAY['D','L','M','X','J','V','S'])[ (MAX(CASE WHEN cal.mes=2  THEN cal.dow END) + 1) ]
-    || MAX(CASE WHEN cal.mes=2  THEN to_char(cal.fecha,'DD') END) AS "Febrero",
-  COALESCE(
-    MAX(CASE WHEN cal.mes=2  AND ($P{conOcupacion}) AND o.estado_id=2 THEN 'RESER' END),
-    MAX(CASE WHEN cal.mes=2  AND ($P{conOcupacion}) AND o.estado_id=3 THEN 'PEND'  END),
-    MAX(CASE WHEN cal.mes=2  AND ($P{conOcupacion}) THEN p.abreviatura END),
-    MAX(CASE WHEN cal.mes=2  THEN
-      CASE
-        WHEN ip.tipo_incremento_id=1 AND t.importe>0 THEN to_char(t.importe + COALESCE(ip.incremento,0), 'FM999999')
-        WHEN ip.tipo_incremento_id=2 AND t.importe>0 THEN to_char(t.importe + (t.importe*ip.incremento)/100.0, 'FM999999')
-        ELSE to_char(t.importe, 'FM999999')
-      END
-    END)
-  ) AS "marzo1",
-
-  (ARRAY['D','L','M','X','J','V','S'])[ (MAX(CASE WHEN cal.mes=3  THEN cal.dow END) + 1) ]
-    || MAX(CASE WHEN cal.mes=3  THEN to_char(cal.fecha,'DD') END) AS "Marzo",
-  COALESCE(
-    MAX(CASE WHEN cal.mes=3  AND ($P{conOcupacion}) AND o.estado_id=2 THEN 'RESER' END),
-    MAX(CASE WHEN cal.mes=3  AND ($P{conOcupacion}) AND o.estado_id=3 THEN 'PEND'  END),
-    MAX(CASE WHEN cal.mes=3  AND ($P{conOcupacion}) THEN p.abreviatura END),
-    MAX(CASE WHEN cal.mes=3  THEN
-      CASE
-        WHEN ip.tipo_incremento_id=1 AND t.importe>0 THEN to_char(t.importe + COALESCE(ip.incremento,0), 'FM999999')
-        WHEN ip.tipo_incremento_id=2 AND t.importe>0 THEN to_char(t.importe + (t.importe*ip.incremento)/100.0, 'FM999999')
-        ELSE to_char(t.importe, 'FM999999')
-      END
-    END)
-  ) AS "coalesce",
-
-  (ARRAY['D','L','M','X','J','V','S'])[ (MAX(CASE WHEN cal.mes=4  THEN cal.dow END) + 1) ]
-    || MAX(CASE WHEN cal.mes=4  THEN to_char(cal.fecha,'DD') END) AS "Abril",
-  COALESCE(
-    MAX(CASE WHEN cal.mes=4  AND ($P{conOcupacion}) AND o.estado_id=2 THEN 'RESER' END),
-    MAX(CASE WHEN cal.mes=4  AND ($P{conOcupacion}) AND o.estado_id=3 THEN 'PEND'  END),
-    MAX(CASE WHEN cal.mes=4  AND ($P{conOcupacion}) THEN p.abreviatura END),
-    MAX(CASE WHEN cal.mes=4  THEN
-      CASE
-        WHEN ip.tipo_incremento_id=1 AND t.importe>0 THEN to_char(t.importe + COALESCE(ip.incremento,0), 'FM999999')
-        WHEN ip.tipo_incremento_id=2 AND t.importe>0 THEN to_char(t.importe + (t.importe*ip.incremento)/100.0, 'FM999999')
-        ELSE to_char(t.importe, 'FM999999')
-      END
-    END)
-  ) AS "coalesce",
-
-  (ARRAY['D','L','M','X','J','V','S'])[ (MAX(CASE WHEN cal.mes=5  THEN cal.dow END) + 1) ]
-    || MAX(CASE WHEN cal.mes=5  THEN to_char(cal.fecha,'DD') END) AS "Mayo",
-  COALESCE(
-    MAX(CASE WHEN cal.mes=5  AND ($P{conOcupacion}) AND o.estado_id=2 THEN 'RESER' END),
-    MAX(CASE WHEN cal.mes=5  AND ($P{conOcupacion}) AND o.estado_id=3 THEN 'PEND'  END),
-    MAX(CASE WHEN cal.mes=5  AND ($P{conOcupacion}) THEN p.abreviatura END),
-    MAX(CASE WHEN cal.mes=5  THEN
-      CASE
-        WHEN ip.tipo_incremento_id=1 AND t.importe>0 THEN to_char(t.importe + COALESCE(ip.incremento,0), 'FM999999')
-        WHEN ip.tipo_incremento_id=2 AND t.importe>0 THEN to_char(t.importe + (t.importe*ip.incremento)/100.0, 'FM999999')
-        ELSE to_char(t.importe, 'FM999999')
-      END
-    END)
-  ) AS "coalesce",
-
-  (ARRAY['D','L','M','X','J','V','S'])[ (MAX(CASE WHEN cal.mes=6  THEN cal.dow END) + 1) ]
-    || MAX(CASE WHEN cal.mes=6  THEN to_char(cal.fecha,'DD') END) AS "Junio",
-  COALESCE(
-    MAX(CASE WHEN cal.mes=6  AND ($P{conOcupacion}) AND o.estado_id=2 THEN 'RESER' END),
-    MAX(CASE WHEN cal.mes=6  AND ($P{conOcupacion}) AND o.estado_id=3 THEN 'PEND'  END),
-    MAX(CASE WHEN cal.mes=6  AND ($P{conOcupacion}) THEN p.abreviatura END),
-    MAX(CASE WHEN cal.mes=6  THEN
-      CASE
-        WHEN ip.tipo_incremento_id=1 AND t.importe>0 THEN to_char(t.importe + COALESCE(ip.incremento,0), 'FM999999')
-        WHEN ip.tipo_incremento_id=2 AND t.importe>0 THEN to_char(t.importe + (t.importe*ip.incremento)/100.0, 'FM999999')
-        ELSE to_char(t.importe, 'FM999999')
-      END
-    END)
-  ) AS "coalesce",
-
-  (ARRAY['D','L','M','X','J','V','S'])[ (MAX(CASE WHEN cal.mes=7  THEN cal.dow END) + 1) ]
-    || MAX(CASE WHEN cal.mes=7  THEN to_char(cal.fecha,'DD') END) AS "Julio",
-  COALESCE(
-    MAX(CASE WHEN cal.mes=7  AND ($P{conOcupacion}) AND o.estado_id=2 THEN 'RESER' END),
-    MAX(CASE WHEN cal.mes=7  AND ($P{conOcupacion}) AND o.estado_id=3 THEN 'PEND'  END),
-    MAX(CASE WHEN cal.mes=7  AND ($P{conOcupacion}) THEN p.abreviatura END),
-    MAX(CASE WHEN cal.mes=7  THEN
-      CASE
-        WHEN ip.tipo_incremento_id=1 AND t.importe>0 THEN to_char(t.importe + COALESCE(ip.incremento,0), 'FM999999')
-        WHEN ip.tipo_incremento_id=2 AND t.importe>0 THEN to_char(t.importe + (t.importe*ip.incremento)/100.0, 'FM999999')
-        ELSE to_char(t.importe, 'FM999999')
-      END
-    END)
-  ) AS "coalesce",
-
-  (ARRAY['D','L','M','X','J','V','S'])[ (MAX(CASE WHEN cal.mes=8  THEN cal.dow END) + 1) ]
-    || MAX(CASE WHEN cal.mes=8  THEN to_char(cal.fecha,'DD') END) AS "Agosto",
-  COALESCE(
-    MAX(CASE WHEN cal.mes=8  AND ($P{conOcupacion}) AND o.estado_id=2 THEN 'RESER' END),
-    MAX(CASE WHEN cal.mes=8  AND ($P{conOcupacion}) AND o.estado_id=3 THEN 'PEND'  END),
-    MAX(CASE WHEN cal.mes=8  AND ($P{conOcupacion}) THEN p.abreviatura END),
-    MAX(CASE WHEN cal.mes=8  THEN
-      CASE
-        WHEN ip.tipo_incremento_id=1 AND t.importe>0 THEN to_char(t.importe + COALESCE(ip.incremento,0), 'FM999999')
-        WHEN ip.tipo_incremento_id=2 AND t.importe>0 THEN to_char(t.importe + (t.importe*ip.incremento)/100.0, 'FM999999')
-        ELSE to_char(t.importe, 'FM999999')
-      END
-    END)
-  ) AS "coalesce",
-
-  (ARRAY['D','L','M','X','J','V','S'])[ (MAX(CASE WHEN cal.mes=9  THEN cal.dow END) + 1) ]
-    || MAX(CASE WHEN cal.mes=9  THEN to_char(cal.fecha,'DD') END) AS "Septiembre",
-  COALESCE(
-    MAX(CASE WHEN cal.mes=9  AND ($P{conOcupacion}) AND o.estado_id=2 THEN 'RESER' END),
-    MAX(CASE WHEN cal.mes=9  AND ($P{conOcupacion}) AND o.estado_id=3 THEN 'PEND'  END),
-    MAX(CASE WHEN cal.mes=9  AND ($P{conOcupacion}) THEN p.abreviatura END),
-    MAX(CASE WHEN cal.mes=9  THEN
-      CASE
-        WHEN ip.tipo_incremento_id=1 AND t.importe>0 THEN to_char(t.importe + COALESCE(ip.incremento,0), 'FM999999')
-        WHEN ip.tipo_incremento_id=2 AND t.importe>0 THEN to_char(t.importe + (t.importe*ip.incremento)/100.0, 'FM999999')
-        ELSE to_char(t.importe, 'FM999999')
-      END
-    END)
-  ) AS "coalesce",
-
-  (ARRAY['D','L','M','X','J','V','S'])[ (MAX(CASE WHEN cal.mes=10 THEN cal.dow END) + 1) ]
-    || MAX(CASE WHEN cal.mes=10 THEN to_char(cal.fecha,'DD') END) AS "Octubre",
-  COALESCE(
-    MAX(CASE WHEN cal.mes=10 AND ($P{conOcupacion}) AND o.estado_id=2 THEN 'RESER' END),
-    MAX(CASE WHEN cal.mes=10 AND ($P{conOcupacion}) AND o.estado_id=3 THEN 'PEND'  END),
-    MAX(CASE WHEN cal.mes=10 AND ($P{conOcupacion}) THEN p.abreviatura END),
-    MAX(CASE WHEN cal.mes=10 THEN
-      CASE
-        WHEN ip.tipo_incremento_id=1 AND t.importe>0 THEN to_char(t.importe + COALESCE(ip.incremento,0), 'FM999999')
-        WHEN ip.tipo_incremento_id=2 AND t.importe>0 THEN to_char(t.importe + (t.importe*ip.incremento)/100.0, 'FM999999')
-        ELSE to_char(t.importe, 'FM999999')
-      END
-    END)
-  ) AS "coalesce",
-
-  (ARRAY['D','L','M','X','J','V','S'])[ (MAX(CASE WHEN cal.mes=11 THEN cal.dow END) + 1) ]
-    || MAX(CASE WHEN cal.mes=11 THEN to_char(cal.fecha,'DD') END) AS "Noviembre",
-  COALESCE(
-    MAX(CASE WHEN cal.mes=11 AND ($P{conOcupacion}) AND o.estado_id=2 THEN 'RESER' END),
-    MAX(CASE WHEN cal.mes=11 AND ($P{conOcupacion}) AND o.estado_id=3 THEN 'PEND'  END),
-    MAX(CASE WHEN cal.mes=11 AND ($P{conOcupacion}) THEN p.abreviatura END),
-    MAX(CASE WHEN cal.mes=11 THEN
-      CASE
-        WHEN ip.tipo_incremento_id=1 AND t.importe>0 THEN to_char(t.importe + COALESCE(ip.incremento,0), 'FM999999')
-        WHEN ip.tipo_incremento_id=2 AND t.importe>0 THEN to_char(t.importe + (t.importe*ip.incremento)/100.0, 'FM999999')
-        ELSE to_char(t.importe, 'FM999999')
-      END
-    END)
-  ) AS "coalesce",
-
-  (ARRAY['D','L','M','X','J','V','S'])[ (MAX(CASE WHEN cal.mes=12 THEN cal.dow END) + 1) ]
-    || MAX(CASE WHEN cal.mes=12 THEN to_char(cal.fecha,'DD') END) AS "Diciembre",
-  COALESCE(
-    MAX(CASE WHEN cal.mes=12 AND ($P{conOcupacion}) AND o.estado_id=2 THEN 'RESER' END),
-    MAX(CASE WHEN cal.mes=12 AND ($P{conOcupacion}) AND o.estado_id=3 THEN 'PEND'  END),
-    MAX(CASE WHEN cal.mes=12 AND ($P{conOcupacion}) THEN p.abreviatura END),
-    MAX(CASE WHEN cal.mes=12 THEN
-      CASE
-        WHEN ip.tipo_incremento_id=1 AND t.importe>0 THEN to_char(t.importe + COALESCE(ip.incremento,0), 'FM999999')
-        WHEN ip.tipo_incremento_id=2 AND t.importe>0 THEN to_char(t.importe + (t.importe*ip.incremento)/100.0, 'FM999999')
-        ELSE to_char(t.importe, 'FM999999')
-      END
-    END)
-  ) AS "coalesce"
-
-FROM gestmusica.artista art
-inner join gestmusica.agencia ag on art.agencia_id =ag.id
-CROSS JOIN cal
-LEFT JOIN gestmusica.tarifa t  ON t.artista_id = art.id and t.activo AND t.fecha::date  = cal.fecha
-LEFT JOIN gestmusica.ocupacion o  ON ($P{conOcupacion}) and o.activo AND o.artista_id = art.id AND o.fecha::date  = cal.fecha
-LEFT JOIN gestmusica.provincia p ON p.id = o.provincia_id
-LEFT JOIN gestmusica.incremento_provincial ip ON ip.artista_id = art.id  and ip.provincia_id =$P{idProvincia}::bigint
-where art.id = $P{idArtista}
-GROUP BY art.id, art.nombre, ag.nombre, cal.dia
-ORDER BY art.nombre, ag.nombre, cal.dia;]]>
+) d
+CROSS JOIN gestmusica.artista a inner join gestmusica.agencia ag on a.agencia_id=ag.id
+LEFT JOIN gestmusica.tarifa t1 ON t1.artista_id = a.id AND t1.fecha::date = d.enero::date AND t1.activo
+LEFT JOIN gestmusica.ocupacion o1 ON o1.artista_id = a.id AND o1.fecha::date = d.enero::date  AND o1.activo and o1.estado_id in (1,2,3) and $P{conOcupacion}
+left join gestmusica.provincia p1 on o1.provincia_id = p1.id
+LEFT JOIN gestmusica.tarifa t2 ON t2.artista_id = a.id AND t2.fecha::date = d.febrero::date AND t2.activo
+LEFT JOIN gestmusica.ocupacion o2 ON o2.artista_id = a.id AND o2.fecha::date = d.febrero::date  AND o2.activo and o2.estado_id in (1,2,3) and $P{conOcupacion}
+left join gestmusica.provincia p2 on o2.provincia_id = p2.id
+LEFT JOIN gestmusica.tarifa t3 ON t3.artista_id = a.id AND t3.fecha::date = d.marzo::date AND t3.activo
+LEFT JOIN gestmusica.ocupacion o3 ON o3.artista_id = a.id AND o3.fecha::date = d.marzo::date  AND o3.activo and o3.estado_id in (1,2,3) and $P{conOcupacion}
+left join gestmusica.provincia p3 on o3.provincia_id = p3.id
+LEFT JOIN gestmusica.tarifa t4 ON t4.artista_id = a.id AND t4.fecha::date = d.abril::date AND t4.activo
+LEFT JOIN gestmusica.ocupacion o4 ON o4.artista_id = a.id AND o4.fecha::date = d.abril::date  AND o4.activo and o4.estado_id in (1,2,3) and $P{conOcupacion}
+left join gestmusica.provincia p4 on o4.provincia_id = p4.id
+LEFT JOIN gestmusica.tarifa t5 ON t5.artista_id = a.id AND t5.fecha::date = d.mayo::date AND t5.activo
+LEFT JOIN gestmusica.ocupacion o5 ON o5.artista_id = a.id AND o5.fecha::date = d.mayo::date  AND o5.activo and o5.estado_id in (1,2,3) and $P{conOcupacion}
+left join gestmusica.provincia p5 on o5.provincia_id = p5.id
+LEFT JOIN gestmusica.tarifa t6 ON t6.artista_id = a.id AND t6.fecha::date = d.junio::date AND t6.activo
+LEFT JOIN gestmusica.ocupacion o6 ON o6.artista_id = a.id AND o6.fecha::date = d.junio::date  AND o6.activo and o6.estado_id in (1,2,3) and $P{conOcupacion}
+left join gestmusica.provincia p6 on o6.provincia_id = p6.id
+LEFT JOIN gestmusica.tarifa t7 ON t7.artista_id = a.id AND t7.fecha::date = d.julio::date AND t7.activo
+LEFT JOIN gestmusica.ocupacion o7 ON o7.artista_id = a.id AND o7.fecha::date = d.julio::date  AND o7.activo and o7.estado_id in (1,2,3) and $P{conOcupacion}
+left join gestmusica.provincia p7 on o7.provincia_id = p7.id
+LEFT JOIN gestmusica.tarifa t8 ON t8.artista_id = a.id AND t8.fecha::date = d.agosto::date AND t8.activo
+LEFT JOIN gestmusica.ocupacion o8 ON o8.artista_id = a.id AND o8.fecha::date = d.agosto::date  AND o8.activo and o8.estado_id in (1,2,3) and $P{conOcupacion}
+left join gestmusica.provincia p8 on o8.provincia_id = p8.id
+LEFT JOIN gestmusica.tarifa t9 ON t9.artista_id = a.id AND t9.fecha::date = d.septiembre::date AND t9.activo
+LEFT JOIN gestmusica.ocupacion o9 ON o9.artista_id = a.id AND o9.fecha::date = d.septiembre::date  AND o9.activo and o9.estado_id in (1,2,3) and $P{conOcupacion}
+left join gestmusica.provincia p9 on o9.provincia_id = p9.id
+LEFT JOIN gestmusica.tarifa t10 ON t10.artista_id = a.id AND t10.fecha::date = d.octubre::date AND t10.activo
+LEFT JOIN gestmusica.ocupacion o10 ON o10.artista_id = a.id AND o10.fecha::date = d.octubre::date  AND o10.activo and o10.estado_id in (1,2,3) and $P{conOcupacion}
+left join gestmusica.provincia p10 on o10.provincia_id = p10.id
+LEFT JOIN gestmusica.tarifa t11 ON t11.artista_id = a.id AND t11.fecha::date = d.noviembre::date AND t11.activo
+LEFT JOIN gestmusica.ocupacion o11 ON o11.artista_id = a.id AND o11.fecha::date = d.noviembre::date  AND o11.activo and o11.estado_id in (1,2,3) and $P{conOcupacion}
+left join gestmusica.provincia p11 on o11.provincia_id = p11.id
+LEFT JOIN gestmusica.tarifa t12 ON t12.artista_id = a.id AND t12.fecha::date = d.diciembre::date AND t12.activo 
+LEFT JOIN gestmusica.ocupacion o12 ON o12.artista_id = a.id AND o12.fecha::date = d.diciembre::date  AND o12.activo and o12.estado_id in (1,2,3) and $P{conOcupacion}
+left join gestmusica.provincia p12 on o12.provincia_id = p12.id
+LEFT JOIN gestmusica.incremento_provincial ip ON (ip.artista_id=a.id AND ip.provincia_id=$P{idProvincia}::bigint )    
+WHERE a.id = $P{idArtista} ORDER BY 1, 2, CAST(SUBSTRING((CASE extract(dow from d.enero)
+        WHEN 0 THEN 'D'
+        WHEN 1 THEN 'L'
+        WHEN 2 THEN 'M'
+        WHEN 3 THEN 'X'
+        WHEN 4 THEN 'J'
+        WHEN 5 THEN 'V'
+        WHEN 6 THEN 'S'
+    END || EXTRACT(day FROM d.enero::date)::text) FROM 2) AS INTEGER)]]>
 		</queryString>
 		<field name="Nombre" class="java.lang.String">
 			<property name="com.jaspersoft.studio.field.name" value="Nombre"/>
@@ -398,15 +340,11 @@ ORDER BY art.nombre, ag.nombre, cal.dia;]]>
 		<band height="47" splitType="Stretch">
 			<textField>
 				<reportElement x="0" y="0" width="802" height="47" uuid="a4676890-9119-497a-bc0c-584535b0ccae"/>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center">
 					<font fontName="SansSerif" size="20"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{titulo} + " Temporada "+$P{ano}]]></textFieldExpression>
 			</textField>
-			<image>
-				<reportElement x="0" y="0" width="50" height="47" uuid="4813f540-f28d-4ce7-a44d-72eaa59fbc68"/>
-				<imageExpression><![CDATA["https://res.cloudinary.com/hseoceuyz/image/upload/v1754229791/logo-name-transparente_mini_yfdyvi.png"]]></imageExpression>
-			</image>
 		</band>
 	</title>
 	<pageFooter>
