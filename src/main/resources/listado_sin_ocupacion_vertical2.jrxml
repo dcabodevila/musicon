@@ -97,7 +97,7 @@ CASE
              WHEN a.tipo_escenario_id = 1 THEN ''/T''
              ELSE ''/R''
          END
-END AS escenario, t.fecha::date, (CASE WHEN ip.tipo_incremento_id=1 THEN TO_CHAR(t.importe + COALESCE(ip.incremento,0),''999999'') WHEN ip.tipo_incremento_id=2 THEN TO_CHAR(t.importe+(t.importe*ip.incremento)/100,''999999'') else TO_CHAR(t.importe,''999999'')  end) as importe
+END AS escenario, t.fecha::date, (CASE WHEN (ip.tipo_incremento_id=1 AND t.importe>0 ) THEN TO_CHAR(t.importe + COALESCE(ip.incremento,0),''999999'') WHEN (ip.tipo_incremento_id=2 AND t.importe>0 ) THEN TO_CHAR(t.importe+(t.importe*ip.incremento)/100,''999999'') else TO_CHAR(t.importe,''999999'')  end) as importe
    FROM gestmusica.tarifa t inner join gestmusica.artista a on t.artista_id=a.id inner join gestmusica.artista_tipo_artista ata on a.id=ata.artista_id inner join gestmusica.agencia ag on a.agencia_id=ag.id left join gestmusica.contacto cont on ag.agencia_contacto_id=cont.id
    LEFT JOIN gestmusica.incremento_provincial ip ON (ip.artista_id=a.id AND ip.provincia_id=$P!{idProvincia}::bigint )
    WHERE t.activo 
