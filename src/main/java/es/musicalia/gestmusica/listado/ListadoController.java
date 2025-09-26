@@ -1,6 +1,7 @@
 package es.musicalia.gestmusica.listado;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import es.musicalia.gestmusica.agencia.AgenciaService;
 import es.musicalia.gestmusica.ajustes.AjustesDto;
@@ -59,7 +60,7 @@ public class ListadoController {
                            Model model) {
 
         ListadoDto listado = new ListadoDto();
-        listado.setSolicitadoPara(user.getUsuario().getNombreCompleto());
+        listado.setSolicitadoPara(user.getUsuario().getNombreComercial()!=null? user.getUsuario().getNombreComercial() : user.getUsuario().getNombreCompleto());
         final Long idCcaa = this.localizacionService.findCcaaByUsuarioId(user.getUserId()).getId();
         final Long idProvincia = this.localizacionService.findProvinciaByUsuarioId(user.getUserId()).getId();
         listado.setIdCcaa(idCcaa);
@@ -93,13 +94,20 @@ public class ListadoController {
 
     @GetMapping("/audiencia-listados")
     public String getAudienciaListados(@AuthenticationPrincipal CustomAuthenticatedUser user, Model model) {
-
-        List<ListadoRecord> listadosGenerados = new ArrayList<>();
-        model.addAttribute("listadosGenerados", listadosGenerados);
-        model.addAttribute("listadoAudienciasDto", ListadoAudienciasDto.builder()
+        ListadoAudienciasDto listadoAudienciasDto = ListadoAudienciasDto.builder()
                 .fechaDesde(LocalDate.now().minusMonths(2))
                 .fechaHasta(LocalDate.now())
-                .build());
+                .build();
+        List<ListadoRecord> listadosGenerados = this.listadoService.obtenerListadoEntreFechas(listadoAudienciasDto);
+        try {
+            String chartDataJson = objectMapper.writeValueAsString(listadoService.obtenerListadosPorMes(listadosGenerados));
+            model.addAttribute("chartData", chartDataJson);
+
+        } catch (JsonProcessingException e) {
+            log.error("Error consultando audiencia listados", e);
+        }
+        model.addAttribute("listadosGenerados", listadosGenerados);
+        model.addAttribute("listadoAudienciasDto", listadoAudienciasDto);
         obtenerModelComun(model, user.getUserId());
 
         return "listados-generados";

@@ -91,6 +91,10 @@
                                     <h5 class="card-title">Audiencia de la agencia en listados</h5>
                                 </div>
                                 <div class="card-body">
+                                    <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                                        <canvas id="listadosChart"></canvas>
+                                    </div>
+                                    <input type="hidden" id="chartData" th:value="${chartData}">
 
                                     <div id="datatables-reponsive_wrapper" class="dataTables_wrapper dt-bootstrap5 no-footer">
                                         <div class="row">
@@ -99,8 +103,8 @@
                                                     <thead>
                                                     <tr>
                                                         <th tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1"  >Fecha generación presupuesto</th>
-                                                        <th class="sorting sorting_desc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1"  >Solicitado para</th>
                                                         <th class="sorting sorting_desc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1"  >Representante</th>
+                                                        <th class="sorting sorting_desc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1"  >Solicitado para</th>
                                                         <th class="sorting sorting_desc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1"  >Municipio</th>
                                                         <th class="sorting sorting_desc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1"  >Localidad</th>
                                                         <th class="sorting " tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1"  >Fechas del presupuesto</th>
@@ -112,9 +116,10 @@
 
                                                     <tr th:each="listadosGenerados : ${listadosGenerados}">
                                                         <td class="dtr-control " tabindex="0"
-                                                            th:text="${listadosGenerados.fechaCreacion != null ? #temporals.format(listadosGenerados.fechaCreacion.atZone(T(java.time.ZoneId).of('Europe/Madrid')), 'dd/MM/yyyy HH:mm') : '-'}"></td>
-                                                        <td class="dtr-control sorting_1" tabindex="0" th:text="${listadosGenerados.solicitadoPara}"></td>
+                                                            th:text="${listadosGenerados.fechaCreacion != null ? #temporals.format(listadosGenerados.fechaCreacion.atZone(T(java.time.ZoneId).of('Europe/Madrid')), 'dd/MM/yyyy') : '-'}"></td>
                                                         <td class="dtr-control sorting_1" tabindex="0" th:text="${listadosGenerados.nombreRepresentante}"></td>
+                                                        <td class="dtr-control sorting_1" tabindex="0" th:text="${listadosGenerados.solicitadoPara}"></td>
+
                                                         <td class="dtr-control sorting_1" tabindex="0" th:text="${listadosGenerados.municipio}"></td>
                                                         <td class="dtr-control sorting_1" tabindex="0" th:text="${listadosGenerados.localidad}"></td>
                                                         <td class="dtr-control " tabindex="0"
@@ -136,10 +141,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
-                                        <canvas id="listadosChart"></canvas>
-                                    </div>
-                                    <input type="hidden" id="chartData" th:value="${chartData}">
+
 
 
                                 </div>
