@@ -1,5 +1,6 @@
 package es.musicalia.gestmusica.ocupacion;
 
+import es.musicalia.gestmusica.actividad.ActividadRecord;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -33,4 +34,14 @@ public interface OcupacionRepository extends JpaRepository<Ocupacion, Long>, Jpa
 
     @Query("SELECT o FROM Ocupacion o WHERE o.fecha>= :fechaDesde AND o.activo AND o.idOcupacionLegacy NOT IN :ids")
     Optional<List<Ocupacion>> findByIdOcupacionLegacyNotIn(@Param("fechaDesde") LocalDateTime fechaDesde, @Param("ids") Set<Integer> ids);
+
+
+	@Query("select new es.musicalia.gestmusica.actividad.ActividadRecord(o.artista.id, o.artista.agencia.nombre, o.artista.nombre, " +
+		   "GREATEST(max(o.fechaCreacion), max(o.fechaModificacion)), " +
+		   "sum(case when GREATEST(o.fechaCreacion, coalesce(o.fechaModificacion, o.fechaCreacion)) >= :fechaLimite then 1 else 0 end)) " +
+		   "from Ocupacion o " +
+		   "where o.artista.activo = true " +
+		   "group by o.artista.id, o.artista.agencia.nombre,  o.artista.nombre " +
+		   "order by GREATEST(max(o.fechaCreacion), max(o.fechaModificacion))")
+	List<ActividadRecord> findActividadOcupacionesConConteo(@Param("fechaLimite") LocalDateTime fechaLimite);
 }
