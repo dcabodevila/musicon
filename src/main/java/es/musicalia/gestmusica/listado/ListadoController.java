@@ -95,7 +95,7 @@ public class ListadoController {
     @GetMapping("/audiencia-listados")
     public String getAudienciaListados(@AuthenticationPrincipal CustomAuthenticatedUser user, Model model) {
         ListadoAudienciasDto listadoAudienciasDto = ListadoAudienciasDto.builder()
-                .fechaDesde(LocalDate.now().minusMonths(2))
+                .fechaDesde(LocalDate.now().minusMonths(2).withDayOfMonth(1))
                 .fechaHasta(LocalDate.now())
                 .build();
         List<ListadoRecord> listadosGenerados = this.listadoService.obtenerListadoEntreFechas(listadoAudienciasDto);

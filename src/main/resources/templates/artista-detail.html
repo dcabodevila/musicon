@@ -7,7 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <div th:replace="~{fragments/main-template :: header-css}"/>
-
+    
+    <!-- Lightbox CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css">
 </head>
 <body>
 <body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
@@ -19,7 +21,6 @@
         <div th:replace="~{fragments/main-template :: navbar}"/>
         <main class="content">
             <div class="container-fluid p-0">
-                <!--<a th:href="@{/artista}" class="btn btn-primary mt-n1"><i class="fas fa-arrow-left"></i> Volver a artistas</a>-->
 
                 <div th:replace="~{fragments/modal-tarifas :: modal-tarifas}"/>
                 <div th:replace="~{fragments/modal-incrementos :: modal-incrementos}"/>
@@ -59,8 +60,15 @@
 
                     <div class="col-12 col-md-3 col-lg-3 order-2 order-lg-1">
                         <div class="card card-max-width">
-                            <img class="card-img-top img-max-height" th:if="${artistaDto.logo!=null}"
-                                 th:src="@{${artistaDto.logo}}" alt="Unsplash">
+                            <a th:if="${artistaDto.logo!=null}"
+                               th:href="@{${artistaDto.logo}}"
+                               data-lightbox="artista-gallery"
+                               th:data-title="${artistaDto.nombre}">
+                                <img class="card-img-top img-max-height"
+                                     th:src="@{${artistaDto.logo}}"
+                                     alt="Imagen del artista"
+                                     style="cursor: pointer;">
+                            </a>
                             <div class="card-header px-4 pt-4">
                                 <h5 class="card-title mb-0" th:text="${artistaDto.nombre}">Card with image and
                                     button</h5>
@@ -107,7 +115,7 @@
 
                                 <ul class="list-unstyled mb-0">
                                     <li class="mb-1"
-                                        th:if="${artistaDto.nombreTipoEscenario!=null && artistaDto.nombreTipoEscenario!=''}">
+                                        th:if="${artistaDto.escenario && artistaDto.nombreTipoEscenario!=null && artistaDto.nombreTipoEscenario!=''}">
                                         <span title="Tipo escenario" class="fas fa-truck fa-fw me-1"></span> <a
                                             th:text="${artistaDto.nombreTipoEscenario}"></a></li>
                                     <li class="mb-1"
@@ -146,6 +154,10 @@
                                     <li class="mb-1" th:if="${artistaDto.youtube!=null && artistaDto.youtube!=''}"><span
                                             class="fab fa-fw fa-youtube"></span> <a th:text="${artistaDto.youtube}"
                                                                                     th:href="${'http://'+artistaDto.youtube}"
+                                                                                    th:target="_blank"></a></li>
+                                    <li class="mb-1" th:if="${artistaDto.google!=null && artistaDto.google!=''}"><span
+                                            class="fab fa-fw fa-google"></span> <a th:text="${artistaDto.google}"
+                                                                                    th:href="${'https://'+artistaDto.google}"
                                                                                     th:target="_blank"></a></li>
                                 </ul>
 
@@ -241,6 +253,7 @@
 <script type="text/javascript" th:src="@{/js/comun.js}"></script>
 <script type="text/javascript" th:src="@{/js/ocupaciones-comun.js}"></script>
 <script type="text/javascript" th:src="@{/js/artistas.js}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
 
 </body>
 </html>

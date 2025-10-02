@@ -50,6 +50,7 @@ public class ArtistaDto {
     private String telefono;
     private String telefono2;
     private String telefono3;
+    private String google;
 
     private String facebook;
     private String youtube;

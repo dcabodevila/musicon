@@ -106,6 +106,7 @@ public class ArtistaServiceImpl implements ArtistaService {
 			artistaDto.setTelefono2(contacto.getTelefono2());
 			artistaDto.setTelefono3(contacto.getTelefono3());
 			artistaDto.setYoutube(contacto.getYoutube());
+
 		}
 		return artistaDto;
 	}
@@ -157,6 +158,7 @@ public class ArtistaServiceImpl implements ArtistaService {
 		artista.setBiografia(dto.getBiografia());
 		artista.setCondicionesContratacion(dto.getCondicionesContratacion());
 		artista.setPermiteOrquestasDeGalicia(dto.isPermiteOrquestasDeGalicia());
+        artista.setGoogle(StringUtils.removeHttp(dto.getGoogle()));
     }
 
     private void actualizarTiposArtista(Artista artista, List<Long> idsTipoArtista) {

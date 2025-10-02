@@ -104,4 +104,7 @@ public class Artista {
     @Column(name = "permite_orquestas_de_galicia")
     private boolean permiteOrquestasDeGalicia;
 
+    @Column(name = "google")
+    private String google;
+
 }
