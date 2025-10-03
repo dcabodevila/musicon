@@ -127,13 +127,15 @@ function initializeChart() {
     try {
         // Crear gráfico con estilo AdminKit.io
         currentChart = new Chart(canvas, {
-            type: "line",
+            type: "bar",
             data: {
                 labels: labels,
                 datasets: [{
-                    label: "Número de impresiones",
-                    backgroundColor: "transparent",
+                    label: "Número de listados",
+                    backgroundColor: window.theme.primary,
                     borderColor: window.theme.primary,
+                    borderWidth: 1,
+                    maxBarThickness: 50,
                     data: data
                 }]
             },
@@ -158,7 +160,7 @@ function initializeChart() {
                         beginAtZero: true,
                         min: 0,
                         grid: {
-                            display: false
+                            display: true
                         },
                         ticks: {
                             stepSize: 1,
@@ -169,7 +171,7 @@ function initializeChart() {
                     },
                     x: {
                         grid: {
-                            color: "transparent"
+                            display: false
                         }
                     }
                 }
@@ -181,6 +183,7 @@ function initializeChart() {
     } catch (error) {
         console.error('Error creando el gráfico:', error);
     }
+
 }
 
 // Función para reinicializar el gráfico (útil después de actualizaciones AJAX)

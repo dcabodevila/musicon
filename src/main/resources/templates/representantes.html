@@ -48,13 +48,13 @@
                                     <div id="datatables-reponsive_wrapper" class="dataTables_wrapper dt-bootstrap5 no-footer">
                                         <div class="row">
                                             <div class="col-sm-12">
-                                                <table id="datatables-reponsive_usuarios" class="table table-striped dataTable no-footer dtr-inline collapsed" style="width: 100%;" aria-describedby="datatables-reponsive_info">
+                                                <table id="datatables-reponsive_representantes" class="table table-striped dataTable no-footer dtr-inline collapsed" style="width: 100%;" aria-describedby="datatables-reponsive_info">
                                                     <thead>
                                                     <tr>
                                                         <th></th>
+                                                        <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Nombre comercial</th>
                                                         <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Nombre</th>
                                                         <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Apellidos</th>
-                                                        <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Nombre comercial</th>
                                                         <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Provincia</th>
                                                         <th class="sorting sorting_asc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1" aria-sort="ascending" >Rol principal</th>
                                                         <th>Ver</th>
@@ -66,9 +66,9 @@
                                                             <td>
                                                                 <img th:if="${usuario.imagen}!=null" th:src="${usuario.imagen}" class="rounded-circle my-n1" width="32" height="32" alt="Charles Hall">
                                                             </td>
+                                                            <td class="dtr-control sorting_1" tabindex="0" th:text="${usuario.nombreComercial}" ></td>
                                                             <td class="dtr-control sorting_1" tabindex="0" th:text="${usuario.nombre}"></td>
                                                             <td class="dtr-control sorting_1" tabindex="0" th:text="${usuario.apellidos}" ></td>
-                                                            <td class="dtr-control sorting_1" tabindex="0" th:text="${usuario.nombreComercial}" ></td>
                                                             <td class="dtr-control sorting_1" tabindex="0" th:text="${usuario.provincia}" ></td>
                                                             <td class="dtr-control sorting_1" tabindex="0" th:text="${usuario.rol}" ></td>
                                                             <td>

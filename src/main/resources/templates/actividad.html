@@ -29,17 +29,91 @@
                         </div>
                     </div>
                     
-                    <!-- Tabla de Actividad Tarifas -->
+                    <!-- Tabla de Usuarios Conectados -->
                     <div class="row">
                         <div class="col-12">
                             <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5 class="card-title mb-0">
+                                        <i class="fas fa-users text-primary me-2"></i>Usuarios Conectados
+                                    </h5>
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge bg-primary me-2" th:text="${#lists.size(usuariosConectados)} + ' usuario' + (${#lists.size(usuariosConectados)} != 1 ? 's' : '')">0 usuarios</span>
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock me-1"></i>Actualizado: <span th:text="${#temporals.format(#temporals.createNow(), 'HH:mm:ss')}">--:--:--</span>
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div th:if="${!#lists.isEmpty(usuariosConectados)}" class="table-responsive">
+                                        <table class="table table-striped table-hover">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th><i class="fas fa-user me-1"></i>Usuario</th>
+                                                    <th><i class="fas fa-clock me-1"></i>Última Actividad</th>
+                                                    <th><i class="fas fa-stopwatch me-1"></i>Tiempo Inactivo</th>
+                                                    <th><i class="fas fa-signal me-1"></i>Estado</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr th:each="usuario : ${usuariosConectados}" th:class="${'table-row-' + usuario.claseEstado}">
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="avatar avatar-sm me-2">
+                                                                <div class="avatar-title rounded-circle bg-secondary">
+                                                                    <i class="fas fa-user"></i>
+                                                                </div>
+                                                            </div>
+                                                            <span class="fw-bold" th:text="${usuario.nombre}">Usuario</span>
+                                                        </div>
+                                                    </td>
+
+                                                    <td>
+                                                        <span th:if="${usuario.ultimaActividad != null}" 
+                                                              th:text="${#temporals.format(usuario.ultimaActividad, 'dd/MM/yyyy HH:mm:ss')}"
+                                                              class="text-muted">
+                                                            Fecha
+                                                        </span>
+                                                        <span th:if="${usuario.ultimaActividad == null}" class="text-muted">Sin fecha</span>
+                                                    </td>
+                                                    <td>
+                                                        <small class="text-muted" th:text="${usuario.tiempoInactividad}">--</small>
+                                                    </td>
+                                                    <td>
+                                                        <span th:class="${'badge bg-' + usuario.claseEstado + ' d-inline-flex align-items-center'}" 
+                                                              th:text="${usuario.estado}">
+                                                            Estado
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div th:if="${#lists.isEmpty(usuariosConectados)}" class="text-center py-5">
+                                        <div class="text-muted">
+                                            <i class="fas fa-user-slash fa-3x mb-3 opacity-50"></i>
+                                            <h5>No hay usuarios conectados</h5>
+                                            <p class="mb-0">No se encontraron usuarios activos en este momento</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tabla de Actividad Tarifas -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
                                 <div class="card-header">
-                                    <h5 class="card-title mb-0">Actividad de Tarifas</h5>
+                                    <h5 class="card-title mb-0">
+                                        <i class="fas fa-chart-line text-info me-2"></i>Actividad de Tarifas
+                                    </h5>
                                 </div>
                                 <div class="card-body">
                                     <div class="table-responsive">
                                         <table class="table table-striped table-hover">
-                                            <thead>
+                                            <thead class="table-light">
                                                 <tr>
                                                     <th>Agencia</th>
                                                     <th>Artista</th>
@@ -55,7 +129,7 @@
                                                     <td th:text="${actividad.numeroActualizacionesMes}"></td>
                                                 </tr>
                                                 <tr th:if="${#lists.isEmpty(actividadTarifas)}">
-                                                    <td colspan="3" class="text-center text-muted">No hay datos de actividad de tarifas disponibles</td>
+                                                    <td colspan="4" class="text-center text-muted">No hay datos de actividad de tarifas disponibles</td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -70,12 +144,14 @@
                         <div class="col-12">
                             <div class="card">
                                 <div class="card-header">
-                                    <h5 class="card-title mb-0">Actividad de Ocupaciones</h5>
+                                    <h5 class="card-title mb-0">
+                                        <i class="fas fa-calendar-check text-success me-2"></i>Actividad de Ocupaciones
+                                    </h5>
                                 </div>
                                 <div class="card-body">
                                     <div class="table-responsive">
                                         <table class="table table-striped table-hover">
-                                            <thead>
+                                            <thead class="table-light">
                                                 <tr>
                                                     <th>Agencia</th>
                                                     <th>Artista</th>
@@ -91,7 +167,7 @@
                                                     <td th:text="${actividad.numeroActualizacionesMes}"></td>
                                                 </tr>
                                                 <tr th:if="${#lists.isEmpty(actividadOcupaciones)}">
-                                                    <td colspan="3" class="text-center text-muted">No hay datos de actividad de ocupaciones disponibles</td>
+                                                    <td colspan="4" class="text-center text-muted">No hay datos de actividad de ocupaciones disponibles</td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -108,6 +184,36 @@
         </div>
     </div>
 
+    <!-- Estilos adicionales para los estados -->
+    <style>
+        .table-row-success {
+            border-left: 3px solid #28a745;
+        }
+        .table-row-warning {
+            border-left: 3px solid #ffc107;
+        }
+        .table-row-danger {
+            border-left: 3px solid #dc3545;
+        }
+        .avatar {
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .avatar-title {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+        .opacity-50 {
+            opacity: 0.5;
+        }
+    </style>
 
 </body>
 </html>

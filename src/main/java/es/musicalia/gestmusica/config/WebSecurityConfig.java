@@ -13,6 +13,8 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -41,7 +43,12 @@ public class WebSecurityConfig {
 		return http.getSharedObject(AuthenticationManagerBuilder.class)
 				.build();
 	}
-	@Bean
+    @Bean
+    public SessionRegistry sessionRegistry() {
+        return new SessionRegistryImpl();
+    }
+
+    @Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
@@ -58,13 +65,14 @@ public class WebSecurityConfig {
 			.sessionManagement(session -> session
 					.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
 					.maximumSessions(1)
-					.expiredUrl("/auth/login?expired")
+					.expiredUrl("/auth/login?expired").sessionRegistry(sessionRegistry())
 			)
             .formLogin(form -> form
                 .loginPage("/auth/login")
                 .permitAll()
                 .defaultSuccessUrl("/", true)
             )
+
             .logout(logout -> logout
                 .invalidateHttpSession(true)
             );
