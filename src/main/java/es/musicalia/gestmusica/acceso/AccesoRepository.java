@@ -12,7 +12,7 @@ import org.springframework.data.repository.query.Param;
 @Repository
 public interface AccesoRepository extends JpaRepository<Acceso, Long> {
 
-    @Query("select a from Acceso a where a.usuario.id = ?1 and a.activo")
+    @Query("select a from Acceso a JOIN a.rol r  where a.usuario.id = ?1 and r.codigo != 'RESTRINGIR' and a.activo")
     Optional<List<Acceso>> findAllAccesosByIdUsuario(Long idUsuario);
 
 

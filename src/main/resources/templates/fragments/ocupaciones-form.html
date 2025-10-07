@@ -74,7 +74,7 @@
   <div class="mb-3 row">
     <label for="localidad-ocupacion" class="col-form-label col-sm-3 text-sm-end">Localidad</label>
     <div class="col-sm-9">
-      <input multiple type="text" id="localidad-ocupacion" th:field="*{localidad}" class="form-control" placeholder="Localidad"  autocomplete="off" required list="localidades-list">
+      <input multiple type="text" id="localidad-ocupacion" th:field="*{localidad}" class="form-control" placeholder="Localidad"  autocomplete="off" list="localidades-list">
       <datalist id="localidades-list">
         <option th:each="localidad : ${listaLocalidadesListado}" th:value="${localidad.nombre}"></option>
       </datalist>

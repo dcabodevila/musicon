@@ -17,7 +17,7 @@ public interface AccesoArtistaRepository extends JpaRepository<AccesoArtista, Lo
     @Query("select a from AccesoArtista a where a.artista.id = ?1 and a.usuario.id = ?2 and a.permiso.id = ?3 and a.activo and a.artista.activo")
     Optional<AccesoArtista> findAllAccesosByIdArtistaIdUsuarioIdPermiso(Long idArtista, Long idUsuario, Long idPermiso);
 
-    @Query("select a from AccesoArtista a where a.usuario.id = ?1 and a.activo and a.artista.activo")
+    @Query("select a from AccesoArtista a JOIN a.permiso p where a.usuario.id = ?1 and p.codigo !='PRESUPUESTOS_RESTRINGIDOS' and a.activo and a.artista.activo")
     Optional<List<AccesoArtista>> findAllAccesosArtistaByIdUsuario(Long idUsuario);
 
     @Query("select a from AccesoArtista a where a.artista.id = ?1 and a.usuario.id = ?2 and a.permiso.id = ?3 and a.activo and a.artista.activo")
