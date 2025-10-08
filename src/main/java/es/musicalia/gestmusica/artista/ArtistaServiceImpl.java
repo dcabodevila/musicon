@@ -2,19 +2,20 @@ package es.musicalia.gestmusica.artista;
 
 
 import es.musicalia.gestmusica.acceso.Acceso;
-import es.musicalia.gestmusica.acceso.AccesoRepository;
 import es.musicalia.gestmusica.acceso.AccesoService;
+import es.musicalia.gestmusica.accesoartista.AccesoArtistaRepository;
 import es.musicalia.gestmusica.agencia.AgenciaRepository;
 import es.musicalia.gestmusica.contacto.Contacto;
 import es.musicalia.gestmusica.contacto.ContactoRepository;
-import es.musicalia.gestmusica.localizacion.*;
+import es.musicalia.gestmusica.localizacion.CcaaRepository;
+import es.musicalia.gestmusica.localizacion.CodigoNombreDto;
 import es.musicalia.gestmusica.rol.RolEnum;
-import es.musicalia.gestmusica.rol.RolRepository;
 import es.musicalia.gestmusica.tipoartista.TipoArtistaRepository;
 import es.musicalia.gestmusica.tipoescenario.TipoEscenarioRepository;
 import es.musicalia.gestmusica.usuario.Usuario;
 import es.musicalia.gestmusica.usuario.UsuarioRepository;
 import es.musicalia.gestmusica.util.StringUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
-
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 public class ArtistaServiceImpl implements ArtistaService {
@@ -35,14 +36,12 @@ public class ArtistaServiceImpl implements ArtistaService {
 	private final CcaaRepository ccaaRepository;
 	private final AgenciaRepository agenciaRepository;
 	private final AccesoService accesoService;
-	private final RolRepository rolRepository;
-	private final AccesoRepository accesoRepository;
 	private final ArtistaMapper artistaMapper;
 
 	public ArtistaServiceImpl(ArtistaRepository artistaRepository, UsuarioRepository usuarioRepository, ContactoRepository agenciaContactoRepository,
                               TipoEscenarioRepository tipoEscenarioRepository,
                               TipoArtistaRepository tipoArtistaRepository,
-                              CcaaRepository ccaaRepository, AgenciaRepository agenciaRepository, AccesoService accesoService, RolRepository rolRepository, AccesoRepository accesoRepository, ArtistaMapper artistaMapper){
+                              CcaaRepository ccaaRepository, AgenciaRepository agenciaRepository, AccesoService accesoService, ArtistaMapper artistaMapper){
 		this.artistaRepository = artistaRepository;
 		this.usuarioRepository = usuarioRepository;
 		this.agenciaContactoRepository = agenciaContactoRepository;
@@ -52,9 +51,8 @@ public class ArtistaServiceImpl implements ArtistaService {
 		this.agenciaRepository = agenciaRepository;
 
         this.accesoService = accesoService;
-        this.rolRepository = rolRepository;
-        this.accesoRepository = accesoRepository;
         this.artistaMapper = artistaMapper;
+
     }
 
 	@Override
@@ -129,9 +127,31 @@ public class ArtistaServiceImpl implements ArtistaService {
 
 		artista = artistaRepository.save(artista);
 
-//        crearAccesosUsuarioArtista(artista.getUsuario(), artistaDto.getIdAgencia(), artista.getId());
+
+        if (artistaDto.getId() == null) {
+            guardarPermisosArtistaRolesAgenciaRepresentante(artista);
+        }
+
+
 
         return artista;
+    }
+
+    private void guardarPermisosArtistaRolesAgenciaRepresentante(Artista artista) {
+        try {
+
+            Optional<List<Acceso>> listaAccesosAgencia = this.accesoService.findAllAccesosByAndIdAgenciaAndCodigoRolAndActivo(Set.of(RolEnum.ROL_AGENCIA.getCodigo(), RolEnum.ROL_REPRESENTANTE.getCodigo()), artista.getAgencia().getId());
+
+            if (listaAccesosAgencia.isPresent() && !listaAccesosAgencia.get().isEmpty()) {
+                for (Acceso acceso : listaAccesosAgencia.get()) {
+                    this.accesoService.guardarPermisosArtistas(acceso, artista.getId(), false);
+                }
+
+            }
+
+        }catch (Exception e){
+            log.error("Error al guardar los permisos del artista {}", artista.getId(), e);
+        }
     }
 
     private void actualizarDatosBasicos(Artista artista, ArtistaDto dto) {
@@ -186,21 +206,7 @@ public class ArtistaServiceImpl implements ArtistaService {
         return contacto;
     }
 
-//    private void crearAccesosUsuarioArtista(Usuario usuario, Long idAgencia, Long idArtista) {
-//
-//        accesoService.crearAccesoUsuarioAgenciaRol(usuario.getId(), idAgencia, rolRepository.findRolRecordByCodigo(RolEnum.ROL_ARTISTA.getCodigo()).id(), idArtista);
-//
-//        Set<String> rolesPermitidos = Set.of(
-//                RolEnum.ROL_REPRESENTANTE.getCodigo(),
-//                RolEnum.ROL_AGENCIA.getCodigo()
-//        );
-//
-//		Optional<List<Acceso>> accesosUsuario = accesoRepository.findAllAccesosByAndIdAgenciaAndCodigoRolAndActivo(rolesPermitidos, idAgencia);
-//
-//		accesosUsuario.ifPresent(accesos ->
-//				accesos.forEach(acceso -> accesoService.guardarPermisosArtistas(acceso, idArtista))
-//		);
-//    }
+
 	@Override
 	public List<CodigoNombreDto> listaTipoEscenario(){
 		return this.tipoEscenarioRepository.findAll().stream()

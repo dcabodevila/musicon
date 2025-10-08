@@ -92,7 +92,7 @@ public class AccesoServiceImpl implements AccesoService {
 
 		Acceso acceso = getAcceso(accesoDto);
 
-		guardarPermisosArtistas(acceso, accesoDto.getIdArtista());
+		guardarPermisosArtistas(acceso, accesoDto.getIdArtista(), true);
 
 		return acceso;
 	}
@@ -149,9 +149,11 @@ public class AccesoServiceImpl implements AccesoService {
 	}
 
 	@Transactional(readOnly = false)
-	public void guardarPermisosArtistas(Acceso acceso, Long idArtista) {
+	public void guardarPermisosArtistas(Acceso acceso, Long idArtista, boolean eliminarAntiguos) {
 
-        eliminarPermisosArtistas(acceso.getUsuario().getId(), acceso.getAgencia().getId(), acceso.getRol().getId());
+        if (eliminarAntiguos) {
+            eliminarPermisosArtistas(acceso.getUsuario().getId(), acceso.getAgencia().getId(), acceso.getRol().getId());
+        }
 
 		Set<Permiso> permisosArtista = obtenerPermisosArtista(acceso.getRol().getId());
 
@@ -265,6 +267,11 @@ public class AccesoServiceImpl implements AccesoService {
 	public List<AccesoDetailRecord> findAllAccesosDetailRecordByIdUsuario(Long idUsuario) {
 		return accesoRepository.findAllAccesosDetailRecordByIdUsuario(idUsuario);
 	}
+
+    @Override
+    public Optional<List<Acceso>> findAllAccesosByAndIdAgenciaAndCodigoRolAndActivo(Set<String> codigosRol, Long idAgencia){
+        return this.accesoRepository.findAllAccesosByAndIdAgenciaAndCodigoRolAndActivo(codigosRol,idAgencia);
+    }
 
 	@Override
 	public List<AccesoDetailRecord> getMisAccesos(Long userId){
