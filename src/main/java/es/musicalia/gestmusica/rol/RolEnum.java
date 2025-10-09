@@ -9,8 +9,8 @@ import java.util.Map;
 public enum RolEnum {
 
     ROL_ADMINISTRADOR("ADMIN", "Administrador"),
-    ROL_REPRESENTANTE( "REPRE", "Representante"),
-    ROL_AGENTE("AGENTE", "Agente"),
+    ROL_REPRESENTANTE( "REPRE", "Agente Pro"),
+    ROL_AGENTE("AGENTE", "Representante"),
     ROL_AGENCIA( "AGENCIA", "Agencia"),
     ROL_ARTISTA( "ARTISTA", "Artista");
 

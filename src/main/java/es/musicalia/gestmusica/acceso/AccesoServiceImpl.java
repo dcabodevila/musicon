@@ -15,12 +15,14 @@ import es.musicalia.gestmusica.rol.*;
 import es.musicalia.gestmusica.usuario.Usuario;
 import es.musicalia.gestmusica.usuario.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 public class AccesoServiceImpl implements AccesoService {
@@ -49,7 +51,7 @@ public class AccesoServiceImpl implements AccesoService {
 	@Override
 	public Acceso crearAccesoUsuarioAgenciaRol(Long idUsuario, Long idAgencia, Long idRol, Long idArtista){
 
-		Acceso acceso = obtenerOCrearAcceso(idUsuario, idAgencia, idRol);
+		Acceso acceso = obtenerOCrearAccesoAgencia(idUsuario, idAgencia, idRol);
 		AccesoDto accesoDto = accesoMapper.toAccesoDto(acceso);
 		accesoDto.setIdArtista(idArtista);
 		guardarAcceso(accesoDto);
@@ -90,28 +92,80 @@ public class AccesoServiceImpl implements AccesoService {
             accesoDto.setId(null);
         }
 
-		Acceso acceso = getAcceso(accesoDto);
+		Acceso acceso = guardarEntityAcceso(accesoDto);
 
 		guardarPermisosArtistas(acceso, accesoDto.getIdArtista(), true);
 
 		return acceso;
 	}
 
-	private Acceso getAcceso(AccesoDto accesoDto) {
-		Acceso acceso = obtenerOCrearAcceso(accesoDto);
+	private Acceso guardarEntityAcceso(AccesoDto accesoDto) {
+		Acceso acceso = obtenerOCrearAccesoAgencia(accesoDto);
 		Usuario usuario = obtenerUsuario(accesoDto.getIdUsuario());
 
 		acceso.setUsuario(usuario);
 		acceso.setAgencia(obtenerAgencia(accesoDto.getIdAgencia()));
-		acceso.setRol(obtenerRol(accesoDto.getIdRol()));
+        final Rol rolAcceso = obtenerRol(accesoDto.getIdRol());
+		acceso.setRol(rolAcceso);
 		acceso.setArtista(accesoDto.getIdArtista()!=null ? this.artistaRepository.findById(accesoDto.getIdArtista()).orElseThrow() : null);
 		acceso.setActivo(Boolean.TRUE);
 
 		acceso = accesoRepository.save(acceso);
+
+        final Rol rolGeneral = obtenerRolGeneralUsuario(usuario);
+
+        if (rolGeneral != null && !rolGeneral.getCodigo().equals(usuario.getRolGeneral().getCodigo())) {
+            usuario.setRolGeneral(rolGeneral);
+            usuarioRepository.save(usuario);
+        }
+
 		return acceso;
 	}
 
-	private Acceso obtenerOCrearAcceso(Long idUsuario, Long idAgencia, Long idRol) {
+    private Rol obtenerRolGeneralUsuario(Usuario u) {
+        try {
+            final Optional<List<Acceso>> listaAccesosUsuario = this.accesoRepository.findAllAccesosByIdUsuario(u.getId());
+
+            if (listaAccesosUsuario.isPresent() && !listaAccesosUsuario.get().isEmpty()) {
+                List<Acceso> accesos = listaAccesosUsuario.get();
+
+                // Verificar si tiene al menos un acceso como agencia
+                boolean tieneAccesoAgencia = accesos.stream()
+                        .anyMatch(acceso -> RolEnum.ROL_AGENCIA.getCodigo().equals(acceso.getRol().getCodigo()));
+
+                if (tieneAccesoAgencia) {
+                    // Se asigna rol general agencia
+                    return this.rolRepository.findRolByCodigo(RolEnum.ROL_AGENCIA.getCodigo());
+                }
+
+                // Si no es agencia, verificar si tiene acceso como representante
+                boolean tieneAccesoRepresentante = accesos.stream()
+                        .anyMatch(acceso -> RolEnum.ROL_REPRESENTANTE.getCodigo().equals(acceso.getRol().getCodigo()));
+
+                if (tieneAccesoRepresentante) {
+                    // Se asigna rol general representante
+                    return this.rolRepository.findRolByCodigo(RolEnum.ROL_REPRESENTANTE.getCodigo());
+                }
+
+                // Si no tiene acceso como representante, verificar si tiene rol artista
+                boolean tieneRolArtista = accesos.stream()
+                        .anyMatch(acceso -> RolEnum.ROL_ARTISTA.getCodigo().equals(acceso.getRol().getCodigo()));
+
+                if (tieneRolArtista) {
+                    return this.rolRepository.findRolByCodigo(RolEnum.ROL_ARTISTA.getCodigo());
+                }
+            }
+
+            return this.rolRepository.findRolByCodigo(RolEnum.ROL_AGENTE.getCodigo());
+        } catch (Exception e) {
+            log.error("error boteniendo el rol general del usuario", e);
+        }
+
+        return null;
+
+    }
+
+	private Acceso obtenerOCrearAccesoAgencia(Long idUsuario, Long idAgencia, Long idRol) {
 		Acceso acceso = this.accesoRepository
 				.findAccesoByIdUsuarioAndIdAgenciaAndCodigoRol(idUsuario, idAgencia, RolEnum.ROL_AGENCIA.getCodigo())
 				.orElseGet(Acceso::new);
@@ -127,7 +181,7 @@ public class AccesoServiceImpl implements AccesoService {
 		return acceso;
 	}
 
-	private Acceso obtenerOCrearAcceso(AccesoDto accesoDto) {
+	private Acceso obtenerOCrearAccesoAgencia(AccesoDto accesoDto) {
 		return accesoDto.getId() != null
 				? accesoRepository.findById(accesoDto.getId()).orElse(new Acceso())
 				: new Acceso();
@@ -260,6 +314,15 @@ public class AccesoServiceImpl implements AccesoService {
 
 
 		this.accesoRepository.delete(acceso);
+
+        Usuario usuario = acceso.getUsuario();
+
+        final Rol rolGeneral = obtenerRolGeneralUsuario(usuario);
+
+        if (rolGeneral != null && !rolGeneral.getCodigo().equals(usuario.getRolGeneral().getCodigo())) {
+            usuario.setRolGeneral(rolGeneral);
+            usuarioRepository.save(usuario);
+        }
 
 	}
 
