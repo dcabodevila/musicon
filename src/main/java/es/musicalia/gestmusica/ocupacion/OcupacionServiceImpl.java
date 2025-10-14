@@ -424,14 +424,19 @@ public class OcupacionServiceImpl implements OcupacionService {
 	}
 
 	private Tarifa obtenerTarifaByOcupacion(Long idArtista, LocalDateTime fecha, final Ocupacion ocupacion){
+        final List<Tarifa> listaTarifas = this.tarifaRepository.findTarifasByArtistaIdAndDates(idArtista, fecha.withHour(0).withMinute(0).withSecond(0), fecha.withHour(23).withMinute(59).withSecond(59));
 
-		if (ocupacion.getTarifa()!=null){
-			return ocupacion.getTarifa();
-		}
+        if (ocupacion.getTarifa()!=null){
 
-		final List<Tarifa> listaTarifas = this.tarifaRepository.findTarifasByArtistaIdAndDates(idArtista, fecha.withHour(0).withMinute(0).withSecond(0), fecha.withHour(23).withMinute(59).withSecond(59));
+            for (Tarifa tarifa : listaTarifas){
+                tarifa.setActivo(false);
+            }
+            return ocupacion.getTarifa();
+        }
+
 
 		if (listaTarifas!=null && !listaTarifas.isEmpty()){
+
 			return listaTarifas.get(0);
 		}
 

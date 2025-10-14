@@ -8,7 +8,6 @@ import es.musicalia.gestmusica.util.DateUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -51,7 +50,6 @@ public class TarifaServiceImpl implements TarifaService {
 	@Transactional(readOnly = false)
 	public void saveTarifa(TarifaSaveDto tarifaSaveDto){
 
-		//TODO: Crear tarifas por día fecha desde/hasta
 		if (tarifaSaveDto.getFechaHasta()!=null){
 			Duration duracion = Duration.between(tarifaSaveDto.getFechaDesde(), tarifaSaveDto.getFechaHasta());
 			for (int i = 0; i <= duracion.toDays(); i++) {

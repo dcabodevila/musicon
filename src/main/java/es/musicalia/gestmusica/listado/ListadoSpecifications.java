@@ -1,6 +1,7 @@
 package es.musicalia.gestmusica.listado;
 
 import es.musicalia.gestmusica.agencia.Agencia;
+import es.musicalia.gestmusica.artista.Artista;
 import es.musicalia.gestmusica.localizacion.Municipio;
 import es.musicalia.gestmusica.localizacion.Provincia;
 import es.musicalia.gestmusica.usuario.Usuario;
@@ -38,6 +39,48 @@ public class ListadoSpecifications {
             
             Join<Listado, Agencia> agenciaJoin = root.join("agencias", JoinType.INNER);
             return agenciaJoin.get("id").in(idsAgencias);
+        };
+    }
+
+    public static Specification<Listado> hasComunidad(Set<Long> idsComunidadesArtista) {
+        return (root, query, criteriaBuilder) -> {
+            if (idsComunidadesArtista == null || idsComunidadesArtista.isEmpty()) {
+                return criteriaBuilder.conjunction();
+            }
+
+            
+            List<Predicate> predicates = new ArrayList<>();
+            
+            for (Long idComunidad : idsComunidadesArtista) {
+                // Buscar el ID como número completo, considerando que puede estar:
+                // - Al principio seguido de coma: "123,"
+                // - En el medio rodeado de comas: ",123,"
+                // - Al final precedido de coma: ",123"
+                // - Solo (sin comas): "123"
+                String pattern = "(^|,)" + idComunidad + "(,|$)";
+                
+                Predicate containsId = criteriaBuilder.like(
+                    criteriaBuilder.concat(",", criteriaBuilder.concat(root.get("idsComunidades"), ",")),
+                    "%," + idComunidad + ",%"
+                );
+                
+                predicates.add(containsId);
+            }
+            
+            // Usar OR para que coincida con cualquiera de las comunidades
+            return criteriaBuilder.or(predicates.toArray(new Predicate[0]));
+        };
+    }
+
+
+    public static Specification<Listado> hasArtista(Set<Long> idsArtistas) {
+        return (root, query, criteriaBuilder) -> {
+            if (idsArtistas == null || idsArtistas.isEmpty()) {
+                return criteriaBuilder.conjunction();
+            }
+
+            Join<Listado, Artista> artistaJoin = root.join("artistas", JoinType.INNER);
+            return artistaJoin.get("id").in(idsArtistas);
         };
     }
 
@@ -104,7 +147,7 @@ public class ListadoSpecifications {
             if (idMunicipio == null) {
                 return criteriaBuilder.conjunction();
             }
-            
+
             Join<Listado, Municipio> municipioJoin = root.join("municipio", JoinType.INNER);
             return criteriaBuilder.equal(municipioJoin.get("id"), idMunicipio);
         };
@@ -226,6 +269,11 @@ public class ListadoSpecifications {
     public static Specification<Listado> findListadosByAgenciaAndFechas(Long idAgencia, LocalDateTime fechaDesde, LocalDateTime fechaHasta) {
         return Specification.where(hasAgencia(idAgencia))
                 .and(hasFechaCreacionEntre(fechaDesde, fechaHasta)).and(isActivo());
+    }
+
+    public static Specification<Listado> findListadosByAgenciaAndFechasAndComunidades(Long idAgencia, LocalDateTime fechaDesde, LocalDateTime fechaHasta, Set<Long> idsArtistas) {
+        return Specification.where(hasAgencia(idAgencia))
+                .and(hasFechaCreacionEntre(fechaDesde, fechaHasta)).and(hasArtista(idsArtistas)).and(isActivo());
     }
 
     public static Specification<Listado> isActivo() {

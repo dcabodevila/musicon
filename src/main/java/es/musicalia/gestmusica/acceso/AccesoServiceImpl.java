@@ -124,6 +124,11 @@ public class AccesoServiceImpl implements AccesoService {
 
     private Rol obtenerRolGeneralUsuario(Usuario u) {
         try {
+
+            if (u.getRolGeneral().getCodigo().equals(RolEnum.ROL_ADMINISTRADOR.getCodigo())){
+                return null;
+            }
+
             final Optional<List<Acceso>> listaAccesosUsuario = this.accesoRepository.findAllAccesosByIdUsuario(u.getId());
 
             if (listaAccesosUsuario.isPresent() && !listaAccesosUsuario.get().isEmpty()) {

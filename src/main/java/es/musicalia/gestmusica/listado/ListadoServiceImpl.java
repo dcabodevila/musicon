@@ -4,6 +4,7 @@ import es.musicalia.gestmusica.accesoartista.AccesoArtista;
 import es.musicalia.gestmusica.accesoartista.AccesoArtistaRepository;
 import es.musicalia.gestmusica.agencia.Agencia;
 import es.musicalia.gestmusica.agencia.AgenciaRepository;
+import es.musicalia.gestmusica.artista.ArtistaRecord;
 import es.musicalia.gestmusica.artista.ArtistaRepository;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.informe.InformeService;
@@ -17,6 +18,7 @@ import es.musicalia.gestmusica.permiso.PermisoRepository;
 import es.musicalia.gestmusica.util.DateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -190,12 +192,30 @@ public byte[] generarInformeListado(ListadoDto listadoDto, Long idUsuario) {
 
 	@Override
 public List<ListadoRecord> obtenerListadoEntreFechas(ListadoAudienciasDto listadoAudienciasDto) {
+    Specification<Listado> spec = null;
+    if (listadoAudienciasDto.getIdAgencia() == null) {
+         spec = ListadoSpecifications.findListadosByAgenciaAndFechas(
+                listadoAudienciasDto.getIdAgencia(),
+                listadoAudienciasDto.getFechaDesde().atStartOfDay(),
+                listadoAudienciasDto.getFechaHasta().plusDays(1).atStartOfDay().minusNanos(1)
+        );
 
-    var spec = ListadoSpecifications.findListadosByAgenciaAndFechas(
-        listadoAudienciasDto.getIdAgencia(),
-        listadoAudienciasDto.getFechaDesde().atStartOfDay(),
-        listadoAudienciasDto.getFechaHasta().plusDays(1).atStartOfDay().minusNanos(1)
-    );
+    }
+    else {
+
+        Set<Long> idsArtistaAgencia = this.artistaRepository.findAllArtistasRecordByIdAgencia(listadoAudienciasDto.getIdAgencia()).stream()
+                .map(ArtistaRecord::id)
+                .collect(Collectors.toSet());
+
+        spec = ListadoSpecifications.findListadosByAgenciaAndFechasAndComunidades(
+                listadoAudienciasDto.getIdAgencia(),
+                listadoAudienciasDto.getFechaDesde().atStartOfDay(),
+                listadoAudienciasDto.getFechaHasta().plusDays(1).atStartOfDay().minusNanos(1), idsArtistaAgencia
+        );
+
+    }
+
+
 
     // Obtener las entidades ordenadas
     List<Listado> listados = this.listadoRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "fechaCreacion"));
