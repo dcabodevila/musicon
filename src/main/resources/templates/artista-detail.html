@@ -102,7 +102,7 @@
                                             th:text="${artistaDto.telefono3}"></a></li>
                                     <li class="mb-1" th:if="${artistaDto.email!=null && artistaDto.email!=''}"><span
                                             class="fas fa-envelope fa-fw me-1"></span> <a
-                                            th:href="${'mailto:'+ artistaDto.email}" th:text="${artistaDto.email}"></a>
+                                            th:href="${'mailto:'+ artistaDto.email}" target="_blank" th:text="${artistaDto.email}"></a>
                                     </li>
                                     <li class="mb-1"
                                         th:if="${artistaDto.nombreCcaa!=null  && artistaDto.nombreCcaa!=''}"><span

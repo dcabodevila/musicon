@@ -6,6 +6,7 @@ import es.musicalia.gestmusica.permiso.PermisoAgenciaEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,13 +33,15 @@ public class HomeController {
                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         final boolean isUsuarioValidado = user.getUsuario().isValidado();
-
+        model.addAttribute("isUsuarioValidado", isUsuarioValidado);
         if (!isUsuarioValidado){
-            model.addAttribute("message", "Su cuenta de usuario será validada próximamente por los administradores. Una vez validada se le asignarán permisos de acceso");
+            model.addAttribute("message", "Tu cuenta de usuario está siendo validado por los administradores, mientras tanto, puedes echar un vistazo a las características de festia.");
             model.addAttribute("alertClass", "success");
 
         }
 
+
+        model.addAttribute("isUsuarioAutenticado", !SecurityContextHolder.getContext().getAuthentication().getName().equals("anonymousUser"));
         model.addAttribute("listaOcupacionPendiente", this.ocupacionService.findOcupacionesDtoByAgenciaPendientes(mapPermisosAgencia.keySet()));
         return "main.html";
     }

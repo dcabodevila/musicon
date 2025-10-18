@@ -23,126 +23,127 @@
             <div th:replace="~{fragments/modal-confirmacion :: modal-confirmacion}"/>
 
             <main class="content">
-
                 <div th:if="${message}" th:class="${'alert alert-' + alertClass+ ' alert-dismissible fade show'}" role="alert"
                      style="padding: 15px;">
                     <strong th:text="${message}">Hello there!</strong>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
-                <div class="container-fluid p-0">
-                    <!-- Carrusel Principal -->
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <div id="mainCarousel" class="carousel slide" data-bs-ride="carousel">
-                                <div class="carousel-inner">
-                                    <div class="carousel-item active">
-                                        <div class="card">
-                                            <div class="card-body text-center py-5">
-                                                <img th:src="@{/logo/logo-name-transparente.png}" alt="festia Logo"
-                                                     class="img-fluid mb-3" style="max-height: 200px;"/>
-                                            </div>
-                                        </div>
-                                    </div>
+
+                <div id="content-usuario" th:if="${isUsuarioValidado}">
+                    <div class="container-fluid p-0">
+                        <div class="row mb-4">
+                            <section class="hero-section animate__animated animate__fadeIn"
+                                     style="max-height: 400px !important; height: 400px !important; min-height: 400px !important;">
+                                <img src="https://res.cloudinary.com/hseoceuyz/image/upload/v1760722076/landing-festia_ycxlkg.png"
+                                     alt="Concierto multitudinario"
+                                     class="hero-image" style="max-height: 400px; height: 400px; object-fit: cover; width: 100%;"/>
+                                <div class="hero-content animate__animated animate__zoomIn animate__delay-1s">
+                                    <img src="/logo/logo-name-transparente-alt-color.png" alt="festia.es" class="hero-logo" style="max-width: 320px;"/>
+                                </div>
+                            </section>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="d-flex flex-column flex-sm-row justify-content-around">
+                                    <a th:if="${#sets.size(misAgencias)==1}"
+                                       th:href="@{'/agencia/{id}'(id=${misAgencias[0]})}"
+                                       class="btn btn-pill btn-secondary m-1 col-12 col-sm-3">
+                                        <i class="align-middle me-2 fas fa-fw fa-suitcase"></i>
+                                        <span class="align-middle">Mi agencia</span>
+                                    </a>
+                                    <a th:if="${#sets.size(misAgencias)>1}"
+                                       th:href="@{/agencia/mis-agencias}"
+                                       class="btn btn-pill btn-secondary m-1 col-12 col-sm-3">
+                                        <i class="align-middle me-2 fas fa-fw fa-suitcase"></i>
+                                        <span class="align-middle">Mis agencias</span>
+                                    </a>
+                                    <a th:if="${#sets.size(misArtistas)==1}"
+                                       th:href="@{'/artista/{id}'(id=${misArtistas[0]})}"
+                                       class="btn btn-pill btn-warning m-1 col-12 col-sm-3">
+                                        <i class="align-middle me-2 fas fa-fw fa-music"></i>
+                                        <span class="align-middle">Mi artista</span>
+                                    </a>
+                                    <a th:if="${#sets.size(misArtistas)>1}"
+                                       th:href="@{/artista/mis-artistas}"
+                                       class="btn btn-pill btn-warning m-1 col-12 col-sm-3">
+                                        <i class="align-middle me-2 fas fa-fw fa-music"></i>
+                                        <span class="align-middle">Mis artistas</span>
+                                    </a>
+                                    <a th:if="${hasPermisoOcupaciones != null and hasPermisoOcupaciones}"
+                                       th:href="@{/ocupacion/list}"
+                                       class="btn btn-pill btn-success m-1 col-12 col-sm-3">
+                                        <i class="align-middle me-2 fas fa-fw fa-calendar-plus"></i>
+                                        <span class="align-middle">Ocupaciones</span>
+                                    </a>
+                                    <a sec:authorize="hasAuthority('MENU_LISTADOS')" href="/listado"
+                                       class="btn btn-pill btn-primary m-1 col-12 col-sm-3">
+                                        <i class="align-middle me-2 fas fa-fw fa-calendar-alt"></i>
+                                        <span class="align-middle">Presupuestos</span>
+                                    </a>
+
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <div class="d-flex flex-column flex-sm-row justify-content-around">
-                                <a th:if="${#sets.size(misAgencias)==1}"
-                                   th:href="@{'/agencia/{id}'(id=${misAgencias[0]})}"
-                                   class="btn btn-pill btn-secondary m-1 col-12 col-sm-3">
-                                    <i class="align-middle me-2 fas fa-fw fa-suitcase"></i>
-                                    <span class="align-middle">Mi agencia</span>
-                                </a>
-                                <a th:if="${#sets.size(misAgencias)>1}"
-                                   th:href="@{/agencia/mis-agencias}"
-                                   class="btn btn-pill btn-secondary m-1 col-12 col-sm-3">
-                                    <i class="align-middle me-2 fas fa-fw fa-suitcase"></i>
-                                    <span class="align-middle">Mis agencias</span>
-                                </a>
-                                <a th:if="${#sets.size(misArtistas)==1}"
-                                   th:href="@{'/artista/{id}'(id=${misArtistas[0]})}"
-                                   class="btn btn-pill btn-warning m-1 col-12 col-sm-3">
-                                    <i class="align-middle me-2 fas fa-fw fa-music"></i>
-                                    <span class="align-middle">Mi artista</span>
-                                </a>
-                                <a th:if="${#sets.size(misArtistas)>1}"
-                                   th:href="@{/artista/mis-artistas}"
-                                   class="btn btn-pill btn-warning m-1 col-12 col-sm-3">
-                                    <i class="align-middle me-2 fas fa-fw fa-music"></i>
-                                    <span class="align-middle">Mis artistas</span>
-                                </a>
-                                <a th:if="${hasPermisoOcupaciones != null and hasPermisoOcupaciones}"
-                                   th:href="@{/ocupacion/list}"
-                                   class="btn btn-pill btn-success m-1 col-12 col-sm-3">
-                                    <i class="align-middle me-2 fas fa-fw fa-calendar-plus"></i>
-                                    <span class="align-middle">Ocupaciones</span>
-                                </a>
-                                <a sec:authorize="hasAuthority('MENU_LISTADOS')" href="/listado"
-                                   class="btn btn-pill btn-primary m-1 col-12 col-sm-3">
-                                    <i class="align-middle me-2 fas fa-fw fa-calendar-alt"></i>
-                                    <span class="align-middle">Presupuestos</span>
-                                </a>
-
-                            </div>
-                        </div>
-                    </div>
 
 
-                    <!-- Reemplazar el div existente por: -->
-                    <div class="row mb-4" th:if="${listaOcupacionPendiente != null && not #lists.isEmpty(listaOcupacionPendiente)}">
-                        <div class="col-12">
-                            <h3 class="h3 d-inline align-middle"><strong>Ocupaciones</strong> pendientes de confirmación</h3>
+                        <!-- Reemplazar el div existente por: -->
+                        <div class="row mb-4" th:if="${listaOcupacionPendiente != null && not #lists.isEmpty(listaOcupacionPendiente)}">
+                            <div class="col-12">
+                                <h3 class="h3 d-inline align-middle"><strong>Ocupaciones</strong> pendientes de confirmación</h3>
 
-                            <div id="carrousel-lista-ocupaciones-pendientes" class="carousel slide" data-bs-ride="carousel">
-                                <div class="carousel-inner">
-                                    <!-- Primera tarjeta activa -->
-                                    <div class="carousel-item active">
-                                        <div class="row">
-                                            <div th:each="ocupacion, iterStat : ${listaOcupacionPendiente}" 
-                                                 th:if="${iterStat.index < 4}"
-                                                 class="col-12 col-md-6 col-lg-3">
-                                                <div class="card card-max-width animate__animated animate__fadeIn">
-                                                    <div th:replace="~{fragments/ocupaciones-pendientes :: ocupaciones-pendientes}"/>
+                                <div id="carrousel-lista-ocupaciones-pendientes" class="carousel slide" data-bs-ride="carousel">
+                                    <div class="carousel-inner">
+                                        <!-- Primera tarjeta activa -->
+                                        <div class="carousel-item active">
+                                            <div class="row">
+                                                <div th:each="ocupacion, iterStat : ${listaOcupacionPendiente}"
+                                                     th:if="${iterStat.index < 4}"
+                                                     class="col-12 col-md-6 col-lg-3">
+                                                    <div class="card card-max-width animate__animated animate__fadeIn">
+                                                        <div th:replace="~{fragments/ocupaciones-pendientes :: ocupaciones-pendientes}"/>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Resto de las tarjetas -->
+                                        <div th:each="batch : ${#numbers.sequence(4, #lists.size(listaOcupacionPendiente)-1, 4)}"
+                                             class="carousel-item">
+                                            <div class="row">
+                                                <div th:each="ocupacion, iterStat : ${listaOcupacionPendiente}"
+                                                     th:if="${iterStat.index >= batch && iterStat.index < batch + 4}"
+                                                     class="col-12 col-md-6 col-lg-3">
+                                                    <div class="card card-max-width animate__animated animate__fadeIn">
+                                                        <!-- El mismo contenido de la tarjeta que arriba -->
+                                                        <div th:replace="~{fragments/ocupaciones-pendientes :: ocupaciones-pendientes}"/>
+
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <!-- Resto de las tarjetas -->
-                                    <div th:each="batch : ${#numbers.sequence(4, #lists.size(listaOcupacionPendiente)-1, 4)}" 
-                                         class="carousel-item">
-                                        <div class="row">
-                                            <div th:each="ocupacion, iterStat : ${listaOcupacionPendiente}" 
-                                                 th:if="${iterStat.index >= batch && iterStat.index < batch + 4}"
-                                                 class="col-12 col-md-6 col-lg-3">
-                                                <div class="card card-max-width animate__animated animate__fadeIn">
-                                                    <!-- El mismo contenido de la tarjeta que arriba -->
-                                                    <div th:replace="~{fragments/ocupaciones-pendientes :: ocupaciones-pendientes}"/>
-
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <!-- Controles del carrusel -->
+                                    <button class="carousel-control-prev" type="button" data-bs-target="#carrousel-lista-ocupaciones-pendientes" data-bs-slide="prev">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Anterior</span>
+                                    </button>
+                                    <button class="carousel-control-next" type="button" data-bs-target="#carrousel-lista-ocupaciones-pendientes" data-bs-slide="next">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Siguiente</span>
+                                    </button>
                                 </div>
-
-                                <!-- Controles del carrusel -->
-                                <button class="carousel-control-prev" type="button" data-bs-target="#carrousel-lista-ocupaciones-pendientes" data-bs-slide="prev">
-                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                    <span class="visually-hidden">Anterior</span>
-                                </button>
-                                <button class="carousel-control-next" type="button" data-bs-target="#carrousel-lista-ocupaciones-pendientes" data-bs-slide="next">
-                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                    <span class="visually-hidden">Siguiente</span>
-                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
+                <div th:if="${!isUsuarioValidado}">
+                    <div  th:replace="~{info-content}"></div>
+                </div>
             </main>
+
+
 
             <div th:replace="~{fragments/main-template :: footer}"/>
         </div>
@@ -150,10 +151,9 @@
 
     <!-- Área transparente para detectar el swipe -->
     <div id="swipeArea" style="position: fixed; left: 0; top: 0; bottom: 0; width: 20px; z-index: 1000;"></div>
-    
+
     <script type="text/javascript" th:src="@{/js/comun.js}"></script>
     <script type="text/javascript" th:src="@{/js/main.js}"></script>
-    
+
     </body>
 </html>
-
