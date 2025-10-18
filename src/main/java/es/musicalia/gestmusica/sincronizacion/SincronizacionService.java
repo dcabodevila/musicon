@@ -15,6 +15,7 @@ import io.micrometer.common.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +29,11 @@ import java.util.Set;
 
 @Service
 @Slf4j
+@ConditionalOnProperty(
+        name = "mariadb.datasource.enabled",
+        havingValue = "true",
+        matchIfMissing = false
+)
 public class SincronizacionService {
 
     private final OcupacionService ocupacionService;

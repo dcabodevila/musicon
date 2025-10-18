@@ -2,6 +2,7 @@ package es.musicalia.gestmusica.sincronizacion;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +14,11 @@ import java.time.LocalDateTime;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@ConditionalOnProperty(
+        name = "mariadb.datasource.enabled",
+        havingValue = "true",
+        matchIfMissing = false
+)
 public class SincronizacionJob {
 
     private final SincronizacionService sincronizacionService;

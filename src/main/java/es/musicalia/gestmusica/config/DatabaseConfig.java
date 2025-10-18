@@ -3,6 +3,7 @@ package es.musicalia.gestmusica.config;
 import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManagerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
@@ -70,9 +71,14 @@ public class DatabaseConfig {
         return new JpaTransactionManager(entityManagerFactory);
     }
 
-    // Configuración MariaDB (Secundaria)
+    // Configuración MariaDB (Secundaria) - CONDICIONAL
     @Bean(name = "mariadbDataSource")
     @ConfigurationProperties("spring.datasource.mariadb")
+    @ConditionalOnProperty(
+            name = "mariadb.datasource.enabled",
+            havingValue = "true",
+            matchIfMissing = false
+    )
     public DataSource mariadbDataSource() {
         return DataSourceBuilder.create()
                 .type(HikariDataSource.class)
@@ -80,6 +86,11 @@ public class DatabaseConfig {
     }
 
     @Bean(name = "mariadbEntityManagerFactory")
+    @ConditionalOnProperty(
+            name = "mariadb.datasource.enabled",
+            havingValue = "true",
+            matchIfMissing = false
+    )
     public LocalContainerEntityManagerFactoryBean mariadbEntityManagerFactory(
             @Qualifier("mariadbDataSource") DataSource dataSource) {
 
@@ -109,6 +120,11 @@ public class DatabaseConfig {
     }
 
     @Bean(name = "mariadbTransactionManager")
+    @ConditionalOnProperty(
+            name = "mariadb.datasource.enabled",
+            havingValue = "true",
+            matchIfMissing = false
+    )
     public PlatformTransactionManager mariadbTransactionManager(
             @Qualifier("mariadbEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
         return new JpaTransactionManager(entityManagerFactory);
@@ -116,9 +132,14 @@ public class DatabaseConfig {
 
     /**
      * Bean manual para OcupacionLegacyService 
-     * SOLUCIÓN AL PROBLEMA: Crear el bean manualmente
+     * SOLUCIÓN AL PROBLEMA: Crear el bean manualmente - CONDICIONAL
      */
     @Bean("ocupacionLegacyService")
+    @ConditionalOnProperty(
+            name = "mariadb.datasource.enabled",
+            havingValue = "true",
+            matchIfMissing = false
+    )
     public es.musicalia.gestmusicalegacy.ocupacion.OcupacionLegacyService ocupacionLegacyService(
             es.musicalia.gestmusicalegacy.ocupacion.OcupacionLegacyRepository repository) {
         return new es.musicalia.gestmusicalegacy.ocupacion.OcupacionLegacyServiceImpl(repository);

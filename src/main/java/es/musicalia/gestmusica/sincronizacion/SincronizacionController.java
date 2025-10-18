@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cglib.core.Local;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,11 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "Sincronización", description = "API para la sincronización de datos")
+@ConditionalOnProperty(
+        name = "mariadb.datasource.enabled",
+        havingValue = "true",
+        matchIfMissing = false
+)
 public class SincronizacionController {
 
     private final SincronizacionService sincronizacionService;
