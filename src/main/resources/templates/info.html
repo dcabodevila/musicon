@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <title>festia.es - Gestión de artistas y eventos</title>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <meta name="description" content="festia.es - El punto de encuentro entre agencias, artistas y representantes"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+    <style>
+        :root {
+            --primary-color: #21344b;   /* Azul oscuro */
+            --secondary-color: #39b4e8; /* Azul claro */
+            --tertiary-color: #e74c3c;  /* Rojo */
+            --quaternary-color: #f1c40f;/* Amarillo */
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            overflow-x: hidden;
+        }
+
+        .hero-section {
+            position: relative;
+            height: 70vh;
+            min-height: 500px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hero-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.5) hue-rotate(180deg) saturate(2) contrast(0.9);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            align-self: flex-start;
+            margin-top: 5vh;
+        }
+
+        .hero-logo {
+            max-width: 400px;
+            width: 90%;
+            height: auto;
+            filter: drop-shadow(0 10px 30px rgba(0,0,0,0.5));
+        }
+
+        .description-section {
+            padding: 80px 0;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+        }
+
+        .description-text {
+            font-size: 1.5rem;
+            line-height: 1.8;
+            text-align: center;
+            max-width: 900px;
+            margin: 0 auto;
+            font-weight: 300;
+        }
+
+        .features-section {
+            padding: 80px 0;
+            background-color: #f8f9fa;
+        }
+
+        .feature-card {
+            height: 100%;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+
+       .feature-icon {
+            width: 100%;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: white;
+            background: linear-gradient(135deg, var(--secondary-color) 0%, var(--secondary-color) 30%, var(--primary-color) 100%);
+        }
+
+        .feature-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-top: 20px;
+            color: #333;
+        }
+
+        .about-section {
+            padding: 80px 0;
+            background-color: #ffffff;
+        }
+
+        .about-content {
+            max-width: 900px;
+            margin: 0 auto;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #555;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 50px;
+            text-align: center;
+            position: relative;
+            padding-bottom: 20px;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(135deg, var(--tertiary-color) 0%, var(--quaternary-color) 100%);
+            border-radius: 2px;
+        }
+
+        footer {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 30px 0;
+            text-align: center;
+        }
+
+    </style>
+
+</head>
+
+<body>
+<!-- Hero Section -->
+<section class="hero-section animate__animated animate__fadeIn">
+    <img src="https://res.cloudinary.com/hseoceuyz/image/upload/v1760722076/landing-festia_ycxlkg.png"
+         alt="Concierto multitudinario"
+         class="hero-image"/>
+    <div class="hero-content animate__animated animate__zoomIn animate__delay-1s">
+        <img src="/logo/logo-name-transparente.png" alt="festia.es" class="hero-logo"/>
+    </div>
+</section>
+
+<!-- Description Section -->
+<section class="description-section">
+    <div class="container">
+        <div class="description-text animate__animated animate__fadeInUp">
+            festia.es el punto de encuentro entre agencias, artistas y representantes donde conseguirás
+            información actualizada en tiempo real de disponibilidad, tarifas y gestión de las ocupaciones.
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section">
+    <div class="container">
+        <h2 class="section-title animate__animated animate__fadeInUp">Características</h2>
+        <div class="row">
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card feature-card animate__animated animate__fadeInUp">
+                    <div class="feature-icon">
+                        <i class="fas fa-euro-sign"></i>
+                    </div>
+                    <div class="card-body text-center">
+                        <h3 class="feature-title">Tarifas y ocupaciones de artistas</h3>
+                        <p class="text-muted">Crea y consulta tarifas actualizadas y disponibilidad en tiempo real</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card feature-card animate__animated animate__fadeInUp" style="animation-delay: 0.1s">
+                    <div class="feature-icon">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </div>
+                    <div class="card-body text-center">
+                        <h3 class="feature-title">Presupuestos inmediatos</h3>
+                        <p class="text-muted">Genera presupuestos profesionales al instante</p>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card feature-card animate__animated animate__fadeInUp" style="animation-delay: 0.3s">
+                    <div class="feature-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <div class="card-body text-center">
+                        <h3 class="feature-title">Gestión de contrataciones</h3>
+                        <p class="text-muted">Ocupa y reserva las fechas de los artistas de la agencia </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card feature-card animate__animated animate__fadeInUp" style="animation-delay: 0.5s">
+                    <div class="feature-icon">
+                        <i class="fas fa-map-marked-alt"></i>
+                    </div>
+                    <div class="card-body text-center">
+                        <h3 class="feature-title">Incrementos de tarifa por provincias</h3>
+                        <p class="text-muted">Ajusta precios según la localización del evento</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card feature-card animate__animated animate__fadeInUp" style="animation-delay: 0.2s">
+                    <div class="feature-icon">
+                        <i class="fas fa-photo-video"></i>
+                    </div>
+                    <div class="card-body text-center">
+                        <h3 class="feature-title">Documentación, imágenes, videos y redes</h3>
+                        <p class="text-muted">Todo el material de los artistas en un solo lugar</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card feature-card animate__animated animate__fadeInUp" style="animation-delay: 0.4s">
+                    <div class="feature-icon">
+                        <i class="fas fa-users-cog"></i>
+                    </div>
+                    <div class="card-body text-center">
+                        <h3 class="feature-title">Gestión de accesos y permisos</h3>
+                        <p class="text-muted">Otorga responsabilidades en tu agencia a distintos perfiles</p>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div class="col-12 col-md-6 col-lg-4 offset-lg-4">
+                <div class="card feature-card animate__animated animate__fadeInUp" style="animation-delay: 0.6s">
+                    <div class="feature-icon">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <div class="card-body text-center">
+                        <h3 class="feature-title">Publicación en OrquestasDeGalicia.es</h3>
+                        <p class="text-muted"><em>Próximamente</em> - Amplía tu visibilidad en el mercado</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- About Section -->
+<section class="about-section">
+    <div class="container">
+        <h2 class="section-title animate__animated animate__fadeInUp">Sobre nosotros</h2>
+        <div class="about-content animate__animated animate__fadeInUp">
+            <p>
+                <strong>festia.es</strong> nace como evolución de la plataforma Gestmusica, pionera en 1998 en la gestión de tarifas.
+            </p>
+            <p>
+                Combina el conocimiento del mundo del espectáculo de la agencia <strong>Musicalia</strong>, con más de 40 años de conocimiento en la organización de eventos
+                y la experiencia técnica de nuestro ingeniero de software con más de 15 años de experiencia en arquitectura, análisis y desarrollo de aplicaciones web.
+
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer>
+    <div class="container">
+        <p class="mb-0">&copy; 2025 festia.es</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

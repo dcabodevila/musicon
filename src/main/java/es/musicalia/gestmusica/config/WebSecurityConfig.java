@@ -54,6 +54,7 @@ public class WebSecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/auth/**").permitAll()
+                    .requestMatchers("/info**","/info").permitAll()
 					.requestMatchers("/manifest.json").permitAll()
 
 					.requestMatchers("/fragments/**", "/static/**", "/adminkit/**", "/img/**", "/logo/**", "/favicon.ico", "/js/**", "/css/**").permitAll()
