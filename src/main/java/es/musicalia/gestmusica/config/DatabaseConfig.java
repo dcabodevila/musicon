@@ -1,6 +1,7 @@
 package es.musicalia.gestmusica.config;
 
 import com.zaxxer.hikari.HikariDataSource;
+import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManagerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +18,9 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
+import java.net.Authenticator;
+import java.net.PasswordAuthentication;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -75,6 +79,44 @@ public class DatabaseConfig {
             @Qualifier("primaryEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
         return new JpaTransactionManager(entityManagerFactory);
     }
+    @PostConstruct
+    public void configureFixieSocksProxy() {
+        if (fixieSocksHost != null && !fixieSocksHost.isEmpty()) {
+            configureSocketsProxy(fixieSocksHost);
+        }
+    }
+
+    private void configureSocketsProxy(String fixieSocksHost) {
+        try {
+            URL fixie = new URL(fixieSocksHost);
+            String[] fixieUserInfo = fixie.getUserInfo().split(":");
+            String fixieUser = fixieUserInfo[0];
+            String fixiePassword = fixieUserInfo[1];
+
+            // Configurar SOCKS proxy
+            System.setProperty("socksProxyHost", fixie.getHost());
+            System.setProperty("socksProxyPort", String.valueOf(fixie.getPort()));
+
+            // Configurar autenticación del proxy
+            Authenticator.setDefault(new ProxyAuthenticator(fixieUser, fixiePassword));
+
+        } catch (Exception e) {
+            System.err.println("Error configurando SOCKS proxy Fixie: " + e.getMessage());
+        }
+    }
+
+    private static class ProxyAuthenticator extends Authenticator {
+        private final PasswordAuthentication passwordAuthentication;
+
+        private ProxyAuthenticator(String user, String password) {
+            passwordAuthentication = new PasswordAuthentication(user, password.toCharArray());
+        }
+
+        @Override
+        protected PasswordAuthentication getPasswordAuthentication() {
+            return passwordAuthentication;
+        }
+    }
 
     // Configuración MariaDB (Secundaria) - CONDICIONAL
     @Bean(name = "mariadbDataSource")
@@ -85,9 +127,26 @@ public class DatabaseConfig {
             matchIfMissing = false
     )
     public DataSource mariadbDataSource() {
-        return DataSourceBuilder.create()
+        HikariDataSource dataSource = (HikariDataSource) DataSourceBuilder.create()
                 .type(HikariDataSource.class)
                 .build();
+        // Configurar SOCKS5 proxy para Fixie
+        String fixieSocksUrl = System.getenv("FIXIE_SOCKS_URL");
+        if (fixieSocksUrl != null && !fixieSocksUrl.isEmpty()) {
+            // Parsear la URL de Fixie Socks (formato: socks5://user:pass@host:port)
+            // y configurar las propiedades del sistema para SOCKS
+            configureSocksProxy(fixieSocksUrl);
+        }
+
+        return dataSource;
+    }
+
+    private void configureSocksProxy(String socksUrl) {
+        // Implementar parsing de la URL y configuración del proxy SOCKS
+        // System.setProperty("socksProxyHost", host);
+        // System.setProperty("socksProxyPort", port);
+        // System.setProperty("java.net.socks.username", username);
+        // System.setProperty("java.net.socks.password", password);
     }
 
     @Bean(name = "mariadbEntityManagerFactory")
