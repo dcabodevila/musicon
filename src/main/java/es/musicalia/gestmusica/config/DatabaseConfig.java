@@ -4,7 +4,6 @@ import com.zaxxer.hikari.HikariDataSource;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManagerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
@@ -28,9 +27,6 @@ import java.util.Map;
 @Configuration
 @EnableTransactionManagement
 public class DatabaseConfig {
-
-    @Value("${fixie.socks.host:}")
-    private String fixieSocksHost;
 
     // Configuración PostgreSQL (Principal)
     @Primary
@@ -81,6 +77,7 @@ public class DatabaseConfig {
     }
     @PostConstruct
     public void configureFixieSocksProxy() {
+        String fixieSocksHost = System.getenv("FIXIE_SOCKS_HOST");
         if (fixieSocksHost != null && !fixieSocksHost.isEmpty()) {
             configureSocketsProxy(fixieSocksHost);
         }
