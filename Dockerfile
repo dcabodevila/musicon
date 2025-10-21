@@ -23,8 +23,12 @@ WORKDIR /app
 # Copiar el archivo WAR generado en la fase anterior
 COPY --from=build /app/target/gestmusica.war /app/gestmusica.war
 
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Exponer el puerto que utiliza la aplicación
 EXPOSE 8080
 
 # Comando para ejecutar la aplicación con la zona horaria configurada
 CMD ["java", "-jar", "/app/gestmusica.war"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
