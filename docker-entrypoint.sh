@@ -24,7 +24,7 @@ if [[ "$FIXIE_SOCKS_HOST" =~ ^socks5://([^:]+):([^@]+)@([^:]+):([0-9]+)$ ]]; the
     FIXIE_PASS="${BASH_REMATCH[2]}"
     FIXIE_HOST="${BASH_REMATCH[3]}"
     FIXIE_PORT="${BASH_REMATCH[4]}"
-
+    
     echo "Usuario Fixie: $FIXIE_USER"
     echo "Host Fixie: $FIXIE_HOST:$FIXIE_PORT"
 else
@@ -43,9 +43,9 @@ echo "✅ Conectividad a Fixie OK"
 
 echo "Iniciando túnel: localhost:$LOCAL_PORT -> SOCKS5($FIXIE_HOST:$FIXIE_PORT) -> $DB_HOST:$DB_PORT"
 
-# Crear túnel SOCKS5 en background
+# SINTAXIS CORREGIDA para socat SOCKS5
 socat TCP-LISTEN:${LOCAL_PORT},fork,reuseaddr \
-      SOCKS5:${FIXIE_HOST}:${DB_HOST}:${DB_PORT},socksport=${FIXIE_PORT},socksuser=${FIXIE_USER},sockspass=${FIXIE_PASS} &
+      SOCKS4A:${FIXIE_HOST}:${DB_HOST}:${DB_PORT},socksport=${FIXIE_PORT},socksuser=${FIXIE_USER} &
 
 SOCAT_PID=$!
 echo "Túnel iniciado con PID: $SOCAT_PID"
