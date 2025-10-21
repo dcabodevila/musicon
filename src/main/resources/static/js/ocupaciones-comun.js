@@ -1,5 +1,4 @@
 $(document).ready(function(){
-        const tipoOcupacionChoice = new Choices('#tipos-ocupacion');
 
         const municipioChoice = new Choices('#municipio-ocupacion');
         $('#municipio-ocupacion').data('choicesInstance', municipioChoice);
