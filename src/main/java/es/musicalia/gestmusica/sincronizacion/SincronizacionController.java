@@ -61,6 +61,35 @@ public class SincronizacionController {
         }
     }
 
+    @PostMapping(value = "/sincronizar-fecha", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Sincroniza los datos desde el día introducido", description = "Ejecuta el proceso de sincronización de datos")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Sincronización completada"),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content)
+    })
+    public ResponseEntity<Map<String, Object>> sincronizarDesde(@RequestParam("fechaDesde") LocalDate fechaDesde) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+
+            log.info("Sincronizando ocupaciones desde " + fechaDesde + " con fecha modificación posterior a " + fechaDesde.atStartOfDay());
+            SincronizacionResult sincronizacionResult = sincronizacionService.sincronizarOcupacionesDesde(fechaDesde, fechaDesde.atStartOfDay());
+
+            response.put("ocupacionesCreadas", sincronizacionResult.getCreadas());
+            response.put("ocupacionesActualizadas", sincronizacionResult.getActualizadas());
+            response.put("ocupacionesErrores", sincronizacionResult.getErrores());
+            response.put("ocupacionesEliminadas", sincronizacionResult.getEliminadas());
+
+            response.put("mensaje", "Sincronización completada");
+            response.put("timestamp", LocalDateTime.now());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error en la sincronización", e);
+            response.put("error", "Error en la sincronización: " + e.getMessage());
+            response.put("timestamp", LocalDateTime.now());
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
     @PostMapping(value = "/sincronizar-all", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Sincroniza todas las fechas desde 2025 para todos los artistas", description = "Ejecuta el proceso de sincronización de datos")
     @ApiResponses(value = {
