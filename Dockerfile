@@ -17,9 +17,12 @@ RUN mvn package -DskipTests
 # Usar una imagen base de Java para ejecutar la aplicación
 FROM eclipse-temurin:17-jre
 
-# Instalar socat y netcat para el túnel SOCKS5
-RUN apt-get update && apt-get install -y --no-install-recommends socat netcat-traditional \
-  && rm -rf /var/lib/apt/lists/*
+# Instalar herramientas para túnel SOCKS5 (múltiples opciones)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    socat \
+    netcat-traditional \
+    connect-proxy \
+    && rm -rf /var/lib/apt/lists/*
 
 # Crear el directorio para la aplicación en el contenedor
 WORKDIR /app
