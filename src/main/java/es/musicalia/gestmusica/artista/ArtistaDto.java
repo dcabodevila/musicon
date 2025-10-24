@@ -54,11 +54,15 @@ public class ArtistaDto {
 
     private String facebook;
     private String youtube;
+    private String tiktok;
+    private String musica;
+
     private Boolean activo;
     private Boolean tarifasPublicas;
     private String condicionesContratacion;
     private String biografia;
     private boolean permiteOrquestasDeGalicia = true;
+
 
     public ArtistaDto(){
         activo=true;

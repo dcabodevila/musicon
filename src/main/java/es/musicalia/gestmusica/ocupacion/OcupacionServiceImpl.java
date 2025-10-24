@@ -242,7 +242,7 @@ public class OcupacionServiceImpl implements OcupacionService {
 
 		final Ocupacion ocupacion = ocupacionSaveDto.getId()!=null? this.ocupacionRepository.findById(ocupacionSaveDto.getId()).orElse(new Ocupacion())  : new Ocupacion();
 
-		setDatosUsuarioCreacionModificacion(ocupacionSaveDto.getId()==null, isSincronizacion, ocupacion);
+		setDatosUsuarioCreacionModificacion(ocupacionSaveDto.getId()==null, isSincronizacion, ocupacion, ocupacionSaveDto.getIdUsuario());
 
 		final Artista artista = this.artistaRepository.findById(ocupacionSaveDto.getIdArtista()).orElseThrow();
 		ocupacion.setArtista(artista);
@@ -281,7 +281,7 @@ public class OcupacionServiceImpl implements OcupacionService {
 
 	}
 
-	private void setDatosUsuarioCreacionModificacion(boolean isCreacion, boolean isSincronizacion, Ocupacion ocupacion) throws ModificacionOcupacionException {
+	private void setDatosUsuarioCreacionModificacion(boolean isCreacion, boolean isSincronizacion, Ocupacion ocupacion, Long idUsuarioOcupacion) throws ModificacionOcupacionException {
 		if (isSincronizacion){
 			if (isCreacion){
 				ocupacion.setUsuarioCreacion(ConstantsGestmusica.USUARIO_SINCRONIZACION);
@@ -298,6 +298,8 @@ public class OcupacionServiceImpl implements OcupacionService {
 			}
 		}
 		else {
+
+
 			final Usuario usuario = this.userService.obtenerUsuarioAutenticado().orElseThrow();
 
 			if (isCreacion){

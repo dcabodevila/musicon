@@ -179,6 +179,8 @@ public class ArtistaServiceImpl implements ArtistaService {
 		artista.setCondicionesContratacion(dto.getCondicionesContratacion());
 		artista.setPermiteOrquestasDeGalicia(dto.isPermiteOrquestasDeGalicia());
         artista.setGoogle(StringUtils.removeHttp(dto.getGoogle()));
+        artista.setTiktok(StringUtils.removeHttp(dto.getTiktok()));
+        artista.setMusica(StringUtils.removeHttp(dto.getMusica()));
     }
 
     private void actualizarTiposArtista(Artista artista, List<Long> idsTipoArtista) {

@@ -33,6 +33,8 @@ public class AgenciaDto {
     private String telefono3;
     private String facebook;
     private String youtube;
+    private String tiktok;
+    private String musica;
     private Boolean activo;
     private Boolean tarifasPublicas = true;
 

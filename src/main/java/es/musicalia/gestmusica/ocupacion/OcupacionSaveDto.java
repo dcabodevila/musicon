@@ -34,6 +34,7 @@ public class OcupacionSaveDto {
     @NotNull
     private BigDecimal iva;
 
+    private Long idUsuario;
     private String observaciones;
 
     private Boolean matinal= Boolean.FALSE;

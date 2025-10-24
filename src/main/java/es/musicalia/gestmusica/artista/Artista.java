@@ -107,4 +107,10 @@ public class Artista {
     @Column(name = "google")
     private String google;
 
+    @Column(name = "tiktok")
+    private String tiktok;
+
+    @Column(name = "musica")
+    private String musica;
+
 }

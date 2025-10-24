@@ -159,6 +159,14 @@
                                             class="fab fa-fw fa-google"></span> <a th:text="${artistaDto.google}"
                                                                                     th:href="${'https://'+artistaDto.google}"
                                                                                     th:target="_blank"></a></li>
+                                    <li class="mb-1" th:if="${artistaDto.tiktok!=null && artistaDto.tiktok!=''}"><span
+                                            class="fab fa-fw fa-tiktok"></span> <a th:text="${artistaDto.tiktok}"
+                                                                                   th:href="${'https://'+artistaDto.tiktok}"
+                                                                                   th:target="_blank"></a></li>
+                                    <li class="mb-1" th:if="${artistaDto.musica!=null && artistaDto.musica!=''}"><span
+                                            class="fas fa-fw fa-music"></span> <a th:text="${artistaDto.musica}"
+                                                                                   th:href="${'https://'+artistaDto.musica}"
+                                                                                   th:target="_blank"></a></li>
                                 </ul>
 
 
