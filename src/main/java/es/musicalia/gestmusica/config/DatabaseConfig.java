@@ -2,7 +2,6 @@ package es.musicalia.gestmusica.config;
 
 import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManagerFactory;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -23,7 +22,6 @@ import java.net.PasswordAuthentication;
 import java.util.HashMap;
 import java.util.Map;
 
-@Slf4j
 @Configuration
 @EnableTransactionManagement
 public class DatabaseConfig {
@@ -41,7 +39,7 @@ public class DatabaseConfig {
     @Value("${fixie.password:}")
     private String fixiePassword;
     
-    @Value("${spring.datasource.mariadb.jdbcUrl:}")
+    @Value("${spring.datasource.mariadb.url:}")
     private String mariadbUrl;
     
     @Value("${spring.datasource.mariadb.username:}")
@@ -107,19 +105,12 @@ public class DatabaseConfig {
             matchIfMissing = false
     )
     public DataSource mariadbDataSource() {
-        log.info("🔧 Configurando DataSource MariaDB...");
-        
-        // Debug de variables de entorno
-        debugEnvironmentVariables();
+        System.out.println("🔧 Configurando DataSource MariaDB...");
         
         HikariDataSource dataSource = new HikariDataSource();
         
         // Construir URL con parámetros de proxy específicos para MariaDB
         String finalUrl = buildMariaDBUrlWithProxy();
-        
-        if (finalUrl == null || finalUrl.trim().isEmpty()) {
-            throw new RuntimeException("❌ URL de MariaDB no puede estar vacía");
-        }
         
         dataSource.setJdbcUrl(finalUrl);
         dataSource.setUsername(mariadbUsername);
@@ -127,52 +118,32 @@ public class DatabaseConfig {
         dataSource.setDriverClassName("org.mariadb.jdbc.Driver");
         
         // Configuraciones optimizadas para conexiones proxy
-        dataSource.setMaximumPoolSize(2);  // Muy reducido para testing
+        dataSource.setMaximumPoolSize(3);  // Reducido para proxy
         dataSource.setMinimumIdle(1);
-        dataSource.setConnectionTimeout(120000); // 2 minutos para proxy
+        dataSource.setConnectionTimeout(60000); // 60 segundos para proxy
         dataSource.setIdleTimeout(300000);
         dataSource.setMaxLifetime(1800000);
-        dataSource.setLeakDetectionThreshold(120000);
-        dataSource.setValidationTimeout(30000);  // 30 segundos para proxy
+        dataSource.setLeakDetectionThreshold(60000);
+        dataSource.setValidationTimeout(10000);  // Aumentado para proxy
+        dataSource.setConnectionTestQuery("SELECT 1");
         
-        // NO usar connection test query con proxy inicialmente
-        // dataSource.setConnectionTestQuery("SELECT 1");
+        // Propiedades adicionales para conexiones proxy
+        dataSource.addDataSourceProperty("connectTimeout", "60000");
+        dataSource.addDataSourceProperty("socketTimeout", "60000");
         
-        log.info("✅ DataSource MariaDB configurado correctamente");
+        System.out.println("✅ DataSource MariaDB configurado con URL: " + finalUrl);
         return dataSource;
-    }
-
-    private void debugEnvironmentVariables() {
-        log.info("🔍 === DEBUG VARIABLES DE ENTORNO ===");
-        log.info("MARIADB_URL: " + mariadbUrl);
-        log.info("MARIADB_USERNAME: " + mariadbUsername);
-        log.info("MARIADB_PASSWORD: " + (mariadbPassword != null ? "***configurado***" : "null"));
-        log.info("PROXY_ENABLED: " + proxyEnabled);
-        log.info("FIXIE_HOST: " + fixieHost);
-        log.info("FIXIE_USERNAME: " + fixieUsername);
-        log.info("FIXIE_PASSWORD: " + (fixiePassword != null ? "***configurado***" : "null"));
-        log.info("🔍 === FIN DEBUG ===");
     }
 
     private String buildMariaDBUrlWithProxy() {
         String baseUrl = mariadbUrl;
-        
-        // Debug: verificar que tenemos la URL base
-        System.out.println("🔍 URL base MariaDB: " + baseUrl);
-        
-        if (baseUrl == null || baseUrl.trim().isEmpty()) {
-            System.err.println("❌ MARIADB_URL no está configurada correctamente");
-            return baseUrl;
-        }
         
         if (proxyEnabled && fixieHost != null && !fixieHost.trim().isEmpty()) {
             String[] hostPort = fixieHost.split(":");
             String proxyHostOnly = hostPort[0];
             String proxyPortOnly = hostPort.length > 1 ? hostPort[1] : "1080";
             
-            // Inicializar el SocketFactory con los datos del proxy
-            FixieSocketFactory.initialize(proxyHostOnly, Integer.parseInt(proxyPortOnly), fixieUsername, fixiePassword);
-            
+            // Usar parámetros específicos de MariaDB para proxy SOCKS
             StringBuilder urlBuilder = new StringBuilder(baseUrl);
             
             // Agregar separador correcto
@@ -186,10 +157,13 @@ public class DatabaseConfig {
             urlBuilder.append("useSSL=false")
                      .append("&allowPublicKeyRetrieval=true")
                      .append("&useCompression=false")
-                     .append("&connectTimeout=120000")
-                     .append("&socketTimeout=120000")
-                     .append("&autoReconnect=true")
-                     .append("&socketFactory=").append(FixieSocketFactory.class.getName());
+                     .append("&socketFactory=").append(FixieSocketFactory.class.getName())
+                     .append("&socksProxyHost=").append(proxyHostOnly)
+                     .append("&socksProxyPort=").append(proxyPortOnly);
+            
+            if (fixieUsername != null && !fixieUsername.trim().isEmpty()) {
+                urlBuilder.append("&socksProxyUsername=").append(fixieUsername);
+            }
             
             System.out.println("🌐 URL con proxy configurada: " + urlBuilder.toString());
             return urlBuilder.toString();
