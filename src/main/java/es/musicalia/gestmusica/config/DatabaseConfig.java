@@ -3,6 +3,7 @@ package es.musicalia.gestmusica.config;
 import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManagerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
@@ -16,12 +17,36 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
+import java.net.Authenticator;
+import java.net.PasswordAuthentication;
 import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
 @EnableTransactionManagement
 public class DatabaseConfig {
+
+    // Inyección de propiedades via @Value
+    @Value("${mariadb.proxy.enabled:false}")
+    private boolean proxyEnabled;
+    
+    @Value("${fixie.socks.host:}")
+    private String fixieHost;
+    
+    @Value("${fixie.username:}")
+    private String fixieUsername;
+    
+    @Value("${fixie.password:}")
+    private String fixiePassword;
+    
+    @Value("${spring.datasource.mariadb.url:}")
+    private String mariadbUrl;
+    
+    @Value("${spring.datasource.mariadb.username:}")
+    private String mariadbUsername;
+    
+    @Value("${spring.datasource.mariadb.password:}")
+    private String mariadbPassword;
 
     // Configuración PostgreSQL (Principal)
     @Primary
@@ -80,10 +105,74 @@ public class DatabaseConfig {
             matchIfMissing = false
     )
     public DataSource mariadbDataSource() {
-        return DataSourceBuilder.create()
-                .type(HikariDataSource.class)
-                .build();
+        System.out.println("🔧 Configurando DataSource MariaDB...");
+        
+        HikariDataSource dataSource = new HikariDataSource();
+        
+        // Construir URL con parámetros de proxy específicos para MariaDB
+        String finalUrl = buildMariaDBUrlWithProxy();
+        
+        dataSource.setJdbcUrl(finalUrl);
+        dataSource.setUsername(mariadbUsername);
+        dataSource.setPassword(mariadbPassword);
+        dataSource.setDriverClassName("org.mariadb.jdbc.Driver");
+        
+        // Configuraciones optimizadas para conexiones proxy
+        dataSource.setMaximumPoolSize(3);  // Reducido para proxy
+        dataSource.setMinimumIdle(1);
+        dataSource.setConnectionTimeout(60000); // 60 segundos para proxy
+        dataSource.setIdleTimeout(300000);
+        dataSource.setMaxLifetime(1800000);
+        dataSource.setLeakDetectionThreshold(60000);
+        dataSource.setValidationTimeout(10000);  // Aumentado para proxy
+        dataSource.setConnectionTestQuery("SELECT 1");
+        
+        // Propiedades adicionales para conexiones proxy
+        dataSource.addDataSourceProperty("connectTimeout", "60000");
+        dataSource.addDataSourceProperty("socketTimeout", "60000");
+        
+        System.out.println("✅ DataSource MariaDB configurado con URL: " + finalUrl);
+        return dataSource;
     }
+
+    private String buildMariaDBUrlWithProxy() {
+        String baseUrl = mariadbUrl;
+        
+        if (proxyEnabled && fixieHost != null && !fixieHost.trim().isEmpty()) {
+            String[] hostPort = fixieHost.split(":");
+            String proxyHostOnly = hostPort[0];
+            String proxyPortOnly = hostPort.length > 1 ? hostPort[1] : "1080";
+            
+            // Usar parámetros específicos de MariaDB para proxy SOCKS
+            StringBuilder urlBuilder = new StringBuilder(baseUrl);
+            
+            // Agregar separador correcto
+            if (baseUrl.contains("?")) {
+                urlBuilder.append("&");
+            } else {
+                urlBuilder.append("?");
+            }
+            
+            // Parámetros específicos para MariaDB con proxy SOCKS
+            urlBuilder.append("useSSL=false")
+                     .append("&allowPublicKeyRetrieval=true")
+                     .append("&useCompression=false")
+                     .append("&socketFactory=").append(FixieSocketFactory.class.getName())
+                     .append("&socksProxyHost=").append(proxyHostOnly)
+                     .append("&socksProxyPort=").append(proxyPortOnly);
+            
+            if (fixieUsername != null && !fixieUsername.trim().isEmpty()) {
+                urlBuilder.append("&socksProxyUsername=").append(fixieUsername);
+            }
+            
+            System.out.println("🌐 URL con proxy configurada: " + urlBuilder.toString());
+            return urlBuilder.toString();
+        }
+        
+        return baseUrl;
+    }
+
+    // Remover el método configureFixieProxy() ya que ahora usamos parámetros URL
 
     @Bean(name = "mariadbEntityManagerFactory")
     @ConditionalOnProperty(
