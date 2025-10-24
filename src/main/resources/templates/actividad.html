@@ -59,11 +59,7 @@
                                                 <tr th:each="usuario : ${usuariosConectados}" th:class="${'table-row-' + usuario.claseEstado}">
                                                     <td>
                                                         <div class="d-flex align-items-center">
-                                                            <div class="avatar avatar-sm me-2">
-                                                                <div class="avatar-title rounded-circle bg-secondary">
-                                                                    <i class="fas fa-user"></i>
-                                                                </div>
-                                                            </div>
+
                                                             <span class="fw-bold" th:text="${usuario.nombre}">Usuario</span>
                                                         </div>
                                                     </td>
