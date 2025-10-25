@@ -15,16 +15,41 @@ $(document).ready(function(){
     let pickerFecha7 = flatpickr("#idFecha7", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
     });
     let pickerFecha6 = flatpickr("#idFecha6", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
+        ,
+        onChange: function(selectedDates, dateStr, instance) {
+            pickerFecha7.jumpToDate(new Date(instance.currentYear, instance.currentMonth, 1));
+        }
     });
     let pickerFecha5 = flatpickr("#idFecha5", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
+        ,
+        onChange: function(selectedDates, dateStr, instance) {
+            pickerFecha6.jumpToDate(new Date(instance.currentYear, instance.currentMonth, 1));
+        }
     });
     let pickerFecha4 = flatpickr("#idFecha4", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
+        ,
+        onChange: function(selectedDates, dateStr, instance) {
+            pickerFecha5.jumpToDate(new Date(instance.currentYear, instance.currentMonth, 1));
+        }
     });
     let pickerFecha3 = flatpickr("#idFecha3", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
+        ,
+        onChange: function(selectedDates, dateStr, instance) {
+            pickerFecha4.jumpToDate(new Date(instance.currentYear, instance.currentMonth, 1));
+        }
+
     });
     let pickerFecha2 = flatpickr("#idFecha2", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
+        ,
+        onChange: function(selectedDates, dateStr, instance) {
+            pickerFecha3.jumpToDate(new Date(instance.currentYear, instance.currentMonth, 1));
+        }
     });
     let pickerFecha1 = flatpickr("#idFecha1", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
+        ,
+        onChange: function(selectedDates, dateStr, instance) {
+            pickerFecha2.jumpToDate(new Date(instance.currentYear, instance.currentMonth, 1));
+        }
     });
 
 

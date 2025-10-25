@@ -1,7 +1,16 @@
 $(document).ready(function(){
 
-        const municipioChoice = new Choices('#municipio-ocupacion');
-        $('#municipio-ocupacion').data('choicesInstance', municipioChoice);
+        // Verificar si ya existe una instancia antes de crear una nueva
+        if (!$('#municipio-ocupacion').data('choicesInstance')) {
+            const municipioChoice = new Choices('#municipio-ocupacion');
+            $('#municipio-ocupacion').data('choicesInstance', municipioChoice);
+        }
+
+        if (!$('#usuario-ocupacion').data('choicesInstance')) {
+            const usuarioChoice = new Choices('#usuario-ocupacion');
+            $('#usuario-ocupacion').data('choicesInstance', usuarioChoice);
+        }
+
 
         $('#ccaa-ocupacion').on('change', function() {
             cargarProvincias('#provincia-ocupacion', $(this).val(), null)
@@ -124,6 +133,7 @@ function crearOcupacionSaveDto() {
     ocupacionSaveDto["observaciones"] = $("#observaciones-ocupacion").val();
     ocupacionSaveDto["provisional"] = $("#provisional-ocupacion").val();
     ocupacionSaveDto["textoOrquestasDeGalicia"] = $("#orquestasdegalicia-ocupacion").val();
+    ocupacionSaveDto["idUsuario"] = $("#usuario-ocupacion").data('choicesInstance').getValue(true);
 
     return ocupacionSaveDto;
 }
@@ -213,6 +223,9 @@ function obtenerOcupacionDto(idOcupacion) {
                 // Datos adicionales
                 $("#observaciones-ocupacion").val(ocupacionDto.observaciones);
                 $("#orquestasdegalicia-ocupacion").val(ocupacionDto.textoOrquestasDeGalicia);
+
+                $('#usuario-ocupacion').data('choicesInstance').setChoiceByValue(String(ocupacionDto.idUsuario));
+
 
                 // Gestionar estado y UI
                 if (ocupacionDto.estado) {

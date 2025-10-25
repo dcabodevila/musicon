@@ -16,6 +16,7 @@ public interface OcupacionMapper {
     @Mapping(source = "municipio.id", target = "idMunicipio")
     @Mapping(source = "poblacion", target = "localidad")
     @Mapping(source = "ocupacionEstado.nombre", target = "estado")
+    @Mapping(source = "usuario.id", target = "idUsuario")
     OcupacionSaveDto toDto(Ocupacion ocupacion);
 
 

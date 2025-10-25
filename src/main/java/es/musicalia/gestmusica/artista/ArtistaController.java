@@ -90,6 +90,7 @@ public class ArtistaController {
         model.addAttribute("artistaDto", artistaDto);
         model.addAttribute("isArtistaPermiteOrquestasDeGalicia", artistaDto.isPermiteOrquestasDeGalicia());
         model.addAttribute("listaUsuarios", this.userService.findAllUsuarioRecords());
+        model.addAttribute("idUsuarioAutenticado", this.userService.isUserAutheticated()? this.userService.obtenerUsuarioAutenticado().get().getId() : null);
         model.addAttribute("listaAgencias", artistaDto.getIdAgencia() != null ? this.agenciaService.findAgenciaRecordById(artistaDto.getIdAgencia()) : this.agenciaService.findAllAgenciasForUser());
         model.addAttribute("listaTipoArtista", this.artistaService.listaTipoArtista());
         model.addAttribute("listaTipoEscenario", this.artistaService.listaTipoEscenario());
@@ -154,7 +155,7 @@ public class ArtistaController {
 
             redirectAttributes.addFlashAttribute("message", "Artista guardado correctamente");
             redirectAttributes.addFlashAttribute("alertClass", "success");
-            return "redirect:/agencia/"+ artistaDto.getIdAgencia();
+            return "redirect:/artista/"+ artistaDto.getId();
 
         } catch (Exception e){
             log.error("Error guardando artista", e);

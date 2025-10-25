@@ -216,7 +216,7 @@ $(document).ready(function(){
 
     $("#btnModalNuevaOcupacion").click(function (event) {
         $('#badge-estado-ocupacion').text('');
-        pickerFechaOcupacion.setDate('');
+//        pickerFechaOcupacion.setDate('');
         $("#id-ocupacion").val('');
         $("#ccaa-ocupacion").change();
         $("#localidad-ocupacion").val('');
@@ -228,6 +228,8 @@ $(document).ready(function(){
         $('#solo-matinal-ocupacion').prop('checked', false);
         $("#observaciones-ocupacion").val('');
         $("#orquestasdegalicia-ocupacion").val('');
+        $('#usuario-ocupacion').data('choicesInstance').setChoiceByValue(String($("#idUsuarioAutenticado").val()));
+
         mostrarOcultarBotonesModalOcupacion();
     });
 

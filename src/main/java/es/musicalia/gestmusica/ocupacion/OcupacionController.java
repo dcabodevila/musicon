@@ -9,6 +9,7 @@ import es.musicalia.gestmusica.artista.ArtistaService;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.generic.CodigoNombreRecord;
 import es.musicalia.gestmusica.localizacion.LocalizacionService;
+import es.musicalia.gestmusica.usuario.UserService;
 import es.musicalia.gestmusica.util.DefaultResponseBody;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -36,13 +37,15 @@ public class OcupacionController {
     private final AgenciaService agenciaService;
     private final ArtistaService artistaService;
     private final LocalizacionService localizacionService;
+    private final UserService userService;
 
-    public OcupacionController(OcupacionService ocupacionService, AgenciaService agenciaService, ArtistaService artistaService, LocalizacionService localizacionService){
+    public OcupacionController(OcupacionService ocupacionService, AgenciaService agenciaService, ArtistaService artistaService, LocalizacionService localizacionService, UserService userService){
         this.ocupacionService = ocupacionService;
 
         this.agenciaService = agenciaService;
         this.artistaService = artistaService;
         this.localizacionService = localizacionService;
+        this.userService = userService;
     }
 
 
@@ -83,6 +86,7 @@ public class OcupacionController {
         ocupacion.setImporte(BigDecimal.ZERO);
         ocupacion.setPorcentajeRepre(BigDecimal.ZERO);
         ocupacion.setIva(BigDecimal.ZERO);
+        ocupacion.setIdUsuario(this.userService.obtenerUsuarioAutenticado().get().getId());
         return ocupacion;
     }
 
@@ -99,7 +103,8 @@ public class OcupacionController {
 
         model.addAttribute("listaTiposOcupacion", this.ocupacionService.listarTiposOcupacion(ocupacion.getIdArtista()));
         model.addAttribute("isArtistaPermiteOrquestasDeGalicia", this.artistaService.findArtistaDtoById(ocupacion.getIdArtista()).isPermiteOrquestasDeGalicia());
-
+        model.addAttribute("listaUsuarios", this.userService.findAllUsuarioRecords());
+        model.addAttribute("idUsuarioAutenticado", this.userService.isUserAutheticated()? this.userService.obtenerUsuarioAutenticado().get().getId() : null);
     }
 
     public Set<Long> obtenerArtistasConPermisoOcupaciones(Map<Long, Set<String>> mapPermisosArtista) {

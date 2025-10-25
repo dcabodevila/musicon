@@ -39,70 +39,47 @@
                                     <h5 class="card-title mb-0">Presupuesto para</h5>
                                 </div>
                                 <div class="card-body text-center">
-                                <div class="mb-3">
+                                    <div class="mb-3">
 
-                                        <div class="mb-3 row">
-                                            <label class="col-form-label col-sm-3 text-sm-end">Solicitado para</label>
-                                            <div class="col-sm-9">
-                                                <input class="form-control" th:field="*{solicitadoPara}" placeholder="Solicitado para" id="solicitado-listado" required>
+                                            <div class="mb-3 row">
+                                                <label class="col-form-label col-sm-3 text-sm-end">Solicitado para</label>
+                                                <div class="col-sm-9">
+                                                    <input class="form-control" th:field="*{solicitadoPara}" placeholder="Solicitado para" id="solicitado-listado" required>
 
+                                                </div>
                                             </div>
-                                        </div>
 
-                                        <div class="mb-3 row">
-                                            <label class="col-form-label col-sm-3 text-sm-end">Comunidad</label>
-                                            <div class="col-sm-9">
-                                                <select id="ccaa-listado" th:field="*{idCcaa}" class="form-control choices-single" required>
-                                                    <option th:each="ccaa : ${listaCcaa}" th:value="${ccaa.id}" th:text="${ccaa.nombre}"></option>
-                                                </select>
+                                            <div class="mb-3 row">
+                                                <label class="col-form-label col-sm-3 text-sm-end">Comunidad</label>
+                                                <div class="col-sm-9">
+                                                    <select id="ccaa-listado" th:field="*{idCcaa}" class="form-control choices-single" required>
+                                                        <option th:each="ccaa : ${listaCcaa}" th:value="${ccaa.id}" th:text="${ccaa.nombre}"></option>
+                                                    </select>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="mb-3 row">
-                                            <label class="col-form-label col-sm-3 text-sm-end">Provincia</label>
-                                            <div class="col-sm-9">
-                                                <select id="provincia-listado" th:field="*{idProvincia}" class="form-control choices-single" required>
-                                                    <option th:each="provincia : ${listaProvinciasCcaaListado}" th:value="${provincia.id}" th:text="${provincia.nombre}"></option>
-                                                </select>
+                                            <div class="mb-3 row">
+                                                <label class="col-form-label col-sm-3 text-sm-end">Provincia</label>
+                                                <div class="col-sm-9">
+                                                    <select id="provincia-listado" th:field="*{idProvincia}" class="form-control choices-single" required>
+                                                        <option th:each="provincia : ${listaProvinciasCcaaListado}" th:value="${provincia.id}" th:text="${provincia.nombre}"></option>
+                                                    </select>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="mb-3 row">
-                                            <label class="col-form-label col-sm-3 text-sm-end">Municipio</label>
-                                            <div class="col-sm-9">
-                                                <select id="municipio-listado" th:field="*{idMunicipio}"  class="form-control choices-single">
-                                                    <option th:each="municipio : ${listaMunicipioListado}" th:value="${municipio.id}" th:text="${municipio.nombre}"></option>
-                                                </select>
+                                            <div class="mb-3 row">
+                                                <label class="col-form-label col-sm-3 text-sm-end">Municipio</label>
+                                                <div class="col-sm-9">
+                                                    <select id="municipio-listado" th:field="*{idMunicipio}"  class="form-control choices-single">
+                                                        <option th:each="municipio : ${listaMunicipioListado}" th:value="${municipio.id}" th:text="${municipio.nombre}"></option>
+                                                    </select>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="mb-3 row">
-                                            <label class="col-form-label col-sm-3 text-sm-end">Localidad</label>
-                                            <div class="col-sm-9">
-                                                <input class="form-control" placeholder="Localidad" th:field="*{localidad}"  id="localidad-listado" autocomplete="off">
-                                            </div>
-                                        </div>
-                                        <div class="mb-3 row">
-                                            <label class="col-form-label col-sm-3 text-sm-end">Comentario</label>
-                                            <div class="col-sm-9">
-                                                <input class="form-control" placeholder="Comentario" th:field="*{comentario}" id="observaciones-listado" autocomplete="off">
-                                            </div>
-                                        </div>
-                                        <div class="mb-3 row">
-                                            <label class="col-form-label col-sm-3 text-sm-end">Tipo ocupación</label>
-                                            <div class="col-sm-9">
-                                                <select id="tipo-ocupacion-listado" th:field="*{idTipoOcupacion}" class="form-control choices-single" required>
-                                                    <option th:each="tipoOcupacion : ${listaTiposOcupacion}" th:value="${tipoOcupacion.id}" th:text="${tipoOcupacion.nombre}"></option>
-                                                </select>
-                                            </div>
-                                        </div>
 
+                                            <div class="sticky">
+                                                <button type="submit" id="btn-generar-listado" class="btn btn-primary">Generar presupuesto</button>
+                                            </div>
 
-
-
-                                        <div class="sticky">
-                                            <button type="submit" id="btn-generar-listado" class="btn btn-primary">Generar presupuesto</button>
-                                        </div>
-
+                                    </div>
                                 </div>
-                            </div>
                             </div>
                             <div class="card">
                                 <div class="card-header">
@@ -207,7 +184,39 @@
                                 </div>
                             </div>
                         </div>
+
                         <div class="col-12 col-lg-6 order-2 order-lg-2">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Más información</h5>
+                                </div>
+                                <div class="card-body text-center">
+                                    <div class="mb-3">
+
+                                        <div class="mb-3 row">
+                                            <label class="col-form-label col-sm-3 text-sm-end">Localidad</label>
+                                            <div class="col-sm-9">
+                                                <input class="form-control" placeholder="Localidad" th:field="*{localidad}"  id="localidad-listado" autocomplete="off">
+                                            </div>
+                                        </div>
+                                        <div class="mb-3 row">
+                                            <label class="col-form-label col-sm-3 text-sm-end">Comentario</label>
+                                            <div class="col-sm-9">
+                                                <input class="form-control" placeholder="Comentario" th:field="*{comentario}" id="observaciones-listado" autocomplete="off">
+                                            </div>
+                                        </div>
+                                        <div class="mb-3 row">
+                                            <label class="col-form-label col-sm-3 text-sm-end">Tipo ocupación</label>
+                                            <div class="col-sm-9">
+                                                <select id="tipo-ocupacion-listado" th:field="*{idTipoOcupacion}" class="form-control choices-single" required>
+                                                    <option th:each="tipoOcupacion : ${listaTiposOcupacion}" th:value="${tipoOcupacion.id}" th:text="${tipoOcupacion.nombre}"></option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
                             <div class="card">
                                 <div class="card-header">
                                     <h5 class="card-title mb-0">Otras opciones</h5>

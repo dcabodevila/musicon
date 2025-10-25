@@ -39,6 +39,15 @@
       </select>
     </div>
   </div>
+    <div class="mb-3 row">
+        <label class="col-form-label col-sm-3 text-sm-end">Representante</label>
+        <input id="idUsuarioAutenticado" type="hidden" th:value="${idUsuarioAutenticado}"/>
+        <div class="col-sm-9">
+            <select id="usuario-ocupacion" th:field="*{idUsuario}" class="form-control choices-single" required>
+                <option th:each="usuario : ${listaUsuarios}" th:value="${usuario.id}" th:text="${usuario.nombreComercial != null and !usuario.nombreComercial.isEmpty()} ? ${usuario.nombreApellidos + ' (' + usuario.nombreComercial + ')'} : ${usuario.nombreApellidos}"></option>
+            </select>
+        </div>
+    </div>
   <div class="mb-3 row">
     <label for="provisional-ocupacion" class="col-form-label col-sm-3 text-sm-end pt-sm-0" >Localización provisional</label>
     <div class="col-sm-9">

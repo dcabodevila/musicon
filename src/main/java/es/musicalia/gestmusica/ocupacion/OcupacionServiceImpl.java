@@ -300,7 +300,7 @@ public class OcupacionServiceImpl implements OcupacionService {
 		else {
 
 
-			final Usuario usuario = this.userService.obtenerUsuarioAutenticado().orElseThrow();
+			final Usuario usuario = idUsuarioOcupacion != null ? this.userService.findUsuarioById(idUsuarioOcupacion) : this.userService.obtenerUsuarioAutenticado().orElseThrow();
 
 			if (isCreacion){
 				ocupacion.setUsuario(usuario);
@@ -308,11 +308,16 @@ public class OcupacionServiceImpl implements OcupacionService {
 				ocupacion.setUsuarioCreacion(usuario.getUsername());
 
 			}else {
-				if (!(ocupacion.getUsuario().getId().equals(usuario.getId())) &&
-						!this.permisoService.existePermisoUsuarioAgencia(ocupacion.getArtista().getAgencia().getId(), PermisoAgenciaEnum.MODIFICAR_OCUPACION_OTROS.name())) {
-					throw new ModificacionOcupacionException("No tiene permisos para modificar ocupaciones de otros usuarios");
-				}
-				ocupacion.setUsuarioModificacion(usuario.getUsername());
+
+                if (!(ocupacion.getUsuario().getId().equals(usuario.getId())) &&
+                        !this.permisoService.existePermisoUsuarioAgencia(ocupacion.getArtista().getAgencia().getId(), PermisoAgenciaEnum.MODIFICAR_OCUPACION_OTROS.name())) {
+                    throw new ModificacionOcupacionException("No tiene permisos para modificar ocupaciones de otros usuarios");
+                }
+
+                if (idUsuarioOcupacion!=null){
+                    ocupacion.setUsuario(usuario);
+                }
+                ocupacion.setUsuarioModificacion(usuario.getUsername());
 				ocupacion.setFechaModificacion(LocalDateTime.now());
 
 			}
