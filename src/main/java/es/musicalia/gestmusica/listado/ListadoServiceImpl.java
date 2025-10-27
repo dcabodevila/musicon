@@ -147,7 +147,7 @@ public byte[] generarInformeListado(ListadoDto listadoDto, Long idUsuario) {
 		parametros.put("idsArtistaRestringidos", obtenerIdsArtistaRestringidos(idUsuario));
 
 
-
+        
 		List<Map.Entry<String, String>> diaList = generateDiaListFechas(listadoDto.getFechaDesde(), listadoDto.getFechaHasta(), dateList);
 		// Agregar cada par clave-valor de la lista al mapa de parámetros
 		for (Map.Entry<String, String> entry : diaList) {
@@ -432,6 +432,11 @@ private ListadoRecord mapToListadoRecord(Listado listado) {
 			diaCounter++;
 			currentDate = currentDate.plusDays(1);
 		}
+        final boolean isReportVertical = diaList.size()<=8;
+        int maxDias = isReportVertical ? 8 : 16;
+        while (diaList.size() < maxDias) {
+            diaList.add(new AbstractMap.SimpleEntry<>("dia" + (diaList.size() + 1), ""));
+        }
 
 		return diaList;
 	}
@@ -477,9 +482,9 @@ private ListadoRecord mapToListadoRecord(Listado listado) {
 	}
 
 	private List<Map.Entry<String, String>> generateDiaListFechas(LocalDate fechaDesde, LocalDate fechaHasta, List<LocalDate> dateList) {
+        if (fechaDesde != null && fechaHasta != null) {
 
-		if (fechaDesde != null && fechaHasta != null) {
-			return generateDiaList(fechaDesde, fechaHasta);
+            return generateDiaList(fechaDesde, fechaHasta);
 		}
 
 		List<Map.Entry<String, String>> diaList = new ArrayList<>();
@@ -493,6 +498,12 @@ private ListadoRecord mapToListadoRecord(Listado listado) {
 			diaList.add(new AbstractMap.SimpleEntry<>(key, value));
 			diaCounter++;
 		}
+
+        final boolean isReportVertical = diaList.size()<=8;
+        int maxDias = isReportVertical ? 8 : 16;
+        while (diaList.size() < maxDias) {
+            diaList.add(new AbstractMap.SimpleEntry<>("dia" + (diaList.size() + 1), ""));
+        }
 
 		return diaList;
 	}
