@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>es.musicalia</groupId>
 	<artifactId>gestmusica</artifactId>
-	<version>1.0.2</version>
+	<version>1.0.3</version>
 	<packaging>war</packaging>
 	<name>gestmusica</name>
 	<description>Aplicación web para gestión de agrupaciones</description>

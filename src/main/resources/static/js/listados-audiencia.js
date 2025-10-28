@@ -8,7 +8,7 @@ $(document).ready(function () {
     $('#datatables-reponsive_listados-generados').DataTable({
         responsive: true,
         searching: false,
-        ordering: true,
+        ordering: false,
         paging: true,
         processing: true,
         serverSide: true,
@@ -27,7 +27,7 @@ $(document).ready(function () {
             }
         },
         columns: [
-            { 
+            {
                 data: 'fechaCreacion',
                 render: function(data, type, row) {
                     if (data && type === 'display') {
@@ -40,11 +40,11 @@ $(document).ready(function () {
             { data: 'solicitadoPara' },
             { data: 'municipio' },
             { data: 'localidad' },
-            { 
+            {
                 data: null,
                 render: function(data, type, row) {
                     if (row.fechaInicio && row.fechaFin) {
-                        return new Date(row.fechaInicio).toLocaleDateString('es-ES') + ' a ' + 
+                        return new Date(row.fechaInicio).toLocaleDateString('es-ES') + ' a ' +
                                new Date(row.fechaFin).toLocaleDateString('es-ES');
                     } else {
                         let fechas = [];
@@ -94,7 +94,7 @@ $(document).ready(function () {
 
     // Esperar a que AdminKit esté completamente cargado
     setTimeout(function() {
-        initializeChart();
+        $('#formListadoAudiencias').trigger('submit');
     }, 500);
 
     // Interceptar el envío del formulario para recargar la tabla

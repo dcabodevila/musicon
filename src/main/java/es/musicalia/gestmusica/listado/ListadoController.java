@@ -257,28 +257,29 @@ public class ListadoController {
             @RequestParam(value = "search[value]", required = false) String searchValue,
             @RequestParam(value = "order[0][column]", defaultValue = "0") int orderColumn,
             @RequestParam(value = "order[0][dir]", defaultValue = "desc") String orderDir) {
+
+    try {
+        // Calcular página correctamente - VALIDAR que sea >= 0
+        int page = Math.max(0, start / length);
         
-        try {
-            // Calcular página y tamaño
-            int page = start / length;
-            
-            // Crear objeto de paginación con ordenación
-            Sort sort = Sort.by(orderDir.equals("desc") ? Sort.Direction.DESC : Sort.Direction.ASC, 
-                               getColumnName(orderColumn));
-            Pageable pageable = PageRequest.of(page, length, sort);
-            
-            // Parsear fechas
+        log.info("Parámetros DataTables - start: {}, length: {}, página calculada: {}", start, length, page);
+
+        // IMPORTANTE: Crear Sort explícitamente ANTES del Pageable
+        Sort sort = Sort.by(Sort.Direction.DESC, "fechaCreacion");
+        Pageable pageable = PageRequest.of(page, length, sort);
+
+        // Parsear fechas
             LocalDate fechaDesde = null;
             LocalDate fechaHasta = null;
-            
+        
             if (fechaDesdeStr != null && !fechaDesdeStr.trim().isEmpty()) {
                 fechaDesde = DateUtils.parseLocalDate(fechaDesdeStr, "dd-MM-yyyy");
             }
-            
+        
             if (fechaHastaStr != null && !fechaHastaStr.trim().isEmpty()) {
                 fechaHasta = DateUtils.parseLocalDate(fechaHastaStr, "dd-MM-yyyy");
             }
-            
+        
             // Llamar al servicio con los filtros y paginación
             ListadoAudienciasDto filtros = ListadoAudienciasDto.builder()
                     .idAgencia(idAgencia)
@@ -288,19 +289,22 @@ public class ListadoController {
                     
             Page<ListadoRecord> pageResult = this.listadoService.obtenerListadoEntreFechasPaginado(
                 filtros, searchValue, pageable, user.getUserId());
-            
+        
+            log.info("Resultado: Total={}, En esta página={}, Página actual={}", 
+                     pageResult.getTotalElements(), pageResult.getContent().size(), pageResult.getNumber());
+        
             // Preparar respuesta en formato DataTables
             Map<String, Object> response = new HashMap<>();
             response.put("draw", draw);
             response.put("recordsTotal", pageResult.getTotalElements());
             response.put("recordsFiltered", pageResult.getTotalElements());
             response.put("data", pageResult.getContent());
-            
+        
             return response;
-            
+        
         } catch (Exception e) {
             log.error("Error obteniendo datos paginados para listados", e);
-            
+        
             // Respuesta de error para DataTables
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("draw", draw);
@@ -308,7 +312,7 @@ public class ListadoController {
             errorResponse.put("recordsFiltered", 0);
             errorResponse.put("data", new ArrayList<>());
             errorResponse.put("error", "Error al cargar los datos: " + e.getMessage());
-            
+        
             return errorResponse;
         }
     }
