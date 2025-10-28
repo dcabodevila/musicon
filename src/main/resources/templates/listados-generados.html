@@ -96,50 +96,27 @@
                                     </div>
                                     <input type="hidden" id="chartData" th:value="${chartData}">
 
-                                    <div id="datatables-reponsive_wrapper" class="dataTables_wrapper dt-bootstrap5 no-footer">
-                                        <div class="row">
-                                            <div class="col-sm-12">
-                                                <table id="datatables-reponsive_listados-generados" class="table table-striped dataTable no-footer dtr-inline collapsed" style="width: 100%;" aria-describedby="datatables-reponsive_info">
-                                                    <thead>
-                                                    <tr>
-                                                        <th tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1"  >Fecha generación presupuesto</th>
-                                                        <th class="sorting sorting_desc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1"  >Representante</th>
-                                                        <th class="sorting sorting_desc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1"  >Solicitado para</th>
-                                                        <th class="sorting sorting_desc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1"  >Municipio</th>
-                                                        <th class="sorting sorting_desc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1"  >Localidad</th>
-                                                        <th class="sorting " tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1"  >Fechas del presupuesto</th>
-
-
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody>
-
-                                                    <tr th:each="listadosGenerados : ${listadosGenerados}">
-                                                        <td class="dtr-control " tabindex="0"
-                                                            th:text="${listadosGenerados.fechaCreacion != null ? #temporals.format(listadosGenerados.fechaCreacion.atZone(T(java.time.ZoneId).of('Europe/Madrid')), 'dd/MM/yyyy') : '-'}"></td>
-                                                        <td class="dtr-control sorting_1" tabindex="0" th:text="${listadosGenerados.nombreRepresentante}"></td>
-                                                        <td class="dtr-control sorting_1" tabindex="0" th:text="${listadosGenerados.solicitadoPara}"></td>
-
-                                                        <td class="dtr-control sorting_1" tabindex="0" th:text="${listadosGenerados.municipio}"></td>
-                                                        <td class="dtr-control sorting_1" tabindex="0" th:text="${listadosGenerados.localidad}"></td>
-                                                        <td class="dtr-control " tabindex="0"
-                                                            th:text="${(listadosGenerados.fechaInicio != null and listadosGenerados.fechaFin != null) ? 
-                                                            (#temporals.format(listadosGenerados.fechaInicio, 'dd/MM/yyyy') + ' a ' + #temporals.format(listadosGenerados.fechaFin, 'dd/MM/yyyy')) :
-                                                            ((listadosGenerados.fechaPropuesta1 != null ? #temporals.format(listadosGenerados.fechaPropuesta1, 'dd/MM/yyyy') : '') + 
-                                                             (listadosGenerados.fechaPropuesta2 != null ? ' - ' + #temporals.format(listadosGenerados.fechaPropuesta2, 'dd/MM/yyyy') : '') + 
-                                                             (listadosGenerados.fechaPropuesta3 != null ? ' - ' + #temporals.format(listadosGenerados.fechaPropuesta3, 'dd/MM/yyyy') : '') +
-                                                             (listadosGenerados.fechaPropuesta4 != null ? ' - ' + #temporals.format(listadosGenerados.fechaPropuesta4, 'dd/MM/yyyy') : '') +
-                                                             (listadosGenerados.fechaPropuesta5 != null ? ' - ' + #temporals.format(listadosGenerados.fechaPropuesta5, 'dd/MM/yyyy') : '') +
-                                                             (listadosGenerados.fechaPropuesta6 != null ? ' - ' + #temporals.format(listadosGenerados.fechaPropuesta6, 'dd/MM/yyyy') : '') +
-                                                             (listadosGenerados.fechaPropuesta7 != null ? ' - ' + #temporals.format(listadosGenerados.fechaPropuesta7, 'dd/MM/yyyy') : ''))}"></td>
-
-                                                    </tr>
-
-                                                    </tbody>
-                                                </table>
+                                        <div id="datatables-reponsive_wrapper" class="dataTables_wrapper dt-bootstrap5 no-footer">
+                                            <div class="row">
+                                                <div class="col-sm-12">
+                                                    <table id="datatables-reponsive_listados-generados" class="table table-striped dataTable no-footer dtr-inline collapsed" style="width: 100%;" aria-describedby="datatables-reponsive_info">
+                                                        <thead>
+                                                        <tr>
+                                                            <th tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Fecha generación presupuesto</th>
+                                                            <th class="sorting sorting_desc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Representante</th>
+                                                            <th class="sorting sorting_desc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Solicitado para</th>
+                                                            <th class="sorting sorting_desc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Municipio</th>
+                                                            <th class="sorting sorting_desc" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Localidad</th>
+                                                            <th class="sorting" tabindex="0" aria-controls="datatables-reponsive" rowspan="1" colspan="1">Fechas del presupuesto</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        <!-- Los datos se cargarán via AJAX -->
+                                                        </tbody>
+                                                    </table>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
 
 
 
@@ -160,11 +137,8 @@
 </div>
 
 </body>
-<!-- Cargar AdminKit primero -->
-<!--<script th:src="@{/adminkit/js/app.js}"></script>-->
-<!-- Luego los scripts personalizados -->
+
 <script type="text/javascript" th:src="@{/js/comun.js}"></script>
 <script th:src="@{/js/date-eu.js}"></script>
 <script type="text/javascript" th:src="@{/js/listados-audiencia.js}"></script>
 </html>
-

@@ -17,6 +17,8 @@ import es.musicalia.gestmusica.permiso.PermisoRecord;
 import es.musicalia.gestmusica.permiso.PermisoRepository;
 import es.musicalia.gestmusica.util.DateUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -523,5 +525,64 @@ private ListadoRecord mapToListadoRecord(Listado listado) {
 
 		return dateList;
 	}
+
+    @Override
+    public Page<ListadoRecord> obtenerListadoEntreFechasPaginado(
+            ListadoAudienciasDto filtros,
+            String searchValue,
+            Pageable pageable,
+            Long idUsuario) {
+
+        // Convertir fechas LocalDate a LocalDateTime
+        LocalDateTime fechaDesde = null;
+        LocalDateTime fechaHasta = null;
+
+        if (filtros.getFechaDesde() != null) {
+            fechaDesde = filtros.getFechaDesde().atStartOfDay();
+        }
+
+        if (filtros.getFechaHasta() != null) {
+            fechaHasta = filtros.getFechaHasta().atTime(23, 59, 59);
+        }
+
+        // Construir specification base
+        Specification<Listado> spec = Specification.where(ListadoSpecifications.isActivo());
+
+        // Añadir filtro por agencia si se especifica
+        if (filtros.getIdAgencia() != null) {
+            Set<Long> idsArtistaAgencia = this.artistaRepository.findAllArtistasRecordByIdAgencia(filtros.getIdAgencia()).stream()
+                    .map(ArtistaRecord::id)
+                    .collect(Collectors.toSet());
+            spec = spec.and(ListadoSpecifications.hasArtista(idsArtistaAgencia));
+        }
+
+        // Añadir filtro por fechas
+        if (fechaDesde != null || fechaHasta != null) {
+            spec = spec.and(ListadoSpecifications.hasFechaCreacionEntre(fechaDesde, fechaHasta).and(ListadoSpecifications.isActivo()));
+        }
+
+        // Añadir búsqueda global si se proporciona
+        if (searchValue != null && !searchValue.trim().isEmpty()) {
+            Specification<Listado> searchSpec = Specification.where(
+                            ListadoSpecifications.hasSolicitadoPara(searchValue))
+                    .or(ListadoSpecifications.hasLocalidad(searchValue))
+                    .or(ListadoSpecifications.hasMunicipioNombre(searchValue))
+                    .or(ListadoSpecifications.hasUsuarioNombre(searchValue));
+
+            spec = spec.and(searchSpec);
+        }
+
+
+
+        // Ejecutar consulta paginada
+        Page<Listado> listadosPage = listadoRepository.findAll(spec, pageable);
+
+        // Convertir a ListadoRecord
+        return listadosPage.map(this::mapToListadoRecord);
+    }
+
+
+
+
 
 }

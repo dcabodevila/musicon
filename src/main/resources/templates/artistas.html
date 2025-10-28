@@ -22,7 +22,28 @@
                 <div class="mb-3">
                     <h1 class="h3 d-inline align-middle">Artistas</h1>
                 </div>
-
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-md-10">
+                                        <select id="selectArtista" class="form-select" onchange="updateButton()">
+                                            <option value="">Selecciona un artista...</option>
+                                            <option th:each="artista : ${listaArtistas}"
+                                                    th:value="${artista.id}"
+                                                    th:text="${artista.nombre}">
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <a id="btnIrArtista" href="#" class="btn btn-primary disabled w-100">Ir al Artista</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="row">
                     <div class="col-12 col-md-6 col-lg-3" th:each="artista: ${listaArtistas}">
                         <div class="card card-max-width" style="height: 500px">
@@ -47,7 +68,23 @@
     </div>
 </div>
 
-</body>
+<script>
+
+    const selectArtista = new Choices('#selectArtista');
+
+    function updateButton() {
+        const select = document.getElementById('selectArtista');
+        const button = document.getElementById('btnIrArtista');
+
+        if (select.value) {
+            button.href = '/artista/' + select.value;
+            button.classList.remove('disabled');
+        } else {
+            button.href = '#';
+            button.classList.add('disabled');
+        }
+    }
+</script>
 
 </body>
 </html>

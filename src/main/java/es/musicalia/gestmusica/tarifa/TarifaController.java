@@ -30,7 +30,6 @@ public class TarifaController {
     private final TarifaService tarifaService;
     private final ArtistaService artistaService;
 
-
     public TarifaController(ArtistaService artistaService, TarifaService tarifaService) {
         this.artistaService = artistaService;
         this.tarifaService = tarifaService;
@@ -75,7 +74,9 @@ public class TarifaController {
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
         final ArtistaDto astistaDto = this.artistaService.findArtistaDtoById(tarifaAnualDto.getIdArtista());
 
-        String fileNameToExport = astistaDto.getNombre().concat(DateUtils.getDateStr(new Date(), "ddMMyyyyHHmmss")).concat(".pdf");
+
+
+        String fileNameToExport = astistaDto.getNombre().concat(tarifaAnualDto.getAno().toString()).concat(DateUtils.getDateStr(new Date(), "-ddMMyyyyHHmmss")).concat(".pdf");
         headers.setContentDispositionFormData("attachment", fileNameToExport);
 
         return new ResponseEntity<byte[]>(informeGenerado,headers, HttpStatus.OK);

@@ -76,7 +76,7 @@ public class ListadoSpecifications {
     public static Specification<Listado> hasArtista(Set<Long> idsArtistas) {
         return (root, query, criteriaBuilder) -> {
             if (idsArtistas == null || idsArtistas.isEmpty()) {
-                return criteriaBuilder.conjunction();
+                return criteriaBuilder.disjunction();
             }
 
             Join<Listado, Artista> artistaJoin = root.join("artistas", JoinType.INNER);
@@ -327,4 +327,6 @@ public class ListadoSpecifications {
                 .and(hasUsuario(idUsuario))
                 .and(hasTipoOcupacion(tipoOcupacion));
     }
+
+
 }

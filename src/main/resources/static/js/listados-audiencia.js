@@ -4,12 +4,61 @@ let chartInitialized = false;
 
 $(document).ready(function () {
 
-    // Inicializar DataTable
+    // Inicializar DataTable con AJAX
     $('#datatables-reponsive_listados-generados').DataTable({
         responsive: true,
-        searching: true,
+        searching: false,
         ordering: true,
         paging: true,
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: '/listado/audiencias/data',
+            type: 'POST',
+            data: function(d) {
+                // Añadir parámetros del formulario de filtros
+                d.idAgencia = $('#agencia').val();
+                d.fechaDesde = $('#idFechaDesde').val();
+                d.fechaHasta = $('#idFechaHasta').val();
+                return d;
+            },
+            error: function(xhr, error, code) {
+                console.error('Error en la carga de datos:', error);
+            }
+        },
+        columns: [
+            { 
+                data: 'fechaCreacion',
+                render: function(data, type, row) {
+                    if (data && type === 'display') {
+                        return new Date(data).toLocaleDateString('es-ES');
+                    }
+                    return data || '-';
+                }
+            },
+            { data: 'nombreRepresentante' },
+            { data: 'solicitadoPara' },
+            { data: 'municipio' },
+            { data: 'localidad' },
+            { 
+                data: null,
+                render: function(data, type, row) {
+                    if (row.fechaInicio && row.fechaFin) {
+                        return new Date(row.fechaInicio).toLocaleDateString('es-ES') + ' a ' + 
+                               new Date(row.fechaFin).toLocaleDateString('es-ES');
+                    } else {
+                        let fechas = [];
+                        for (let i = 1; i <= 7; i++) {
+                            let fechaProp = row['fechaPropuesta' + i];
+                            if (fechaProp) {
+                                fechas.push(new Date(fechaProp).toLocaleDateString('es-ES'));
+                            }
+                        }
+                        return fechas.join(' - ');
+                    }
+                }
+            }
+        ],
         language: {
             url: "https://cdn.datatables.net/plug-ins/1.13.1/i18n/es-ES.json"
         },
@@ -24,7 +73,7 @@ $(document).ready(function () {
         ]
     });
 
-    // Configurar flatpickr
+// Configurar flatpickr
     let pickerFechaHasta = flatpickr("#idFechaHasta", {
         disableMobile: true, 
         "locale": "es", 
@@ -47,17 +96,60 @@ $(document).ready(function () {
     setTimeout(function() {
         initializeChart();
     }, 500);
+
+    // Interceptar el envío del formulario para recargar la tabla
+    $('#formListadoAudiencias').on('submit', function(e) {
+        e.preventDefault();
+        
+        // Recargar la tabla con los nuevos filtros
+        $('#datatables-reponsive_listados-generados').DataTable().ajax.reload();
+        
+        // Actualizar el gráfico con los nuevos filtros
+        updateChartWithFilters();
+        
+        return false;
+    });
 });
+
+    // Función para actualizar el gráfico con filtros
+    function updateChartWithFilters() {
+        // Obtener valores de los filtros
+        const idAgencia = $('#agencia').val();
+        const fechaDesde = $('#idFechaDesde').val();
+        const fechaHasta = $('#idFechaHasta').val();
+        
+        // Realizar petición AJAX para obtener nuevos datos del gráfico
+        $.ajax({
+            url: '/listado/audiencias/chart-data',
+            type: 'POST',
+            data: {
+                idAgencia: idAgencia,
+                fechaDesde: fechaDesde,
+                fechaHasta: fechaHasta
+            },
+            success: function(response) {
+                if (response.success && response.chartData) {
+                    // Actualizar el elemento hidden con los nuevos datos
+                    $('#chartData').val(JSON.stringify(response.chartData));
+                    
+                    // Reinicializar el gráfico con los nuevos datos
+                    reinitializeChart();
+                } else {
+                    console.error('Error en la respuesta del gráfico:', response.error);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error actualizando datos del gráfico:', error);
+            }
+        });
+    }
 
 // Función separada para el gráfico
 function initializeChart() {
     // Evitar múltiples inicializaciones
     if (chartInitialized) {
-        console.log('Gráfico ya inicializado, saltando...');
         return;
     }
-
-    console.log('Iniciando inicialización del gráfico...');
 
     // Verificar que Chart.js esté disponible
     if (typeof Chart === 'undefined') {
@@ -68,7 +160,7 @@ function initializeChart() {
 
     // Destruir gráfico existente si existe
     if (currentChart) {
-        console.log('Destruyendo gráfico existente...');
+
         currentChart.destroy();
         currentChart = null;
     }
@@ -96,16 +188,14 @@ function initializeChart() {
     
     // Verificar si hay datos válidos
     if (!chartData || chartData.length === 0) {
-        console.log('No hay datos para mostrar gráfico');
-        let canvas = document.getElementById('listadosChart');
-        if (canvas) {
-            canvas.style.display = 'none';
-        }
-        chartInitialized = true;
-        return;
+
+        chartData = [{
+            mes: "Sin datos",
+            cantidad: 0
+        }];
     }
 
-    console.log('Datos finales para gráfico:', chartData);
+
 
     // Verificar que el canvas existe
     let canvas = document.getElementById('listadosChart');
@@ -114,15 +204,13 @@ function initializeChart() {
         return;
     }
 
-    // Mostrar el gráfico
-    canvas.style.display = 'block';
+    // Siempre mostrar el gráfico (ya sea con datos reales o vacíos)
+    toggleChartVisibility(true);
 
     // Preparar datos para Chart.js estilo AdminKit
     var labels = chartData.map(item => item.mes);
     var data = chartData.map(item => item.cantidad);
 
-    console.log('Labels:', labels);
-    console.log('Data:', data);
 
     try {
         // Crear gráfico con estilo AdminKit.io
@@ -150,6 +238,9 @@ function initializeChart() {
                     tooltip: {
                         callbacks: {
                             label: function(context) {
+                                if (context.parsed.y === 0 && context.label === 'Sin datos') {
+                                    return 'No hay listados en el período seleccionado';
+                                }
                                 return context.dataset.label + ': ' + context.parsed.y + ' listados';
                             }
                         }
@@ -182,12 +273,38 @@ function initializeChart() {
 
     } catch (error) {
         console.error('Error creando el gráfico:', error);
+        toggleChartVisibility(false);
     }
 
 }
 
 // Función para reinicializar el gráfico (útil después de actualizaciones AJAX)
 function reinitializeChart() {
-    chartInitialized = false;
-    initializeChart();
-}
+
+        
+        // Marcar como no inicializado para forzar recreación
+        chartInitialized = false;
+        
+        // Destruir gráfico existente si existe
+        if (currentChart) {
+            currentChart.destroy();
+            currentChart = null;
+        }
+        
+        // Inicializar con los nuevos datos
+        initializeChart();
+    }
+
+    // Función para mostrar/ocultar el gráfico según haya datos
+    function toggleChartVisibility(hasData) {
+        const canvas = document.getElementById('listadosChart');
+        const container = canvas ? canvas.closest('.chart-container') : null;
+        
+        if (container) {
+            if (hasData) {
+                container.style.display = 'block';
+            } else {
+                container.style.display = 'none';
+            }
+        }
+    }

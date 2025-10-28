@@ -26,9 +26,16 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
@@ -100,13 +107,21 @@ public class ListadoController {
                 .build();
         List<ListadoRecord> listadosGenerados = this.listadoService.obtenerListadoEntreFechas(listadoAudienciasDto);
         try {
-            String chartDataJson = objectMapper.writeValueAsString(listadoService.obtenerListadosPorMes(listadosGenerados));
+            List<ListadosPorMesDto> listadosPorMes = listadoService.obtenerListadosPorMes(listadosGenerados);
+            List<Map<String, Object>> chartDataList = convertirListadosPorMesAMap(listadosPorMes);
+            
+            // Si no hay datos, crear un elemento con valor 0
+            if (chartDataList.isEmpty()) {
+                chartDataList = crearDatosVaciosParaGrafico();
+            }
+            
+            String chartDataJson = objectMapper.writeValueAsString(chartDataList);
             model.addAttribute("chartData", chartDataJson);
 
         } catch (JsonProcessingException e) {
             log.error("Error consultando audiencia listados", e);
         }
-        model.addAttribute("listadosGenerados", listadosGenerados);
+        model.addAttribute("listadosGenerados", new ArrayList<ListadoRecord>());
         model.addAttribute("listadoAudienciasDto", listadoAudienciasDto);
         obtenerModelComun(model, user.getUserId());
 
@@ -201,10 +216,17 @@ public class ListadoController {
 
             List<ListadoRecord> listados = this.listadoService.obtenerListadoEntreFechas(listadoAudienciasDto);
 
-            model.addAttribute("listadosGenerados", listados);
-            String chartDataJson = objectMapper.writeValueAsString(listadoService.obtenerListadosPorMes(listados));
+            model.addAttribute("listadosGenerados", new ArrayList<ListadoRecord>());
+            List<ListadosPorMesDto> listadosPorMes = listadoService.obtenerListadosPorMes(listados);
+            List<Map<String, Object>> chartDataList = convertirListadosPorMesAMap(listadosPorMes);
+            
+            // Si no hay datos, crear un elemento con valor 0
+            if (chartDataList.isEmpty()) {
+                chartDataList = crearDatosVaciosParaGrafico();
+            }
+            
+            String chartDataJson = objectMapper.writeValueAsString(chartDataList);
             model.addAttribute("chartData", chartDataJson);
-
 
             obtenerModelComun(model, idUsuarioAutenticado);
 
@@ -221,4 +243,160 @@ public class ListadoController {
         obtenerModelComun(model, idUsuarioAutenticado);
         return "listados-generados";
     }
+
+    @PostMapping("/audiencias/data")
+    @ResponseBody
+    public Map<String, Object> getListadosData(
+            @AuthenticationPrincipal CustomAuthenticatedUser user,
+            @RequestParam(value = "draw", defaultValue = "1") int draw,
+            @RequestParam(value = "start", defaultValue = "0") int start,
+            @RequestParam(value = "length", defaultValue = "10") int length,
+            @RequestParam(value = "idAgencia", required = false) Long idAgencia,
+            @RequestParam(value = "fechaDesde", required = false) String fechaDesdeStr,
+            @RequestParam(value = "fechaHasta", required = false) String fechaHastaStr,
+            @RequestParam(value = "search[value]", required = false) String searchValue,
+            @RequestParam(value = "order[0][column]", defaultValue = "0") int orderColumn,
+            @RequestParam(value = "order[0][dir]", defaultValue = "desc") String orderDir) {
+        
+        try {
+            // Calcular página y tamaño
+            int page = start / length;
+            
+            // Crear objeto de paginación con ordenación
+            Sort sort = Sort.by(orderDir.equals("desc") ? Sort.Direction.DESC : Sort.Direction.ASC, 
+                               getColumnName(orderColumn));
+            Pageable pageable = PageRequest.of(page, length, sort);
+            
+            // Parsear fechas
+            LocalDate fechaDesde = null;
+            LocalDate fechaHasta = null;
+            
+            if (fechaDesdeStr != null && !fechaDesdeStr.trim().isEmpty()) {
+                fechaDesde = DateUtils.parseLocalDate(fechaDesdeStr, "dd-MM-yyyy");
+            }
+            
+            if (fechaHastaStr != null && !fechaHastaStr.trim().isEmpty()) {
+                fechaHasta = DateUtils.parseLocalDate(fechaHastaStr, "dd-MM-yyyy");
+            }
+            
+            // Llamar al servicio con los filtros y paginación
+            ListadoAudienciasDto filtros = ListadoAudienciasDto.builder()
+                    .idAgencia(idAgencia)
+                    .fechaDesde(fechaDesde)
+                    .fechaHasta(fechaHasta)
+                    .build();
+                    
+            Page<ListadoRecord> pageResult = this.listadoService.obtenerListadoEntreFechasPaginado(
+                filtros, searchValue, pageable, user.getUserId());
+            
+            // Preparar respuesta en formato DataTables
+            Map<String, Object> response = new HashMap<>();
+            response.put("draw", draw);
+            response.put("recordsTotal", pageResult.getTotalElements());
+            response.put("recordsFiltered", pageResult.getTotalElements());
+            response.put("data", pageResult.getContent());
+            
+            return response;
+            
+        } catch (Exception e) {
+            log.error("Error obteniendo datos paginados para listados", e);
+            
+            // Respuesta de error para DataTables
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("draw", draw);
+            errorResponse.put("recordsTotal", 0);
+            errorResponse.put("recordsFiltered", 0);
+            errorResponse.put("data", new ArrayList<>());
+            errorResponse.put("error", "Error al cargar los datos: " + e.getMessage());
+            
+            return errorResponse;
+        }
+    }
+    
+    @PostMapping("/audiencias/chart-data")
+    @ResponseBody
+    public Map<String, Object> getChartData(
+            @AuthenticationPrincipal CustomAuthenticatedUser user,
+            @RequestParam(value = "idAgencia", required = false) Long idAgencia,
+            @RequestParam(value = "fechaDesde", required = false) String fechaDesdeStr,
+            @RequestParam(value = "fechaHasta", required = false) String fechaHastaStr) {
+        
+        try {
+            // Parsear fechas
+            LocalDate fechaDesde = null;
+            LocalDate fechaHasta = null;
+            
+            if (fechaDesdeStr != null && !fechaDesdeStr.trim().isEmpty()) {
+                fechaDesde = DateUtils.parseLocalDate(fechaDesdeStr, "dd-MM-yyyy");
+            }
+            
+            if (fechaHastaStr != null && !fechaHastaStr.trim().isEmpty()) {
+                fechaHasta = DateUtils.parseLocalDate(fechaHastaStr, "dd-MM-yyyy");
+            }
+            
+            // Crear filtros
+            ListadoAudienciasDto filtros = ListadoAudienciasDto.builder()
+                    .idAgencia(idAgencia)
+                    .fechaDesde(fechaDesde)
+                    .fechaHasta(fechaHasta)
+                    .build();
+                    
+            // Obtener listados para el gráfico
+            List<ListadoRecord> listados = this.listadoService.obtenerListadoEntreFechas(filtros);
+            
+            // Generar datos del gráfico
+            List<Map<String, Object>> chartData = convertirListadosPorMesAMap(listadoService.obtenerListadosPorMes(listados));
+            if (chartData.isEmpty()) {
+                chartData = crearDatosVaciosParaGrafico();
+            }
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("chartData", chartData);
+            
+            return response;
+            
+        } catch (Exception e) {
+            log.error("Error obteniendo datos del gráfico", e);
+            
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", "Error al obtener datos del gráfico: " + e.getMessage());
+            errorResponse.put("chartData", new ArrayList<>());
+            
+            return errorResponse;
+        }
+    }
+
+    private List<Map<String, Object>> crearDatosVaciosParaGrafico() {
+        List<Map<String, Object>> datosVacios = new ArrayList<>();
+        Map<String, Object> item = new HashMap<>();
+        item.put("mes", "Sin datos");
+        item.put("cantidad", 0);
+        datosVacios.add(item);
+        return datosVacios;
+    }
+
+    private List<Map<String, Object>> convertirListadosPorMesAMap(List<ListadosPorMesDto> listadosPorMes) {
+        return listadosPorMes.stream()
+                .map(dto -> {
+                    Map<String, Object> item = new HashMap<>();
+                    item.put("mes", dto.getMes());
+                    item.put("cantidad", dto.getCantidad());
+                    return item;
+                })
+                .collect(Collectors.toList());
+    }
+
+    private String getColumnName(int column) {
+        switch (column) {
+            case 0: return "fechaCreacion";
+            case 1: return "nombreRepresentante";
+            case 2: return "solicitadoPara";
+            case 3: return "municipio";
+            case 4: return "localidad";
+            case 5: return "fechaInicio"; // Para las fechas del presupuesto
+            default: return "fechaCreacion";
+        }
+    }
+
 }

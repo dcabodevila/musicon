@@ -3,6 +3,7 @@ package es.musicalia.gestmusica.tarifa;
 import es.musicalia.gestmusica.artista.Artista;
 import es.musicalia.gestmusica.artista.ArtistaRepository;
 import es.musicalia.gestmusica.informe.InformeService;
+import es.musicalia.gestmusica.localizacion.ProvinciaRepository;
 import es.musicalia.gestmusica.usuario.UserService;
 import es.musicalia.gestmusica.util.DateUtils;
 import org.springframework.stereotype.Service;
@@ -23,12 +24,14 @@ public class TarifaServiceImpl implements TarifaService {
 	private final ArtistaRepository artistaRepository;
 	private final UserService userService;
 	private final InformeService informeService;
+    private final ProvinciaRepository provinciaRepository;
 
-	public TarifaServiceImpl(TarifaRepository tarifaRepository, ArtistaRepository artistaRepository, UserService userService, InformeService informeService){
+	public TarifaServiceImpl(TarifaRepository tarifaRepository, ArtistaRepository artistaRepository, UserService userService, InformeService informeService, ProvinciaRepository provinciaRepository){
 		this.tarifaRepository = tarifaRepository;
 		this.artistaRepository = artistaRepository;
 		this.userService = userService;
         this.informeService = informeService;
+        this.provinciaRepository = provinciaRepository;
     }
 	@Override
 	public List<TarifaDto> findByArtistaId(long idArtista , LocalDateTime start, LocalDateTime end){
@@ -75,13 +78,57 @@ public class TarifaServiceImpl implements TarifaService {
 		parametros.put("idProvincia", tarifaAnualDto.getIdProvincia().intValue());
 		parametros.put("conOcupacion", tarifaAnualDto.getConOcupacion());
 
+
+        String sbDatosAgrupacion = obtenerDatosAgrupacion(artista);
+
+
+        parametros.put("datosAgrupacion", sbDatosAgrupacion);
+        final String provincia = this.provinciaRepository.findById(tarifaAnualDto.getIdProvincia()).get().getNombre();
+
+        parametros.put("datosAgencia", obtenerDatosAgencia(artista, provincia));
+
 		String fileNameToExport = artista.getNombre().concat(DateUtils.getDateStr(new Date(), "ddMMyyyyHHmmss")).concat(".pdf");
 		String fileReport = "tarifa_anual_horizontal_ocupacion.jrxml";
 
 		return this.informeService.imprimirInforme(parametros, fileNameToExport, fileReport);
 	}
 
-	private void guardarTarifaFecha(TarifaSaveDto tarifaSaveDto, LocalDateTime fecha) {
+    private static String obtenerDatosAgrupacion(Artista artista) {
+        StringBuilder sbDatosAgrupacion =  new StringBuilder();
+        sbDatosAgrupacion.append("Número de componentes: ");
+        sbDatosAgrupacion.append(artista.getComponentes());
+        sbDatosAgrupacion.append("\n");
+
+        if (artista.isEscenario()){
+            sbDatosAgrupacion.append("Escenario: ");
+            sbDatosAgrupacion.append(artista.getTipoEscenario().getNombre());
+            sbDatosAgrupacion.append("\n");
+            sbDatosAgrupacion.append("Medidas escenario: ");
+            sbDatosAgrupacion.append(artista.getMedidasEscenario());
+            sbDatosAgrupacion.append("\n");
+        }
+
+        return sbDatosAgrupacion.toString();
+    }
+
+    private static String obtenerDatosAgencia(Artista artista, String provincia) {
+        StringBuilder sbDatosAgencia =  new StringBuilder();
+        sbDatosAgencia.append("Provincia: ");
+        sbDatosAgencia.append(provincia);
+        sbDatosAgencia.append("\n");
+
+        if (artista.getCondicionesContratacion()!=null && !artista.getCondicionesContratacion().isEmpty()){
+            sbDatosAgencia.append("Condiciones de contratación: ");
+            sbDatosAgencia.append(artista.getCondicionesContratacion());
+            sbDatosAgencia.append("\n");
+        }
+
+
+        return sbDatosAgencia.toString();
+
+    }
+
+    private void guardarTarifaFecha(TarifaSaveDto tarifaSaveDto, LocalDateTime fecha) {
 		Tarifa tarifa = tarifaSaveDto.getId()!=null ? this.tarifaRepository.findById(tarifaSaveDto.getId()).orElse(new Tarifa()) : new Tarifa();
 
 		final List<Tarifa> listaTarifasFecha = this.tarifaRepository.findTarifasByArtistaIdAndDates(tarifaSaveDto.getIdArtista(), fecha.withHour(0).withMinute(0).withSecond(0) , fecha.withHour(23).withMinute(59).withSecond(59));

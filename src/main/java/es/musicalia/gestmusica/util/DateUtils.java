@@ -1,6 +1,7 @@
 package es.musicalia.gestmusica.util;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -17,4 +18,8 @@ public class DateUtils {
         return dateTime.format(formatter);
     }
 
+    public static LocalDate parseLocalDate(String fechaDesdeStr, String pattern) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+        return LocalDate.parse(fechaDesdeStr, formatter);
+    }
 }
