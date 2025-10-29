@@ -30,7 +30,7 @@
                                     <div class="col-md-10">
                                         <select id="selectArtista" class="form-select" onchange="updateButton()">
                                             <option value="">Selecciona un artista...</option>
-                                            <option th:each="artista : ${listaArtistas}"
+                                            <option th:each="artista : ${listaArtistasSelect}"
                                                     th:value="${artista.id}"
                                                     th:text="${artista.nombre}">
                                             </option>

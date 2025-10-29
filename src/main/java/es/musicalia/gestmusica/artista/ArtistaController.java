@@ -66,6 +66,9 @@ public class ArtistaController {
         Pageable pageable = PageRequest.of(page, 8);
         Page<ArtistaDto> paginaArtistas = this.artistaService.findAllArtistasForUserPaginated(user.getUsuario(), pageable);
 
+        model.addAttribute("listaArtistasSelect", this.artistaService.findAllArtistasForUser(user.getUsuario()));
+
+
         model.addAttribute("listaArtistas", paginaArtistas.getContent());
         model.addAttribute("paginaActual", page);
         model.addAttribute("totalPaginas", paginaArtistas.getTotalPages());
@@ -83,7 +86,8 @@ public class ArtistaController {
             final Map<Long, Set<String>> mapPermisosArtista = user.getMapPermisosArtista();
 
             Pageable pageable = PageRequest.of(page, 8);
-            Page<ArtistaDto> paginaArtistas = this.artistaService.findAllArtistasForUserPaginated(user.getUsuario(), pageable);
+            Page<ArtistaRecord> paginaArtistas = this.artistaService.findMisArtistasPaginated(mapPermisosArtista.keySet(),pageable);
+            model.addAttribute("listaArtistasSelect", mapPermisosArtista.isEmpty() ? new ArrayList<>() : this.artistaService.findMisArtistas(mapPermisosArtista.keySet()));
 
             model.addAttribute("listaArtistas", paginaArtistas.getContent());
             model.addAttribute("paginaActual", page);
