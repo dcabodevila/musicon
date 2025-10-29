@@ -1,5 +1,7 @@
 package es.musicalia.gestmusica.artista;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -41,5 +43,10 @@ public interface ArtistaRepository extends JpaRepository<Artista, Long> {
 	@Query("select new es.musicalia.gestmusica.artista.ArtistaAgenciaRecord(a.id, a.agencia.id) from Artista a where a.idArtistaGestmanager = :idArtistaGestmanager")
 	Optional<ArtistaAgenciaRecord> findArtistaByIdArtistaGestmanager(@Param("idArtistaGestmanager") Long idArtistaGestmanager);
 
+    @Query("select new es.musicalia.gestmusica.artista.ArtistaRecord(a.id, a.nombre, a.logo) from Artista a where a.activo order by a.nombre")
+    Page<ArtistaRecord> findAllArtistasOrderedByNamePaginated(Pageable pageable);
+
+    @Query("select new es.musicalia.gestmusica.artista.ArtistaRecord(a.id, a.nombre, a.logo) from Artista a where a.id in (:idsMisArtistas) and a.activo order by a.nombre")
+    Page<ArtistaRecord> findMisArtistasPaginated(@Param("idsMisArtistas") Set<Long> idsMisArtistas, Pageable pageable);
 
 }

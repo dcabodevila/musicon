@@ -11,6 +11,9 @@ import es.musicalia.gestmusica.tarifa.TarifaAnualDto;
 import es.musicalia.gestmusica.usuario.UserService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -57,20 +60,39 @@ public class ArtistaController {
 
     @GetMapping
     public String artistas(@AuthenticationPrincipal CustomAuthenticatedUser user,
+                           @RequestParam(defaultValue = "0") int page,
                            Model model) {
 
-        model.addAttribute("listaArtistas", this.artistaService.findAllArtistasForUser(user.getUsuario()));
+        Pageable pageable = PageRequest.of(page, 8);
+        Page<ArtistaDto> paginaArtistas = this.artistaService.findAllArtistasForUserPaginated(user.getUsuario(), pageable);
+
+        model.addAttribute("listaArtistas", paginaArtistas.getContent());
+        model.addAttribute("paginaActual", page);
+        model.addAttribute("totalPaginas", paginaArtistas.getTotalPages());
+        model.addAttribute("totalElementos", paginaArtistas.getTotalElements());
+        model.addAttribute("tieneSiguiente", paginaArtistas.hasNext());
+        model.addAttribute("tieneAnterior", paginaArtistas.hasPrevious());
 
         return "artistas";
     }
 
     @GetMapping("/mis-artistas")
-    public String misArtistas(@AuthenticationPrincipal CustomAuthenticatedUser user, Model model) {
+    public String misArtistas(@AuthenticationPrincipal CustomAuthenticatedUser user, @RequestParam(defaultValue = "0") int page, Model model) {
         if (userService.isUserAutheticated()){
 
             final Map<Long, Set<String>> mapPermisosArtista = user.getMapPermisosArtista();
 
-            model.addAttribute("listaArtistas", mapPermisosArtista.isEmpty() ? new ArrayList<>() : this.artistaService.findMisArtistas(mapPermisosArtista.keySet()));
+            Pageable pageable = PageRequest.of(page, 8);
+            Page<ArtistaDto> paginaArtistas = this.artistaService.findAllArtistasForUserPaginated(user.getUsuario(), pageable);
+
+            model.addAttribute("listaArtistas", paginaArtistas.getContent());
+            model.addAttribute("paginaActual", page);
+            model.addAttribute("totalPaginas", paginaArtistas.getTotalPages());
+            model.addAttribute("totalElementos", paginaArtistas.getTotalElements());
+            model.addAttribute("tieneSiguiente", paginaArtistas.hasNext());
+            model.addAttribute("tieneAnterior", paginaArtistas.hasPrevious());
+
+            model.addAttribute("listaArtistas", mapPermisosArtista.isEmpty() ? new ArrayList<>() : paginaArtistas);
 
         }
         return "artistas";

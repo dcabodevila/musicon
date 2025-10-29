@@ -61,6 +61,47 @@
                         </div>
                     </div>
                 </div>
+                
+                <!-- Controles de paginación -->
+                <div class="row mt-4" th:if="${totalPaginas > 1}">
+                    <div class="col-12">
+                        <nav aria-label="Paginación de artistas">
+                            <ul class="pagination justify-content-center">
+                                <!-- Botón Anterior -->
+                                <li class="page-item" th:classappend="${!tieneAnterior} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/artista(page=${paginaActual - 1})}" 
+                                       th:if="${tieneAnterior}">Anterior</a>
+                                    <span class="page-link" th:unless="${tieneAnterior}">Anterior</span>
+                                </li>
+                                
+                                <!-- Números de página -->
+                                <li class="page-item" 
+                                    th:each="i : ${#numbers.sequence(0, totalPaginas - 1)}"
+                                    th:classappend="${i == paginaActual} ? 'active'">
+                                    <a class="page-link" th:href="@{/artista(page=${i})}" 
+                                       th:text="${i + 1}" th:if="${i != paginaActual}">1</a>
+                                    <span class="page-link" th:text="${i + 1}" th:if="${i == paginaActual}">1</span>
+                                </li>
+                                
+                                <!-- Botón Siguiente -->
+                                <li class="page-item" th:classappend="${!tieneSiguiente} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/artista(page=${paginaActual + 1})}" 
+                                       th:if="${tieneSiguiente}">Siguiente</a>
+                                    <span class="page-link" th:unless="${tieneSiguiente}">Siguiente</span>
+                                </li>
+                            </ul>
+                        </nav>
+                        
+                        <!-- Información de paginación -->
+                        <div class="text-center mt-2">
+                            <small class="text-muted">
+                                Mostrando <span th:text="${#lists.size(listaArtistas)}">0</span> de 
+                                <span th:text="${totalElementos}">0</span> artistas
+                                (Página <span th:text="${paginaActual + 1}">1</span> de <span th:text="${totalPaginas}">1</span>)
+                            </small>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
         <div th:replace="~{fragments/main-template :: footer}"/>

@@ -3,7 +3,6 @@ package es.musicalia.gestmusica.artista;
 
 import es.musicalia.gestmusica.acceso.Acceso;
 import es.musicalia.gestmusica.acceso.AccesoService;
-import es.musicalia.gestmusica.accesoartista.AccesoArtistaRepository;
 import es.musicalia.gestmusica.agencia.AgenciaRepository;
 import es.musicalia.gestmusica.contacto.Contacto;
 import es.musicalia.gestmusica.contacto.ContactoRepository;
@@ -17,6 +16,8 @@ import es.musicalia.gestmusica.usuario.UsuarioRepository;
 import es.musicalia.gestmusica.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,7 +55,18 @@ public class ArtistaServiceImpl implements ArtistaService {
         this.artistaMapper = artistaMapper;
 
     }
+    @Override
+    public Page<ArtistaDto> findAllArtistasForUserPaginated(Usuario usuario, Pageable pageable) {
+        Page<ArtistaRecord> pageArtistaRecords = this.artistaRepository.findAllArtistasOrderedByNamePaginated(pageable);
 
+        return pageArtistaRecords.map(artistaRecord -> {
+            ArtistaDto dto = new ArtistaDto();
+            dto.setId(artistaRecord.id());
+            dto.setNombre(artistaRecord.nombre());
+            dto.setLogo(artistaRecord.logo());
+            return dto;
+        });
+    }
 	@Override
 	public List<ArtistaRecord> findAllArtistasForUser(final Usuario usuario){
 		return this.artistaRepository.findAllArtistasOrderedByName();
@@ -63,6 +75,10 @@ public class ArtistaServiceImpl implements ArtistaService {
 	public List<ArtistaRecord> findMisArtistas(Set<Long> idsMisArtistas) {
 		return this.artistaRepository.findMisArtistas(idsMisArtistas);
 	}
+    @Override
+    public Page<ArtistaRecord> findMisArtistasPaginated(Set<Long> idsMisArtistas, Pageable pageable) {
+        return this.artistaRepository.findMisArtistasPaginated(idsMisArtistas, pageable);
+    }
 	@Override
 	public List<ArtistaRecord> findOtrosArtistas(Set<Long> idsMisArtistas) {
 		return this.artistaRepository.findOtrosArtistas(idsMisArtistas);
