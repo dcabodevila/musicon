@@ -65,28 +65,35 @@
                 <!-- Controles de paginación -->
                 <div class="row mt-4" th:if="${totalPaginas > 1}">
                     <div class="col-12">
+                        <!-- Paginador con expresión condicional más limpia -->
                         <nav aria-label="Paginación de artistas">
                             <ul class="pagination justify-content-center">
-                                <!-- Botón Anterior -->
+                                <!-- Botón anterior -->
                                 <li class="page-item" th:classappend="${!tieneAnterior} ? 'disabled'">
-                                    <a class="page-link" th:href="@{/artista(page=${paginaActual - 1})}" 
-                                       th:if="${tieneAnterior}">Anterior</a>
+                                    <a class="page-link" 
+                                       th:href="@{${isMisArtistas ? '/artista/mis-artistas' : '/artista'}(page=${paginaActual - 1})}"
+                                       th:if="${tieneAnterior}">
+                                        Anterior
+                                    </a>
                                     <span class="page-link" th:unless="${tieneAnterior}">Anterior</span>
                                 </li>
-                                
+
                                 <!-- Números de página -->
                                 <li class="page-item" 
-                                    th:each="i : ${#numbers.sequence(0, totalPaginas - 1)}"
+                                    th:each="i : ${#numbers.sequence(0, totalPaginas - 1)}" 
                                     th:classappend="${i == paginaActual} ? 'active'">
-                                    <a class="page-link" th:href="@{/artista(page=${i})}" 
-                                       th:text="${i + 1}" th:if="${i != paginaActual}">1</a>
-                                    <span class="page-link" th:text="${i + 1}" th:if="${i == paginaActual}">1</span>
+                                    <a class="page-link" 
+                                       th:href="@{${isMisArtistas ? '/artista/mis-artistas' : '/artista'}(page=${i})}"
+                                       th:text="${i + 1}">1</a>
                                 </li>
-                                
-                                <!-- Botón Siguiente -->
+
+                                <!-- Botón siguiente -->
                                 <li class="page-item" th:classappend="${!tieneSiguiente} ? 'disabled'">
-                                    <a class="page-link" th:href="@{/artista(page=${paginaActual + 1})}" 
-                                       th:if="${tieneSiguiente}">Siguiente</a>
+                                    <a class="page-link" 
+                                       th:href="@{${isMisArtistas ? '/artista/mis-artistas' : '/artista'}(page=${paginaActual + 1})}"
+                                       th:if="${tieneSiguiente}">
+                                        Siguiente
+                                    </a>
                                     <span class="page-link" th:unless="${tieneSiguiente}">Siguiente</span>
                                 </li>
                             </ul>

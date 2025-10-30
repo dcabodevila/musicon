@@ -75,7 +75,7 @@ public class ArtistaController {
         model.addAttribute("totalElementos", paginaArtistas.getTotalElements());
         model.addAttribute("tieneSiguiente", paginaArtistas.hasNext());
         model.addAttribute("tieneAnterior", paginaArtistas.hasPrevious());
-
+        model.addAttribute("isMisArtistas", false);
         return "artistas";
     }
 
@@ -85,7 +85,7 @@ public class ArtistaController {
 
             final Map<Long, Set<String>> mapPermisosArtista = user.getMapPermisosArtista();
 
-            Pageable pageable = PageRequest.of(page, 8);
+            Pageable pageable = PageRequest.of(page, 16);
             Page<ArtistaRecord> paginaArtistas = this.artistaService.findMisArtistasPaginated(mapPermisosArtista.keySet(),pageable);
             model.addAttribute("listaArtistasSelect", mapPermisosArtista.isEmpty() ? new ArrayList<>() : this.artistaService.findMisArtistas(mapPermisosArtista.keySet()));
 
@@ -95,6 +95,7 @@ public class ArtistaController {
             model.addAttribute("totalElementos", paginaArtistas.getTotalElements());
             model.addAttribute("tieneSiguiente", paginaArtistas.hasNext());
             model.addAttribute("tieneAnterior", paginaArtistas.hasPrevious());
+            model.addAttribute("isMisArtistas", true);
 
             model.addAttribute("listaArtistas", mapPermisosArtista.isEmpty() ? new ArrayList<>() : paginaArtistas);
 
