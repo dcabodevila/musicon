@@ -81,7 +81,7 @@ public class AgenciaServiceImpl implements AgenciaService {
 
 		if (agenciaContacto!=null){
 			agenciaDto.setEmail(agenciaContacto.getEmail());
-			agenciaDto.setFacebook(agenciaContacto.getFax());
+			agenciaDto.setFacebook(agenciaContacto.getFacebook());
 			agenciaDto.setWeb(agenciaContacto.getWeb());
 			agenciaDto.setInstagram(agenciaContacto.getInstagram());
 			agenciaDto.setFacebook(agenciaContacto.getFacebook());
@@ -144,7 +144,6 @@ public class AgenciaServiceImpl implements AgenciaService {
 		Contacto agenciaContacto = agencia.getAgenciaContacto() != null ? agencia.getAgenciaContacto() : new Contacto();
 		agenciaContacto.setFacebook(StringUtils.removeHttp(agenciaDto.getFacebook()));
 		agenciaContacto.setEmail(agenciaDto.getEmail());
-		agenciaContacto.setFax(agenciaDto.getFax());
 		agenciaContacto.setTelefono(agenciaDto.getTelefono());
 		agenciaContacto.setTelefono2(agenciaDto.getTelefono2());
 		agenciaContacto.setTelefono3(agenciaDto.getTelefono3());

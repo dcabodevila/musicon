@@ -4,7 +4,6 @@ import es.musicalia.gestmusica.tipoartista.TipoArtista;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
-import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 import java.util.Set;
@@ -30,7 +29,6 @@ public interface ArtistaMapper {
     @Mapping(target = "telefono", source = "contacto.telefono")
     @Mapping(target = "telefono2", source = "contacto.telefono2")
     @Mapping(target = "telefono3", source = "contacto.telefono3")
-    @Mapping(target = "fax", source = "contacto.fax")
     @Mapping(target = "youtube", source = "contacto.youtube")
     ArtistaDto toDto(Artista artista);
 

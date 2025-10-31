@@ -25,7 +25,6 @@ public class AgenciaDto {
     private Long idUsuario;
     private String nombreUsuario;
     private String email;
-    private String fax;
     private String web;
     private String instagram;
     private String telefono;

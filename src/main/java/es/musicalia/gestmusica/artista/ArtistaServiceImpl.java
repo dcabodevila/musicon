@@ -112,7 +112,7 @@ public class ArtistaServiceImpl implements ArtistaService {
 
 		if (contacto!=null){
 			artistaDto.setEmail(contacto.getEmail());
-			artistaDto.setFacebook(contacto.getFax());
+			artistaDto.setFacebook(contacto.getFacebook());
 			artistaDto.setWeb(contacto.getWeb());
 			artistaDto.setInstagram(contacto.getInstagram());
 			artistaDto.setFacebook(contacto.getFacebook());
@@ -197,6 +197,7 @@ public class ArtistaServiceImpl implements ArtistaService {
         artista.setGoogle(StringUtils.removeHttp(dto.getGoogle()));
         artista.setTiktok(StringUtils.removeHttp(dto.getTiktok()));
         artista.setMusica(StringUtils.removeHttp(dto.getMusica()));
+        artista.setCif(dto.getCif());
     }
 
     private void actualizarTiposArtista(Artista artista, List<Long> idsTipoArtista) {
@@ -214,7 +215,6 @@ public class ArtistaServiceImpl implements ArtistaService {
         contacto = contacto != null ? contacto : new Contacto();
         contacto.setFacebook(StringUtils.removeHttp(dto.getFacebook()));
         contacto.setEmail(dto.getEmail());
-        contacto.setFax(dto.getFax());
         contacto.setTelefono(dto.getTelefono());
         contacto.setTelefono2(dto.getTelefono2());
         contacto.setTelefono3(dto.getTelefono3());

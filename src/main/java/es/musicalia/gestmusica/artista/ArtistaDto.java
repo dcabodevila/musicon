@@ -3,6 +3,7 @@ package es.musicalia.gestmusica.artista;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import org.hibernate.validator.constraints.Length;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +15,7 @@ public class ArtistaDto {
     @NotNull
     @NotEmpty
     private String nombre;
+
     private String cif;
     private String logo;
     @NotNull
@@ -44,7 +46,6 @@ public class ArtistaDto {
 
     private String nombreAgencia;
     private String email;
-    private String fax;
     private String web;
     private String instagram;
     private String telefono;

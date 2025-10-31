@@ -44,38 +44,39 @@
                                     <div class="mb-3 row required">
                                         <label class="col-form-label col-sm-3 text-sm-end">Nombre de usuario</label>
                                         <div class="col-sm-9">
-                                            <input type="text" class="form-control" th:field="*{username}" placeholder="Nombre de usuario" id="username" required autocomplete="off">
+                                            <input type="text" class="form-control" th:field="*{username}" placeholder="Nombre de usuario" id="username" required autocomplete="off" maxlength="250">
                                         </div>
                                     </div>
 
                                     <div class="mb-3 row">
                                         <label class="col-form-label col-sm-3 text-sm-end">Nombre</label>
                                         <div class="col-sm-9">
-                                            <input class="form-control" th:field="*{nombre}" placeholder="Nombre" id="nombre" autocomplete="off">
+                                            <input class="form-control" th:field="*{nombre}" placeholder="Nombre" id="nombre" autocomplete="off" maxlength="250">
                                         </div>
                                     </div>
                                     <div class="mb-3 row">
                                         <label class="col-form-label col-sm-3 text-sm-end">Apellidos</label>
                                         <div class="col-sm-9">
-                                            <input id="apellidos" class="form-control" th:field="*{apellidos}" placeholder="Apellidos" autocomplete="off"></input>
+                                            <input id="apellidos" class="form-control" th:field="*{apellidos}" placeholder="Apellidos" autocomplete="off" maxlength="250">
                                         </div>
                                     </div>
                                     <div class="mb-3 row">
-                                        <label class="col-form-label col-sm-3 text-sm-end">email</label>
+                                        <label for="email" class="col-form-label col-sm-3 text-sm-end">email</label>
                                         <div class="col-sm-9">
-                                            <input id="email" class="form-control" th:field="*{email}" placeholder="email" autocomplete="off"></input>
+                                            <input type="email" id="email" class="form-control" th:field="*{email}"
+                                                   placeholder="email" autocomplete="off" maxlength="250">
                                         </div>
                                     </div>
                                     <div class="mb-3 row">
                                         <label class="col-form-label col-sm-3 text-sm-end">Nombre comercial</label>
                                         <div class="col-sm-9">
-                                            <input id="nombre-comercial" class="form-control" th:field="*{nombreComercial}" placeholder="Nombre comercial" autocomplete="off"></input>
+                                            <input id="nombre-comercial" class="form-control" th:field="*{nombreComercial}" placeholder="Nombre comercial" autocomplete="off" maxlength="150">
                                         </div>
                                     </div>
                                     <div class="mb-3 row">
                                         <label class="col-form-label col-sm-3 text-sm-end">Teléfono</label>
                                         <div class="col-sm-9">
-                                            <input id="telefono" class="form-control" th:field="*{telefono}" placeholder="Teléfono" autocomplete="off"></input>
+                                            <input id="telefono" class="form-control" th:field="*{telefono}" placeholder="Teléfono" autocomplete="off" maxlength="15">
                                         </div>
                                     </div>
                                     <div class="mb-3 row">

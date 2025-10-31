@@ -21,7 +21,6 @@ public class UsuarioEdicionDTO {
     private String nombre;
     private String apellidos;
     @NotNull
-    @Email
     private String email;
     private String imagen;
     private String telefono;

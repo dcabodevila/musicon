@@ -31,7 +31,6 @@ public interface AgenciaMapper {
     @Named("mapContactoToDto")
     @BeanMapping(ignoreByDefault = true)
     @Mapping(source = "email", target = "email")
-    @Mapping(source = "fax", target = "fax")
     @Mapping(source = "web", target = "web")
     @Mapping(source = "instagram", target = "instagram")
     @Mapping(source = "facebook", target = "facebook")
@@ -47,7 +46,6 @@ public interface AgenciaMapper {
 
         Contacto contacto = new Contacto();
         contacto.setEmail(agenciaDto.getEmail());
-        contacto.setFax(agenciaDto.getFax());
         contacto.setWeb(agenciaDto.getWeb());
         contacto.setInstagram(agenciaDto.getInstagram());
         contacto.setFacebook(agenciaDto.getFacebook());

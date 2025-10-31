@@ -167,6 +167,8 @@ public class ArtistaController {
                                  BindingResult bindingResult, RedirectAttributes redirectAttributes, Errors errors) {
 
         if (bindingResult.hasErrors()) {
+            getModelAttributeDetail(model, artistaDto);
+
             return "artista-detail";
         }
 

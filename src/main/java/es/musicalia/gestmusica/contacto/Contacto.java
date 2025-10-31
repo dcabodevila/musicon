@@ -17,9 +17,6 @@ public class Contacto {
     @Column(name = "email")
     private String email;
 
-    @Column(name = "fax")
-    private String fax;
-
     @Column(name = "web")
     private String web;
 
