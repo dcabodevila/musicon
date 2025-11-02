@@ -63,7 +63,7 @@ public class AgenciasController {
     public String crearAgencias(Model model) {
         model.addAttribute("agenciaDto", new AgenciaDto());
         model.addAttribute("listaProvincias", this.localizacionService.findAllProvincias());
-        model.addAttribute("listaUsuarios", this.userService.findAllUsuarioRecords());
+        model.addAttribute("listaUsuarios", this.userService.findAllUsuarioRecordsNotAdmin());
 
         return "agencia-detail-edit";
     }
@@ -72,7 +72,7 @@ public class AgenciasController {
     public String detalleEditarAgencia(Model model, @PathVariable("id") Long idAgencia) {
         model.addAttribute("agenciaDto", this.agenciaService.findAgenciaDtoById(idAgencia));
         model.addAttribute("listaProvincias", this.localizacionService.findAllProvincias());
-        model.addAttribute("listaUsuarios", this.userService.findAllUsuarioRecords());
+        model.addAttribute("listaUsuarios", this.userService.findAllUsuarioRecordsNotAdmin());
 
         return "agencia-detail-edit";
     }

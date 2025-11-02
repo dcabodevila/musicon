@@ -8,6 +8,7 @@
     <meta name="description" content="">
     <div th:replace="~{fragments/main-template :: header-css}"/>
 
+
 </head>
 <body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
     <div class="wrapper">
@@ -28,9 +29,11 @@
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
                     </div>
-                    
+                
+
+                
                     <!-- Tabla de Usuarios Conectados -->
-                    <div class="row">
+                    <div class="row mt-4">
                         <div class="col-12">
                             <div class="card">
                                 <div class="card-header d-flex justify-content-between align-items-center">
@@ -92,6 +95,73 @@
                                             <p class="mb-0">No se encontraron usuarios activos en este momento</p>
                                         </div>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gráfico de Accesos por Día -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5 class="card-title mb-0">
+                                        <i class="fas fa-chart-bar text-primary me-2"></i>Accesos por Día del Usuario
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <!-- Formulario de filtros -->
+                                    <form id="formFiltroAccesos" class="mb-4">
+                                        <div class="row g-3">
+                                            <div class="col-md-4">
+                                                <label for="usuarioSelectGrafico" class="form-label">
+                                                    <i class="fas fa-user me-1"></i>Seleccionar Usuario
+                                                </label>
+                                                <select id="usuarioSelectGrafico" class="form-select" >
+                                                    <option value="">-- Selecciona un usuario --</option>
+                                                    <option th:each="usuario : ${usuarios}" th:value="${usuario.id}" th:text="${usuario.nombreApellidos + ' - '+ usuario.nombreComercial }">Usuario</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label for="fechaDesdeGrafico" class="form-label">
+                                                    <i class="fas fa-calendar me-1"></i>Fecha Desde
+                                                </label>
+                                                <input type="text" id="fechaDesdeGrafico" class="form-control"
+                                                       placeholder="dd-mm-yyyy"
+                                                       th:value="${#temporals.format(#temporals.createNow().minusMonths(2), 'dd-MM-yyyy')}">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label for="fechaHastaGrafico" class="form-label">
+                                                    <i class="fas fa-calendar me-1"></i>Fecha Hasta
+                                                </label>
+                                                <input type="text" id="fechaHastaGrafico" class="form-control"
+                                                       placeholder="dd-mm-yyyy"
+                                                       th:value="${#temporals.format(#temporals.createNow(), 'dd-MM-yyyy')}">
+                                            </div>
+                                            <div class="col-md-2 d-flex align-items-end">
+                                                <button type="submit" class="btn btn-primary w-100">
+                                                    <i class="fas fa-search me-1"></i>Consultar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+
+                                    <!-- Canvas del gráfico -->
+                                    <div id="accesosPorDiaContainer" style="display: none; height: 400px;">
+                                        <canvas id="accesosPorDiaChart"></canvas>
+                                    </div>
+
+                                    <!-- Mensaje de sin datos -->
+                                    <div id="sinDatosMsg" class="text-center py-5">
+                                        <div class="text-muted">
+                                            <i class="fas fa-info-circle fa-3x mb-3 opacity-50"></i>
+                                            <h5>Sin datos disponibles</h5>
+                                            <p class="mb-0">Selecciona un usuario y un período de fechas para ver los accesos</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Input oculto para datos del gráfico -->
+                                    <input type="hidden" id="chartDataAccesos" value="">
                                 </div>
                             </div>
                         </div>
@@ -211,6 +281,9 @@
         }
     </style>
 
+    <script type="text/javascript" th:src="@{/js/actividad.js}"></script>1
+
 </body>
 </html>
+
 

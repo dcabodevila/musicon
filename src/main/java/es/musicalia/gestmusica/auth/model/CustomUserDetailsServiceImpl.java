@@ -7,6 +7,7 @@ import es.musicalia.gestmusica.acceso.AccesoService;
 import es.musicalia.gestmusica.accesoartista.AccesoArtistaService;
 import es.musicalia.gestmusica.permiso.Permiso;
 import es.musicalia.gestmusica.permiso.PermisoService;
+import es.musicalia.gestmusica.registrologin.RegistroLoginService;
 import es.musicalia.gestmusica.rol.TipoRolEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -28,11 +29,13 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService {
 	private final UsuarioRepository usuarioRepository;
 	private final PermisoService permisoService;
 	private final AccesoArtistaService accesoArtistaService;
+    private final RegistroLoginService  registroLoginService;
 
-	public CustomUserDetailsServiceImpl(PermisoService permisoService, UsuarioRepository usuarioRepository, AccesoArtistaService accesoArtistaService){
+	public CustomUserDetailsServiceImpl(PermisoService permisoService, UsuarioRepository usuarioRepository, AccesoArtistaService accesoArtistaService, RegistroLoginService registroLoginService){
 		this.usuarioRepository = usuarioRepository;
 		this.permisoService = permisoService;
         this.accesoArtistaService = accesoArtistaService;
+        this.registroLoginService = registroLoginService;
     }
 
 	@Override
@@ -61,6 +64,9 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService {
 		final Date date = new Date();
 		usuario.setFechaUltimoAcceso(new Timestamp(date.getTime()));
 		this.usuarioRepository.save(usuario);
+
+        this.registroLoginService.registrarLogin(usuario.getId());
+
 		return userDetails;
 	}
 

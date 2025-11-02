@@ -13,9 +13,11 @@ public interface UserService {
 
 	Usuario saveRegistration(RegistrationForm registrationForm) throws EmailYaExisteException, EnvioEmailException;
 
-	List<UsuarioRecord> findAllUsuarioRecords();
+	List<UsuarioRecord> findAllUsuarioRecordsNotAdmin();
 
-	List<RepresentanteRecord> findAllRepresentanteRecords();
+    List<UsuarioRecord> findAllUsuarioRecords();
+
+    List<RepresentanteRecord> findAllRepresentanteRecords();
 
 	@Transactional(readOnly = false)
 	Usuario activateUserByEmail(String email) throws UsuarioNoEncontradoException;

@@ -45,7 +45,7 @@ public class AccesoController {
         final AccesoDto accesoDto = new AccesoDto();
         accesoDto.setIdAgencia(idAgencia);
         model.addAttribute("accesoDto", accesoDto);
-        model.addAttribute("listaUsuarios", this.userService.findAllUsuarioRecords());
+        model.addAttribute("listaUsuarios", this.userService.findAllUsuarioRecordsNotAdmin());
         final List<RolRecord> listaRoles = this.accesoService.obtenerRolesAgencia();
         model.addAttribute("listaRoles", listaRoles);
 

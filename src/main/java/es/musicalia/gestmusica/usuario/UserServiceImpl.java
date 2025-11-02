@@ -130,9 +130,15 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public List<UsuarioRecord> findAllUsuarioRecords(){
-		return this.userRepository.findAllUsuarioRecords();
+	public List<UsuarioRecord> findAllUsuarioRecordsNotAdmin(){
+		return this.userRepository.findAllUsuarioRecordsNotAdmin();
 	}
+
+    @Override
+    public List<UsuarioRecord> findAllUsuarioRecords(){
+        return this.userRepository.findAllUsuarioRecords();
+    }
+
 	@Override
 	public List<RepresentanteRecord> findAllRepresentanteRecords(){
 		return this.userRepository.findAllRepresentantesRecords();

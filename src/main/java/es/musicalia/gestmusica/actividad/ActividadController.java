@@ -2,9 +2,8 @@ package es.musicalia.gestmusica.actividad;
 
 
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
+import es.musicalia.gestmusica.usuario.UserService;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.session.SessionInformation;
 import org.springframework.security.core.session.SessionRegistry;
@@ -12,7 +11,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -27,12 +25,14 @@ public class ActividadController {
 
     private final ActividadService actividadService;
     private final SessionRegistry sessionRegistry;
+    private final UserService userService;
 
 
-    public ActividadController(ActividadService actividadService, SessionRegistry sessionRegistry){
+    public ActividadController(ActividadService actividadService, SessionRegistry sessionRegistry, UserService userService){
 
         this.actividadService = actividadService;
         this.sessionRegistry = sessionRegistry;
+        this.userService = userService;
     }
 
     @GetMapping
@@ -41,8 +41,7 @@ public class ActividadController {
         model.addAttribute("actividadTarifas", this.actividadService.findActividadTarifas());
         model.addAttribute("actividadOcupaciones", this.actividadService.findActividadOcupaciones());
         model.addAttribute("usuariosConectados", obtenerUsuariosConectados());
-
-
+        model.addAttribute("usuarios", this.userService.findAllUsuarioRecords());
         return "actividad";
     }
 

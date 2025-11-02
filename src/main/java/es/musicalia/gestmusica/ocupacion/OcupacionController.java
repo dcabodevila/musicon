@@ -103,7 +103,7 @@ public class OcupacionController {
 
         model.addAttribute("listaTiposOcupacion", this.ocupacionService.listarTiposOcupacion(ocupacion.getIdArtista()));
         model.addAttribute("isArtistaPermiteOrquestasDeGalicia", this.artistaService.findArtistaDtoById(ocupacion.getIdArtista()).isPermiteOrquestasDeGalicia());
-        model.addAttribute("listaUsuarios", this.userService.findAllUsuarioRecords());
+        model.addAttribute("listaUsuarios", this.userService.findAllUsuarioRecordsNotAdmin());
         model.addAttribute("idUsuarioAutenticado", this.userService.isUserAutheticated()? this.userService.obtenerUsuarioAutenticado().get().getId() : null);
     }
 
