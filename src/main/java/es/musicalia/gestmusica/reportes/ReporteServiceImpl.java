@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Locale;
 
 @Slf4j
@@ -27,7 +28,7 @@ public class ReporteServiceImpl implements ReporteService {
         log.info("Iniciando envío de reporte mensual para agencia con ID: {}", idAgencia);
 
         // Buscar el acceso activo de la agencia
-        Acceso acceso = accesoService.findAccesoActivoByAgenciaId(idAgencia)
+        List<Acceso> accesos = accesoService.findAccesoActivoByAgenciaId(idAgencia)
                 .orElseThrow(() -> new EnvioEmailException("No se encontró acceso activo para la agencia con ID: " + idAgencia));
 
         // Calcular fechas
@@ -38,15 +39,19 @@ public class ReporteServiceImpl implements ReporteService {
         YearMonth tresMesesAtras = YearMonth.now().minusMonths(3);
         LocalDate inicioTresMeses = tresMesesAtras.atDay(1);
         LocalDate finTresMeses = mesAnterior.atEndOfMonth();
-
-        // Formatear periodo
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM yyyy", new Locale("es", "ES"));
+        // Formatear periodo
         String periodo = mesAnterior.format(formatter);
         periodo = periodo.substring(0, 1).toUpperCase() + periodo.substring(1);
 
-        // Ejecutar reporte
-        reporteMensualAgenciaJob.enviarReporteParaAgencia(acceso, periodo, inicioMesAnterior, finMesAnterior, inicioTresMeses, finTresMeses);
+        for (Acceso acceso : accesos) {
 
-        log.info("Reporte mensual para agencia {} completado exitosamente", acceso.getAgencia().getNombre());
+            // Ejecutar reporte
+            reporteMensualAgenciaJob.enviarReporteParaAgencia(acceso, periodo, inicioMesAnterior, finMesAnterior, inicioTresMeses, finTresMeses);
+
+            log.info("Reporte mensual para agencia {} completado exitosamente", acceso.getAgencia().getNombre());
+        }
+
+
     }
 }

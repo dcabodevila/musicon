@@ -34,5 +34,5 @@ public interface AccesoService {
 
     List<Acceso> findAccesosActivosByRolCodigo(String codigoRol);
 
-    Optional<Acceso> findAccesoActivoByAgenciaId(Long idAgencia);
+    Optional<List<Acceso>> findAccesoActivoByAgenciaId(Long idAgencia);
 }

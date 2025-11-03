@@ -361,7 +361,7 @@ public class AccesoServiceImpl implements AccesoService {
 	}
 
 	@Override
-	public Optional<Acceso> findAccesoActivoByAgenciaId(Long idAgencia) {
+	public Optional<List<Acceso>> findAccesoActivoByAgenciaId(Long idAgencia) {
 		return accesoRepository.findAccesoActivoByAgenciaId(idAgencia);
 	}
 
