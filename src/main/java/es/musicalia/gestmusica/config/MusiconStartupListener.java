@@ -25,18 +25,18 @@ public class MusiconStartupListener implements ApplicationListener<ApplicationRe
         logger.info("");
         logger.info("* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *");
         logger.info("");
-        logger.info("  ____           _                      _");
-        logger.info(" / ___| ___  ___| |_ _ __ ___  _   _ ___(_) ___ __ _");
-        logger.info("| |  _ / _ \\/ __| __| '_ ` _ \\| | | / __| |/ __/ _` |");
-        logger.info("| |_| |  __/\\__ \\ |_| | | | | | |_| \\__ \\ | (_| (_| |");
-        logger.info(" \\____|\\___|\\___/\\__|_| |_| |_|\\__,_|___/_|\\___\\__,_|");
+        logger.info("  ███████ ███████ ███████ ████████ ██  █████ ");
+        logger.info("  ██      ██      ██         ██    ██ ██   ██");
+        logger.info("  █████   █████   ███████    ██    ██ ███████");
+        logger.info("  ██      ██           ██    ██    ██ ██   ██");
+        logger.info("  ██      ███████ ███████    ██    ██ ██   ██");
         logger.info("");
         logger.info("* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *");
         logger.info("");
         logger.info("===========================================================");
         logger.info("  >> Servidor: http://localhost:{}{}", port, contextPath);
         logger.info("  >> Perfil: {}", profile);
-        logger.info("  >> Aplicacion: GESTMUSICA");
+        logger.info("  >> Aplicacion: FESTIA");
         logger.info("  >> Java: {}", System.getProperty("java.version"));
         logger.info("===========================================================");
 
