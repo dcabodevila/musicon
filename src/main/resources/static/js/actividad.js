@@ -67,7 +67,7 @@ $(document).ready(function(){
 
             // Realizar petición AJAX para obtener datos del gráfico
             $.ajax({
-                url: '/api/registro-login/chart-data?' + params.toString(),
+                url: '/registro-login/chart-data?' + params.toString(),
                 type: 'GET',
                 success: function(response) {
                     if (response.success && response.chartData && response.chartData.length > 0) {

@@ -76,13 +76,20 @@
 								</div>
 								<div class="row g-0 align-items-center mt-2">
 
-									<div class="col-12 text-end">
-										<button class="btn btn-sm btn-light"
-												th:onclick="'marcarMensajeLeido(' + ${mensaje.id} + ')'">
-											<i class="align-middle me-1 fas fa-check"></i>
-											Marcar como leído
-										</button>
-									</div>
+                                    <div class="col-6 text-start">
+                                        <a th:if="${mensaje.urlEnlace != null}" th:href="${mensaje.urlEnlace}"
+                                           class="btn btn-sm btn-primary">
+                                            <i class="align-middle me-1 fas fa-eye"></i>
+                                            Ver
+                                        </a>
+                                    </div>
+                                    <div class="col-6 text-end">
+                                        <button class="btn btn-sm btn-light"
+                                                th:onclick="'marcarMensajeLeido(' + ${mensaje.id} + ')'">
+                                            <i class="align-middle me-1 fas fa-check"></i>
+                                            Marcar como leído
+                                        </button>
+                                    </div>
 								</div>
 							</div>
 

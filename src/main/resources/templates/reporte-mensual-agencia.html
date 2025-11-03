@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>festia.es</title>
+    <div th:replace="~{fragments/mail-header :: header}"></div>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1 th:text="${titulo}">festia</h1>
+        <p th:text="${subtitulo}"></p>
+    </div>
+    <div class="content">
+        <p class="message" th:text="${mensaje}">Aquí va el mensaje principal</p>
+
+        <div style="margin: 20px 0; padding: 15px; background-color: #f5f5f5; border-radius: 5px;">
+            <h3 style="margin-top: 0; color: #333;">Resumen del mes</h3>
+            <p style="font-size: 16px; margin: 10px 0;">
+                <strong>Agencia:</strong> <span th:text="${nombreAgencia}">Nombre de la agencia</span>
+            </p>
+            <p style="font-size: 16px; margin: 10px 0;">
+                <strong>Período:</strong> <span th:text="${periodo}">Enero 2025</span>
+            </p>
+            <p style="font-size: 24px; margin: 15px 0; color: #007bff;">
+                <strong>Total de listados generados:</strong> <span th:text="${totalListados}">0</span>
+            </p>
+            <p style="font-size: 14px; color: #666; margin-top: 10px;">
+                Durante este mes, alguno de tus artistas ha aparecido en <strong th:text="${totalListados}">0</strong> presupuestos generados en la plataforma.
+            </p>
+        </div>
+
+        <div style="margin: 20px 0; padding: 15px; background-color: #ffffff; border-radius: 5px; border: 1px solid #ddd;">
+            <h3 style="margin-top: 0; color: #333;">Gráfico de listados por mes</h3>
+            <div style="width: 100%; max-width: 600px; margin: 0 auto; text-align: center;">
+                <img th:src="${chartImageUrl}"
+                     alt="Gráfico de listados por mes"
+                     style="max-width: 100%; height: auto; border-radius: 5px;" />
+            </div>
+        </div>
+
+        <p style="margin-top: 20px;">
+            Accede a <a href="https://festia.es" style="color: #007bff; text-decoration: none;">festia.es</a> para ver más detalles.
+        </p>
+    </div>
+    <div class="footer">
+        <p>Este es un mensaje automático de <strong>festia.es</strong></p>
+    </div>
+</div>
+</body>
+</html>

@@ -17,7 +17,7 @@ import java.util.Map;
  * @author sir
  */
 @RestController
-@RequestMapping("/api/registro-login")
+@RequestMapping("/registro-login")
 public class RegistroLoginController {
 	
 	@Autowired

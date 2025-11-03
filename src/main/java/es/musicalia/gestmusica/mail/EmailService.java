@@ -18,7 +18,11 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -145,6 +149,48 @@ public class EmailService {
     }
 
 
+    public void enviarReporteMensualAgencia(String email, String nombreAgencia, String periodo, Long totalListados, List<Map<String, Object>> chartData) throws EnvioEmailException {
+        if (!isMailEnabled) {
+            log.info("Envío de correo deshabilitado por configuración. No se enviará el mensaje a: {}", email);
+            return;
+        }
+
+        EmailTemplateEnum tipo = EmailTemplateEnum.REPORTE_MENSUAL_AGENCIA;
+        Context context = new Context();
+        context.setVariable("titulo", tipo.getTitulo());
+        context.setVariable("subtitulo", tipo.getSubtitulo());
+        context.setVariable("mensaje", tipo.getMensaje());
+        context.setVariable("nombreAgencia", nombreAgencia);
+        context.setVariable("periodo", periodo);
+        context.setVariable("totalListados", totalListados);
+
+        // Generar URL de imagen del gráfico usando QuickChart
+        String chartImageUrl = generarUrlGraficoQuickChart(chartData);
+        context.setVariable("chartImageUrl", chartImageUrl);
+
+        String htmlContent = templateEngine.process(tipo.getTemplate(), context);
+        String plainContent = String.format(
+                "%s\n\nAgencia: %s\nPeríodo: %s\nTotal de listados generados: %d\n\nAccede a festia.es para ver más detalles.",
+                tipo.getMensaje(), nombreAgencia, periodo, totalListados
+        );
+
+        EmailDto emailDto = EmailDto.builder()
+                .to(email)
+                .subject(tipo.getAsunto())
+                .content(htmlContent)
+                .plainContent(plainContent)
+                .isHtml(true)
+                .build();
+
+        try {
+            final MailgunResponse mailgunResponse = sendMailgunEmail(emailDto);
+            log.info("Reporte mensual enviado correctamente a: {} - Respuesta: {}", email, mailgunResponse);
+        } catch (Exception e) {
+            log.error("Error enviando reporte mensual a {}: {}", email, e.getMessage());
+            throw new EnvioEmailException("No se pudo enviar el reporte mensual por correo");
+        }
+    }
+
     private void addAttachments(MimeMessageHelper helper, List<String> attachmentPaths)
             throws MessagingException {
         for (String path : attachmentPaths) {
@@ -161,5 +207,39 @@ public class EmailService {
         }
     }
 
+    private String generarUrlGraficoQuickChart(List<Map<String, Object>> chartData) {
+        try {
+            // Extraer labels y valores
+            List<String> labels = chartData.stream()
+                    .map(item -> (String) item.get("mes"))
+                    .collect(Collectors.toList());
+            List<Long> values = chartData.stream()
+                    .map(item -> (Long) item.get("cantidad"))
+                    .collect(Collectors.toList());
+
+            // Crear configuración del gráfico en formato JSON
+            String labelsJson = labels.stream()
+                    .map(label -> "\"" + label + "\"")
+                    .collect(Collectors.joining(","));
+            String valuesJson = values.stream()
+                    .map(String::valueOf)
+                    .collect(Collectors.joining(","));
+
+            String chartConfig = String.format(
+                    "{type:'bar',data:{labels:[%s],datasets:[{label:'Número de listados',data:[%s],backgroundColor:'rgba(0,123,255,0.5)',borderColor:'rgba(0,123,255,1)',borderWidth:1}]},options:{responsive:true,scales:{y:{beginAtZero:true,ticks:{stepSize:1}}},plugins:{legend:{display:true,position:'top'},title:{display:true,text:'Listados generados por mes'}}}}",
+                    labelsJson, valuesJson
+            );
+
+            // Codificar para URL
+            String encodedConfig = URLEncoder.encode(chartConfig, StandardCharsets.UTF_8);
+
+            // Generar URL de QuickChart con dimensiones específicas
+            return "https://quickchart.io/chart?width=600&height=400&c=" + encodedConfig;
+
+        } catch (Exception e) {
+            log.error("Error generando URL del gráfico", e);
+            return "";
+        }
+    }
 
 }

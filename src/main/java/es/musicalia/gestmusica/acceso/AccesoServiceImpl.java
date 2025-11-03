@@ -353,7 +353,16 @@ public class AccesoServiceImpl implements AccesoService {
 
 		return accesoRepository.existsActiveAccessByUserIdAndAgencyIds(idUsuarioConsulta, idsAgencia);
 
+	}
 
+	@Override
+	public List<Acceso> findAccesosActivosByRolCodigo(String codigoRol) {
+		return accesoRepository.findAccesosActivosByRolCodigo(codigoRol);
+	}
+
+	@Override
+	public Optional<Acceso> findAccesoActivoByAgenciaId(Long idAgencia) {
+		return accesoRepository.findAccesoActivoByAgenciaId(idAgencia);
 	}
 
 }

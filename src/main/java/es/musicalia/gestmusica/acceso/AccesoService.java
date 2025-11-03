@@ -31,4 +31,8 @@ public interface AccesoService {
     List<AccesoDetailRecord> getMisAccesos(Long userId);
 
     boolean isUsuarioAccesoEnAgencia(Set<Long> idsAgencia, Long idUsuarioConsulta);
+
+    List<Acceso> findAccesosActivosByRolCodigo(String codigoRol);
+
+    Optional<Acceso> findAccesoActivoByAgenciaId(Long idAgencia);
 }

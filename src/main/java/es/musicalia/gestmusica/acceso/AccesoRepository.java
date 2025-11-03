@@ -38,5 +38,10 @@ public interface AccesoRepository extends JpaRepository<Acceso, Long> {
     @Query("select count(a) > 0 from Acceso a where a.usuario.id = :idUsuario and a.agencia.id in (:idsAgencia) and a.activo = true and a.rol.codigo <> 'RESTRINGIR'")
     boolean existsActiveAccessByUserIdAndAgencyIds(@Param("idUsuario") Long idUsuario, @Param("idsAgencia") Set<Long> idsAgencia);
 
+    @Query("select a from Acceso a where a.rol.codigo = ?1 and a.activo = true")
+    List<Acceso> findAccesosActivosByRolCodigo(String codigoRol);
+
+    @Query("select a from Acceso a where a.agencia.id = ?1 and a.rol.codigo = 'AGENCIA' and a.activo = true")
+    Optional<Acceso> findAccesoActivoByAgenciaId(Long idAgencia);
 
 }
