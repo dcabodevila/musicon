@@ -90,9 +90,12 @@ public class OcupacionServiceImpl implements OcupacionService {
 	@Override
 	@Transactional(readOnly = false)
 	public DefaultResponseBody anularOcupacion(long id){
+
 		final Ocupacion ocupacion =  this.ocupacionRepository.findById(id).orElseThrow();
 
-		ocupacion.setOcupacionEstado(this.ocupacionEstadoRepository.findById(OcupacionEstadoEnum.ANULADO.getId()).orElseThrow());
+        actualizarTarifasAnularOcupacion(ocupacion.getTarifa());
+
+        ocupacion.setOcupacionEstado(this.ocupacionEstadoRepository.findById(OcupacionEstadoEnum.ANULADO.getId()).orElseThrow());
 		this.ocupacionRepository.save(ocupacion);
 
 		try {
@@ -100,19 +103,6 @@ public class OcupacionServiceImpl implements OcupacionService {
 
 			this.emailService.enviarMensajePorEmail(ocupacion.getUsuario().getEmail(), EmailTemplateEnum.EMAIL_NOTIFICACION_ANULACION);
 
-//			if (ocupacion.getArtista().isPermiteOrquestasDeGalicia()){
-//				ResponseEntity<String> response = this.orquestasDeGaliciaService.eliminarActuacion(ocupacion.getId().intValue());
-//				if (response.getStatusCode().is2xxSuccessful()){
-//					log.info("Se ha eliminado correctamente la actuacion de la ocupacion: {}", ocupacion.getId());
-//				}
-//				else {
-//					throw new OrquestasDeGaliciaException("Error eliminado la actuacion de la ocupacion a OrquestasDeGalicia: " + ocupacion.getId());
-//				}
-//
-//			}
-//
-//		} catch (OrquestasDeGaliciaException e) {
-//			return DefaultResponseBody.builder().success(true).message("Ocupacion anulada correctamente, pero ha habido un error publicadando en OrquestasDeGalicia").messageType("warning").build();
 		} catch (EnvioEmailException e) {
 			return DefaultResponseBody.builder().success(true).message("Ocupacion anulada correctamente, pero ha habido un error enviando la notificación por correo").messageType("warning").build();
 		} catch (Exception e) {
@@ -124,7 +114,29 @@ public class OcupacionServiceImpl implements OcupacionService {
 
 	}
 
-	@Override
+    private void actualizarTarifasAnularOcupacion(Tarifa oldTarifa) {
+        Tarifa nuevaTarifa = copiarTarifa(oldTarifa);
+
+        oldTarifa.setActivo(Boolean.FALSE);
+
+        this.tarifaRepository.save(oldTarifa);
+        this.tarifaRepository.save(nuevaTarifa);
+    }
+
+    private static Tarifa copiarTarifa(Tarifa oldTarifa) {
+        Tarifa nuevaTarifa = new Tarifa();
+
+        nuevaTarifa.setImporte(oldTarifa.getImporte());
+        nuevaTarifa.setActivo(Boolean.TRUE);
+        nuevaTarifa.setFecha(oldTarifa.getFecha());
+        nuevaTarifa.setImporte(oldTarifa.getImporte());
+        nuevaTarifa.setArtista(oldTarifa.getArtista());
+        nuevaTarifa.setUsuarioCreacion(oldTarifa.getUsuarioCreacion());
+        nuevaTarifa.setFechaCreacion(oldTarifa.getFechaCreacion());
+        return nuevaTarifa;
+    }
+
+    @Override
 	@Transactional(readOnly = false)
 	public DefaultResponseBody confirmarOcupacion(long id){
 		final Ocupacion ocupacion =  this.ocupacionRepository.findById(id).orElseThrow();
@@ -246,7 +258,6 @@ public class OcupacionServiceImpl implements OcupacionService {
 
 		final Artista artista = this.artistaRepository.findById(ocupacionSaveDto.getIdArtista()).orElseThrow();
 		ocupacion.setArtista(artista);
-		ocupacion.setFecha(ocupacionSaveDto.getFecha());
 		ocupacion.setImporte(ocupacionSaveDto.getImporte()!=null? ocupacionSaveDto.getImporte() : BigDecimal.ZERO);
 		ocupacion.setPorcentajeRepre(ocupacionSaveDto.getPorcentajeRepre()!=null ? ocupacionSaveDto.getPorcentajeRepre(): BigDecimal.ZERO);
 		ocupacion.setIva(ocupacionSaveDto.getIva()!=null?ocupacionSaveDto.getIva(): BigDecimal.ZERO);
@@ -267,7 +278,9 @@ public class OcupacionServiceImpl implements OcupacionService {
 		ocupacion.setPoblacion(ocupacionSaveDto.getLocalidad()!=null ? ocupacionSaveDto.getLocalidad() : ConstantsGestmusica.LOCALIDAD_PROVISIONAL);
 		ocupacion.setLugar(ocupacionSaveDto.getLugar());
 		ocupacion.setTarifa(actualizarTarifaSegunOcupacion(ocupacionSaveDto.getIdArtista(), ocupacionSaveDto.getFecha(), ocupacion, isSincronizacion));
-		ocupacion.setObservaciones(ocupacionSaveDto.getObservaciones());
+        ocupacion.setFecha(ocupacionSaveDto.getFecha());
+
+        ocupacion.setObservaciones(ocupacionSaveDto.getObservaciones());
 		ocupacion.setMatinal(ocupacionSaveDto.getMatinal());
 		ocupacion.setSoloMatinal(ocupacionSaveDto.getSoloMatinal());
 		ocupacion.setProvisional(ocupacionSaveDto.getProvisional());
@@ -384,9 +397,9 @@ public class OcupacionServiceImpl implements OcupacionService {
 
 	}
 
-	private Tarifa actualizarTarifaSegunOcupacion(Long idArtista, LocalDateTime fecha, Ocupacion ocupacion, boolean isSincronizacion) {
+	private Tarifa actualizarTarifaSegunOcupacion(Long idArtista, LocalDateTime fechaDestino, Ocupacion ocupacion, boolean isSincronizacion) {
 
-		Tarifa nuevaTarifa = obtenerTarifaByOcupacion(idArtista, fecha,ocupacion);
+		Tarifa nuevaTarifa = obtenerTarifaByOcupacion(idArtista, fechaDestino,ocupacion);
 
 		nuevaTarifa.setArtista(ocupacion.getArtista());
 
@@ -396,7 +409,7 @@ public class OcupacionServiceImpl implements OcupacionService {
             nuevaTarifa.setImporte(ocupacion.getImporte()!=null ? ocupacion.getImporte() : BigDecimal.ZERO);
         }
 
-		nuevaTarifa.setFecha(fecha);
+		nuevaTarifa.setFecha(fechaDestino);
 		nuevaTarifa.setActivo(Boolean.TRUE);
 
 		if (isSincronizacion){
@@ -430,27 +443,50 @@ public class OcupacionServiceImpl implements OcupacionService {
 
 	}
 
-	private Tarifa obtenerTarifaByOcupacion(Long idArtista, LocalDateTime fecha, final Ocupacion ocupacion){
-        final List<Tarifa> listaTarifas = this.tarifaRepository.findTarifasByArtistaIdAndDates(idArtista, fecha.withHour(0).withMinute(0).withSecond(0), fecha.withHour(23).withMinute(59).withSecond(59));
+	private Tarifa obtenerTarifaByOcupacion(Long idArtista, LocalDateTime fechaDestino, final Ocupacion ocupacion){
+        final List<Tarifa> listaTarifas = this.tarifaRepository.findTarifasByArtistaIdAndDates(idArtista, fechaDestino.withHour(0).withMinute(0).withSecond(0), fechaDestino.withHour(23).withMinute(59).withSecond(59));
 
+        // Si es una modificación
         if (ocupacion.getTarifa()!=null){
 
-            for (Tarifa tarifa : listaTarifas){
-                tarifa.setActivo(false);
+            if (ocupacion.getFecha().equals(fechaDestino)){
+                return ocupacion.getTarifa();
             }
-            return ocupacion.getTarifa();
+            else {
+                if (listaTarifas!=null && !listaTarifas.isEmpty()){
+                    return listaTarifas.get(0);
+                }
+                else {
+                    Tarifa nuevaTarifaDestino = copiarTarifa(ocupacion.getTarifa());
+                    nuevaTarifaDestino.setFecha(fechaDestino);
+                    return nuevaTarifaDestino;
+
+                }
+            }
+
         }
-
-
-		if (listaTarifas!=null && !listaTarifas.isEmpty()){
-
+        else if (listaTarifas!=null && !listaTarifas.isEmpty()){
 			return listaTarifas.get(0);
 		}
 
 		return new Tarifa();
 	}
 
-	@Override
+    private void crearCopiaTarifaFechaAnterior(Long idArtista, Tarifa tarifaAnterior) {
+        final List<Tarifa> listaTarifasAnteriores = this.tarifaRepository.findTarifasByArtistaIdAndDates(idArtista, tarifaAnterior.getFecha().withHour(0).withMinute(0).withSecond(0), tarifaAnterior.getFecha().withHour(23).withMinute(59).withSecond(59));
+
+        if (listaTarifasAnteriores!=null && !listaTarifasAnteriores.isEmpty()){
+            if (listaTarifasAnteriores.size()==1){
+
+                this.tarifaRepository.save(copiarTarifa(tarifaAnterior));
+            }
+        }
+        else {
+            this.tarifaRepository.save(copiarTarifa(tarifaAnterior));
+        }
+    }
+
+    @Override
 	public List<OcupacionRecord> findOcupacionesDtoByAgenciaPendientes(Set<Long> idsAgencia){
 		return this.ocupacionRepository.findOcupacionesDtoByAgenciaPendientes(idsAgencia).orElse(new ArrayList<>());
 	}

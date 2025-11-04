@@ -35,11 +35,9 @@ public class Listado {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "municipio_id")
-    @NotNull
     private Municipio municipio;
 
     @Column(name = "localidad")
-    @NotNull
     private String localidad;
 
     @Column(name = "comentario")

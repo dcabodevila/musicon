@@ -38,8 +38,6 @@ $(document).ready(function () {
             },
             { data: 'nombreRepresentante' },
             { data: 'solicitadoPara' },
-            { data: 'municipio' },
-            { data: 'localidad' },
             {
                 data: null,
                 render: function(data, type, row) {

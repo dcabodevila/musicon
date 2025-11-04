@@ -61,3 +61,7 @@ COMMENT ON CONSTRAINT fk_registro_login_usuario ON gestmusica.registro_login
     DROP INDEX gestmusica.idx_registro_login_ip;
     ALTER TABLE gestmusica.registro_login DROP COLUMN direccion_ip;
     ALTER TABLE gestmusica.registro_login DROP COLUMN agente_usuario;
+--
+
+ALTER TABLE gestmusica.listado ALTER COLUMN municipio_id DROP NOT NULL;
+ALTER TABLE gestmusica.listado ALTER COLUMN localidad DROP NOT NULL;

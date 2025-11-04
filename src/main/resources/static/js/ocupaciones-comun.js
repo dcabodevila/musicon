@@ -105,10 +105,7 @@ function validar_guardar_ocupacion(){
         notif('error','Selecciona la fecha de la ocupación');
         return false;
     }
-    if (document.getElementById('municipio-ocupacion').value ==''){
-        notif('error','Selecciona el municipio de la ocupación');
-        return false;
-    }
+
     return true;
 
 }

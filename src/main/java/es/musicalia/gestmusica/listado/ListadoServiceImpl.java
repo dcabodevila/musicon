@@ -200,7 +200,8 @@ public class ListadoServiceImpl implements ListadoService {
                 listado.getSolicitadoPara(),
                 listado.getUsuario().getNombreComercial() != null ? listado.getUsuario().getNombreComercial() : listado.getUsuario().getNombre() + " " + listado.getUsuario().getApellidos(),
                 listado.getLocalidad(),
-                listado.getMunicipio().getNombre(),
+                listado.getMunicipio()!=null ? listado.getMunicipio().getNombre(): "",
+
                 listado.getUsuario().getNombre(),
                 listado.getUsuario().getApellidos(),
                 listado.getTipoOcupacion() != null ? listado.getTipoOcupacion().name() : null,
@@ -225,10 +226,12 @@ public class ListadoServiceImpl implements ListadoService {
                 .getUsuario());
 
         // Cargar municipio
-        Municipio municipio = municipioRepository.findById(listadoDto.getIdMunicipio())
-                .orElseThrow(() -> new IllegalArgumentException("Municipio no encontrado con ID: " + listadoDto.getIdMunicipio()));
-        listadoEntity.setMunicipio(municipio);
 
+        if (listadoDto.getIdMunicipio() != null) {
+            Municipio municipio = municipioRepository.findById(listadoDto.getIdMunicipio())
+                    .orElseThrow(() -> new IllegalArgumentException("Municipio no encontrado con ID: " + listadoDto.getIdMunicipio()));
+            listadoEntity.setMunicipio(municipio);
+        }
 
         // Cargar agencias si existen
         if (listadoDto.getIdsAgencias() != null && !listadoDto.getIdsAgencias().isEmpty()) {

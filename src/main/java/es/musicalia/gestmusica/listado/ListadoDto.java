@@ -20,9 +20,7 @@ public class ListadoDto {
     private Long idCcaa;
     @NotNull
     private Long idProvincia;
-    @NotNull
     private Long idMunicipio;
-    @NotNull
     private String localidad;
     private String comentario;
     private Long idTipoOcupacion;

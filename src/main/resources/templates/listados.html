@@ -69,6 +69,7 @@
                                                 <label class="col-form-label col-sm-3 text-sm-end">Municipio</label>
                                                 <div class="col-sm-9">
                                                     <select id="municipio-listado" th:field="*{idMunicipio}"  class="form-control choices-single">
+                                                        <option value="">Sin especificar</option>
                                                         <option th:each="municipio : ${listaMunicipioListado}" th:value="${municipio.id}" th:text="${municipio.nombre}"></option>
                                                     </select>
                                                 </div>

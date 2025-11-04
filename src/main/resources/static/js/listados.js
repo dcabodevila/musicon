@@ -99,11 +99,6 @@ $(document).ready(function() {
 
 
         const municipio = document.getElementById('municipio-listado').value;
-        if (!municipio) {
-            event.preventDefault();
-            notif('error','Indique el municipio para el que se solicita el presupuesto');
-            return;
-        }
         // Ejecutar primero las validaciones existentes
         const fechaDesde = document.getElementById('idFechaDesdeListado').value;
         const fechaHasta = document.getElementById('idFechaHastaListado').value;
