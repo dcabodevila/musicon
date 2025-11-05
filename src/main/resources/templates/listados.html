@@ -33,7 +33,7 @@
                     <div class="card-body">
                         <div class="row align-items-end">
                             <div class="col-xs-6 col-sm-3">
-                                <label for="selectAjustes" class="form-label">Seleccionar ajuste</label>
+                                <label for="selectAjustes" class="form-label">Seleccionar configuración</label>
                                 <select id="selectAjustes" class="form-control">
                                     <option th:each="ajuste : ${listaAjustes}" th:value="${ajuste.id}" th:text="${ajuste.nombre}" th:selected="${ajuste.predeterminado}"></option>
                                 </select>
@@ -78,15 +78,7 @@
                                                     </select>
                                                 </div>
                                             </div>
-                                            <div class="mb-3 row">
-                                                <label class="col-form-label col-sm-3 text-sm-end">Municipio</label>
-                                                <div class="col-sm-9">
-                                                    <select id="municipio-listado" th:field="*{idMunicipio}"  class="form-control choices-single">
-                                                        <option value="">Sin especificar</option>
-                                                        <option th:each="municipio : ${listaMunicipioListado}" th:value="${municipio.id}" th:text="${municipio.nombre}"></option>
-                                                    </select>
-                                                </div>
-                                            </div>
+
 
                                             <div class="sticky">
                                                 <button type="submit" id="btn-generar-listado" class="btn btn-primary">Generar presupuesto</button>
@@ -205,6 +197,15 @@
                                     <h5 class="card-title mb-0">Más información</h5>
                                 </div>
                                 <div class="card-body text-center">
+                                    <div class="mb-3 row">
+                                        <label class="col-form-label col-sm-3 text-sm-end">Municipio</label>
+                                        <div class="col-sm-9">
+                                            <select id="municipio-listado" th:field="*{idMunicipio}"  class="form-control choices-single">
+                                                <option value="">Sin especificar</option>
+                                                <option th:each="municipio : ${listaMunicipioListado}" th:value="${municipio.id}" th:text="${municipio.nombre}"></option>
+                                            </select>
+                                        </div>
+                                    </div>
                                     <div class="mb-3">
                                         <div class="mb-3 row">
                                             <label class="col-form-label col-sm-3 text-sm-end">Comentario</label>

@@ -19,7 +19,7 @@
         <main class="content">
             <div class="container-fluid p-0">
                     <div class="mb-3">
-                        <h1 class="h3 d-inline align-middle">Ajustes</h1>
+                        <h1 class="h3 d-inline align-middle">Configuración de listados</h1>
                     </div>
 
                     <div th:if="${message}" th:class="${'alert alert-' + alertClass+ ' alert-dismissible fade show'}" role="alert">
@@ -30,19 +30,19 @@
                     </div>
 
                     <!-- Card de selección de ajustes -->
-                    <div class="card mb-3">
+                    <div class="card mb-3" th:if="${ajustesDto.id!=null}">
                         <div class="card-body">
                             <div class="row align-items-end">
                                 <div class="col-xs-6 col-sm-3">
-                                    <label for="selectAjustes" class="form-label">Seleccionar ajuste</label>
+                                    <label for="selectAjustes" class="form-label">Seleccionar configuración de listados</label>
                                     <select id="selectAjustes" class="form-control">
-                                        <option value="">-- Selecciona un ajuste --</option>
+                                        <option value="">-- Selecciona una configuración --</option>
                                         <option th:each="ajuste : ${listaAjustes}" th:value="${ajuste.id}" th:text="${ajuste.nombre}"></option>
                                     </select>
                                 </div>
-                                <div class="col-xs-6 col-sm-4">
-                                    <button type="button" id="btnNuevoAjuste" class="btn btn-pill btn-success m-1 col-12 col-sm-3">
-                                        <i class="align-middle" data-feather="plus"></i> Nuevo ajuste
+                                <div class="col-xs-6 col-sm-5">
+                                    <button type="button" id="btnNuevoAjuste" class="btn btn-pill btn-success m-1 col-12 col-sm-5">
+                                        <i class="align-middle" data-feather="plus"></i> Crear configuración
                                     </button>
                                 </div>
                             </div>
@@ -59,7 +59,7 @@
                             <div class="col-12 col-lg-12 order-2 order-lg-2">
                                 <div class="card">
                                     <div class="card-header">
-                                        <h5 class="card-title mb-0">Opciones de presupuestos predeterminadas</h5>
+                                        <h5 class="card-title mb-0">Opciones de presupuestos</h5>
                                     </div>
 
                                     <div class="card-body text-center">
@@ -116,7 +116,7 @@
                         </div>
 
                         </div>
-                        <button type="submit" class="btn btn-primary">Guardar ajustes</button>
+                        <button type="submit" class="btn btn-primary">Guardar configuración</button>
                     </form>
             </div>
         </main>
