@@ -80,6 +80,8 @@ public class ListadoController {
         model.addAttribute("listaTiposOcupacion", this.listadoService.findAllTiposOcupacion());
         model.addAttribute("listaTipoArtista", this.artistaService.listaTipoArtista());
         model.addAttribute("listaAgencias", this.agenciaService.listaAgenciasRecordActivasTarifasPublicas());
+        model.addAttribute("listaAjustes", this.ajustesService.getAllAjustesByIdUsuario(user.getUserId()));
+
 
         final AjustesDto ajustesDto = this.ajustesService.getAjustesByIdUsuario(user.getUserId());
 

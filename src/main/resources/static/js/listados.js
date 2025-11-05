@@ -1,3 +1,5 @@
+
+
 $(document).ready(function(){
     let pickerFechaHasta = flatpickr("#idFechaHastaListado", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
     });
@@ -72,72 +74,146 @@ $(document).ready(function(){
 
     const artistasSelect = document.querySelector('#tiposArtista');
 
-    new Choices(artistasSelect, {
+    let tipoArtistaSelectChoice = new Choices(artistasSelect, {
             removeItemButton: true
     });
 
     const agenciasSelect = document.querySelector('#agencias');
 
-    new Choices(agenciasSelect, {
+    let agenciaSelectChoice = new Choices(agenciasSelect, {
             removeItemButton: true
     });
 
     const ccaaSelect = document.querySelector('#ccaa');
 
-    new Choices(ccaaSelect, {
+    let ccaaaSelectChoice = new Choices(ccaaSelect, {
             removeItemButton: true
     });
 
-});
 
-$(document).ready(function() {
-   // Remover el event listener duplicado que ya existe
-    // Solo mantener este que maneja AJAX
-
-    $('#formGenerarListado').off('submit').on('submit', function(e) {
-        e.preventDefault();
-
-
-        const municipio = document.getElementById('municipio-listado').value;
-        // Ejecutar primero las validaciones existentes
-        const fechaDesde = document.getElementById('idFechaDesdeListado').value;
-        const fechaHasta = document.getElementById('idFechaHastaListado').value;
-        const fechasIndividuales = [
-            document.getElementById('idFecha1').value,
-            document.getElementById('idFecha2').value,
-            document.getElementById('idFecha3').value,
-            document.getElementById('idFecha4').value,
-            document.getElementById('idFecha5').value,
-            document.getElementById('idFecha6').value,
-            document.getElementById('idFecha7').value
-        ];
-
-        // Validaciones existentes
-        const hayRangoDeFechas = fechaDesde !== '' && fechaHasta !== '';
-        const hayFechasIndividuales = fechasIndividuales.some(fecha => fecha !== '');
-
-        if (!hayRangoDeFechas && !hayFechasIndividuales) {
-            notif('error','Introduce las fecha inicial y final o alguna fecha individual');
-            return;
-        }
-
-        if ((fechaDesde !== '' || fechaHasta !== '') && hayFechasIndividuales) {
-            notif('error','Si defines una fecha inicial o final, no puedes incluir fechas individuales. Por favor, corrige los campos.');
-            return;
-        }
-
-        const todasLasFechas = [fechaDesde, fechaHasta, ...fechasIndividuales].filter(fecha => fecha !== '');
-        const fechasUnicas = new Set(todasLasFechas);
-
-        if (fechasUnicas.size !== todasLasFechas.length) {
-            notif('error','Las fechas no pueden ser iguales. Por favor, corrige los campos.');
-            return;
-        }
-
-        // Si pasa las validaciones, proceder con AJAX
-        generarPresupuestoAjax();
+    const selectAjustes = document.getElementById('selectAjustes');
+    let selectAjustesChoice = new Choices(selectAjustes, {
+         removeItemButton: false
     });
 
+
+
+    // Manejador para cambios en selectAjustes
+
+    selectAjustes.addEventListener('change', function() {
+        const ajusteId = this.value;
+
+        if (!ajusteId) {
+            return; // No hacer nada si no hay selección
+        }
+
+        // Llamada AJAX para obtener el ajuste
+        $.ajax({
+            type: 'GET',
+            url: '/ajustes/' + ajusteId + '/json',
+            success: function(data) {
+                // Rellenar los campos del formulario con los datos del ajuste
+                rellenarCamposAjuste(data);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error al obtener ajuste:', error);
+                notif('error', 'Error al cargar el ajuste seleccionado');
+            }
+        });
+    });
+
+    // Función para rellenar los campos con los datos del ajuste
+    function rellenarCamposAjuste(ajuste) {
+
+        // Rellenar selects múltiples (Agencias)
+        if (ajuste.idsAgencias && ajuste.idsAgencias.length > 0) {
+            const agenciasSelect = document.getElementById('agencias');
+            $(agenciasSelect).val(ajuste.idsAgencias);
+
+            // Actualizar instancia de Choices si existe
+            if (agenciaSelectChoice) {
+                agenciaSelectChoice.removeActiveItems();
+                ajuste.idsAgencias.forEach((id) => {
+                    agenciaSelectChoice.setChoiceByValue(String(id));
+                });
+            }
+        }
+
+        // Rellenar Tipos de Artista
+        if (ajuste.idsTipoArtista && ajuste.idsTipoArtista.length > 0) {
+            const artistasSelect = document.getElementById('tiposArtista');
+            $(artistasSelect).val(ajuste.idsTipoArtista);
+
+            if (tipoArtistaSelectChoice) {
+                tipoArtistaSelectChoice.removeActiveItems();
+                ajuste.idsTipoArtista.forEach((id) => {
+                    tipoArtistaSelectChoice.setChoiceByValue(String(id));
+                });
+            }
+        }
+
+        // Rellenar Comunidades
+        if (ajuste.idsComunidades && ajuste.idsComunidades.length > 0) {
+            const ccaaSelect = document.getElementById('ccaa');
+            $(ccaaSelect).val(ajuste.idsComunidades);
+
+            if (ccaaaSelectChoice) {
+                ccaaaSelectChoice.removeActiveItems();
+                ajuste.idsComunidades.forEach((id) => {
+                    ccaaaSelectChoice.setChoiceByValue(String(id));
+                });
+            }
+        }
+
+        notif('success', 'Ajuste cargado correctamente');
+    }
+        $('#formGenerarListado').off('submit').on('submit', function(e) {
+            e.preventDefault();
+
+
+            const municipio = document.getElementById('municipio-listado').value;
+            // Ejecutar primero las validaciones existentes
+            const fechaDesde = document.getElementById('idFechaDesdeListado').value;
+            const fechaHasta = document.getElementById('idFechaHastaListado').value;
+            const fechasIndividuales = [
+                document.getElementById('idFecha1').value,
+                document.getElementById('idFecha2').value,
+                document.getElementById('idFecha3').value,
+                document.getElementById('idFecha4').value,
+                document.getElementById('idFecha5').value,
+                document.getElementById('idFecha6').value,
+                document.getElementById('idFecha7').value
+            ];
+
+            // Validaciones existentes
+            const hayRangoDeFechas = fechaDesde !== '' && fechaHasta !== '';
+            const hayFechasIndividuales = fechasIndividuales.some(fecha => fecha !== '');
+
+            if (!hayRangoDeFechas && !hayFechasIndividuales) {
+                notif('error','Introduce las fecha inicial y final o alguna fecha individual');
+                return;
+            }
+
+            if ((fechaDesde !== '' || fechaHasta !== '') && hayFechasIndividuales) {
+                notif('error','Si defines una fecha inicial o final, no puedes incluir fechas individuales. Por favor, corrige los campos.');
+                return;
+            }
+
+            const todasLasFechas = [fechaDesde, fechaHasta, ...fechasIndividuales].filter(fecha => fecha !== '');
+            const fechasUnicas = new Set(todasLasFechas);
+
+            if (fechasUnicas.size !== todasLasFechas.length) {
+                notif('error','Las fechas no pueden ser iguales. Por favor, corrige los campos.');
+                return;
+            }
+
+            // Si pasa las validaciones, proceder con AJAX
+            generarPresupuestoAjax();
+        });
+    // Remover el event listener duplicado que ya existe
+    // Solo mantener este que maneja AJAX
+
+});
     function generarPresupuestoAjax() {
         // Deshabilitar el botón
         const $btn = $('#btn-generar-listado');
@@ -302,12 +378,11 @@ $(document).ready(function() {
         });
     }
 
-});
 
 
-function clearFlatpickrDate(inputId) {
-    const input = document.getElementById(inputId);
-    if (input && input._flatpickr) {
-        input._flatpickr.clear(); // Limpia la fecha seleccionada
+    function clearFlatpickrDate(inputId) {
+        const input = document.getElementById(inputId);
+        if (input && input._flatpickr) {
+            input._flatpickr.clear(); // Limpia la fecha seleccionada
+        }
     }
-}

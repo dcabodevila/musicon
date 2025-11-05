@@ -5,12 +5,16 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface AjustesRepository extends JpaRepository<Ajustes, Long> {
 
+    @Query("select a from Ajustes a where a.usuario.id=?1 and a.predeterminado ")
+    Ajustes findAjustesPredeterminadoByIdUsuario(Long idUsuario);
+
     @Query("select a from Ajustes a where a.usuario.id=?1 ")
-    Ajustes findAjustesByIdUsuario(Long idUsuario);
+    List<Ajustes> findAllAjustesByIdUsuario(Long idUsuario);
 
     @Query("select a from Ajustes a join a.ccaa c where c.id = ?1")
     List<Ajustes> findAjustesByCcaaId(Long idCcaa);

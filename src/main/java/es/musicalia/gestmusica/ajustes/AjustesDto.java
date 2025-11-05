@@ -12,8 +12,10 @@ import java.util.List;
 public class AjustesDto {
 
     private Long id;
+    private String nombre;
     private List<Long> idsTipoArtista = new ArrayList<>();
     private List<Long> idsAgencias = new ArrayList<>();
     private List<Long> idsComunidades = new ArrayList<>();
+    private boolean predeterminado;
 
 }

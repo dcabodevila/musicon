@@ -28,6 +28,19 @@
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 </div>
+                <!-- Card de selección de ajustes -->
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="row align-items-end">
+                            <div class="col-xs-6 col-sm-3">
+                                <label for="selectAjustes" class="form-label">Seleccionar ajuste</label>
+                                <select id="selectAjustes" class="form-control">
+                                    <option th:each="ajuste : ${listaAjustes}" th:value="${ajuste.id}" th:text="${ajuste.nombre}" th:selected="${ajuste.predeterminado}"></option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <form id="formGenerarListado" method="POST" th:object="${listadoDto}" th:action="@{/listado/generar}" autocomplete="off">
 
                 <div class="row">
@@ -193,13 +206,6 @@
                                 </div>
                                 <div class="card-body text-center">
                                     <div class="mb-3">
-
-                                        <div class="mb-3 row">
-                                            <label class="col-form-label col-sm-3 text-sm-end">Localidad</label>
-                                            <div class="col-sm-9">
-                                                <input class="form-control" placeholder="Localidad" th:field="*{localidad}"  id="localidad-listado" autocomplete="off">
-                                            </div>
-                                        </div>
                                         <div class="mb-3 row">
                                             <label class="col-form-label col-sm-3 text-sm-end">Comentario</label>
                                             <div class="col-sm-9">

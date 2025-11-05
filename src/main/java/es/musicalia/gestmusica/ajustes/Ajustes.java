@@ -25,6 +25,9 @@ public class Ajustes {
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
 
+    @Column(name = "nombre")
+    private String nombre;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             schema = "gestmusica",
@@ -48,5 +51,8 @@ public class Ajustes {
             joinColumns = @JoinColumn(name = "ajuste_id"),
             inverseJoinColumns = @JoinColumn(name = "ccaa_id"))
     private Set<Ccaa> ccaa;
+
+    @Column(name = "predeterminado")
+    private boolean predeterminado;
 
 }

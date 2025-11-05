@@ -161,7 +161,7 @@ public class ListadoServiceImpl implements ListadoService {
             parametros.put(entry.getKey(), entry.getValue());
         }
 
-        final boolean isReportVertical = diaList.size() <= 8;
+        final boolean isReportVertical = diaList.size() <= 7;
 
         TipoReportEnum tipoReport = TipoOcupacionEnum.SIN_OCUPACION.getId().equals(listadoDto.getIdTipoOcupacion()) ? (isReportVertical ? TipoReportEnum.LISTADO_SIN_OCUPACION_VERTICAL : TipoReportEnum.LISTADO_SIN_OCUPACION_HORIZONTAL) : (isReportVertical ? TipoReportEnum.LISTADO_CON_OCUPACION_VERTICAL : TipoReportEnum.LISTADO_CON_OCUPACION_HORIZONTAL);
         parametros.put("titulo", tipoReport.getTitulo());
@@ -401,8 +401,8 @@ public class ListadoServiceImpl implements ListadoService {
             diaCounter++;
             currentDate = currentDate.plusDays(1);
         }
-        final boolean isReportVertical = diaList.size() <= 8;
-        int maxDias = isReportVertical ? 8 : 16;
+        final boolean isReportVertical = diaList.size() <= 7;
+        int maxDias = isReportVertical ? 7 : 16;
         while (diaList.size() < maxDias) {
             diaList.add(new AbstractMap.SimpleEntry<>("dia" + (diaList.size() + 1), ""));
         }
@@ -468,8 +468,8 @@ public class ListadoServiceImpl implements ListadoService {
             diaCounter++;
         }
 
-        final boolean isReportVertical = diaList.size() <= 8;
-        int maxDias = isReportVertical ? 8 : 16;
+        final boolean isReportVertical = diaList.size() <= 7;
+        int maxDias = isReportVertical ? 7 : 16;
         while (diaList.size() < maxDias) {
             diaList.add(new AbstractMap.SimpleEntry<>("dia" + (diaList.size() + 1), ""));
         }
