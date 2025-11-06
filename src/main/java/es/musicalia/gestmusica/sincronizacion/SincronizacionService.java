@@ -345,6 +345,12 @@ public class SincronizacionService {
 
         ocupacionSaveDto.setFecha(legacy.getFecha().atStartOfDay());
         ocupacionSaveDto.setEstado(legacy.getEstado().name());
+
+        if (legacy.getPais()!=null && (legacy.getPais().equalsIgnoreCase("RESERVA") || legacy.getPais().equalsIgnoreCase("RESERVADO"))){
+            legacy.setEstado(OcupacionLegacy.EstadoOcupacion.reservado);
+        }
+
+
         ocupacionSaveDto.setIdTipoOcupacion(legacy.getEstado()!=null? TipoOcupacionEnum.findByDescripcion(legacy.getEstado().name()).getId() : TipoOcupacionEnum.OCUPADO.getId());
 
         ocupacionSaveDto.setLocalidad(legacy.getPoblacion()!=null? legacy.getPoblacion() : ConstantsGestmusica.LOCALIDAD_PROVISIONAL);
@@ -358,6 +364,7 @@ public class SincronizacionService {
         ocupacionSaveDto.setSoloMatinal(legacy.getSmt());
         return ocupacionSaveDto;
     }
+
 
     private String normalizarNombre(String nombre) {
         if (nombre == null) return null;
