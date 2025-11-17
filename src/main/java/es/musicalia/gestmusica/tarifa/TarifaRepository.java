@@ -28,4 +28,22 @@ public interface TarifaRepository extends JpaRepository<Tarifa, Long> {
 		   "group by t.artista.id, t.artista.agencia.nombre,  t.artista.nombre " +
 		   "order by GREATEST(max(t.fechaCreacion), max(t.fechaModificacion))")
 	List<ActividadRecord> findActividadTarifasConConteo(@Param("fechaLimite") LocalDateTime fechaLimite);
+
+	@Query("select new es.musicalia.gestmusica.tarifa.TarifaArtistaCcaaDto(t.artista.id, t.artista.nombre, t.importe) " +
+		   "from Tarifa t " +
+		   "join t.artista a " +
+		   "where " +
+		   " t.fecha >= :fechaInicio " +
+		   "and t.fecha <= :fechaFin " +
+		   "and t.activo = true " +
+            "and a.componentes <= :numeroComponentes +2 and a.componentes >= :numeroComponentes -2"+
+		   "and t.importe > 0 " +
+		   "and a.id != :idArtistaExcluir " +
+		   "order by t.importe desc")
+	List<TarifaArtistaCcaaDto> findTarifasByFechaAndNumeroComponentes(
+		@Param("numeroComponentes") int numeroComponentes,
+		@Param("fechaInicio") LocalDateTime fechaInicio,
+		@Param("fechaFin") LocalDateTime fechaFin,
+		@Param("idArtistaExcluir") Long idArtistaExcluir
+	);
 }

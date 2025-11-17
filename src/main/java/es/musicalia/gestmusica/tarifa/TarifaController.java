@@ -20,6 +20,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -59,6 +60,13 @@ public class TarifaController {
     @GetMapping("/{idArtista}/{fecha}")
     public ResponseEntity<TarifaDto> findTarifaByArtistaAndFecha(@PathVariable("idArtista") Long idArtista, @PathVariable("fecha") @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate fecha) {
         return ResponseEntity.ok(this.tarifaService.findByArtistaIdAndDate(idArtista, fecha));
+    }
+
+    @GetMapping("/lista/{idArtista}/{fecha}")
+    public ResponseEntity<List<TarifaArtistaCcaaDto>> findTarifasByCcaaAndFecha(
+            @PathVariable("idArtista") Long idArtista,
+            @PathVariable("fecha") @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate fecha) {
+        return ResponseEntity.ok(this.tarifaService.findTarifasByFechaAndNumComponentesArtista(idArtista,  fecha));
     }
 
 

@@ -2,6 +2,7 @@ package es.musicalia.gestmusica.tarifa;
 
 import es.musicalia.gestmusica.artista.Artista;
 import es.musicalia.gestmusica.artista.ArtistaRepository;
+import es.musicalia.gestmusica.incremento.IncrementoRepository;
 import es.musicalia.gestmusica.informe.InformeService;
 import es.musicalia.gestmusica.localizacion.ProvinciaRepository;
 import es.musicalia.gestmusica.usuario.UserService;
@@ -25,13 +26,15 @@ public class TarifaServiceImpl implements TarifaService {
 	private final UserService userService;
 	private final InformeService informeService;
     private final ProvinciaRepository provinciaRepository;
+	private final IncrementoRepository incrementoRepository;
 
-	public TarifaServiceImpl(TarifaRepository tarifaRepository, ArtistaRepository artistaRepository, UserService userService, InformeService informeService, ProvinciaRepository provinciaRepository){
+	public TarifaServiceImpl(TarifaRepository tarifaRepository, ArtistaRepository artistaRepository, UserService userService, InformeService informeService, ProvinciaRepository provinciaRepository, IncrementoRepository incrementoRepository){
 		this.tarifaRepository = tarifaRepository;
 		this.artistaRepository = artistaRepository;
 		this.userService = userService;
         this.informeService = informeService;
         this.provinciaRepository = provinciaRepository;
+		this.incrementoRepository = incrementoRepository;
     }
 	@Override
 	public List<TarifaDto> findByArtistaId(long idArtista , LocalDateTime start, LocalDateTime end){
@@ -127,6 +130,22 @@ public class TarifaServiceImpl implements TarifaService {
         return sbDatosAgencia.toString();
 
     }
+
+	@Override
+    public List<TarifaArtistaCcaaDto> findTarifasByFechaAndNumComponentesArtista(Long idArtista, LocalDate fecha) {
+		Artista artista = this.artistaRepository.findById(idArtista)
+				.orElseThrow(() -> new RuntimeException("Artista no encontrado"));
+
+		LocalDateTime fechaInicio = fecha.atStartOfDay();
+		LocalDateTime fechaFin = fecha.atTime(LocalTime.of(23, 59, 59));
+
+		return this.tarifaRepository.findTarifasByFechaAndNumeroComponentes(
+				artista.getComponentes(),
+				fechaInicio,
+				fechaFin,
+				idArtista
+		);
+	}
 
     private void guardarTarifaFecha(TarifaSaveDto tarifaSaveDto, LocalDateTime fecha) {
 		Tarifa tarifa = tarifaSaveDto.getId()!=null ? this.tarifaRepository.findById(tarifaSaveDto.getId()).orElse(new Tarifa()) : new Tarifa();

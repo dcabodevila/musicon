@@ -1,11 +1,35 @@
 $(document).ready(function(){
     let pickerFechaHasta = flatpickr("#idFechaHasta", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
+            ,
+            onChange: function(selectedDates, dateStr, instance) {
+                const fechaDesde = $('#idFechaDesde').val();
+                const fechaHasta = $('#idFechaHasta').val();
+
+                if (fechaDesde && fechaHasta && fechaDesde === fechaHasta) {
+                    const idArtista = $('#idArtista').val();
+                    cargarTarifasCcaa(idArtista, fechaDesde);
+                }
+                else {
+                    $('#tarifas-ccaa-container').empty();
+                }
+            }
     });
 
     let pickerFechaDesde = flatpickr("#idFechaDesde", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
         ,
         onChange: function(selectedDates, dateStr, instance) {
             pickerFechaHasta.set("minDate", dateStr);
+            const fechaDesde = $('#idFechaDesde').val();
+            const fechaHasta = $('#idFechaHasta').val();
+
+            if (fechaDesde && fechaHasta && fechaDesde === fechaHasta) {
+                const idArtista = $('#idArtista').val();
+                cargarTarifasCcaa(idArtista, fechaDesde);
+            }
+            else {
+                $('#tarifas-ccaa-container').empty();
+            }
+
         },
         onMonthChange: function(selectedDates, dateStr, instance) {
             pickerFechaHasta.clear();
@@ -240,8 +264,75 @@ $(document).ready(function(){
 
         generarTarifaAnualAjax();
     });
+
+
+
     $('#modalNuevaTarifa').on('shown.bs.modal', function () {
         $('#importe').focus().select();
+
+        // Verificar si fechaDesde === fechaHasta
+        const fechaDesde = $('#idFechaDesde').val();
+        const fechaHasta = $('#idFechaHasta').val();
+
+        if (fechaDesde && fechaHasta && fechaDesde === fechaHasta) {
+            const idArtista = $('#idArtista').val();
+            cargarTarifasCcaa(idArtista, fechaDesde);
+        }
+        else {
+            $('#tarifas-ccaa-container').empty();
+        }
+
+    });
+
+    function cargarTarifasCcaa(idArtista, fecha) {
+        $.ajax({
+            type: 'GET',
+            url: '/tarifa/lista/' + idArtista + '/' + fecha,
+            success: function(data) {
+                if (data && data.length > 0) {
+                    console.log('Tarifas de artistas de la misma CCAA:', data);
+                    // Aquí puedes mostrar los datos en el modal o hacer lo que necesites
+                    mostrarTarifasCcaa(data);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error al cargar tarifas de CCAA:', error);
+            }
+        });
+    }
+
+    function mostrarTarifasCcaa(tarifas) {
+        // Verificar si ya existe el contenedor, si no crearlo
+        let contenedor = $('#tarifas-ccaa-container');
+        if (contenedor.length === 0) {
+            contenedor = $('<div id="tarifas-ccaa-container" class="mt-3"></div>');
+            $('#modalNuevaTarifa .modal-body').append(contenedor);
+        }
+
+        // Limpiar el contenedor
+        contenedor.empty();
+
+        // Crear la tabla con las tarifas
+        let html = '<div class="alert alert-info"><strong>Tarifas de otros artistas para esta fecha:</strong></div>';
+          html += '<div class="table-responsive" style="max-height: 200px; overflow-y: auto;">';
+        html += '<table class="table table-sm table-striped">';
+        html += '<thead><tr><th>Artista</th><th class="text-end">Importe</th></tr></thead>';
+        html += '<tbody>';
+
+        tarifas.forEach(function(tarifa) {
+            html += '<tr>';
+            html += '<td>' + tarifa.nombreArtista + '</td>'; 
+            html += '<td class="text-end">' + tarifa.importe.toFixed(0) + '</td>';
+            html += '</tr>';
+        });
+
+        html += '</tbody></table></div>';
+        contenedor.html(html);
+    }
+
+    $('#modalNuevaTarifa').on('hidden.bs.modal', function () {
+        // Limpiar el contenedor de tarifas CCAA al cerrar el modal
+        $('#tarifas-ccaa-container').remove();
     });
 
     function generarTarifaAnualAjax() {

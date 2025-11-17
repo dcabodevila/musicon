@@ -13,4 +13,7 @@ public interface TarifaService {
     void saveTarifa(TarifaSaveDto tarifaSaveDto);
 
     byte[] getInformeTarifaAnual(TarifaAnualDto tarifaAnualDto);
+
+    List<TarifaArtistaCcaaDto> findTarifasByFechaAndNumComponentesArtista(Long idArtista, LocalDate fecha);
+
 }
