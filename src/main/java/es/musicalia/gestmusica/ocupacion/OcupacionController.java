@@ -13,10 +13,6 @@ import es.musicalia.gestmusica.usuario.UserService;
 import es.musicalia.gestmusica.util.DefaultResponseBody;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -170,13 +166,8 @@ public class OcupacionController {
     @PostMapping("/list")
     public String postListadoOcupaciones(@AuthenticationPrincipal CustomAuthenticatedUser user,
                                          @ModelAttribute OcupacionListFilterDto ocupacionListFilterDto,
-                                         Model model, RedirectAttributes redirectAttributes,                                      @RequestParam(defaultValue = "0") int page,
-                                         @RequestParam(defaultValue = "20") int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
-
-        Page<OcupacionListRecord> ocupacionesPage = ocupacionService.findOcupacionesByArtistasListAndDatesActivo(user, ocupacionListFilterDto, pageable);
-
-        redirectAttributes.addFlashAttribute("listaOcupaciones", ocupacionesPage);
+                                         Model model, RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute("listaOcupaciones", this.ocupacionService.findOcupacionesByArtistasListAndDatesActivo(user, ocupacionListFilterDto));
         redirectAttributes.addFlashAttribute("ocupacionListFilterDto", ocupacionListFilterDto);
 
         return "redirect:/ocupacion/list";
