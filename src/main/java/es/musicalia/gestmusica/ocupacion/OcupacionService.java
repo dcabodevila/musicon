@@ -3,6 +3,9 @@ package es.musicalia.gestmusica.ocupacion;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.localizacion.CodigoNombreDto;
 import es.musicalia.gestmusica.util.DefaultResponseBody;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -28,7 +31,7 @@ public interface OcupacionService {
 
     List<OcupacionRecord> findOcupacionesDtoByAgenciaPendientes(Set<Long> idsAgencia);
 
-    List<OcupacionListRecord> findOcupacionesByArtistasListAndDatesActivo(CustomAuthenticatedUser user, OcupacionListFilterDto ocupacionListFilterDto);
+    Page<OcupacionListRecord> findOcupacionesByArtistasListAndDatesActivo(CustomAuthenticatedUser user, OcupacionListFilterDto ocupacionListFilterDto, Pageable pageable);
 
     OcupacionSaveDto getOcupacionSaveDto(Long idOcupacion);
 

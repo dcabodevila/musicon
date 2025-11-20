@@ -29,6 +29,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -492,56 +496,57 @@ public class OcupacionServiceImpl implements OcupacionService {
 	}
 
 	@Override
-	public List<OcupacionListRecord> findOcupacionesByArtistasListAndDatesActivo(CustomAuthenticatedUser user, OcupacionListFilterDto ocupacionListFilterDto) {
+public Page<OcupacionListRecord> findOcupacionesByArtistasListAndDatesActivo(CustomAuthenticatedUser user, OcupacionListFilterDto ocupacionListFilterDto, Pageable pageable) {
 
-		// Filtrar por los artistas sobre los que tenemos permiso OCUPACIONES
+    // Filtrar por los artistas sobre los que tenemos permiso OCUPACIONES
 
-		final CustomAuthenticatedUser authenticatedUser = (CustomAuthenticatedUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		final Set<Long> idsArtistas = authenticatedUser.getMapPermisosArtista().keySet().stream()
-				.filter(artistaId -> authenticatedUser.getMapPermisosArtista().get(artistaId).contains(PermisoArtistaEnum.OCUPACIONES.name()))
-				.collect(Collectors.toSet());
+    final CustomAuthenticatedUser authenticatedUser = (CustomAuthenticatedUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    final Set<Long> idsArtistas = authenticatedUser.getMapPermisosArtista().keySet().stream()
+            .filter(artistaId -> authenticatedUser.getMapPermisosArtista().get(artistaId).contains(PermisoArtistaEnum.OCUPACIONES.name()))
+            .collect(Collectors.toSet());
 
-		final Specification<Ocupacion> spec
-				= Specification
-				.where(OcupacionSpecifications.hasArtistaIdsIn(idsArtistas))
-				.and(OcupacionSpecifications.hasFechaAfter(ocupacionListFilterDto.getFechaDesde().atStartOfDay()))
-				.and(OcupacionSpecifications.hasFechaBefore(ocupacionListFilterDto.getFechaHasta() != null ? ocupacionListFilterDto.getFechaHasta().atTime(23, 59, 59): null))
-				.and(OcupacionSpecifications.isActivo())
-				.and(OcupacionSpecifications.orderByIdDesc())
-				.and(OcupacionSpecifications.hasAgenciaId(ocupacionListFilterDto.getIdAgencia()))
-				.and(OcupacionSpecifications.hasArtistaId(ocupacionListFilterDto.getIdArtista()))
-				.and(OcupacionSpecifications.hasEstadoNotAnulado())
-				.and(OcupacionSpecifications.hasUsuarioId(isRolRepresentante(user.getUserId(), ocupacionListFilterDto.getIdAgencia()), user.getUserId()))
-				;
+    final Specification<Ocupacion> spec
+            = Specification
+            .where(OcupacionSpecifications.hasArtistaIdsIn(idsArtistas))
+            .and(OcupacionSpecifications.hasFechaAfter(ocupacionListFilterDto.getFechaDesde().atStartOfDay()))
+            .and(OcupacionSpecifications.hasFechaBefore(ocupacionListFilterDto.getFechaHasta() != null ? ocupacionListFilterDto.getFechaHasta().atTime(23, 59, 59): null))
+            .and(OcupacionSpecifications.isActivo())
+            .and(OcupacionSpecifications.orderByIdDesc())
+            .and(OcupacionSpecifications.hasAgenciaId(ocupacionListFilterDto.getIdAgencia()))
+            .and(OcupacionSpecifications.hasArtistaId(ocupacionListFilterDto.getIdArtista()))
+            .and(OcupacionSpecifications.hasEstadoNotAnulado())
+            .and(OcupacionSpecifications.hasUsuarioId(isRolRepresentante(user.getUserId(), ocupacionListFilterDto.getIdAgencia()), user.getUserId()))
+            ;
 
+    // Ejecutar la consulta paginada
+    Page<Ocupacion> ocupacionesPage = ocupacionRepository.findAll(spec, pageable);
+    
+    // Mapear resultados a OcupacionListRecord
+    List<OcupacionListRecord> ocupacionListRecords = ocupacionesPage.getContent().stream()
+            .map(ocupacion -> new OcupacionListRecord(
+                    ocupacion.getId(),
+                    ocupacion.getFecha(),
+                    ocupacion.getArtista().getId(),
+                    ocupacion.getArtista().getNombre(),
+                    ocupacion.getImporte().setScale(0).toPlainString(),
+                    true,
+                    ocupacion.getTipoOcupacion().getNombre(),
+                    ocupacion.getProvincia().getNombre(),
+                    ocupacion.getMunicipio().getNombre(),
+                    ocupacion.getPoblacion(),
+                    ocupacion.isMatinal(),
+                    ocupacion.isSoloMatinal(),
+                    ocupacion.getOcupacionEstado().getNombre(),
+                    ocupacion.getUsuario().getId(),
+                    ocupacion.getUsuario().getNombre() + " " + ocupacion.getUsuario().getApellidos(),
+                    ocupacion.getUsuarioConfirmacion() != null ? ocupacion.getUsuarioConfirmacion().getId() : null,
+                    ocupacion.getUsuarioConfirmacion() != null ? ocupacion.getUsuarioConfirmacion().getNombre() + " " + ocupacion.getUsuarioConfirmacion().getApellidos() : null,
+                    ocupacion.getFechaCreacion()
+            ))
+            .toList();
 
-		// Ejecutar la consulta y mapear resultados a OcupacionListRecord
-		return ocupacionRepository.findAll(spec).stream()
-				.map(ocupacion -> new OcupacionListRecord(
-						ocupacion.getId(),
-						ocupacion.getFecha(),
-						ocupacion.getArtista().getId(),
-						ocupacion.getArtista().getNombre(),
-						ocupacion.getImporte().setScale(0).toPlainString(),
-						true,
-						ocupacion.getTipoOcupacion().getNombre(),
-						ocupacion.getProvincia().getNombre(),
-						ocupacion.getMunicipio().getNombre(),
-						ocupacion.getPoblacion(),
-						ocupacion.isMatinal(),
-						ocupacion.isSoloMatinal(),
-						ocupacion.getOcupacionEstado().getNombre(),
-						ocupacion.getUsuario().getId(),
-						ocupacion.getUsuario().getNombre() + " " + ocupacion.getUsuario().getApellidos(),
-						ocupacion.getUsuarioConfirmacion() != null ? ocupacion.getUsuarioConfirmacion().getId() : null,
-						ocupacion.getUsuarioConfirmacion() != null ? ocupacion.getUsuarioConfirmacion().getNombre() + " " + ocupacion.getUsuarioConfirmacion().getApellidos() : null,
-						ocupacion.getFechaCreacion()
-
-				))
-				.toList();
-
-
-	}
+    return new PageImpl<>(ocupacionListRecords, pageable, ocupacionesPage.getTotalElements());
+}
 
 	private boolean isRolRepresentante(Long idUsuario, Long idAgencia){
 		if (idAgencia!=null){

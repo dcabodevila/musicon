@@ -301,34 +301,44 @@ $(document).ready(function(){
         });
     }
 
-    function mostrarTarifasCcaa(tarifas) {
-        // Verificar si ya existe el contenedor, si no crearlo
-        let contenedor = $('#tarifas-ccaa-container');
-        if (contenedor.length === 0) {
-            contenedor = $('<div id="tarifas-ccaa-container" class="mt-3"></div>');
-            $('#modalNuevaTarifa .modal-body').append(contenedor);
-        }
-
-        // Limpiar el contenedor
-        contenedor.empty();
-
-        // Crear la tabla con las tarifas
-        let html = '<div class="alert alert-info"><strong>Tarifas de otros artistas para esta fecha:</strong></div>';
-          html += '<div class="table-responsive" style="max-height: 200px; overflow-y: auto;">';
-        html += '<table class="table table-sm table-striped">';
-        html += '<thead><tr><th>Artista</th><th class="text-end">Importe</th></tr></thead>';
-        html += '<tbody>';
-
-        tarifas.forEach(function(tarifa) {
-            html += '<tr>';
-            html += '<td>' + tarifa.nombreArtista + '</td>'; 
-            html += '<td class="text-end">' + tarifa.importe.toFixed(0) + '</td>';
-            html += '</tr>';
-        });
-
-        html += '</tbody></table></div>';
-        contenedor.html(html);
+function mostrarTarifasCcaa(tarifas) {
+    // Verificar si ya existe el contenedor, si no crearlo
+    let contenedor = $('#tarifas-ccaa-container');
+    if (contenedor.length === 0) {
+        contenedor = $('<div id="tarifas-ccaa-container" class="mt-3"></div>');
+        $('#modalNuevaTarifa .modal-body').append(contenedor);
     }
+
+    // Limpiar el contenedor
+    contenedor.empty();
+
+    // Crear la tabla con las tarifas
+    let html = '<div style="margin-top: 40px; margin-bottom: 30px;">';
+    html += '<div class="alert alert-info d-flex justify-content-between align-items-center" style="padding: 20px; min-height: 70px;">';
+    html +=   '<div>';
+    html +=     '<strong style="font-size: 1rem;">Tarifas de otros artistas para esta fecha:</strong>';
+    html +=   '</div>';
+    html +=   '<div>';
+    html +=     '<span class="badge bg-warning text-dark" style="font-size: 0.8rem; padding: 8px 12px;">';
+    html +=       '<i class="fas fa-star me-2" data-bs-toggle="tooltip" data-bs-title="Funcionalidad exclusiva de suscripciones Business"></i> Premium';
+    html +=     '</span>';
+    html +=   '</div>';
+    html += '</div>';
+    html += '<div class="table-responsive" style="max-height: 200px; overflow-y: auto;">';
+    html += '<table class="table table-sm table-striped">';
+    html += '<thead><tr><th>Artista</th><th class="text-end">Importe</th></tr></thead>';
+    html += '<tbody>';
+    // ... existing code ...
+    tarifas.forEach(function(tarifa) {
+        html += '<tr>';
+        html += '<td>' + tarifa.nombreArtista + '</td>';
+        html += '<td class="text-end">' + tarifa.importe.toFixed(0) + '</td>';
+        html += '</tr>';
+    });
+
+    html += '</tbody></table></div></div>';
+    contenedor.html(html);
+}
 
     $('#modalNuevaTarifa').on('hidden.bs.modal', function () {
         // Limpiar el contenedor de tarifas CCAA al cerrar el modal
