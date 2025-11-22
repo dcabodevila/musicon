@@ -171,7 +171,8 @@ public class ArtistaServiceImpl implements ArtistaService {
     }
 
     private void actualizarDatosBasicos(Artista artista, ArtistaDto dto) {
-        artista.setNombre(dto.getNombre());
+        final String nombre = StringUtils.capitalizarPalabrasConMayusculas(dto.getNombre());
+        artista.setNombre(nombre.trim());
         artista.setUsuario(usuarioRepository.findById(dto.getIdUsuario()).orElseThrow());
         artista.setActivo(dto.getActivo());
         Optional.ofNullable(dto.getLogo())
