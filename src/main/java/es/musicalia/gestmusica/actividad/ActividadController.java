@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Slf4j
@@ -73,6 +74,9 @@ public class ActividadController {
                 }
             }
         }
+
+        // Ordenar por fecha de última actividad (más reciente primero)
+        usuariosConectados.sort(Comparator.comparing(UsuarioConectadoDto::getUltimaActividad, Comparator.nullsLast(Comparator.reverseOrder())));
 
         return usuariosConectados;
     }

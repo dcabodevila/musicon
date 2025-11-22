@@ -7,8 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <div th:replace="~{fragments/main-template :: header-css}"/>
-
-
+    <script th:src="@{/js/jquery.min.js}"></script>
+    <script th:src="@{/adminkit/js/datatables.js}"></script>
 </head>
 <body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
     <div class="wrapper">
@@ -49,56 +49,55 @@
                                 </div>
                                 <div class="card-body">
                                     <div th:if="${!#lists.isEmpty(usuariosConectados)}" class="table-responsive">
-                                        <table class="table table-striped table-hover">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th><i class="fas fa-user me-1"></i>Usuario</th>
-                                                    <th><i class="fas fa-clock me-1"></i>Última Actividad</th>
-                                                    <th><i class="fas fa-stopwatch me-1"></i>Tiempo Inactivo</th>
-                                                    <th><i class="fas fa-signal me-1"></i>Estado</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr th:each="usuario : ${usuariosConectados}" th:class="${'table-row-' + usuario.claseEstado}">
-                                                    <td>
-                                                        <div class="d-flex align-items-center">
-
-                                                            <span class="fw-bold" th:text="${usuario.nombre}">Usuario</span>
-                                                        </div>
-                                                    </td>
-
-                                                    <td>
-                                                        <span th:if="${usuario.ultimaActividad != null}" 
-                                                              th:text="${#temporals.format(usuario.ultimaActividad, 'dd/MM/yyyy HH:mm:ss')}"
-                                                              class="text-muted">
-                                                            Fecha
-                                                        </span>
-                                                        <span th:if="${usuario.ultimaActividad == null}" class="text-muted">Sin fecha</span>
-                                                    </td>
-                                                    <td>
-                                                        <small class="text-muted" th:text="${usuario.tiempoInactividad}">--</small>
-                                                    </td>
-                                                    <td>
-                                                        <span th:class="${'badge bg-' + usuario.claseEstado + ' d-inline-flex align-items-center'}" 
-                                                              th:text="${usuario.estado}">
-                                                            Estado
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <div th:if="${#lists.isEmpty(usuariosConectados)}" class="text-center py-5">
-                                        <div class="text-muted">
-                                            <i class="fas fa-user-slash fa-3x mb-3 opacity-50"></i>
-                                            <h5>No hay usuarios conectados</h5>
-                                            <p class="mb-0">No se encontraron usuarios activos en este momento</p>
+                                            <table id="datatables-reponsive_usuarios" class="table table-striped dataTable no-footer dtr-inline collapsed" style="width: 100%;" aria-describedby="datatables-reponsive_usuarios_info">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th><i class="fas fa-user me-1"></i>Usuario</th>
+                                                        <th><i class="fas fa-clock me-1"></i>Última Actividad</th>
+                                                        <th><i class="fas fa-stopwatch me-1"></i>Tiempo Inactivo</th>
+                                                        <th><i class="fas fa-signal me-1"></i>Estado</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr th:each="usuario : ${usuariosConectados}" th:class="${'table-row-' + usuario.claseEstado}">
+                                                        <td>
+                                                            <div class="d-flex align-items-center">
+                                                                <span class="fw-bold" th:text="${usuario.nombre}">Usuario</span>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <span th:if="${usuario.ultimaActividad != null}" 
+                                                                  th:text="${#temporals.format(usuario.ultimaActividad, 'dd/MM/yyyy HH:mm:ss')}"
+                                                                  class="text-muted">
+                                                                Fecha
+                                                            </span>
+                                                            <span th:if="${usuario.ultimaActividad == null}" class="text-muted">Sin fecha</span>
+                                                        </td>
+                                                        <td>
+                                                            <small class="text-muted" th:text="${usuario.tiempoInactividad}">--</small>
+                                                        </td>
+                                                        <td>
+                                                            <span th:class="${'badge bg-' + usuario.claseEstado + ' d-inline-flex align-items-center'}" 
+                                                                  th:text="${usuario.estado}">
+                                                                Estado
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div th:if="${#lists.isEmpty(usuariosConectados)}" class="text-center py-5">
+                                            <div class="text-muted">
+                                                <i class="fas fa-user-slash fa-3x mb-3 opacity-50"></i>
+                                                <h5>No hay usuarios conectados</h5>
+                                                <p class="mb-0">No se encontraron usuarios activos en este momento</p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    
 
                     <!-- Gráfico de Accesos por Día -->
                     <div class="row">
@@ -167,81 +166,81 @@
                         </div>
                     </div>
                     
-                    <!-- Tabla de Actividad Tarifas -->
-                    <div class="row mt-4">
-                        <div class="col-12">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5 class="card-title mb-0">
-                                        <i class="fas fa-chart-line text-info me-2"></i>Actividad de Tarifas
-                                    </h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-striped table-hover">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th>Agencia</th>
-                                                    <th>Artista</th>
-                                                    <th>Última Actualización</th>
-                                                    <th>Nº actualizaciones último mes</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr th:each="actividad : ${actividadTarifas}">
-                                                    <td th:text="${actividad.nombreAgencia}"></td>
-                                                    <td th:text="${actividad.nombreArtista}"></td>
-                                                    <td th:text="${actividad.fecha != null ? #temporals.format(actividad.fecha, 'dd/MM/yyyy HH:mm') : 'Sin fecha'}"></td>
-                                                    <td th:text="${actividad.numeroActualizacionesMes}"></td>
-                                                </tr>
-                                                <tr th:if="${#lists.isEmpty(actividadTarifas)}">
-                                                    <td colspan="4" class="text-center text-muted">No hay datos de actividad de tarifas disponibles</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
+                        <!-- Tabla de Actividad Tarifas -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="card-title mb-0">
+                                            <i class="fas fa-chart-line text-info me-2"></i>Actividad de Tarifas
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table id="datatables-reponsive_tarifas" class="table table-striped dataTable no-footer dtr-inline collapsed" style="width: 100%;" aria-describedby="datatables-reponsive_tarifas_info">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Agencia</th>
+                                                        <th>Artista</th>
+                                                        <th>Última Actualización</th>
+                                                        <th>Nº actualizaciones último mes</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr th:each="actividad : ${actividadTarifas}">
+                                                        <td th:text="${actividad.nombreAgencia}"></td>
+                                                        <td th:text="${actividad.nombreArtista}"></td>
+                                                        <td th:text="${actividad.fecha != null ? #temporals.format(actividad.fecha, 'dd/MM/yyyy HH:mm') : 'Sin fecha'}"></td>
+                                                        <td th:text="${actividad.numeroActualizacionesMes}"></td>
+                                                    </tr>
+                                                    <tr th:if="${#lists.isEmpty(actividadTarifas)}">
+                                                        <td colspan="4" class="text-center text-muted">No hay datos de actividad de tarifas disponibles</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
                     
-                    <!-- Tabla de Actividad Ocupaciones -->
-                    <div class="row mt-4">
-                        <div class="col-12">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5 class="card-title mb-0">
-                                        <i class="fas fa-calendar-check text-success me-2"></i>Actividad de Ocupaciones
-                                    </h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-striped table-hover">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th>Agencia</th>
-                                                    <th>Artista</th>
-                                                    <th>Última Actualización</th>
-                                                    <th>Nº actualizaciones último mes</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr th:each="actividad : ${actividadOcupaciones}">
-                                                    <td th:text="${actividad.nombreAgencia}"></td>
-                                                    <td th:text="${actividad.nombreArtista}"></td>
-                                                    <td th:text="${actividad.fecha != null ? #temporals.format(actividad.fecha, 'dd/MM/yyyy HH:mm') : 'Sin fecha'}"></td>
-                                                    <td th:text="${actividad.numeroActualizacionesMes}"></td>
-                                                </tr>
-                                                <tr th:if="${#lists.isEmpty(actividadOcupaciones)}">
-                                                    <td colspan="4" class="text-center text-muted">No hay datos de actividad de ocupaciones disponibles</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
+                        <!-- Tabla de Actividad Ocupaciones -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="card-title mb-0">
+                                            <i class="fas fa-calendar-check text-success me-2"></i>Actividad de Ocupaciones
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table id="datatables-reponsive_ocupaciones_actividad" class="table table-striped dataTable no-footer dtr-inline collapsed" style="width: 100%;" aria-describedby="datatables-reponsive_ocupaciones_actividad_info">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Agencia</th>
+                                                        <th>Artista</th>
+                                                        <th>Última Actualización</th>
+                                                        <th>Nº actualizaciones último mes</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr th:each="actividad : ${actividadOcupaciones}">
+                                                        <td th:text="${actividad.nombreAgencia}"></td>
+                                                        <td th:text="${actividad.nombreArtista}"></td>
+                                                        <td th:text="${actividad.fecha != null ? #temporals.format(actividad.fecha, 'dd/MM/yyyy HH:mm') : 'Sin fecha'}"></td>
+                                                        <td th:text="${actividad.numeroActualizacionesMes}"></td>
+                                                    </tr>
+                                                    <tr th:if="${#lists.isEmpty(actividadOcupaciones)}">
+                                                        <td colspan="4" class="text-center text-muted">No hay datos de actividad de ocupaciones disponibles</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
                     
                 </div>
             </main>
@@ -285,5 +284,3 @@
 
 </body>
 </html>
-
-
