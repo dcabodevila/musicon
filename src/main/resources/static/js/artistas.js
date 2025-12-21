@@ -71,6 +71,11 @@ $(document).ready(function(){
           events: {
               url: "/fecha/list/" + idArtista,
               method: 'GET',
+              success: function(content, xhr) {
+                if (!content || content.length === 0) {
+                    notif("warning", "Es necesario añadir tarifas para que los artistas aparezcan en los listados. Si no quieres especificar importe, puedes crear tarifas con precio 0.");
+                }
+              },
               failure: function() {
                   alert('Hubo un error al cargar los eventos.');
               },
