@@ -49,6 +49,7 @@ public class AccesoArtistaServiceImpl implements AccesoArtistaService {
 		accesoDto.setIdUsuario(acceso.getUsuario().getId());
 		accesoDto.setNombreUsuario(acceso.getUsuario().getNombreCompleto());
 		accesoDto.setArtista(acceso.getArtista().getNombre());
+        accesoDto.setIdArtista(acceso.getArtista().getId());
 		accesoDto.setIdPermiso(acceso.getPermiso().getId());
 		accesoDto.setPermiso(acceso.getPermiso().getDescripcion());
 

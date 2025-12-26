@@ -90,6 +90,11 @@ $(document).ready(function () {
         } else {
             $('#btn-eliminar-acceso-artista').addClass('d-none');
         }
+        if (idArtista) {
+            $('#artista-accesos-artista').val(idArtista).trigger('change');
+        }
+
+
         $('#modalAccesosArtista').modal('show');
 
 

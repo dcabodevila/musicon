@@ -372,3 +372,25 @@ footer {
     padding: 80px 0;
     background-color: #ffffff;
 }
+.tutorial-focus {
+    position: relative;
+    z-index: 1051; /* Por encima de otros elementos */
+    box-shadow: 0 0 0 4px rgba(59, 125, 221, 0.5); /* Color primario de ejemplo */
+    animation: pulse-blue 2s infinite;
+    border-radius: 0.25rem;
+}
+
+@keyframes pulse-blue {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(59, 125, 221, 0.7);
+    }
+    70% {
+        transform: scale(1.02);
+        box-shadow: 0 0 0 15px rgba(59, 125, 221, 0);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(59, 125, 221, 0);
+    }
+}

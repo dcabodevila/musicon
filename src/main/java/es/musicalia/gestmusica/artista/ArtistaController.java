@@ -2,6 +2,7 @@ package es.musicalia.gestmusica.artista;
 
 import es.musicalia.gestmusica.agencia.AgenciaService;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
+import es.musicalia.gestmusica.auth.model.SecurityService;
 import es.musicalia.gestmusica.file.FileService;
 import es.musicalia.gestmusica.incremento.IncrementoService;
 import es.musicalia.gestmusica.localizacion.LocalizacionService;
@@ -44,10 +45,11 @@ public class ArtistaController {
     private final LocalizacionService localizacionService;
     private final IncrementoService incrementoService;
     private final OcupacionService ocupacionService;
+    private final SecurityService securityService;
 
 
     public ArtistaController(UserService userService, ArtistaService artistaService, FileService fileService, AgenciaService agenciaService,
-                             LocalizacionService localizacionService, IncrementoService incrementoService, OcupacionService ocupacionService){
+                             LocalizacionService localizacionService, IncrementoService incrementoService, OcupacionService ocupacionService, SecurityService securityService){
         this.userService = userService;
         this.artistaService = artistaService;
         this.fileService = fileService;
@@ -56,6 +58,7 @@ public class ArtistaController {
         this.incrementoService =incrementoService;
         this.ocupacionService = ocupacionService;
 
+        this.securityService = securityService;
     }
 
     @GetMapping
@@ -163,7 +166,7 @@ public class ArtistaController {
     }
 
     @PostMapping("/guardar")
-    public String guardarArtista(Model model, @ModelAttribute("artistaDto") @Valid ArtistaDto artistaDto, @RequestParam(value = "image", required = false) MultipartFile multipartFile,
+    public String guardarArtista(@AuthenticationPrincipal CustomAuthenticatedUser user, Model model, @ModelAttribute("artistaDto") @Valid ArtistaDto artistaDto, @RequestParam(value = "image", required = false) MultipartFile multipartFile,
                                  BindingResult bindingResult, RedirectAttributes redirectAttributes, Errors errors) {
 
         if (bindingResult.hasErrors()) {
@@ -184,6 +187,8 @@ public class ArtistaController {
 
             redirectAttributes.addFlashAttribute("message", "Artista guardado correctamente");
             redirectAttributes.addFlashAttribute("alertClass", "success");
+
+            securityService.reloadUserAuthorities();
             return "redirect:/artista/"+ artistaDto.getId();
 
         } catch (Exception e){

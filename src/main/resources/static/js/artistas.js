@@ -75,6 +75,7 @@ $(document).ready(function(){
                 if (!content || content.length === 0) {
                     notif("warning", "Es necesario añadir tarifas para que los artistas aparezcan en los listados. Si no quieres especificar importe, puedes crear tarifas con precio 0.");
                 }
+                resaltarBotonNuevaTarifa(!content || content.length === 0);
               },
               failure: function() {
                   alert('Hubo un error al cargar los eventos.');
@@ -113,7 +114,7 @@ $(document).ready(function(){
             }
             else if (tipoFecha === 'Ocupacion') {
 
-                  checkPermission( idArtista, 'ARTISTA', 'OCUPACIONES')
+                  checkPermission( idArtista, 'ARTISTA', 'DETALLE_OCUPACIONES')
                       .done(function(hasPermission) {
                           if (hasPermission) {
                             const id = info.event.id;
@@ -693,3 +694,14 @@ function cargarTarifaFecha(idArtista, fecha){
         }
     });
 }
+
+    function resaltarBotonNuevaTarifa(isResaltar) {
+
+        if (isResaltar){
+            $('#btnNuevaTarifa').addClass('tutorial-focus');
+        }
+        else {
+            $('#btnNuevaTarifa').removeClass('tutorial-focus');
+        }
+
+    }
