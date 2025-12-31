@@ -38,6 +38,11 @@
                                     <option th:each="ajuste : ${listaAjustes}" th:value="${ajuste.id}" th:text="${ajuste.nombre}" th:selected="${ajuste.predeterminado}"></option>
                                 </select>
                             </div>
+                            <div class="col-xs-6 col-sm-5">
+                                <a type="button" th:href="@{/ajustes}" id="btnAjustes" class="btn btn-pill btn-secondary m-1 col-12 col-sm-5">
+                                    <i class="align-middle" data-feather="plus"></i> Configuración listados
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
