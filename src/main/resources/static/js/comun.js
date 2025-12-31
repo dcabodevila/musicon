@@ -88,6 +88,25 @@ function cargarLocalidades(selectId, idMunicipio, valorSeleccionado) {
     });
 }
 
+function notifUnica(type, message){
+    if (document.querySelectorAll('.notyf__toast').length > 0) {
+        return;
+    }
+    let duration = "5000";
+    let ripple = true;
+    let dismissible = false;
+    window.notyf.open({
+        type,
+        message,
+        duration,
+        ripple,
+        dismissible,
+        position: {
+            x: "center",
+            y: "top"
+        }
+    });
+}
 
 function notif(type, message){
     let duration = "5000";
