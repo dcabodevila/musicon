@@ -38,7 +38,7 @@ public class ReporteMensualAgenciaJob {
     private final EmailService emailService;
     private final MensajeService mensajeService;
 
-    @Scheduled(cron = "${reporte.mensual.agencia.cron.expression:0 16 1 * * ?}")
+    @Scheduled(cron = "${reporte.mensual.agencia.cron.expression:0 0 18 1 * ?}")
     @Transactional(readOnly = false)
     public void enviarReportesMensuales() {
         try {
