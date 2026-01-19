@@ -12,9 +12,6 @@ public class RestTemplateConfig {
     @Value("${mailgun.api-key}")
     private String mailgunApiKey;
 
-    @Value("${orquestas.galicia.api.token}")
-    private String orquestasApiToken;
-
     @Bean(name = "mailgunRestTemplate")
     public RestTemplate mailgunRestTemplate(RestTemplateBuilder builder) {
         return builder

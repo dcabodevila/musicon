@@ -1,7 +1,7 @@
 package es.musicalia.gestmusica.orquestasdegalicia;
 
 import es.musicalia.gestmusica.ocupacion.OrquestasDeGaliciaException;
-import org.springframework.http.ResponseEntity;
+import es.musicalia.gestmusica.util.DefaultResponseBody;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface OrquestasDeGaliciaService {
@@ -9,14 +9,14 @@ public interface OrquestasDeGaliciaService {
     ActuacionExterna obtenerActuacion(Integer idActuacionExterno);
 
     @Transactional
-    ResponseEntity<String> crearActuacion(ActuacionExterna actuacion);
+    DefaultResponseBody crearActuacion(ActuacionExterna actuacion);
 
     @Transactional
-    ResponseEntity<String> modificarActuacion(Integer idActuacionExterno, ActuacionExterna actuacion);
+    DefaultResponseBody modificarActuacion(Integer idActuacionExterno, ActuacionExterna actuacion);
 
     @Transactional
-    ResponseEntity<String> eliminarActuacion(Integer idActuacionExterno);
+    DefaultResponseBody eliminarActuacion(Integer idActuacionExterno);
 
-    @Transactional
-    void enviarActuacionOrquestasDeGalicia(boolean isCreacion, ActuacionExterna actuacionExterna, String nombreEstadoOcupacion) throws OrquestasDeGaliciaException;
+//    @Transactional
+//    void enviarActuacionOrquestasDeGalicia(boolean isCreacion, ActuacionExterna actuacionExterna, String nombreEstadoOcupacion) throws OrquestasDeGaliciaException;
 }

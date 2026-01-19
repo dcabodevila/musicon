@@ -2,6 +2,7 @@ package es.musicalia.gestmusica.orquestasdegalicia;
 
 import es.musicalia.gestmusica.ocupacion.OcupacionEstadoEnum;
 import es.musicalia.gestmusica.ocupacion.OrquestasDeGaliciaException;
+import es.musicalia.gestmusica.util.DefaultResponseBody;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,9 +12,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Slf4j
 @Service
-@Transactional(readOnly = true)
+@Transactional
 public class OrquestasDeGaliciaServiceImpl implements OrquestasDeGaliciaService {
 
     private final RestTemplate restTemplate;
@@ -21,17 +25,79 @@ public class OrquestasDeGaliciaServiceImpl implements OrquestasDeGaliciaService 
     public OrquestasDeGaliciaServiceImpl(@Qualifier("orquestasRestTemplate") RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
+    @Value("${orquestas.galicia.auth.url:https://oauth.orquestasdegalicia.es}")
+    private String authUrl;
 
-    @Value("${orquestas.galicia.api.url}")
+    @Value("${orquestas.galicia.api.url:https://ext-api.orquestasdegalicia.es/v1/actuaciones-externas}")
     private String apiUrl;
-
-    @Value("${orquestas.galicia.api.token}")
-    private String apiToken;
 
     @Value("${orquestas.galicia.api.enabled}")
     private boolean apiEnabled;
 
-    @Transactional(readOnly = true)
+    @Value("${orquestas.api.username}")
+    private String username;
+
+    @Value("${orquestas.api.password}")
+    private String password;
+
+    private String cachedToken;
+
+    private String getToken() {
+        if (isTokenValido()) {
+            return cachedToken;
+        }
+
+        Map<String, String> body = new HashMap<>();
+        body.put("username", username);
+        body.put("password", password);
+
+        try {
+            AuthResponse response = restTemplate.postForObject(authUrl + "/token", body, AuthResponse.class);
+            if (response != null) {
+                cachedToken = response.getAccessToken();
+                return cachedToken;
+            }
+        } catch (RestClientResponseException e) {
+            log.error("Error de autenticación con Orquestas de Galicia: [{}] {}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new RuntimeException("Fallo al autenticar: " + e.getMessage());
+        }
+
+        throw new RuntimeException("No se pudo obtener el token de Orquestas de Galicia");
+    }
+
+    private HttpHeaders getHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(getToken());
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return headers;
+    }
+
+    private boolean isTokenValido() {
+        if (cachedToken == null) return false;
+
+        try {
+            // Un JWT tiene 3 partes: Header.Payload.Signature
+            String[] parts = cachedToken.split("\\.");
+            if (parts.length < 2) return false;
+
+            // El payload es la segunda parte
+            String payloadJson = new String(java.util.Base64.getUrlDecoder().decode(parts[1]));
+            com.fasterxml.jackson.databind.JsonNode payload = new com.fasterxml.jackson.databind.ObjectMapper().readTree(payloadJson);
+
+            if (payload.has("exp")) {
+                long expTimestamp = payload.get("exp").asLong();
+                long ahora = java.time.Instant.now().getEpochSecond();
+
+                // Consideramos el token inválido si falta menos de 1 minuto para que caduque
+                return expTimestamp > (ahora + 60);
+            }
+        } catch (Exception e) {
+            log.error("Error al verificar caducidad del token JWT", e);
+        }
+        return false;
+    }
+
+    @Transactional
     @Override
     public ActuacionExterna obtenerActuacion(Integer idActuacionExterno) {
         if (!apiEnabled) {
@@ -40,11 +106,11 @@ public class OrquestasDeGaliciaServiceImpl implements OrquestasDeGaliciaService 
         }
 
         // Construir la URL del endpoint
-        String url = apiUrl + "/v1/actuaciones-externas/" + idActuacionExterno;
+        String url = apiUrl + "/"  + idActuacionExterno;
         
         try {
             // Crear headers e incluir el token de autenticación
-            HttpHeaders headers = crearHeaders();
+            HttpHeaders headers = getHeaders();
             HttpEntity<?> entity = new HttpEntity<>(headers);
 
             // Realizar la solicitud GET
@@ -64,58 +130,75 @@ public class OrquestasDeGaliciaServiceImpl implements OrquestasDeGaliciaService 
             log.info("Actuación obtenida correctamente: {}", actuacionExterna);
             return actuacionExterna;
         } catch (RestClientResponseException e) {
-            // Actualización: usar getStatusCode().value() en lugar de getRawStatusCode()
-            log.error("Error al obtener actuación con ID {}: [{}] {}", idActuacionExterno, e.getStatusCode().value(), e.getResponseBodyAsString());
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                return null;
+            }
+            log.error("Error al obtener actuación {}: [{}]", idActuacionExterno, e.getStatusCode());
+            if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) { cachedToken = null; }
+        } catch (RuntimeException e) {
+            // Propagamos la RuntimeException lanzada por getToken() o por errores de auth
+            throw e;
         } catch (Exception e) {
-            // Manejar cualquier otro error desconocido
             log.error("Error inesperado al obtener actuación con ID {}: {}", idActuacionExterno, e.getMessage(), e);
         }
 
-        return null; // Devuelve null si ocurre algún error
+        return null;
     }
 
     @Transactional
     @Override
-    public ResponseEntity<String> crearActuacion(ActuacionExterna actuacion) {
+    public DefaultResponseBody crearActuacion(ActuacionExterna actuacion) {
         if (!apiEnabled) {
             log.warn("La API de Orquestas de Galicia está deshabilitada. No se realizó la llamada para crear la actuación.");
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body("API deshabilitada");
+            return DefaultResponseBody.builder().success(false).messageType("danger").message("API deshabilitada").build();
         }
 
-        HttpHeaders headers = crearHeaders();
+        HttpHeaders headers = getHeaders();
         HttpEntity<ActuacionExterna> entity = new HttpEntity<>(actuacion, headers);
 
-        String url = apiUrl + "/v1/actuaciones-externas";
+
         try {
             ResponseEntity<String> response = restTemplate.exchange(
-                url,
+                apiUrl ,
                 HttpMethod.POST,
                 entity,
                 String.class
             );
-            log.info("Actuación creada correctamente: {}", response.getBody());
-            return response;
+
+            if (response.getStatusCode().is2xxSuccessful()){
+                log.info("Actuación creada correctamente: {}", response.getBody());
+                return DefaultResponseBody.builder().success(true).messageType("success").message("Actuación creada correctamente en OrquestasDeGalicia").build();
+            }
+            else {
+                log.error("No se ha podido crear la actuación: {}, {}", actuacion.getIdActuacionExterno(), response.getStatusCode());
+                return DefaultResponseBody.builder().success(false).messageType("error").message("No se ha podido crear la actuación en OrquestasDeGalicia").build();
+            }
+
+
         } catch (RestClientResponseException e) {
             log.error("Error al crear actuación: {}", e.getResponseBodyAsString());
-            return ResponseEntity.status(e.getStatusCode().value())
-                    .body(e.getResponseBodyAsString());
+            if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) { cachedToken = null; }
+            if (e.getStatusCode() == HttpStatus.CONFLICT) {
+                return DefaultResponseBody.builder().success(false).messageType("error").message("La actuación ya ha sido creada previamente en OrquestasDeGalicia").build();
+            }
+
+            return DefaultResponseBody.builder().success(false).messageType("error").message("Excepción al crear la actuación en OrquestasDeGalicia").build();
+
         }
     }
 
     @Transactional
     @Override
-    public ResponseEntity<String> modificarActuacion(Integer idActuacionExterno, ActuacionExterna actuacion) {
+    public DefaultResponseBody modificarActuacion(Integer idActuacionExterno, ActuacionExterna actuacion) {
         if (!apiEnabled) {
-            log.warn("La API de Orquestas de Galicia está deshabilitada. No se realizó la llamada para modificar la actuación.");
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body("API deshabilitada");
+            log.warn("La API de Orquestas de Galicia está deshabilitada. No se realizó la llamada para crear la actuación.");
+            return DefaultResponseBody.builder().success(false).messageType("danger").message("API deshabilitada").build();
         }
 
-        HttpHeaders headers = crearHeaders();
+        HttpHeaders headers = getHeaders();
         HttpEntity<ActuacionExterna> entity = new HttpEntity<>(actuacion, headers);
 
-        String url = apiUrl + "/v1/actuaciones-externas/" + idActuacionExterno;
+        String url = apiUrl + "/"  + idActuacionExterno;
         try {
             ResponseEntity<String> response = restTemplate.exchange(
                 url,
@@ -123,28 +206,34 @@ public class OrquestasDeGaliciaServiceImpl implements OrquestasDeGaliciaService 
                 entity,
                 String.class
             );
-            log.info("Actuación modificada correctamente. ID: {}", idActuacionExterno);
-            return ResponseEntity.noContent().build();
+            if (response.getStatusCode().is2xxSuccessful()){
+                log.info("Actuación actualizada correctamente: {}", response.getBody());
+                return DefaultResponseBody.builder().success(true).messageType("success").message("Actuación actualizada correctamente en OrquestasDeGalicia").build();
+            }
+            else {
+                log.error("No se ha podido crear la actuación: {}, {}", actuacion.getIdActuacionExterno(), response.getStatusCode());
+                return DefaultResponseBody.builder().success(false).messageType("error").message("No se ha podido actualizar la actuación en OrquestasDeGalicia").build();
+            }
         } catch (RestClientResponseException e) {
             log.error("Error al modificar actuación: {}", e.getResponseBodyAsString());
-            return ResponseEntity.status(e.getStatusCode().value())
-                    .body(e.getResponseBodyAsString());
+            if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) { cachedToken = null; }
+            return DefaultResponseBody.builder().success(false).messageType("error").message("Excepción al actualizar la actuación en OrquestasDeGalicia").build();
+
         }
     }
 
     @Transactional
     @Override
-    public ResponseEntity<String> eliminarActuacion(Integer idActuacionExterno) {
+    public DefaultResponseBody eliminarActuacion(Integer idActuacionExterno) {
         if (!apiEnabled) {
-            log.warn("La API de Orquestas de Galicia está deshabilitada. No se realizó la llamada para eliminar la actuación.");
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body("API deshabilitada");
+            log.warn("La API de Orquestas de Galicia está deshabilitada. No se realizó la llamada para crear la actuación.");
+            return DefaultResponseBody.builder().success(false).messageType("danger").message("API deshabilitada").build();
         }
 
-        HttpHeaders headers = crearHeaders();
+        HttpHeaders headers = getHeaders();
         HttpEntity<?> entity = new HttpEntity<>(headers);
 
-        String url = apiUrl + "/v1/actuaciones-externas/" + idActuacionExterno;
+        String url = apiUrl + "/"  + idActuacionExterno;
         try {
             ResponseEntity<String> response = restTemplate.exchange(
                 url,
@@ -152,60 +241,66 @@ public class OrquestasDeGaliciaServiceImpl implements OrquestasDeGaliciaService 
                 entity,
                 String.class
             );
-            log.info("Actuación eliminada correctamente. ID: {}", idActuacionExterno);
-            return ResponseEntity.noContent().build();
+
+            if (response.getStatusCode().is2xxSuccessful()){
+                log.info("Actuación eliminada correctamente: {}", response.getBody());
+                return DefaultResponseBody.builder().success(true).messageType("success").message("Actuación eliminada correctamente de OrquestasDeGalicia").build();
+            }
+            else {
+                log.error("No se ha podido eliminar la actuación: {}, {}", idActuacionExterno, response.getStatusCode());
+                return DefaultResponseBody.builder().success(false).messageType("error").message("No se ha podido eliminar la actuación de OrquestasDeGalicia").build();
+            }
+
+
         } catch (RestClientResponseException e) {
             log.error("Error al eliminar actuación: {}", e.getResponseBodyAsString());
-            return ResponseEntity.status(e.getStatusCode().value())
-                    .body(e.getResponseBodyAsString());
+            if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) { cachedToken = null; }
+            return DefaultResponseBody.builder().success(false).messageType("error").message("Excepción al actualizar la actuación de OrquestasDeGalicia").build();
         }
     }
 
-    @Transactional
-    @Override
-    public void enviarActuacionOrquestasDeGalicia(boolean isCreacion, ActuacionExterna actuacionExterna, String nombreEstadoOcupacion) throws OrquestasDeGaliciaException {
-        if (actuacionExterna == null || nombreEstadoOcupacion == null) {
-            throw new IllegalArgumentException("Parámetros obligatorios no pueden ser nulos");
-        }
+//    @Transactional
+//    @Override
+//    public void enviarActuacionOrquestasDeGalicia(boolean isCreacion, ActuacionExterna actuacionExterna, String nombreEstadoOcupacion) throws OrquestasDeGaliciaException {
+//        if (actuacionExterna == null || nombreEstadoOcupacion == null) {
+//            throw new IllegalArgumentException("Parámetros obligatorios no pueden ser nulos");
+//        }
+//
+//        DefaultResponseBody response = null;
+//        try {
+//            if (OcupacionEstadoEnum.OCUPADO.getDescripcion().equals(nombreEstadoOcupacion)) {
+//                response = (isCreacion)
+//                        ? crearActuacion(actuacionExterna)
+//                        : procesarModificacion(actuacionExterna);
+//            } else {
+//                response = (isCreacion)
+//                        ? ResponseEntity.ok("No es necesario actualizar")
+//                        : eliminarActuacion(actuacionExterna.getIdActuacionExterno());
+//            }
+//
+//            if (response != null && response.getStatusCode().is2xxSuccessful()) {
+//                log.info("Actuación enviada correctamente: {}", actuacionExterna.getIdActuacionExterno());
+//            } else {
+//                String status = (response != null) ? response.getStatusCode().toString() : "SIN_RESPUESTA";
+//                throw new OrquestasDeGaliciaException("Error en la operación externa. Status: " + status);
+//            }
+//        } catch (Exception e) {
+//            throw new OrquestasDeGaliciaException("Fallo inesperado al procesar la actuación: " + e.getMessage());
+//        }
+//    }
+//
+//
+//
+//    private ResponseEntity<String> procesarModificacion(ActuacionExterna actuacionExterna) {
+//        ActuacionExterna actuacionExternaResponse =
+//                obtenerActuacion(actuacionExterna.getIdActuacionExterno());
+//        if (actuacionExternaResponse != null) {
+//            return modificarActuacion(actuacionExterna.getIdActuacionExterno(), actuacionExterna);
+//        } else {
+//            return crearActuacion(actuacionExterna);
+//        }
+//    }
 
-        ResponseEntity<String> response = null;
-        try {
-            if (OcupacionEstadoEnum.OCUPADO.getDescripcion().equals(nombreEstadoOcupacion)) {
-                response = (isCreacion)
-                        ? crearActuacion(actuacionExterna)
-                        : procesarModificacion(actuacionExterna);
-            } else {
-                response = (isCreacion)
-                        ? ResponseEntity.ok("No es necesario actualizar")
-                        : eliminarActuacion(actuacionExterna.getIdActuacionExterno());
-            }
 
-            if (response != null && response.getStatusCode().is2xxSuccessful()) {
-                log.info("Actuación enviada correctamente: {}", actuacionExterna.getIdActuacionExterno());
-            } else {
-                throw new OrquestasDeGaliciaException("Error en la operación. Respuesta: " + response != null ? response.getStatusCode().toString() : "null");
-            }
-        } catch (Exception e) {
-            throw new OrquestasDeGaliciaException("Fallo inesperado al procesar la actuación: " + e.getMessage());
-        }
-    }
-
-    private ResponseEntity<String> procesarModificacion(ActuacionExterna actuacionExterna) {
-        ActuacionExterna actuacionExternaResponse =
-                obtenerActuacion(actuacionExterna.getIdActuacionExterno());
-        if (actuacionExternaResponse != null) {
-            return modificarActuacion(actuacionExterna.getIdActuacionExterno(), actuacionExterna);
-        } else {
-            return crearActuacion(actuacionExterna);
-        }
-    }
-
-
-    private HttpHeaders crearHeaders() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(apiToken);
-        return headers;
-    }
 
 }

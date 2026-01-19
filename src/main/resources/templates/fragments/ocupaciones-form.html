@@ -142,15 +142,36 @@
           </div>
         </div>
 
-        <div class="mb-3 row" th:if="${isArtistaPermiteOrquestasDeGalicia}">
-          <label for="orquestasdegalicia-ocupacion" class="col-form-label col-sm-3 text-sm-end">Información OrquestasDeGalicia</label>
-          <div class="col-sm-9">
-            <textarea class="form-control" th:field="*{textoOrquestasDeGalicia}" placeholder="Información que se publicará en OrquestasDeGalicia.es sobre la actuación" id="orquestasdegalicia-ocupacion"
-                      autocomplete="off" maxlength="400"></textarea>
-          </div>
-        </div>
+            <div th:if="${isArtistaPermiteOrquestasDeGalicia}" class="card mb-3">
+              <div class="card-header fw-bold">
+                Publicación OrquestasDeGalicia.com
+                <i class="fas fa-crown text-warning ms-2" title="Funcionalidad Premium"> Premium</i>
+              </div>
+              <div class="card-body">
+                <div class="mb-3 row">
+                  <label for="orquestasdegalicia-ocupacion" class="col-form-label col-sm-3 text-sm-end">Información OrquestasDeGalicia</label>
+                  <div class="col-sm-9">
+                    <div class="d-flex gap-2">
+                      <textarea class="form-control" th:field="*{textoOrquestasDeGalicia}" placeholder="Información para OrquestasDeGalicia.es sobre la actuación" id="orquestasdegalicia-ocupacion"
+                                autocomplete="off" maxlength="400"></textarea>
+                      <div class="d-flex flex-column gap-2">
+                        <button type="button" class="btn btn-success" id="btn-publicar-orquestas" title="Publicar en OrquestasDeGalicia.es">
+                          <i class="fas fa-upload"></i>
+                        </button>
+                        <button type="button" class="btn btn-info" id="btn-actualizar-orquestas" title="Actualizar en OrquestasDeGalicia.es">
+                          <i class="fas fa-sync-alt"></i>
+                        </button>
+                        <button type="button" class="btn btn-danger" id="btn-eliminar-orquestas" title="Eliminar de en OrquestasDeGalicia.es">
+                          <i class="fas fa-trash-alt"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-      </div>
+          </div>
 
 
 

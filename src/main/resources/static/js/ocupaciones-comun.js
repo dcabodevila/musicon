@@ -53,6 +53,21 @@ $(document).ready(function(){
                 }, 500);
             }
         });
+
+        $(document).on('click', '#btn-publicar-orquestas', function(e) {
+            e.preventDefault();
+            publicarEnOrquestasDeGalicia();
+        });
+        $(document).on('click', '#btn-actualizar-orquestas', function(e) {
+            e.preventDefault();
+            actualizarEnOrquestasDeGalicia();
+        });
+
+        $(document).on('click', '#btn-eliminar-orquestas', function(e) {
+            e.preventDefault();
+            eliminarDeOrquestasDeGalicia();
+        });
+
 });
 
 
@@ -63,17 +78,21 @@ function guardar_ocupacion() {
 
         $("#btn-guardar-ocupacion").prop("disabled", true);
 
-        sendOcupacionPost(ocupacionSaveDto);
+        let response = sendOcupacionPost(ocupacionSaveDto);
 
         $('#modalNuevaOcupacion').modal('toggle');
 
-    }
+        return response;
 
+    }
+    else {
+        return $.Deferred().reject("Error en validación").promise();
+    }
 
 }
 
 function sendOcupacionPost(ocupacionSaveDto){
-    $.ajax({
+    return $.ajax({
         type: "POST",
         contentType: "application/json; charset=utf-8",
         url: "/ocupacion/save",
@@ -231,6 +250,18 @@ function obtenerOcupacionDto(idOcupacion) {
                     mostrarOcultarBotonesModalOcupacion(ocupacionDto.estado);
                 }
 
+                if (ocupacionDto.isPublicadoOdg){
+                    $('#btn-publicar-orquestas').hide();
+                    $('#btn-actualizar-orquestas').show();
+                    $('#btn-eliminar-orquestas').show();
+
+                }
+                else{
+                    $('#btn-publicar-orquestas').show();
+                    $('#btn-actualizar-orquestas').hide();
+                    $('#btn-eliminar-orquestas').hide();
+                }
+
             },
             error: function(xhr, status, error) {
                 console.error('Error al obtener la ocupación:', error);
@@ -242,27 +273,165 @@ function obtenerOcupacionDto(idOcupacion) {
     }
 }
 
-    // Al mostrar la modal
-    function mostrarOcultarBotonesModalOcupacion(estado) {
-        const $ocupacionInput = $('#id-ocupacion');
-        const $btnAnular = $('#btn-anular-ocupacion');
-        const $btnConfirmar = $('#btn-confirmar-ocupacion');
+// Al mostrar la modal
+function mostrarOcultarBotonesModalOcupacion(estado) {
+    const $ocupacionInput = $('#id-ocupacion');
+    const $btnAnular = $('#btn-anular-ocupacion');
+    const $btnConfirmar = $('#btn-confirmar-ocupacion');
 
-        // Verificar el valor del input al mostrar la modal
-        if ($ocupacionInput.val().trim() !== "") {
-            $btnAnular.show();
-            $btnConfirmar.show();
-        } else {
-            $btnAnular.hide();
-            $btnConfirmar.hide();
-        }
-
-        if (estado!=null && estado!='Ocupado'){
-            $btnConfirmar.show();
-        }
-        else {
-            $btnConfirmar.hide();
-        }
-
-
+    // Verificar el valor del input al mostrar la modal
+    if ($ocupacionInput.val().trim() !== "") {
+        $btnAnular.show();
+        $btnConfirmar.show();
+    } else {
+        $btnAnular.hide();
+        $btnConfirmar.hide();
     }
+
+    if (estado!=null && estado!='Ocupado'){
+        $btnConfirmar.show();
+    }
+    else {
+        $btnConfirmar.hide();
+    }
+
+
+}
+
+function publicarEnOrquestasDeGalicia() {
+    // Obtener el ID de la ocupación
+    const idOcupacion = $('#id-ocupacion').val();
+
+    // Validar que exista el ID
+    if (!idOcupacion) {
+
+        notif('error', 'La ocupación debe ser guardada primero');
+        return;
+    }
+    let promesa = guardar_ocupacion();
+    if (promesa) {
+        promesa.done(function(response) {
+            if (response && response.success) {
+                // Si el guardado fue exitoso, enviar la petición de publicación
+                enviarPeticionPublicacion(idOcupacion);
+            } else {
+                notif('error', response ? response.message : 'Error al guardar el formulario');
+            }
+        }).fail(function(error) {
+            notif('error', 'Error al guardar el formulario');
+            console.error('Error:', error);
+        });
+    }
+}
+
+function actualizarEnOrquestasDeGalicia() {
+    // Obtener el ID de la ocupación
+    const idOcupacion = $('#id-ocupacion').val();
+
+    // Validar que exista el ID
+    if (!idOcupacion) {
+
+        notif('error', 'La ocupación debe ser guardada primero');
+        return;
+    }
+    let promesa = guardar_ocupacion();
+    if (promesa) {
+        promesa.done(function(response) {
+            if (response && response.success) {
+                // Si el guardado fue exitoso, enviar la petición de publicación
+                enviarPeticionActualizarEnOrquestasDeGalicia(idOcupacion);
+            } else {
+                notif('error', response ? response.message : 'Error al guardar el formulario');
+            }
+        }).fail(function(error) {
+            notif('error', 'Error al guardar el formulario');
+            console.error('Error:', error);
+        });
+    }
+}
+
+function enviarPeticionPublicacion(idOcupacion) {
+
+    $.ajax({
+        url: '/ocupacion/publicar-odg/' + idOcupacion,
+        type: 'POST',
+        contentType: 'application/json',
+        dataType: 'json',
+        success: function(data) {
+            if (data && data.success) {
+                notif(data.messageType, data.message || 'Ocupación publicada correctamente en OrquestasDeGalicia');
+            } else {
+                notif(data.messageType, data ? data.message : 'Error al publicar la ocupación');
+            }
+        },
+        error: function(xhr, status, error) {
+            notif('error',  'Error al publicar la ocupación: ' + error);
+        }
+    });
+}
+
+function enviarPeticionActualizarEnOrquestasDeGalicia() {
+    const idOcupacion = $("#id-ocupacion").val();
+
+    if (!idOcupacion) {
+        notif('error', 'Debe guardar la ocupación primero');
+        return;
+    }
+
+    $.ajax({
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        url: "/ocupacion/actualizar-odg/" + idOcupacion,
+        dataType: 'json',
+        cache: false,
+        timeout: 600000,
+        success: function(data) {
+            if (data.success) {
+                notif("success", data.message);
+            } else {
+                notif("error", data.message);
+            }
+        },
+        error: function(e) {
+            console.log(e);
+            notif('error', 'Error al actualizar en OrquestasDeGalicia');
+        }
+    });
+
+}
+
+function eliminarDeOrquestasDeGalicia() {
+    const idOcupacion = $("#id-ocupacion").val();
+
+    if (!idOcupacion) {
+        notif('error', 'Debe guardar la ocupación primero');
+        return;
+    }
+
+
+    $.ajax({
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        url: "/ocupacion/eliminar-odg/" + idOcupacion,
+        dataType: 'json',
+        cache: false,
+        timeout: 600000,
+        success: function(data) {
+            if (data.success) {
+                notif("success", data.message);
+            } else {
+                notif("error", data.message);
+            }
+            $('#modalNuevaOcupacion').modal('toggle');
+
+        },
+        error: function(e) {
+            console.log(e);
+            notif('error', 'Error al eliminar de OrquestasDeGalicia');
+        }
+    });
+
+}
+
+
+

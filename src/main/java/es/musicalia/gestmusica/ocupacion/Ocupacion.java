@@ -121,6 +121,11 @@ public class Ocupacion {
     @Column(name = "id_ocupacion_legacy")
     private Integer idOcupacionLegacy;
 
+    @Column(name = "publicado_odg")
+    private boolean publicadoOdg;
+
+    @Column(name = "fecha_publicacion_odg")
+    private LocalDateTime fechaPublicacionOdg;
 
 }
 

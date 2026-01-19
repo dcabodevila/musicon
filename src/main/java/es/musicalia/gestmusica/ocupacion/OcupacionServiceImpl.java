@@ -12,6 +12,7 @@ import es.musicalia.gestmusica.mail.EmailTemplateEnum;
 import es.musicalia.gestmusica.mensaje.Mensaje;
 import es.musicalia.gestmusica.mensaje.MensajeService;
 import es.musicalia.gestmusica.orquestasdegalicia.ActuacionExterna;
+import es.musicalia.gestmusica.orquestasdegalicia.OrquestasDeGaliciaService;
 import es.musicalia.gestmusica.permiso.PermisoAgenciaEnum;
 import es.musicalia.gestmusica.permiso.PermisoArtistaEnum;
 import es.musicalia.gestmusica.permiso.PermisoService;
@@ -25,6 +26,7 @@ import es.musicalia.gestmusica.util.ConstantsGestmusica;
 import es.musicalia.gestmusica.util.DefaultResponseBody;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,8 +56,9 @@ public class OcupacionServiceImpl implements OcupacionService {
 	private final EmailService emailService;
 	private final OcupacionMapper ocupacionMapper;
 	private final MensajeService mensajeService;
+    private final OrquestasDeGaliciaService orquestasDeGaliciaService;
 
-	public OcupacionServiceImpl(OcupacionRepository ocupacionRepository, ArtistaRepository artistaRepository, ProvinciaRepository provinciaRepository, MunicipioRepository municipioRepository, TipoOcupacionRepository tipoOcupacionRepository, OcupacionEstadoRepository ocupacionEstadoRepository, TarifaRepository tarifaRepository, UserService userService, PermisoService permisoService, AccesoRepository accesoRepository, EmailService emailService, OcupacionMapper ocupacionMapper, MensajeService mensajeService){
+	public OcupacionServiceImpl(OcupacionRepository ocupacionRepository, ArtistaRepository artistaRepository, ProvinciaRepository provinciaRepository, MunicipioRepository municipioRepository, TipoOcupacionRepository tipoOcupacionRepository, OcupacionEstadoRepository ocupacionEstadoRepository, TarifaRepository tarifaRepository, UserService userService, PermisoService permisoService, AccesoRepository accesoRepository, EmailService emailService, OcupacionMapper ocupacionMapper, MensajeService mensajeService, OrquestasDeGaliciaService orquestasDeGaliciaService){
 		this.ocupacionRepository = ocupacionRepository;
 		this.artistaRepository = artistaRepository;
         this.provinciaRepository = provinciaRepository;
@@ -69,6 +72,7 @@ public class OcupacionServiceImpl implements OcupacionService {
         this.emailService = emailService;
         this.ocupacionMapper = ocupacionMapper;
         this.mensajeService = mensajeService;
+        this.orquestasDeGaliciaService = orquestasDeGaliciaService;
     }
 
 	@Override
@@ -147,7 +151,7 @@ public class OcupacionServiceImpl implements OcupacionService {
 
         try {
 
-			ActuacionExterna actuacionExterna = getActuacionExterna(ocupacion.getArtista(), ocupacion);
+			ActuacionExterna actuacionExterna = getActuacionExterna(ocupacion);
 
 //			this.orquestasDeGaliciaService.enviarActuacionOrquestasDeGalicia(false, actuacionExterna, OcupacionEstadoEnum.OCUPADO.getDescripcion());
 			enviarMensajeInternoOcupacionConfirmada(ocupacion.getUsuario(), ocupacion);
@@ -338,19 +342,45 @@ public class OcupacionServiceImpl implements OcupacionService {
 	}
 
 
-	private static ActuacionExterna getActuacionExterna(Artista artista, Ocupacion ocupacion) {
+	private static ActuacionExterna getActuacionExterna(Ocupacion ocupacion) {
 		ActuacionExterna actuacionExterna = new ActuacionExterna();
-		actuacionExterna.setIdFormacionExterno(artista.getId().intValue());
+		actuacionExterna.setIdFormacionExterno(ocupacion.getArtista().getId().intValue());
 		actuacionExterna.setIdActuacionExterno(ocupacion.getId().intValue());
 		actuacionExterna.setFecha(ocupacion.getFecha().toLocalDate());
-		actuacionExterna.setLugar(ocupacion.getPoblacion());
+
+        final String lugar = obtenerLugarOrquestaDeGalicia(ocupacion.getMunicipio().getNombre(), ocupacion.getPoblacion());
+
+		actuacionExterna.setLugar(lugar);
 		actuacionExterna.setProvincia(ocupacion.getProvincia().getNombreOrquestasdegalicia());
 		actuacionExterna.setVermu(ocupacion.isMatinal() || ocupacion.isSoloMatinal());
 		actuacionExterna.setTarde(false);
 		actuacionExterna.setNoche(!ocupacion.isSoloMatinal());
 		actuacionExterna.setInformacion(ocupacion.getTextoOrquestasDeGalicia());
+
 		return actuacionExterna;
 	}
+
+    private static String obtenerLugarOrquestaDeGalicia(final String municipio, final String poblacion){
+
+        final StringBuilder sb = new StringBuilder();
+
+        if (poblacion!=null && !poblacion.isEmpty() && !poblacion.equalsIgnoreCase("PROVISIONAL")){
+            sb.append(poblacion);
+
+            if (municipio!=null && !municipio.isEmpty()){
+                sb.append(", ").append(municipio);
+            }
+
+        }
+        else {
+            sb.append(municipio);
+        }
+
+
+        return sb.toString();
+
+
+    }
 
 	@Override
 	public boolean existeOcupacionFecha(OcupacionSaveDto ocupacionSaveDto){
@@ -561,6 +591,94 @@ public class OcupacionServiceImpl implements OcupacionService {
 	public Optional<Ocupacion> buscarPorIdOcupacionLegacy(Integer idOcupacionLegacy) {
 		return this.ocupacionRepository.findOcupacionByIdOcupacionLegacy(idOcupacionLegacy);
 	}
+    @Transactional
+    @Override
+    public DefaultResponseBody publicarOcupacionOrquestasDeGalicia(Long idOcupacion) {
 
+        final Ocupacion ocupacion = this.ocupacionRepository.findById(idOcupacion).orElseThrow();
+
+
+        if (!TipoOcupacionEnum.OCUPADO.getDescripcion().equalsIgnoreCase(ocupacion.getTipoOcupacion().getNombre())){
+            return DefaultResponseBody.builder().idEntidad(idOcupacion).success(false).messageType("danger").message("Solo se pueden publicar en estado ocupada").build();
+        }
+
+        if (ocupacion.getProvincia()==null || ConstantsGestmusica.ID_PROVINCIA_PROVISIONAL == ocupacion.getProvincia().getId()){
+            return DefaultResponseBody.builder().idEntidad(idOcupacion).success(false).messageType("danger").message("Es necesario especificar la provincia de la ocupación").build();
+        }
+
+        if (ocupacion.getMunicipio()==null || ConstantsGestmusica.ID_MUNICIPIO_PROVISIONAL == ocupacion.getMunicipio().getId()){
+
+            return DefaultResponseBody.builder().idEntidad(idOcupacion).success(false).messageType("danger").message("Es necesario especificar el municipio de la ocupación").build();
+
+        }
+
+        // Publicar en ODG
+        final ActuacionExterna actuacionExterna = getActuacionExterna(ocupacion);
+        final DefaultResponseBody response = this.orquestasDeGaliciaService.crearActuacion(actuacionExterna);
+
+        if (response.isSuccess()){
+            ocupacion.setPublicadoOdg(true);
+            ocupacion.setFechaPublicacionOdg(LocalDateTime.now());
+            ocupacionRepository.save(ocupacion);
+        }
+
+        return response;
+
+    }
+    @Transactional
+    @Override
+    public DefaultResponseBody actualizarOcupacionOrquestasDeGalicia(Long idOcupacion) {
+        final Ocupacion ocupacion = this.ocupacionRepository.findById(idOcupacion).orElseThrow();
+
+        if (!TipoOcupacionEnum.OCUPADO.getDescripcion().equalsIgnoreCase(ocupacion.getTipoOcupacion().getNombre())) {
+            return DefaultResponseBody.builder().idEntidad(idOcupacion).success(false).messageType("danger").message("Solo se pueden actualizar en estado ocupada").build();
+        }
+
+        if (ocupacion.getProvincia() == null || ConstantsGestmusica.ID_PROVINCIA_PROVISIONAL == ocupacion.getProvincia().getId()) {
+            return DefaultResponseBody.builder().idEntidad(idOcupacion).success(false).messageType("danger").message("Es necesario especificar la provincia de la ocupación").build();
+        }
+
+        if (ocupacion.getMunicipio() == null || ConstantsGestmusica.ID_MUNICIPIO_PROVISIONAL == ocupacion.getMunicipio().getId()) {
+            return DefaultResponseBody.builder().idEntidad(idOcupacion).success(false).messageType("danger").message("Es necesario especificar el municipio de la ocupación").build();
+        }
+
+        if (!ocupacion.isPublicadoOdg()) {
+            return DefaultResponseBody.builder().idEntidad(idOcupacion).success(false).messageType("danger").message("La ocupación no ha sido publicada en OrquestasDeGalicia").build();
+        }
+
+        // Actualizar en ODG
+        final ActuacionExterna actuacionExterna = getActuacionExterna(ocupacion);
+        final DefaultResponseBody response = this.orquestasDeGaliciaService.modificarActuacion(actuacionExterna.getIdActuacionExterno(), actuacionExterna);
+
+        if (response.isSuccess()) {
+
+            ocupacion.setFechaPublicacionOdg(LocalDateTime.now());
+            ocupacionRepository.save(ocupacion);
+        }
+
+        return response;
+    }
+
+    @Transactional
+    @Override
+    public DefaultResponseBody eliminarOcupacionOrquestasDeGalicia(Long idOcupacion) {
+        final Ocupacion ocupacion = this.ocupacionRepository.findById(idOcupacion).orElseThrow();
+
+        if (!ocupacion.isPublicadoOdg()) {
+            return DefaultResponseBody.builder().idEntidad(idOcupacion).success(false).messageType("danger").message("La ocupación no ha sido publicada en OrquestasDeGalicia").build();
+        }
+
+        // Eliminar de ODG
+        final DefaultResponseBody response = this.orquestasDeGaliciaService.eliminarActuacion(ocupacion.getId().intValue());
+
+        if (response.isSuccess()){
+            ocupacion.setPublicadoOdg(false);
+            ocupacion.setFechaPublicacionOdg(LocalDateTime.now());
+            ocupacionRepository.save(ocupacion);
+        }
+
+
+        return response ;
+    }
 
 }

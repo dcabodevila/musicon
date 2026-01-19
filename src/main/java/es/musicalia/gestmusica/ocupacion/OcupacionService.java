@@ -33,4 +33,13 @@ public interface OcupacionService {
     OcupacionSaveDto getOcupacionSaveDto(Long idOcupacion);
 
     Optional<Ocupacion> buscarPorIdOcupacionLegacy(Integer idOcupacionLegacy);
+
+    @Transactional
+    DefaultResponseBody publicarOcupacionOrquestasDeGalicia(Long idOcupacion);
+
+    @Transactional
+    DefaultResponseBody actualizarOcupacionOrquestasDeGalicia(Long idOcupacion);
+
+    @Transactional
+    DefaultResponseBody eliminarOcupacionOrquestasDeGalicia(Long idOcupacion);
 }

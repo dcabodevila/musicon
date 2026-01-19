@@ -173,6 +173,49 @@ public class OcupacionController {
         return "redirect:/ocupacion/list";
 
     }
+
+
+    @PostMapping("/publicar-odg/{idOcupacion}")
+    public ResponseEntity<DefaultResponseBody> publicarEnOrquestasDeGalicia(@PathVariable long idOcupacion) {
+        try {
+
+            return ResponseEntity.ok(this.ocupacionService.publicarOcupacionOrquestasDeGalicia(idOcupacion));
+
+        } catch (Exception e) {
+            return ResponseEntity.ok(DefaultResponseBody.builder()
+                    .success(false)
+                    .message("Error al publicar en OrquestasDeGalicia: " + e.getMessage())
+                    .messageType("error")
+                    .build());
+        }
+    }
+
+    @PostMapping("/actualizar-odg/{idOcupacion}")
+    public ResponseEntity<DefaultResponseBody> actualizarEnOrquestasDeGalicia(@PathVariable long idOcupacion) {
+        try {
+            return ResponseEntity.ok(this.ocupacionService.actualizarOcupacionOrquestasDeGalicia(idOcupacion));
+        } catch (Exception e) {
+            return ResponseEntity.ok(DefaultResponseBody.builder()
+                    .success(false)
+                    .message("Error al actualizar en OrquestasDeGalicia: " + e.getMessage())
+                    .messageType("error")
+                    .build());
+        }
+    }
+
+    @PostMapping("/eliminar-odg/{idOcupacion}")
+    public ResponseEntity<DefaultResponseBody> eliminarDeOrquestasDeGalicia(@PathVariable long idOcupacion) {
+        try {
+            return ResponseEntity.ok(this.ocupacionService.eliminarOcupacionOrquestasDeGalicia(idOcupacion));
+        } catch (Exception e) {
+            return ResponseEntity.ok(DefaultResponseBody.builder()
+                    .success(false)
+                    .message("Error al eliminar de OrquestasDeGalicia: " + e.getMessage())
+                    .messageType("error")
+                    .build());
+        }
+    }
+    
     private void getModelAttributeComunOcupacionList(CustomAuthenticatedUser user, Model model) {
 
         OcupacionListFilterDto filter = model.containsAttribute("ocupacionListFilterDto") ? (OcupacionListFilterDto) model.getAttribute("ocupacionListFilterDto") : OcupacionListFilterDto.builder().fechaDesde(LocalDate.now()).build() ;

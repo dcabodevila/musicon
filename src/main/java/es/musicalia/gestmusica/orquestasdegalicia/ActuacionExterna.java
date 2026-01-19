@@ -15,4 +15,5 @@ public class ActuacionExterna {
     private Boolean tarde;
     private Boolean noche;
     private String informacion;
+    private boolean oculta = false;
 }
