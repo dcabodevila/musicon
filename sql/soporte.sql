@@ -19,3 +19,12 @@ and a.activo and t.activo
 group by a.id, a.nombre, t.fecha
 having count(t.id) >1;
 
+-- Fechas con más de 1 ocupación
+select ag.nombre, a.id, a.nombre, o.fecha,  count(o.id) from gestmusica.ocupacion o
+inner join gestmusica.artista a on o.artista_id =a.id
+inner join gestmusica.agencia ag on a.agencia_id =ag.id
+where o.fecha>current_date
+and o.activo and a.activo
+group by ag.nombre, a.id, a.nombre, o.fecha
+having count(o.id)>1;
+;
