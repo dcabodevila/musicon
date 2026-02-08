@@ -266,7 +266,7 @@ FROM gestmusica.artista art
 inner join gestmusica.agencia ag on art.agencia_id =ag.id
 CROSS JOIN cal
 LEFT JOIN gestmusica.tarifa t  ON t.artista_id = art.id and t.activo AND t.fecha::date  = cal.fecha
-LEFT JOIN gestmusica.ocupacion o  ON ($P{conOcupacion}) and o.activo AND o.artista_id = art.id AND o.fecha::date  = cal.fecha
+LEFT JOIN gestmusica.ocupacion o  ON ($P{conOcupacion}) and o.activo AND o.artista_id = art.id AND o.fecha::date  = cal.fecha and o.estado_id != 4
 LEFT JOIN gestmusica.provincia p ON p.id = o.provincia_id
 LEFT JOIN gestmusica.incremento_provincial ip ON ip.artista_id = art.id  and ip.provincia_id =$P{idProvincia}::bigint
 where art.id = $P{idArtista}
