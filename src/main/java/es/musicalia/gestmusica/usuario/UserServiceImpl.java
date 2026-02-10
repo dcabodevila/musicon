@@ -178,7 +178,6 @@ public class UserServiceImpl implements UserService {
 		final Usuario usuario = this.userRepository.findUsuarioByMail(email)
 				.orElseThrow(() -> new UsuarioNoEncontradoException("No se encontró usuario con email: " + email));
 		usuario.setPassword(passwordEncoder.encode(newPassword));
-		usuario.setActivo(true);
 		return this.userRepository.save(usuario);
 	}
 
