@@ -182,8 +182,8 @@ public class AuthController {
 
         try {
             // Verificar que el email existe
-            if (!userService.existsUsuarioByEmail(form.getEmail())) {
-                bindingResult.rejectValue("email", "error.email.not-found", "No existe un usuario con este email");
+            if (!userService.existsUsuarioActivoByEmail(form.getEmail())) {
+                bindingResult.rejectValue("email", "error.email.not-found", "No existe un usuario activo con este email");
                 return "remember-password";
             }
 
