@@ -1,6 +1,5 @@
 package es.musicalia.gestmusica.orquestasdegalicia;
 
-import es.musicalia.gestmusica.ocupacion.OcupacionEstadoEnum;
 import es.musicalia.gestmusica.ocupacion.OrquestasDeGaliciaException;
 import es.musicalia.gestmusica.util.DefaultResponseBody;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +13,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -99,10 +99,10 @@ public class OrquestasDeGaliciaServiceImpl implements OrquestasDeGaliciaService 
 
     @Transactional
     @Override
-    public ActuacionExterna obtenerActuacion(Integer idActuacionExterno) {
+    public Optional<ActuacionExterna> obtenerActuacion(Integer idActuacionExterno) throws OrquestasDeGaliciaException {
         if (!apiEnabled) {
             log.warn("La API de Orquestas de Galicia está deshabilitada. No se realizó la llamada para obtener la actuación con ID: {}", idActuacionExterno);
-            return null;
+            return Optional.empty();
         }
 
         // Construir la URL del endpoint
@@ -122,27 +122,29 @@ public class OrquestasDeGaliciaServiceImpl implements OrquestasDeGaliciaService 
             );
 
             if (response.getStatusCode() != HttpStatus.OK) {
-                return null;
+                throw new OrquestasDeGaliciaException("Error en la llamada a Orquestas de Galicia: " + response.getStatusCode());
             }
 
             // Registrar y devolver la respuesta
             ActuacionExterna actuacionExterna = response.getBody();
             log.info("Actuación obtenida correctamente: {}", actuacionExterna);
-            return actuacionExterna;
+            return Optional.ofNullable(actuacionExterna);
         } catch (RestClientResponseException e) {
             if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-                return null;
+                log.error("Actuación no encontrada con idActuacionExterno: {}", idActuacionExterno);
+                return Optional.empty();
             }
             log.error("Error al obtener actuación {}: [{}]", idActuacionExterno, e.getStatusCode());
-            if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) { cachedToken = null; }
-        } catch (RuntimeException e) {
-            // Propagamos la RuntimeException lanzada por getToken() o por errores de auth
+            if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
+                cachedToken = null;
+                log.error("Consulta no autorizada para idActuacionExterno: {}", idActuacionExterno);
+                return Optional.empty();
+            }
             throw e;
         } catch (Exception e) {
             log.error("Error inesperado al obtener actuación con ID {}: {}", idActuacionExterno, e.getMessage(), e);
+            throw e;
         }
-
-        return null;
     }
 
     @Transactional
@@ -182,7 +184,7 @@ public class OrquestasDeGaliciaServiceImpl implements OrquestasDeGaliciaService 
                 return DefaultResponseBody.builder().success(false).messageType("error").message("La actuación ya ha sido creada previamente en OrquestasDeGalicia").build();
             }
 
-            return DefaultResponseBody.builder().success(false).messageType("error").message("Excepción al crear la actuación en OrquestasDeGalicia").build();
+            return DefaultResponseBody.builder().success(false).messageType("error").message("No se ha podido crear la actuación en OrquestasDeGalicia. Comprueba si ya existía anteriormente.").build();
 
         }
     }

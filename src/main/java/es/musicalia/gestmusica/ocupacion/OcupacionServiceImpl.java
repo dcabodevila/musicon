@@ -102,6 +102,14 @@ public class OcupacionServiceImpl implements OcupacionService {
         ocupacion.setOcupacionEstado(this.ocupacionEstadoRepository.findById(OcupacionEstadoEnum.ANULADO.getId()).orElseThrow());
 		this.ocupacionRepository.save(ocupacion);
 
+        if (ocupacion.isPublicadoOdg()){
+            try {
+                this.orquestasDeGaliciaService.eliminarActuacion(ocupacion.getId().intValue());
+            } catch (Exception e) {
+                log.error("error inesperado eliminando actuacion de orquestas de galicia", e);
+            }
+        }
+
 		try {
 			enviarMensajeInternoOcupacionAnulada(ocupacion.getUsuario(), ocupacion);
 
@@ -627,7 +635,8 @@ public class OcupacionServiceImpl implements OcupacionService {
     }
     @Transactional
     @Override
-    public DefaultResponseBody actualizarOcupacionOrquestasDeGalicia(Long idOcupacion) {
+    public DefaultResponseBody actualizarOcupacionOrquestasDeGalicia(Long idOcupacion) throws OrquestasDeGaliciaException {
+
         final Ocupacion ocupacion = this.ocupacionRepository.findById(idOcupacion).orElseThrow();
 
         if (!TipoOcupacionEnum.OCUPADO.getDescripcion().equalsIgnoreCase(ocupacion.getTipoOcupacion().getNombre())) {
@@ -648,15 +657,34 @@ public class OcupacionServiceImpl implements OcupacionService {
 
         // Actualizar en ODG
         final ActuacionExterna actuacionExterna = getActuacionExterna(ocupacion);
-        final DefaultResponseBody response = this.orquestasDeGaliciaService.modificarActuacion(actuacionExterna.getIdActuacionExterno(), actuacionExterna);
+        try {
+            Optional<ActuacionExterna> actuacionExternaAModificar = this.orquestasDeGaliciaService.obtenerActuacion(actuacionExterna.getIdActuacionExterno());
+            if (actuacionExternaAModificar.isEmpty()){
 
-        if (response.isSuccess()) {
+                ocupacion.setPublicadoOdg(false);
+                ocupacionRepository.save(ocupacion);
 
-            ocupacion.setFechaPublicacionOdg(LocalDateTime.now());
-            ocupacionRepository.save(ocupacion);
+                return DefaultResponseBody.builder().success(false).messageType("error").message("No se ha encontrado la actuación a modificar en Orquestas de Galicia").build();
+            }
+            final DefaultResponseBody response = this.orquestasDeGaliciaService.modificarActuacion(actuacionExterna.getIdActuacionExterno(), actuacionExterna);
+
+            if (response.isSuccess()) {
+
+                ocupacion.setFechaPublicacionOdg(LocalDateTime.now());
+                ocupacionRepository.save(ocupacion);
+            }
+
+            return response;
+
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
         }
 
-        return response;
+        return DefaultResponseBody.builder().success(false).messageType("error").message("Error al actualizar la actuación en OrquestasDeGalicia").build();
+
+
+
+
     }
 
     @Transactional

@@ -4,9 +4,11 @@ import es.musicalia.gestmusica.ocupacion.OrquestasDeGaliciaException;
 import es.musicalia.gestmusica.util.DefaultResponseBody;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 public interface OrquestasDeGaliciaService {
     @Transactional(readOnly = true)
-    ActuacionExterna obtenerActuacion(Integer idActuacionExterno);
+    Optional<ActuacionExterna> obtenerActuacion(Integer idActuacionExterno) throws OrquestasDeGaliciaException;
 
     @Transactional
     DefaultResponseBody crearActuacion(ActuacionExterna actuacion);

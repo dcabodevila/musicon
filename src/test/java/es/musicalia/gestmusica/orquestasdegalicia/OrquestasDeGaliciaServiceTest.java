@@ -16,6 +16,7 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
@@ -80,11 +81,11 @@ class OrquestasDeGaliciaServiceTest {
                 .andRespond(withSuccess(objectMapper.writeValueAsString(mockActuacion), MediaType.APPLICATION_JSON));
 
         // WHEN
-        ActuacionExterna result = service.obtenerActuacion(123);
+        Optional<ActuacionExterna> result = service.obtenerActuacion(123);
 
         // THEN
         assertNotNull(result);
-        assertEquals("Santiago", result.getLugar());
+        assertEquals("Santiago", result.get().getLugar());
         mockServer.verify();
     }
 
@@ -128,7 +129,7 @@ class OrquestasDeGaliciaServiceTest {
                 .andRespond(withStatus(HttpStatus.NOT_FOUND));
 
         // WHEN
-        ActuacionExterna result = service.obtenerActuacion(999);
+        Optional<ActuacionExterna> result = service.obtenerActuacion(999);
 
         // THEN
         assertNull(result);

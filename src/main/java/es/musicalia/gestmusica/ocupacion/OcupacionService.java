@@ -38,7 +38,7 @@ public interface OcupacionService {
     DefaultResponseBody publicarOcupacionOrquestasDeGalicia(Long idOcupacion);
 
     @Transactional
-    DefaultResponseBody actualizarOcupacionOrquestasDeGalicia(Long idOcupacion);
+    DefaultResponseBody actualizarOcupacionOrquestasDeGalicia(Long idOcupacion) throws OrquestasDeGaliciaException;
 
     @Transactional
     DefaultResponseBody eliminarOcupacionOrquestasDeGalicia(Long idOcupacion);

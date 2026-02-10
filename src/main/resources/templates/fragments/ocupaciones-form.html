@@ -144,15 +144,15 @@
 
             <div th:if="${isArtistaPermiteOrquestasDeGalicia}" class="card mb-3">
               <div class="card-header fw-bold">
-                Publicación OrquestasDeGalicia.com
-                <i class="fas fa-crown text-warning ms-2" title="Funcionalidad Premium"> Premium</i>
+                Publicación OrquestasDeGalicia.es
+<!--                <i class="fas fa-crown text-warning ms-2" title="Funcionalidad Premium"> Premium</i>-->
               </div>
               <div class="card-body">
                 <div class="mb-3 row">
-                  <label for="orquestasdegalicia-ocupacion" class="col-form-label col-sm-3 text-sm-end">Información OrquestasDeGalicia</label>
+                  <label for="orquestasdegalicia-ocupacion" class="col-form-label col-sm-3 text-sm-end">Descripción para Orquestas De Galicia.es</label>
                   <div class="col-sm-9">
                     <div class="d-flex gap-2">
-                      <textarea class="form-control" th:field="*{textoOrquestasDeGalicia}" placeholder="Información para OrquestasDeGalicia.es sobre la actuación" id="orquestasdegalicia-ocupacion"
+                      <textarea class="form-control" th:field="*{textoOrquestasDeGalicia}" placeholder="Información a publicar en OrquestasDeGalicia.es sobre la actuación" id="orquestasdegalicia-ocupacion"
                                 autocomplete="off" maxlength="400"></textarea>
                       <div class="d-flex flex-column gap-2">
                         <button type="button" class="btn btn-success" id="btn-publicar-orquestas" title="Publicar en OrquestasDeGalicia.es">

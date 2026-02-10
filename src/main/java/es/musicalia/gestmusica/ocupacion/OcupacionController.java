@@ -194,6 +194,13 @@ public class OcupacionController {
     public ResponseEntity<DefaultResponseBody> actualizarEnOrquestasDeGalicia(@PathVariable long idOcupacion) {
         try {
             return ResponseEntity.ok(this.ocupacionService.actualizarOcupacionOrquestasDeGalicia(idOcupacion));
+        } catch (OrquestasDeGaliciaException e) {
+            return ResponseEntity.ok(DefaultResponseBody.builder()
+                    .success(false)
+                    .message("Error al actualizar en OrquestasDeGalicia: " + e.getMessage())
+                    .messageType("error")
+                    .build());
+
         } catch (Exception e) {
             return ResponseEntity.ok(DefaultResponseBody.builder()
                     .success(false)
