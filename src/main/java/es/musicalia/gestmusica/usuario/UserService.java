@@ -29,9 +29,9 @@ public interface UserService {
 	@Transactional(readOnly = false)
 	Usuario changePasswordByEmail(String email, String newPassword) throws UsuarioNoEncontradoException;
 
-	boolean existsUsuarioByEmail(String email);
+    boolean existsUsuarioActivoByEmail(String email);
 
-	List<UsuarioAdminListRecord> findAllUsuarioAdminListRecords();
+    List<UsuarioAdminListRecord> findAllUsuarioAdminListRecords();
 
 	@Transactional(readOnly = false)
     Usuario validarUsuario(Long id);
