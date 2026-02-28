@@ -5,6 +5,16 @@
 <head>
     <title>Novedades - festia.es</title>
     <div th:replace="~{fragments/main-template :: header-css}"/>
+    <style>
+        .release-notes-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 6px;
+            margin: 12px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+            cursor: zoom-in;
+        }
+    </style>
 </head>
 <body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
 <div class="wrapper">
@@ -31,9 +41,6 @@
                                     </option>
                                 </select>
                             </div>
-                            <a th:href="@{/}" class="btn btn-sm btn-secondary">
-                                <i class="fas fa-arrow-left me-1"></i> Volver
-                            </a>
                         </div>
                         <div class="card">
                             <div class="card-body release-notes-content"
