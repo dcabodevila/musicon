@@ -19,6 +19,7 @@ public class InformeServiceImpl implements InformeService {
 
 	private final DataSource dataSource;
 	private JasperReport compiledReportTarifaAnual;
+	private JasperReport compiledReportTarifaAnual8Meses;
 	private JasperReport compiledReportListadoSinOcupacion;
 	private JasperReport compiledReportListadoSinOcupacionVertical;
 	private JasperReport compiledReportListadoConOcupacion;
@@ -36,6 +37,13 @@ public class InformeServiceImpl implements InformeService {
 			}
 			// Se compila una sola vez
 			compiledReportTarifaAnual = JasperCompileManager.compileReport(reportStream);
+		}
+		try (InputStream reportStream = getClass().getResourceAsStream("/".concat(TipoReportEnum.TARIFA_CON_OCUPACION_HORIZONTAL_8MESES.getNombreFicheroReport()))) {
+			if (reportStream == null) {
+				throw new FileNotFoundException("No se encontró el reporte en el classpath");
+			}
+			// Se compila una sola vez
+			compiledReportTarifaAnual8Meses = JasperCompileManager.compileReport(reportStream);
 		}
 		try (InputStream reportStream = getClass().getResourceAsStream("/".concat(TipoReportEnum.LISTADO_SIN_OCUPACION_HORIZONTAL.getNombreFicheroReport()) )) {
 			if (reportStream == null) {
@@ -73,6 +81,8 @@ public class InformeServiceImpl implements InformeService {
 		switch (fileReport) {
 			case  "tarifa_anual_horizontal_ocupacion.jrxml":
 				return compiledReportTarifaAnual;
+			case "tarifa_anual_horizontal_ocupacion_8meses.jrxml":
+				return compiledReportTarifaAnual8Meses;
 			case "listado_sin_ocupacion2.jrxml":
 				return compiledReportListadoSinOcupacion;
 			case "listado_con_ocupacion.jrxml":

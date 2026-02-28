@@ -38,7 +38,15 @@
                 </select>
               </div>
             </div>
-
+            <div class="mb-3 row">
+              <label class="col-form-label col-sm-3 text-sm-end">Tipo tarifa</label>
+              <div class="col-sm-9">
+                <select id="tipo-tarifa" th:field="*{tipoTarifa}" class="form-control choices-single" required>
+                  <option value="ANUAL">Anual</option>
+                  <option value="OCHO_MESES">8 meses</option>
+                </select>
+              </div>
+            </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>

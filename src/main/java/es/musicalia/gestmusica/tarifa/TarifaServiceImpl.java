@@ -4,6 +4,8 @@ import es.musicalia.gestmusica.artista.Artista;
 import es.musicalia.gestmusica.artista.ArtistaRepository;
 import es.musicalia.gestmusica.incremento.IncrementoRepository;
 import es.musicalia.gestmusica.informe.InformeService;
+import es.musicalia.gestmusica.listado.TipoReportEnum;
+import es.musicalia.gestmusica.listado.TipoTarifaEnum;
 import es.musicalia.gestmusica.localizacion.ProvinciaRepository;
 import es.musicalia.gestmusica.usuario.UserService;
 import es.musicalia.gestmusica.util.DateUtils;
@@ -91,7 +93,9 @@ public class TarifaServiceImpl implements TarifaService {
         parametros.put("datosAgencia", obtenerDatosAgencia(artista, provincia));
 
 		String fileNameToExport = artista.getNombre().concat(DateUtils.getDateStr(new Date(), "ddMMyyyyHHmmss")).concat(".pdf");
-		String fileReport = "tarifa_anual_horizontal_ocupacion.jrxml";
+		String fileReport = TipoTarifaEnum.ANUAL.equals(tarifaAnualDto.getTipoTarifa())
+				? TipoReportEnum.TARIFA_CON_OCUPACION_HORIZONTAL.getNombreFicheroReport()
+				: TipoReportEnum.TARIFA_CON_OCUPACION_HORIZONTAL_8MESES.getNombreFicheroReport();
 
 		return this.informeService.imprimirInforme(parametros, fileNameToExport, fileReport);
 	}
