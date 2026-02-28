@@ -93,6 +93,34 @@ public class TarifaController {
 
     }
 
+    /**
+     * Exporta datos de tarifa anual a Excel
+     */
+    @PostMapping("/tarifa-anual-excel")
+    public ResponseEntity<byte[]> exportarTarifaAnualExcel(@ModelAttribute("tarifaAnualDto") @Valid TarifaAnualDto tarifaAnualDto) {
+
+        // Generar archivo Excel
+        var excelStream = this.tarifaService.exportTarifaAnualToExcel(tarifaAnualDto);
+
+        // Configurar headers de respuesta
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+
+        // Obtener datos del artista para el nombre del archivo
+        final ArtistaDto artistaDto = this.artistaService.findArtistaDtoById(tarifaAnualDto.getIdArtista());
+
+        // Generar nombre del archivo
+        String fileNameToExport = artistaDto.getNombre()
+                .concat("_")
+                .concat(tarifaAnualDto.getAno().toString())
+                .concat(DateUtils.getDateStr(new Date(), "-ddMMyyyyHHmmss"))
+                .concat(".xlsx");
+
+        headers.setContentDispositionFormData("attachment", fileNameToExport);
+
+        return new ResponseEntity<>(excelStream.toByteArray(), headers, HttpStatus.OK);
+    }
+
 
 
 

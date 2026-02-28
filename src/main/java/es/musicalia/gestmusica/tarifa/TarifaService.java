@@ -1,6 +1,7 @@
 package es.musicalia.gestmusica.tarifa;
 
 
+import java.io.ByteArrayOutputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,4 +17,5 @@ public interface TarifaService {
 
     List<TarifaArtistaCcaaDto> findTarifasByFechaAndNumComponentesArtista(Long idArtista, LocalDate fecha);
 
+    ByteArrayOutputStream exportTarifaAnualToExcel(TarifaAnualDto tarifaAnualDto);
 }

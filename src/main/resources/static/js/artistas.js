@@ -484,6 +484,106 @@ $(document).ready(function(){
         });
     }
 
+    // Manejador para descargar Excel
+    $('#btn-descargar-excel').on('click', function() {
+        generarTarifaAnualExcel();
+    });
+
+    function generarTarifaAnualExcel() {
+        // Deshabilitar el botón
+        const $btn = $('#btn-descargar-excel');
+        const textoOriginal = $btn.html();
+        $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Generando...');
+
+        const formData = $('#modalTarifaAnual form').serialize();
+        const actionUrl = '/tarifa/tarifa-anual-excel';
+
+        $.ajax({
+            type: 'POST',
+            url: actionUrl,
+            data: formData,
+            xhrFields: {
+                responseType: 'blob'
+            },
+            success: function(data, status, xhr) {
+                // Rehabilitar el botón
+                $btn.prop('disabled', false).html(textoOriginal);
+
+                const contentType = xhr.getResponseHeader('Content-Type');
+                if (!contentType || !contentType.includes('application/octet-stream')) {
+                    notif('error', 'Error: La respuesta del servidor no es válida');
+                    return;
+                }
+
+                // Obtener el nombre del archivo
+                const contentDisposition = xhr.getResponseHeader('Content-Disposition');
+                let filename = 'tarifa_anual_' + new Date().getTime() + '.xlsx';
+                if (contentDisposition) {
+                    const matches = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+                    if (matches != null && matches[1]) {
+                        filename = matches[1].replace(/['"]/g, '');
+                    }
+                }
+
+                // Crear Blob y descargar automáticamente
+                const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+
+                // Notificación de éxito
+                notif('success', 'Excel descargado correctamente: ' + filename);
+
+                // Ocultar el modal
+                $('#modalTarifaAnual').modal('hide');
+            },
+            error: function(xhr, status, error) {
+                $btn.prop('disabled', false).html(textoOriginal);
+
+                let errorMessage = 'Error al generar el archivo Excel';
+                if (xhr.responseText) {
+                    try {
+                        const reader = new FileReader();
+                        reader.onload = function() {
+                            try {
+                                const errorData = JSON.parse(reader.result);
+                                if (errorData.message) {
+                                    notif('error', errorData.message);
+                                    return;
+                                }
+                            } catch (e) {}
+                            notif('error', errorMessage);
+                        };
+                        reader.readAsText(new Blob([xhr.response]));
+                        return;
+                    } catch (e) {}
+                }
+
+                switch (xhr.status) {
+                    case 400:
+                        errorMessage = 'Formulario inválido. Verifica los datos.';
+                        break;
+                    case 403:
+                        errorMessage = 'No tienes permisos para esta operación.';
+                        break;
+                    case 500:
+                        errorMessage = 'Error interno del servidor.';
+                        break;
+                    default:
+                        errorMessage = 'Error desconocido.';
+                        break;
+                }
+
+                notif('error', errorMessage);
+            }
+        });
+    }
+
 
 });
 
