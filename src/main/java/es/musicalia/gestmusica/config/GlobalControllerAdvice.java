@@ -2,6 +2,7 @@ package es.musicalia.gestmusica.config;
 
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.mensaje.MensajeService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -14,6 +15,8 @@ import java.util.Set;
 public class GlobalControllerAdvice {
 
     private final MensajeService mensajeService;
+    @Value("${spring.application.version}")
+    private String currentVersion;
 
     public GlobalControllerAdvice(MensajeService mensajeService) {
         this.mensajeService = mensajeService;
@@ -33,6 +36,7 @@ public class GlobalControllerAdvice {
 
                 model.addAttribute("hasPermisoOcupaciones", hasPermisoOcupaciones);
                 model.addAttribute("mensajesNoLeidos", this.mensajeService.obtenerMensajesRecibidos(user.getUserId()));
+                model.addAttribute("currentVersion", currentVersion);
 
 
             }

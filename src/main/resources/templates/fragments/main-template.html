@@ -248,17 +248,26 @@
 	<footer class="footer">
 		<div class="container-fluid">
 			<div class="row text-muted">
-				<div class="col-4 text-start">
-					<p class="mb-0">
-						<span class="text-muted"><strong>festia.es</strong></span> &copy;
-					</p>
-				</div>
+
                 <div class="col-4 text-center">
                     <p class="mb-0">
                         <a href="https://festia.es/info" target="_blank" class="text-muted"><i
                                 class="fas fa-info-circle me-1"></i><strong>Información sobre festia</strong></a>
                     </p>
                 </div>
+
+				<div class="col-4">
+					<ul class="list-inline">
+						<li class="list-inline-item">
+							<i class="fas fa-rocket me-2"></i>
+							<a href="/release-notes"
+							   class="text-muted">
+								<span class="align-middle">Novedades de la versión </span>
+								<span class="badge bg-primary" th:text="${currentVersion}">x.x.x</span>
+							</a>
+						</li>
+					</ul>
+				</div>
 				<div class="col-4 text-end">
 					<ul class="list-inline">
 						<li class="list-inline-item">

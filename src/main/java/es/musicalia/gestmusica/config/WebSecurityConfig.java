@@ -56,6 +56,7 @@ public class WebSecurityConfig {
                 .requestMatchers("/auth/**").permitAll()
                     .requestMatchers("/info**","/info").permitAll()
 					.requestMatchers("/manifest.json").permitAll()
+					.requestMatchers("/release-notes/**").permitAll()
 
 					.requestMatchers("/fragments/**", "/static/**", "/adminkit/**", "/img/**", "/logo/**", "/favicon.ico", "/js/**", "/css/**").permitAll()
 					.requestMatchers("/android-icon-*.png", "/apple-icon-*.png", "/ms-icon-*.png").permitAll()
