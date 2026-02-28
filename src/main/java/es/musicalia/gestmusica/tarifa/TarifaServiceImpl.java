@@ -31,16 +31,15 @@ public class TarifaServiceImpl implements TarifaService {
 	private final UserService userService;
 	private final InformeService informeService;
     private final ProvinciaRepository provinciaRepository;
-	private final IncrementoRepository incrementoRepository;
 	private final ExcelExportService excelExportService;
 
-	public TarifaServiceImpl(TarifaRepository tarifaRepository, ArtistaRepository artistaRepository, UserService userService, InformeService informeService, ProvinciaRepository provinciaRepository, IncrementoRepository incrementoRepository, ExcelExportService excelExportService){
+	public TarifaServiceImpl(TarifaRepository tarifaRepository, ArtistaRepository artistaRepository, UserService userService, InformeService informeService, ProvinciaRepository provinciaRepository, ExcelExportService excelExportService){
 		this.tarifaRepository = tarifaRepository;
 		this.artistaRepository = artistaRepository;
 		this.userService = userService;
         this.informeService = informeService;
         this.provinciaRepository = provinciaRepository;
-		this.incrementoRepository = incrementoRepository;
+
 		this.excelExportService = excelExportService;
     }
 	@Override

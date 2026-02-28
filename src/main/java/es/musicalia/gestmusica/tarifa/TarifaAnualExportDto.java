@@ -19,86 +19,86 @@ public class TarifaAnualExportDto {
     private String agencia;
 
     // Enero
-    @ExcelColumn(value = "Enero", order = 1)
+    @ExcelColumn(value = "", order = 1)
     private String enero;
 
-    @ExcelColumn(value = "Ene", order = 2)
+    @ExcelColumn(value = "Enero", order = 2)
     private String eneroValor;
 
     // Febrero
-    @ExcelColumn(value = "Febrero", order = 3)
+    @ExcelColumn(value = "", order = 3)
     private String febrero;
 
-    @ExcelColumn(value = "Feb", order = 4)
+    @ExcelColumn(value = "Febrero", order = 4)
     private String febreroValor;
 
     // Marzo
-    @ExcelColumn(value = "Marzo", order = 5)
+    @ExcelColumn(value = "", order = 5)
     private String marzo;
 
-    @ExcelColumn(value = "Mar", order = 6)
+    @ExcelColumn(value = "Marzo", order = 6)
     private String marzoValor;
 
     // Abril
-    @ExcelColumn(value = "Abril", order = 7)
+    @ExcelColumn(value = "", order = 7)
     private String abril;
 
-    @ExcelColumn(value = "Abr", order = 8)
+    @ExcelColumn(value = "Abril", order = 8)
     private String abrilValor;
 
     // Mayo
-    @ExcelColumn(value = "Mayo", order = 9)
+    @ExcelColumn(value = "", order = 9)
     private String mayo;
 
-    @ExcelColumn(value = "May", order = 10)
+    @ExcelColumn(value = "Mayo", order = 10)
     private String mayoValor;
 
     // Junio
-    @ExcelColumn(value = "Junio", order = 11)
+    @ExcelColumn(value = "", order = 11)
     private String junio;
 
-    @ExcelColumn(value = "Jun", order = 12)
+    @ExcelColumn(value = "Junio", order = 12)
     private String junioValor;
 
     // Julio
-    @ExcelColumn(value = "Julio", order = 13)
+    @ExcelColumn(value = "", order = 13)
     private String julio;
 
-    @ExcelColumn(value = "Jul", order = 14)
+    @ExcelColumn(value = "Julio", order = 14)
     private String julioValor;
 
     // Agosto
-    @ExcelColumn(value = "Agosto", order = 15)
+    @ExcelColumn(value = "", order = 15)
     private String agosto;
 
-    @ExcelColumn(value = "Ago", order = 16)
+    @ExcelColumn(value = "Agosto", order = 16)
     private String agostoValor;
 
     // Septiembre
-    @ExcelColumn(value = "Septiembre", order = 17)
+    @ExcelColumn(value = "", order = 17)
     private String septiembre;
 
-    @ExcelColumn(value = "Sep", order = 18)
+    @ExcelColumn(value = "Septiembre", order = 18)
     private String septiembreValor;
 
     // Octubre
-    @ExcelColumn(value = "Octubre", order = 19)
+    @ExcelColumn(value = "", order = 19)
     private String octubre;
 
-    @ExcelColumn(value = "Oct", order = 20)
+    @ExcelColumn(value = "Octubre", order = 20)
     private String octubreValor;
 
     // Noviembre
-    @ExcelColumn(value = "Noviembre", order = 21)
+    @ExcelColumn(value = "", order = 21)
     private String noviembre;
 
-    @ExcelColumn(value = "Nov", order = 22)
+    @ExcelColumn(value = "Noviembre", order = 22)
     private String noviembreValor;
 
     // Diciembre
-    @ExcelColumn(value = "Diciembre", order = 23)
+    @ExcelColumn(value = "", order = 23)
     private String diciembre;
 
-    @ExcelColumn(value = "Dic", order = 24)
+    @ExcelColumn(value = "Diciembre", order = 24)
     private String diciembreValor;
 }
