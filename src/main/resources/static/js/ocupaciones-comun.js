@@ -258,8 +258,11 @@ function obtenerOcupacionDto(idOcupacion) {
                 }
                 else{
                     $('#btn-publicar-orquestas').show();
-                    $('#btn-actualizar-orquestas').hide();
-                    $('#btn-eliminar-orquestas').hide();
+
+                    if (ocupacionDto.id != null){
+                        $('#btn-actualizar-orquestas').hide();
+                        $('#btn-eliminar-orquestas').hide();
+                    }
                 }
 
             },
