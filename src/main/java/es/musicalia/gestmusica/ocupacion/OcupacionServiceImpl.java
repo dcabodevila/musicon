@@ -373,11 +373,20 @@ public class OcupacionServiceImpl implements OcupacionService {
         final StringBuilder sb = new StringBuilder();
 
         if (poblacion!=null && !poblacion.isEmpty() && !poblacion.equalsIgnoreCase("PROVISIONAL")){
-            sb.append(poblacion);
 
-            if (municipio!=null && !municipio.isEmpty()){
-                sb.append(", ").append(municipio);
-            }
+			if (poblacion.equalsIgnoreCase(municipio.toUpperCase())){
+				sb.append(municipio);
+			}
+			else {
+				String poblacionCaps = capitalizarNombreMunicipio(poblacion);
+
+				sb.append(poblacionCaps);
+
+				if (municipio!=null && !municipio.isEmpty()){
+					sb.append(", ").append(municipio);
+				}
+
+			}
 
         }
         else {
@@ -389,6 +398,38 @@ public class OcupacionServiceImpl implements OcupacionService {
 
 
     }
+
+	private static String capitalizarNombreMunicipio(String nombre) {
+		if (nombre == null || nombre.isEmpty()) {
+			return nombre;
+		}
+
+		// Palabras que deben ir en minúscula (preposiciones y artículos en gallego/castellano)
+		Set<String> minusculas = Set.of(
+				"de", "do", "da", "dos", "das",
+				"del", "los", "las", "el", "la",
+				"e", "y", "o", "a"
+		);
+
+		String[] palabras = nombre.trim().toLowerCase().split("\\s+");
+		StringBuilder sb = new StringBuilder();
+
+		for (int i = 0; i < palabras.length; i++) {
+			String palabra = palabras[i];
+			// La primera palabra siempre va en mayúscula
+			if (i == 0 || !minusculas.contains(palabra)) {
+				sb.append(Character.toUpperCase(palabra.charAt(0)))
+						.append(palabra.substring(1));
+			} else {
+				sb.append(palabra);
+			}
+			if (i < palabras.length - 1) {
+				sb.append(" ");
+			}
+		}
+
+		return sb.toString();
+	}
 
 	@Override
 	public boolean existeOcupacionFecha(OcupacionSaveDto ocupacionSaveDto){
