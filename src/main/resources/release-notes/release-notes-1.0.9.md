@@ -24,14 +24,14 @@ Si eres agencia, ahora puedes exportar a PDF el listado de ocupaciones filtradas
 El archivo Excel exportado contiene las siguientes columnas para cada ocupación filtrada:
 
 - **Artista**: Nombre del artista
-- **Fecha**: Fecha de la actuación (formato dd-mm-yyyy)
+- **Fecha**: Fecha de la actuación (formato dd-mm-aaaa)
 - **Localidad**: Localidad de la actuación
 - **Municipio**: Municipio de la actuación
 - **Provincia**: Provincia de la actuación
-- **Matinal**: Indica si es matinal (Sí/No)
-- **Solo Matinal**: Indica si es solo matinal (Sí/No)
-- **Nombre Comercial Representante**: Nombre comercial del representante que creó la ocupación
-- **Teléfono Representante**: Teléfono del representante que creó la ocupación
+- **Matinal**: Indica si tiene matinal (Sí/No)
+- **Solo Matinal**: Indica si es solo una actuación matinal (Sí/No)
+- **Nombre Comercial Representante**: Nombre comercial del representante asignado a la ocupación
+- **Teléfono Representante**: Teléfono del representante asignado a la ocupación
 
 **Nota**: Las ocupaciones se exportan ordenadas por fecha de actuación de forma ascendente.
 
