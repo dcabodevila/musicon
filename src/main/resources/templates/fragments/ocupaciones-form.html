@@ -32,6 +32,13 @@
         </div>
       </div>
       <div class="mb-3 row">
+        <label for="hora-actuacion" class="col-form-label col-sm-3 text-sm-end">Hora de actuación (opcional)</label>
+        <div class="col-sm-9">
+          <input id="hora-actuacion" th:field="*{horaActuacion}" type="time" class="form-control" placeholder="Ej: 22:00">
+          <small class="form-text text-muted">Si no se especifica, se mostrará "Horario por confirmar"</small>
+        </div>
+      </div>
+      <div class="mb-3 row">
         <label for="tipos-ocupacion" class="col-form-label col-sm-3 text-sm-end">Tipo ocupación</label>
         <div class="col-sm-9">
           <select id="tipos-ocupacion" th:field="*{idTipoOcupacion}" class="form-control choices-single" required>

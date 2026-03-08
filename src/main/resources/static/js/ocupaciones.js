@@ -9,7 +9,7 @@ function inicializarForm(){
 
     actualizarBadgeEstado(estado);
 
-    flatpickr("#idFechaOcupacion", {
+    flatpickr("#idFechaDesde", {
         disableMobile: true,
         locale: "es",
         altInput: true,

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Título SEO -->
+    <title th:text="${titulo}">Evento Musical</title>
+
+    <!-- Meta tags para SEO -->
+    <meta name="description" th:content="${descripcion}">
+    <meta name="keywords" th:content="${evento.nombreArtista} + ', ' + ${evento.municipio} + ', ' + ${evento.provincia} + ', orquesta, música, evento, fiesta'">
+
+    <!-- Open Graph para redes sociales -->
+    <meta property="og:title" th:content="${titulo}">
+    <meta property="og:description" th:content="${descripcion}">
+    <meta property="og:type" content="event">
+    <meta property="og:url" th:content="${urlEvento}">
+
+    <!-- Schema.org JSON-LD para Google Events -->
+    <script type="application/ld+json" th:utext="${jsonLd}">
+    </script>
+
+    <!-- CSS del proyecto -->
+    <div th:replace="~{fragments/main-template :: header-css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+</head>
+
+<body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
+
+<div class="wrapper">
+    <div class="main">
+        <main class="content">
+            <div class="container-fluid p-0">
+                <!-- Hero Section -->
+                <div class="row mb-4">
+                    <section class="hero-section animate__animated animate__fadeIn"
+                             style="max-height: 300px !important; height: 300px !important; min-height: 300px !important;">
+                        <img src="https://res.cloudinary.com/hseoceuyz/image/upload/v1760835633/landing-festia_epbr7a.png"
+                             alt="Evento Musical"
+                             class="hero-image" style="max-height: 300px; height: 300px; object-fit: cover; width: 100%;"/>
+                        <div class="hero-content animate__animated animate__zoomIn animate__delay-1s">
+                            <img src="/logo/logo-name-transparente-alt-color.png" alt="festia.es" class="hero-logo" style="max-width: 250px;"/>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Contenido del evento -->
+                <div class="row">
+                    <div class="col-12 col-lg-8 offset-lg-2">
+                        <div class="card card-max-width animate__animated animate__fadeIn" style="max-width: 100%;">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Detalles del evento</h5>
+                            </div>
+                            <div class="card-body">
+                                <!-- Badges de horario -->
+                                <div class="mb-3">
+                                    <span class="badge bg-success me-1" th:if="${evento.matinal}">
+                                        <i class="fas fa-sun"></i> Matinal
+                                    </span>
+                                    <span class="badge bg-warning me-1" th:if="${evento.tarde}">
+                                        <i class="fas fa-cloud-sun"></i> Tarde
+                                    </span>
+                                    <span class="badge bg-primary me-1" th:if="${evento.noche}">
+                                        <i class="fas fa-moon"></i> Noche
+                                    </span>
+                                </div>
+
+                                <!-- Fecha y hora -->
+                                <div class="mb-3">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="stat text-primary me-2">
+                                            <i class="align-middle" data-feather="calendar"></i>
+                                        </div>
+                                        <h3 class="mb-0" th:text="${#temporals.format(evento.fecha, 'dd/MM/yyyy')}">Fecha</h3>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <div class="stat text-primary me-2">
+                                            <i class="align-middle" data-feather="clock"></i>
+                                        </div>
+                                        <h3 class="mb-0">
+                                            <span th:if="${evento.horaActuacion != null}" th:text="${#temporals.format(evento.horaActuacion, 'HH:mm')} + ' horas'">Hora</span>
+                                            <span th:if="${evento.horaActuacion == null}" class="text-muted">Horario por confirmar</span>
+                                        </h3>
+                                    </div>
+                                </div>
+
+                                <hr>
+
+                                <!-- Ubicación -->
+                                <ul class="list-unstyled mb-0">
+                                    <li class="mb-2">
+                                        <span class="fas fa-map-marker-alt fa-fw me-2 text-primary"></span>
+                                        <strong>Lugar:</strong>
+                                        <span th:text="${evento.lugar}">Lugar del evento</span>
+                                    </li>
+                                    <li class="mb-2">
+                                        <span class="fas fa-city fa-fw me-2 text-primary"></span>
+                                        <strong>Municipio:</strong>
+                                        <span th:text="${evento.municipio}">Municipio</span>
+                                    </li>
+                                    <li class="mb-2">
+                                        <span class="fas fa-map fa-fw me-2 text-primary"></span>
+                                        <strong>Provincia:</strong>
+                                        <span th:text="${evento.provincia}">Provincia</span>
+                                    </li>
+                                </ul>
+
+                                <!-- Información adicional -->
+                                <div th:if="${evento.informacionAdicional != null and !#strings.isEmpty(evento.informacionAdicional)}">
+                                    <hr>
+                                    <div class="alert alert-info" role="alert">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        <span th:text="${evento.informacionAdicional}">Información adicional</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer d-flex justify-content-between">
+                                <a th:href="@{/eventos}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left me-1"></i> Todos los eventos
+                                </a>
+                                <a th:href="@{/eventos/artista/{id}(id=${evento.idArtista})}" class="btn btn-primary">
+                                    Más de <span th:text="${evento.nombreArtista}">este artista</span>
+                                    <i class="fas fa-arrow-right ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Footer informativo -->
+                        <div class="text-center mt-4 mb-4">
+                            <small class="text-muted">
+                                <i class="fas fa-check-circle text-success"></i>
+                                Información verificada proporcionada por <strong>festia.es</strong>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <div th:replace="~{fragments/main-template :: footer}"/>
+    </div>
+</div>
+
+<script th:src="@{/adminkit/js/app.js}"></script>
+</body>
+
+</html>

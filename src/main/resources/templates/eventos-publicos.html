@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Título -->
+    <title th:text="${titulo}">Próximas actuaciones</title>
+
+    <!-- Meta tags SEO -->
+    <meta name="description" th:content="'Consulta las próximas actuaciones y eventos musicales de ' + ${nombreArtista != null ? nombreArtista : 'las mejores orquestas'}">
+
+    <!-- CSS del proyecto -->
+    <div th:replace="~{fragments/main-template :: header-css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link th:href="@{/adminkit/flatpickr/flatpickr.min.css}" rel="stylesheet"/>
+</head>
+
+<body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
+
+<div class="wrapper">
+    <div class="main">
+        <main class="content">
+            <div class="container-fluid p-0">
+                <!-- Hero Section -->
+                <div class="row mb-4">
+                    <section class="hero-section animate__animated animate__fadeIn"
+                             style="max-height: 300px !important; height: 300px !important; min-height: 300px !important;">
+                        <img src="https://res.cloudinary.com/hseoceuyz/image/upload/v1760835633/landing-festia_epbr7a.png"
+                             alt="Eventos Musicales"
+                             class="hero-image" style="max-height: 300px; height: 300px; object-fit: cover; width: 100%;"/>
+                        <div class="hero-content animate__animated animate__zoomIn animate__delay-1s">
+                            <img src="/logo/logo-name-transparente-alt-color.png" alt="festia.es" class="hero-logo" style="max-width: 250px;"/>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Filtros -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-filter me-2"></i>Filtrar eventos
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <form method="get" th:action="@{/eventos}">
+                                    <div class="row">
+                                        <div class="col-md-5">
+                                            <label for="idFechaDesde" class="form-label">Fecha desde</label>
+                                            <input id="idFechaDesde" type="date" class="form-control" name="desde"
+                                                   th:value="${fechaDesde}"
+                                                   th:max="${fechaHasta}">
+                                        </div>
+                                        <div class="col-md-5">
+                                            <label for="idFechaHasta" class="form-label">Fecha hasta (máx. 3 meses)</label>
+                                            <input id="idFechaHasta" type="date" class="form-control" name="hasta"
+                                                   th:value="${fechaHasta}"
+                                                   th:min="${fechaDesde}">
+                                        </div>
+                                        <div class="col-md-2 d-flex align-items-end">
+                                            <button type="submit" class="btn btn-primary w-100">
+                                                <i class="fas fa-search me-1"></i> Buscar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lista de eventos agrupados por día -->
+                <div class="row" th:if="${eventosPorDia != null and !eventosPorDia.isEmpty()}">
+                    <div class="col-12">
+                        <div th:each="diaEntry : ${eventosPorDia}" class="mb-4 animate__animated animate__fadeIn">
+                            <!-- Encabezado del día -->
+                            <div class="mb-3">
+                                <h3 class="text-primary">
+                                    <i class="fas fa-calendar-day me-2"></i>
+                                    <span th:text="${#temporals.format(diaEntry.key, 'EEEE, dd MMMM yyyy', new java.util.Locale('es', 'ES'))}">Fecha</span>
+                                </h3>
+                                <span class="badge bg-secondary" th:text="${#lists.size(diaEntry.value)} + ' evento(s)'">0 eventos</span>
+                            </div>
+
+                            <!-- Cards de eventos del día -->
+                            <div class="row">
+                                <div th:each="evento : ${diaEntry.value}"
+                                     class="col-12 col-md-6 col-lg-4 col-xl-3 mb-3">
+                                    <div class="card h-100 card-max-width" style="max-width: 100%;">
+                                        <div class="card-header">
+                                            <h5 class="card-title mb-1" th:text="${evento.nombreArtista}">Artista</h5>
+                                            <div>
+                                                <span class="badge bg-success me-1" th:if="${evento.matinal}">
+                                                    <i class="fas fa-sun"></i> Matinal
+                                                </span>
+                                                <span class="badge bg-warning me-1" th:if="${evento.tarde}">
+                                                    <i class="fas fa-cloud-sun"></i> Tarde
+                                                </span>
+                                                <span class="badge bg-primary me-1" th:if="${evento.noche}">
+                                                    <i class="fas fa-moon"></i> Noche
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <div class="stat text-primary me-2">
+                                                    <i class="align-middle" data-feather="clock"></i>
+                                                </div>
+                                                <h4 class="mb-0">
+                                                    <span th:if="${evento.horaActuacion != null}" th:text="${#temporals.format(evento.horaActuacion, 'HH:mm')} + ' h'">Hora</span>
+                                                    <span th:if="${evento.horaActuacion == null}" class="text-muted">Por confirmar</span>
+                                                </h4>
+                                            </div>
+
+                                            <ul class="list-unstyled mb-0">
+                                                <li class="mb-1">
+                                                    <span class="fas fa-map-marker-alt fa-fw me-1 text-muted"></span>
+                                                    <span th:text="${evento.lugar}">Lugar</span>
+                                                </li>
+                                                <li class="mb-1">
+                                                    <span class="fas fa-city fa-fw me-1 text-muted"></span>
+                                                    <span th:text="${evento.municipio} + ', ' + ${evento.provincia}">Ubicación</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="card-footer">
+                                            <a th:href="@{/eventos/evento/{id}(id=${evento.id})}"
+                                               class="btn btn-primary btn-pill w-100">
+                                                <i class="fas fa-eye me-1"></i> Ver detalles
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mensaje cuando no hay eventos -->
+                <div class="row" th:if="${eventos == null or eventos.isEmpty()}">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body text-center py-5">
+                                <i class="fas fa-calendar-times fa-4x text-muted mb-3"></i>
+                                <h3>No hay eventos programados</h3>
+                                <p class="text-muted" th:if="${nombreArtista != null}">
+                                    <span th:text="${nombreArtista}">El artista</span> no tiene actuaciones programadas en este momento.
+                                </p>
+                                <p class="text-muted" th:unless="${nombreArtista != null}">
+                                    No hay eventos públicos disponibles en el rango de fechas seleccionado.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer informativo -->
+                <div class="row mt-4 mb-4">
+                    <div class="col-12 text-center">
+                        <small class="text-muted">
+                            <i class="fas fa-check-circle text-success"></i>
+                            Información actualizada proporcionada por <strong>festia.es</strong><br>
+                            Plataforma profesional de gestión de eventos musicales
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <div th:replace="~{fragments/main-template :: footer}"/>
+    </div>
+</div>
+
+<script th:src="@{/adminkit/js/app.js}"></script>
+<script th:src="@{/adminkit/flatpickr/flatpickr.min.js}"></script>
+<script th:src="@{/adminkit/flatpickr/es.js}"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Configurar flatpickr para los inputs de fecha
+        flatpickr("input[type='date']", {
+            locale: "es",
+            dateFormat: "Y-m-d"
+        });
+    });
+</script>
+</body>
+
+</html>

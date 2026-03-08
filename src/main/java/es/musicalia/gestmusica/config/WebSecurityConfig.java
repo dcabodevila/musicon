@@ -57,6 +57,8 @@ public class WebSecurityConfig {
                     .requestMatchers("/info**","/info").permitAll()
 					.requestMatchers("/manifest.json").permitAll()
 					.requestMatchers("/release-notes/**").permitAll()
+					// Permitir acceso público a eventos para indexación de Google
+					.requestMatchers("/eventos/**").permitAll()
 
 					.requestMatchers("/fragments/**", "/static/**", "/adminkit/**", "/img/**", "/logo/**", "/favicon.ico", "/js/**", "/css/**").permitAll()
 					.requestMatchers("/android-icon-*.png", "/apple-icon-*.png", "/ms-icon-*.png").permitAll()

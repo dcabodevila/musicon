@@ -12,6 +12,7 @@ import lombok.Setter;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Entity
 @Table(name = "ocupacion", schema="gestmusica")
@@ -126,6 +127,9 @@ public class Ocupacion {
 
     @Column(name = "fecha_publicacion_odg")
     private LocalDateTime fechaPublicacionOdg;
+
+    @Column(name = "hora_actuacion")
+    private LocalTime horaActuacion;
 
 }
 
