@@ -1,6 +1,3 @@
-
-# Release Notes 1.0.9
-
 <!-- FOR_ROLES: AGENCIA -->
 ## Exportación listado de ocupaciones en PDF
 
