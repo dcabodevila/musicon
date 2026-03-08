@@ -1,6 +1,3 @@
-
-# Release Notes 1.0.9
-
 <!-- FOR_ROLES: AGENCIA -->
 ## Exportación listado de ocupaciones en PDF
 
@@ -33,7 +30,6 @@ El archivo Excel exportado contiene las siguientes columnas para cada ocupación
 - **Municipio**: Municipio de la actuación
 - **Provincia**: Provincia de la actuación
 - **Matinal**: Indica si tiene matinal (Sí/No)
-- **Solo Matinal**: Indica si es solo una actuación matinal (Sí/No)
 - **Nombre Comercial Representante**: Nombre comercial del representante asignado a la ocupación
 - **Teléfono Representante**: Teléfono del representante asignado a la ocupación
 
