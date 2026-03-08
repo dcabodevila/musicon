@@ -4,6 +4,7 @@ import es.musicalia.gestmusica.acceso.AccesoRepository;
 import es.musicalia.gestmusica.artista.Artista;
 import es.musicalia.gestmusica.artista.ArtistaRepository;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
+import es.musicalia.gestmusica.excel.ExcelExportService;
 import es.musicalia.gestmusica.localizacion.CodigoNombreDto;
 import es.musicalia.gestmusica.localizacion.MunicipioRepository;
 import es.musicalia.gestmusica.localizacion.ProvinciaRepository;
@@ -31,6 +32,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -57,8 +59,9 @@ public class OcupacionServiceImpl implements OcupacionService {
 	private final OcupacionMapper ocupacionMapper;
 	private final MensajeService mensajeService;
     private final OrquestasDeGaliciaService orquestasDeGaliciaService;
+	private final ExcelExportService excelExportService;
 
-	public OcupacionServiceImpl(OcupacionRepository ocupacionRepository, ArtistaRepository artistaRepository, ProvinciaRepository provinciaRepository, MunicipioRepository municipioRepository, TipoOcupacionRepository tipoOcupacionRepository, OcupacionEstadoRepository ocupacionEstadoRepository, TarifaRepository tarifaRepository, UserService userService, PermisoService permisoService, AccesoRepository accesoRepository, EmailService emailService, OcupacionMapper ocupacionMapper, MensajeService mensajeService, OrquestasDeGaliciaService orquestasDeGaliciaService){
+	public OcupacionServiceImpl(OcupacionRepository ocupacionRepository, ArtistaRepository artistaRepository, ProvinciaRepository provinciaRepository, MunicipioRepository municipioRepository, TipoOcupacionRepository tipoOcupacionRepository, OcupacionEstadoRepository ocupacionEstadoRepository, TarifaRepository tarifaRepository, UserService userService, PermisoService permisoService, AccesoRepository accesoRepository, EmailService emailService, OcupacionMapper ocupacionMapper, MensajeService mensajeService, OrquestasDeGaliciaService orquestasDeGaliciaService, ExcelExportService excelExportService){
 		this.ocupacionRepository = ocupacionRepository;
 		this.artistaRepository = artistaRepository;
         this.provinciaRepository = provinciaRepository;
@@ -73,6 +76,7 @@ public class OcupacionServiceImpl implements OcupacionService {
         this.ocupacionMapper = ocupacionMapper;
         this.mensajeService = mensajeService;
         this.orquestasDeGaliciaService = orquestasDeGaliciaService;
+		this.excelExportService = excelExportService;
     }
 
 	@Override
@@ -749,5 +753,40 @@ public class OcupacionServiceImpl implements OcupacionService {
 
         return response ;
     }
+
+	@Override
+	public ByteArrayOutputStream exportOcupacionesToExcel(CustomAuthenticatedUser user, OcupacionListFilterDto ocupacionListFilterDto) {
+		// Obtener las ocupaciones filtradas
+		List<OcupacionListRecord> ocupaciones = findOcupacionesByArtistasListAndDatesActivo(user, ocupacionListFilterDto);
+
+		// Convertir a DTOs para Excel y ordenar por fecha ascendente
+		List<OcupacionExcelDto> datosExcel = ocupaciones.stream()
+				.sorted(Comparator.comparing(OcupacionListRecord::start))
+				.map(this::mapToOcupacionExcelDto)
+				.collect(Collectors.toList());
+
+		// Exportar a Excel
+		return excelExportService.exportToExcel(datosExcel, OcupacionExcelDto.class, "Ocupaciones");
+	}
+
+	private OcupacionExcelDto mapToOcupacionExcelDto(OcupacionListRecord ocupacion) {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+		// Buscar el usuario para obtener nombre comercial y teléfono
+		Usuario usuario = userService.findUsuarioById(ocupacion.idUsuario());
+
+		return OcupacionExcelDto.builder()
+				.id(ocupacion.id())
+				.artista(ocupacion.artista() != null ? ocupacion.artista() : "")
+				.fecha(ocupacion.start().format(formatter))
+				.localidad(ocupacion.localidad() != null ? ocupacion.localidad() : "")
+				.municipio(ocupacion.municipio() != null ? ocupacion.municipio() : "")
+				.provincia(ocupacion.provincia() != null ? ocupacion.provincia() : "")
+				.matinal(ocupacion.matinal() ? "Sí" : "No")
+				.soloMatinal(ocupacion.soloMatinal() ? "Sí" : "No")
+				.nombreComercialRepresentante(usuario.getNombreComercial() != null ? usuario.getNombreComercial() : "")
+				.telefonoRepresentante(usuario.getTelefono() != null ? usuario.getTelefono() : "")
+				.build();
+	}
 
 }

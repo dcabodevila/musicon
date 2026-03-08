@@ -10,9 +10,13 @@ import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.generic.CodigoNombreRecord;
 import es.musicalia.gestmusica.localizacion.LocalizacionService;
 import es.musicalia.gestmusica.usuario.UserService;
+import es.musicalia.gestmusica.util.DateUtils;
 import es.musicalia.gestmusica.util.DefaultResponseBody;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -22,10 +26,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -222,7 +223,27 @@ public class OcupacionController {
                     .build());
         }
     }
-    
+
+    @PostMapping("/ocupaciones-excel")
+    public ResponseEntity<byte[]> exportarOcupacionesExcel(@AuthenticationPrincipal CustomAuthenticatedUser user,
+                                                            @ModelAttribute OcupacionListFilterDto ocupacionListFilterDto) {
+        // Generar archivo Excel
+        var excelStream = this.ocupacionService.exportOcupacionesToExcel(user, ocupacionListFilterDto);
+
+        // Configurar headers de respuesta
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+
+        // Generar nombre del archivo
+        String fileNameToExport = "Ocupaciones_"
+                .concat(DateUtils.getDateStr(new Date(), "ddMMyyyyHHmmss"))
+                .concat(".xlsx");
+
+        headers.setContentDispositionFormData("attachment", fileNameToExport);
+
+        return new ResponseEntity<>(excelStream.toByteArray(), headers, HttpStatus.OK);
+    }
+
     private void getModelAttributeComunOcupacionList(CustomAuthenticatedUser user, Model model) {
 
         OcupacionListFilterDto filter = model.containsAttribute("ocupacionListFilterDto") ? (OcupacionListFilterDto) model.getAttribute("ocupacionListFilterDto") : OcupacionListFilterDto.builder().fechaDesde(LocalDate.now()).build() ;

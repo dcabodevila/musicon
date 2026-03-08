@@ -94,4 +94,67 @@ function crearNuevaOcupacion() {
     window.location.href = `/ocupacion/nueva/${selectedArtistId}`;
 }
 
+// Manejador para descargar Excel de ocupaciones
+$('#btn-descargar-excel-ocupaciones').on('click', function() {
+    generarOcupacionesExcel();
+});
+
+function generarOcupacionesExcel() {
+    // Deshabilitar el botón
+    const $btn = $('#btn-descargar-excel-ocupaciones');
+    const textoOriginal = $btn.html();
+    $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Generando...');
+
+    const formData = $('#formListadoOcupaciones').serialize();
+    const actionUrl = '/ocupacion/ocupaciones-excel';
+
+    $.ajax({
+        type: 'POST',
+        url: actionUrl,
+        data: formData,
+        xhrFields: {
+            responseType: 'blob'
+        },
+        success: function(data, status, xhr) {
+            // Rehabilitar el botón
+            $btn.prop('disabled', false).html(textoOriginal);
+
+            const contentType = xhr.getResponseHeader('Content-Type');
+            if (!contentType || !contentType.includes('application/octet-stream')) {
+                notif('error', 'Error: La respuesta del servidor no es válida');
+                return;
+            }
+
+            // Extraer el nombre del archivo del header Content-Disposition
+            const disposition = xhr.getResponseHeader('Content-Disposition');
+            let filename = 'Ocupaciones.xlsx';
+            if (disposition) {
+                const filenameMatch = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+                if (filenameMatch && filenameMatch[1]) {
+                    filename = filenameMatch[1].replace(/['"]/g, '');
+                }
+            }
+
+            // Crear un enlace temporal para descargar el archivo
+            const url = window.URL.createObjectURL(data);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+
+            notif('success', 'Excel generado correctamente');
+        },
+        error: function(xhr, status, error) {
+            // Rehabilitar el botón
+            $btn.prop('disabled', false).html(textoOriginal);
+
+            console.error('Error al generar Excel:', error);
+            notif('error', 'Error al generar el archivo Excel. Por favor, inténtelo de nuevo.');
+        }
+    });
+}
+
 

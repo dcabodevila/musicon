@@ -5,6 +5,7 @@ import es.musicalia.gestmusica.localizacion.CodigoNombreDto;
 import es.musicalia.gestmusica.util.DefaultResponseBody;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.ByteArrayOutputStream;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -42,4 +43,6 @@ public interface OcupacionService {
 
     @Transactional
     DefaultResponseBody eliminarOcupacionOrquestasDeGalicia(Long idOcupacion);
+
+    ByteArrayOutputStream exportOcupacionesToExcel(CustomAuthenticatedUser user, OcupacionListFilterDto ocupacionListFilterDto);
 }
