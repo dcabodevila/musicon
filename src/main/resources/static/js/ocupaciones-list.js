@@ -94,65 +94,143 @@ function crearNuevaOcupacion() {
     window.location.href = `/ocupacion/nueva/${selectedArtistId}`;
 }
 
-// Manejador para descargar Excel de ocupaciones
-$('#btn-descargar-excel-ocupaciones').on('click', function() {
-    generarOcupacionesExcel();
-});
-
-function generarOcupacionesExcel() {
+// Función para descargar ocupaciones en PDF
+function descargarOcupacionesPDF() {
     // Deshabilitar el botón
-    const $btn = $('#btn-descargar-excel-ocupaciones');
+    const $btn = $('#btn-descargar-pdf-ocupaciones');
     const textoOriginal = $btn.html();
     $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Generando...');
 
     const formData = $('#formListadoOcupaciones').serialize();
-    const actionUrl = '/ocupacion/ocupaciones-excel';
 
     $.ajax({
         type: 'POST',
-        url: actionUrl,
+        url: '/ocupacion/ocupaciones-pdf',
         data: formData,
         xhrFields: {
             responseType: 'blob'
         },
-        success: function(data, status, xhr) {
+        success: function (data, status, xhr) {
             // Rehabilitar el botón
             $btn.prop('disabled', false).html(textoOriginal);
 
+            // Verificar si la respuesta es realmente un PDF
             const contentType = xhr.getResponseHeader('Content-Type');
-            if (!contentType || !contentType.includes('application/octet-stream')) {
+            if (!contentType || !contentType.includes('application/pdf')) {
                 notif('error', 'Error: La respuesta del servidor no es válida');
                 return;
             }
 
-            // Extraer el nombre del archivo del header Content-Disposition
-            const disposition = xhr.getResponseHeader('Content-Disposition');
-            let filename = 'Ocupaciones.xlsx';
-            if (disposition) {
-                const filenameMatch = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
-                if (filenameMatch && filenameMatch[1]) {
-                    filename = filenameMatch[1].replace(/['"]/g, '');
+            // Obtener el nombre del archivo
+            const contentDisposition = xhr.getResponseHeader('Content-Disposition');
+            let filename = 'Ocupaciones_' + new Date().getTime() + '.pdf';
+
+            if (contentDisposition) {
+                const matches = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+                if (matches != null && matches[1]) {
+                    filename = matches[1].replace(/['"]/g, '');
                 }
             }
 
-            // Crear un enlace temporal para descargar el archivo
-            const url = window.URL.createObjectURL(data);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
+            // Crear Blob y URL
+            const blob = new Blob([data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
 
-            notif('success', 'Excel generado correctamente');
+            // Crear ID único para el archivo
+            const fileId = 'pdf_ocupaciones_' + Date.now();
+            window[fileId] = {
+                blob: blob,
+                url: url,
+                filename: filename
+            };
+
+            // Mostrar notificación con botones
+            notifDuration(
+                'success',
+                `<div class="d-flex gap-2">
+                    <button onclick="window.open(window.${fileId}.url, '_blank')"
+                    class="btn btn-sm btn-outline-light w-50">
+                        <i class="fas fa-eye"></i> Ver PDF
+                    </button>
+                    <button id="btn-share-pdf-ocupaciones" class="btn btn-sm btn-outline-light w-50" data-file-id="${fileId}">
+                        <i class="fas fa-share"></i> Compartir PDF
+                    </button>
+                </div>`,
+                60000
+            );
+
+            // Evento para compartir (debe ser dinámico porque el botón se genera en la notificación)
+            $(document).on('click', '#btn-share-pdf-ocupaciones', function () {
+                const $shareBtn = $(this);
+                const fileIdToShare = $shareBtn.data('file-id');
+                const fileMetadata = window[fileIdToShare];
+
+                // Prevenir múltiples solicitudes de compartir
+                if ($shareBtn.prop('disabled')) {
+                    return;
+                }
+
+                if (navigator.share && navigator.canShare) {
+                    const file = new File([fileMetadata.blob], fileMetadata.filename, { type: 'application/pdf' });
+
+                    // Verificar si el navegador y dispositivo soportan la funcionalidad de compartir
+                    if (navigator.canShare({ files: [file] })) {
+                        // Deshabilitar el botón para evitar interacciones múltiples
+                        $shareBtn.prop('disabled', true);
+
+                        navigator
+                            .share({
+                                files: [file],
+                                title: 'Listado de Ocupaciones',
+                                text: 'Aquí tienes el PDF de ocupaciones generado.',
+                            })
+                            .then(() => {
+                                console.log('Archivo compartido exitosamente.');
+                            })
+                            .catch((error) => {
+                                console.error('Error al compartir:', error);
+                                notif('error', 'No se pudo compartir el archivo.');
+                            })
+                            .finally(() => {
+                                // Vuelve a habilitar el botón después de completar o fallar el proceso
+                                $shareBtn.prop('disabled', false);
+                            });
+                    } else {
+                        notif('error', 'Tu dispositivo no admite la funcionalidad de compartir archivos.');
+                    }
+                } else {
+                    notif('error', 'Compartir archivos no está disponible en este navegador.');
+                }
+            });
+
+            // Limpieza del Blob después de 60 segundos
+            setTimeout(() => {
+                delete window[fileId];
+                window.URL.revokeObjectURL(url);
+            }, 60000);
         },
         error: function(xhr, status, error) {
             // Rehabilitar el botón
             $btn.prop('disabled', false).html(textoOriginal);
 
-            console.error('Error al generar Excel:', error);
-            notif('error', 'Error al generar el archivo Excel. Por favor, inténtelo de nuevo.');
+            console.error('Error al generar PDF:', error);
+
+            let errorMessage = 'Error al generar el PDF de ocupaciones';
+
+            // Mensajes específicos por código de estado
+            switch (xhr.status) {
+                case 400:
+                    errorMessage = 'Datos del formulario inválidos';
+                    break;
+                case 500:
+                    errorMessage = 'Error interno del servidor';
+                    break;
+                case 0:
+                    errorMessage = 'Error de conexión con el servidor';
+                    break;
+            }
+
+            notif('error', errorMessage);
         }
     });
 }

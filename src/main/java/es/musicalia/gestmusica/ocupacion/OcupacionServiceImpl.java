@@ -5,6 +5,7 @@ import es.musicalia.gestmusica.artista.Artista;
 import es.musicalia.gestmusica.artista.ArtistaRepository;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.excel.ExcelExportService;
+import es.musicalia.gestmusica.informe.InformeService;
 import es.musicalia.gestmusica.localizacion.CodigoNombreDto;
 import es.musicalia.gestmusica.localizacion.MunicipioRepository;
 import es.musicalia.gestmusica.localizacion.ProvinciaRepository;
@@ -24,10 +25,11 @@ import es.musicalia.gestmusica.usuario.EnvioEmailException;
 import es.musicalia.gestmusica.usuario.UserService;
 import es.musicalia.gestmusica.usuario.Usuario;
 import es.musicalia.gestmusica.util.ConstantsGestmusica;
+import es.musicalia.gestmusica.util.DateUtils;
 import es.musicalia.gestmusica.util.DefaultResponseBody;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,8 +62,9 @@ public class OcupacionServiceImpl implements OcupacionService {
 	private final MensajeService mensajeService;
     private final OrquestasDeGaliciaService orquestasDeGaliciaService;
 	private final ExcelExportService excelExportService;
+	private final InformeService informeService;
 
-	public OcupacionServiceImpl(OcupacionRepository ocupacionRepository, ArtistaRepository artistaRepository, ProvinciaRepository provinciaRepository, MunicipioRepository municipioRepository, TipoOcupacionRepository tipoOcupacionRepository, OcupacionEstadoRepository ocupacionEstadoRepository, TarifaRepository tarifaRepository, UserService userService, PermisoService permisoService, AccesoRepository accesoRepository, EmailService emailService, OcupacionMapper ocupacionMapper, MensajeService mensajeService, OrquestasDeGaliciaService orquestasDeGaliciaService, ExcelExportService excelExportService){
+	public OcupacionServiceImpl(OcupacionRepository ocupacionRepository, ArtistaRepository artistaRepository, ProvinciaRepository provinciaRepository, MunicipioRepository municipioRepository, TipoOcupacionRepository tipoOcupacionRepository, OcupacionEstadoRepository ocupacionEstadoRepository, TarifaRepository tarifaRepository, UserService userService, PermisoService permisoService, AccesoRepository accesoRepository, EmailService emailService, OcupacionMapper ocupacionMapper, MensajeService mensajeService, OrquestasDeGaliciaService orquestasDeGaliciaService, ExcelExportService excelExportService, InformeService informeService){
 		this.ocupacionRepository = ocupacionRepository;
 		this.artistaRepository = artistaRepository;
         this.provinciaRepository = provinciaRepository;
@@ -77,6 +80,7 @@ public class OcupacionServiceImpl implements OcupacionService {
         this.mensajeService = mensajeService;
         this.orquestasDeGaliciaService = orquestasDeGaliciaService;
 		this.excelExportService = excelExportService;
+        this.informeService = informeService;
     }
 
 	@Override
@@ -787,6 +791,48 @@ public class OcupacionServiceImpl implements OcupacionService {
 				.nombreComercialRepresentante(usuario.getNombreComercial() != null ? usuario.getNombreComercial() : "")
 				.telefonoRepresentante(usuario.getTelefono() != null ? usuario.getTelefono() : "")
 				.build();
+	}
+
+	@Override
+	public byte[] exportOcupacionesToPDF(CustomAuthenticatedUser user, OcupacionListFilterDto ocupacionListFilterDto) {
+		// Obtener las ocupaciones filtradas y convertir a DTOs
+		List<OcupacionListRecord> ocupaciones = findOcupacionesByArtistasListAndDatesActivo(user, ocupacionListFilterDto);
+
+		List<OcupacionExcelDto> datosOcupaciones = ocupaciones.stream()
+				.sorted(Comparator.comparing(OcupacionListRecord::start))
+				.map(this::mapToOcupacionExcelDto)
+				.collect(Collectors.toList());
+
+		// Crear DataSource con la colección de ocupaciones
+		JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(datosOcupaciones);
+
+		// Preparar parámetros para el informe JasperReports
+		Map<String, Object> parametros = new HashMap<>();
+		parametros.put("titulo", "Listado de Ocupaciones");
+		parametros.put("fechaGeneracion", LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+
+		// Agregar filtros aplicados
+		StringBuilder filtrosAplicados = new StringBuilder();
+		if (ocupacionListFilterDto.getIdAgencia() != null) {
+			filtrosAplicados.append("Agencia filtrada | ");
+		}
+		if (ocupacionListFilterDto.getIdArtista() != null) {
+			filtrosAplicados.append("Artista filtrado | ");
+		}
+		if (ocupacionListFilterDto.getFechaDesde() != null) {
+			filtrosAplicados.append("Desde: ").append(ocupacionListFilterDto.getFechaDesde().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+		}
+		if (ocupacionListFilterDto.getFechaHasta() != null) {
+			filtrosAplicados.append(" Hasta: ").append(ocupacionListFilterDto.getFechaHasta().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+		}
+		parametros.put("filtros", filtrosAplicados.toString());
+
+		String fileNameToExport = "Ocupaciones_" + DateUtils.getDateStr(new java.util.Date(), "ddMMyyyyHHmmss") + ".pdf";
+
+		// Usar el nuevo reporte de listado de ocupaciones
+		String fileReport = "listado_ocupaciones.jrxml";
+
+		return informeService.imprimirInformeConDataSource(parametros, fileNameToExport, fileReport, dataSource);
 	}
 
 }

@@ -119,8 +119,8 @@
                                             Nueva ocupación
                                         </button>
 
-                                        <button type="button" id="btn-descargar-excel-ocupaciones" class="btn btn-pill btn-success m-1 col-12 col-sm-3">
-                                            <i class="fas fa-file-excel"></i> Descargar Excel
+                                        <button type="button" id="btn-descargar-pdf-ocupaciones" onclick="descargarOcupacionesPDF()" class="btn btn-pill btn-danger m-1 col-12 col-sm-3">
+                                            <i class="fas fa-file-pdf"></i> Exportar PDF
                                         </button>
 
                                     </div>
@@ -237,6 +237,38 @@
                 </button>
                 <button type="button" class="btn btn-primary"
                         onclick="crearNuevaOcupacion()">Crear Ocupación
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para descargar documento -->
+<div class="modal fade" id="modalDescargarOcupaciones" tabindex="-1"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Descargar Ocupaciones</h5>
+                <button type="button" class="btn-close"
+                        data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Seleccione el formato de exportación</label>
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-success btn-lg" onclick="descargarOcupacionesExcel()">
+                            <i class="fas fa-file-excel"></i> Descargar Excel
+                        </button>
+                        <button type="button" class="btn btn-danger btn-lg" onclick="descargarOcupacionesPDF()">
+                            <i class="fas fa-file-pdf"></i> Descargar PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary"
+                        data-bs-dismiss="modal">Cerrar
                 </button>
             </div>
         </div>

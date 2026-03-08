@@ -244,6 +244,26 @@ public class OcupacionController {
         return new ResponseEntity<>(excelStream.toByteArray(), headers, HttpStatus.OK);
     }
 
+    @PostMapping("/ocupaciones-pdf")
+    public ResponseEntity<byte[]> exportarOcupacionesPDF(@AuthenticationPrincipal CustomAuthenticatedUser user,
+                                                          @ModelAttribute OcupacionListFilterDto ocupacionListFilterDto) {
+        // Generar archivo PDF
+        byte[] pdfBytes = this.ocupacionService.exportOcupacionesToPDF(user, ocupacionListFilterDto);
+
+        // Configurar headers de respuesta
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+
+        // Generar nombre del archivo
+        String fileNameToExport = "Ocupaciones_"
+                .concat(DateUtils.getDateStr(new Date(), "ddMMyyyyHHmmss"))
+                .concat(".pdf");
+
+        headers.setContentDispositionFormData("attachment", fileNameToExport);
+
+        return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+    }
+
     private void getModelAttributeComunOcupacionList(CustomAuthenticatedUser user, Model model) {
 
         OcupacionListFilterDto filter = model.containsAttribute("ocupacionListFilterDto") ? (OcupacionListFilterDto) model.getAttribute("ocupacionListFilterDto") : OcupacionListFilterDto.builder().fechaDesde(LocalDate.now()).build() ;

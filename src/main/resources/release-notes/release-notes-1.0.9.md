@@ -1,6 +1,6 @@
-# Exportación a Excel del listado de ocupaciones
+# Exportación listado de ocupaciones en PDF
 
-Si eres agencia, ahora puedes exportar a Excel el listado de ocupaciones filtradas desde la pantalla de gestión de ocupaciones.
+Si eres agencia, ahora puedes exportar a PDF el listado de ocupaciones filtradas desde la pantalla de gestión de ocupaciones.
 
 ## Cómo usar la funcionalidad
 
@@ -13,9 +13,9 @@ Si eres agencia, ahora puedes exportar a Excel el listado de ocupaciones filtrad
 
 3. Pulsa el botón **Buscar** para aplicar los filtros.
 
-4. Una vez aplicados los filtros, pulsa el botón **Descargar Excel** ubicado junto al botón "Nueva ocupación".
+4. Una vez aplicados los filtros, pulsa el botón **Exportar PDF** ubicado junto al botón "Nueva ocupación".
 
-![export-ocupacionees.png](/img/release-notes/export-ocupacionees.png)
+![ocupaciones-export-pdf.png](/img/release-notes/ocupaciones-export-pdf.png)
 
 5. El archivo Excel se descargará automáticamente con el nombre `Ocupaciones_[fecha_hora].xlsx`.
 
@@ -23,7 +23,6 @@ Si eres agencia, ahora puedes exportar a Excel el listado de ocupaciones filtrad
 
 El archivo Excel exportado contiene las siguientes columnas para cada ocupación filtrada:
 
-- **ID**: Identificador de la ocupación
 - **Artista**: Nombre del artista
 - **Fecha**: Fecha de la actuación (formato dd-mm-yyyy)
 - **Localidad**: Localidad de la actuación
@@ -35,6 +34,4 @@ El archivo Excel exportado contiene las siguientes columnas para cada ocupación
 - **Teléfono Representante**: Teléfono del representante que creó la ocupación
 
 **Nota**: Las ocupaciones se exportan ordenadas por fecha de actuación de forma ascendente.
-
-
 

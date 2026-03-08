@@ -24,6 +24,7 @@ public class InformeServiceImpl implements InformeService {
 	private JasperReport compiledReportListadoSinOcupacionVertical;
 	private JasperReport compiledReportListadoConOcupacion;
 	private JasperReport compiledReportListadoConOcupacionVertical;
+	private JasperReport compiledReportListadoOcupaciones;
 
 	public InformeServiceImpl(DataSource dataSource){
 		this.dataSource =dataSource;
@@ -73,6 +74,13 @@ public class InformeServiceImpl implements InformeService {
 			// Se compila una sola vez
 			compiledReportListadoConOcupacionVertical = JasperCompileManager.compileReport(reportStream);
 		}
+		try (InputStream reportStream = getClass().getResourceAsStream("/".concat(TipoReportEnum.LISTADO_OCUPACIONES.getNombreFicheroReport()))) {
+			if (reportStream == null) {
+				throw new FileNotFoundException("No se encontró el reporte en el classpath");
+			}
+			// Se compila una sola vez
+			compiledReportListadoOcupaciones = JasperCompileManager.compileReport(reportStream);
+		}
 
 	}
 
@@ -91,6 +99,8 @@ public class InformeServiceImpl implements InformeService {
 				return compiledReportListadoConOcupacionVertical;
 			case "listado_sin_ocupacion_vertical2.jrxml":
 				return compiledReportListadoSinOcupacionVertical;
+			case "listado_ocupaciones.jrxml":
+				return compiledReportListadoOcupaciones;
 			default:
 				throw new IllegalArgumentException("Reporte no soportado: " + fileReport);
 		}
@@ -114,5 +124,22 @@ public class InformeServiceImpl implements InformeService {
 			throw new RuntimeException(e);
 		}
     }
+
+	public byte[] imprimirInformeConDataSource(Map<String, Object> parametros, String fileNameToExport, String fileReport, JRDataSource dataSource) {
+
+		JasperReport compiledReport = getCompiledReport(fileReport);
+		try {
+			// Llena el reporte con datos desde el DataSource
+			JasperPrint empReport = JasperFillManager.fillReport(
+					compiledReport,
+					parametros,
+					dataSource
+			);
+			return JasperExportManager.exportReportToPdf(empReport);
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
 
 }

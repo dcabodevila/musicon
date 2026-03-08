@@ -45,4 +45,6 @@ public interface OcupacionService {
     DefaultResponseBody eliminarOcupacionOrquestasDeGalicia(Long idOcupacion);
 
     ByteArrayOutputStream exportOcupacionesToExcel(CustomAuthenticatedUser user, OcupacionListFilterDto ocupacionListFilterDto);
+
+    byte[] exportOcupacionesToPDF(CustomAuthenticatedUser user, OcupacionListFilterDto ocupacionListFilterDto);
 }
