@@ -1,8 +1,12 @@
-# Exportación listado de ocupaciones en PDF
+
+# Release Notes 1.0.9
+
+<!-- FOR_ROLES: AGENCIA -->
+## Exportación listado de ocupaciones en PDF
 
 Si eres agencia, ahora puedes exportar a PDF el listado de ocupaciones filtradas desde la pantalla de gestión de ocupaciones.
 
-## Cómo usar la funcionalidad
+### Cómo usar la funcionalidad
 
 1. Accede a **Ocupaciones** desde el menú principal.
 
@@ -19,7 +23,7 @@ Si eres agencia, ahora puedes exportar a PDF el listado de ocupaciones filtradas
 
 5. El archivo Excel se descargará automáticamente con el nombre `Ocupaciones_[fecha_hora].xlsx`.
 
-## Información incluida en el Excel
+### Información incluida en el Excel
 
 El archivo Excel exportado contiene las siguientes columnas para cada ocupación filtrada:
 
@@ -34,4 +38,17 @@ El archivo Excel exportado contiene las siguientes columnas para cada ocupación
 - **Teléfono Representante**: Teléfono del representante asignado a la ocupación
 
 **Nota**: Las ocupaciones se exportan ordenadas por fecha de actuación de forma ascendente.
+
+# Tarifas anuales de 8 meses.
+Añadimos la tarifa anual ajustada a 8 meses de Marzo a Octubre.
+
+![tarifa-anual-select.png](/img/release-notes/tarifa-anual-select.png)
+
+La nueva tarifa de 8 meses se visualizará así:
+
+![tarifa-8-meses.png](/img/release-notes/tarifa-8-meses.png)
+
+
+
+<!-- END_FOR_ROLES -->
 

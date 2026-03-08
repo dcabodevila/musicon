@@ -1,11 +1,7 @@
-# Tarifas anuales de 8 meses.
-Añadimos la tarifa anual ajustada a 8 meses de Marzo a Octubre.
+---
+roles: [AGENCIA]
+---
 
-![tarifa-anual-select.png](/img/release-notes/tarifa-anual-select.png)
-
-La nueva tarifa de 8 meses se visualizará así:
-
-![tarifa-8-meses.png](/img/release-notes/tarifa-8-meses.png)
 
 # Permiso Ver los detalles de las ocupaciones en el calendario
 

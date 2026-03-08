@@ -49,4 +49,6 @@ public interface UserService {
 	List<Usuario> findUsuariosAdmin();
 
     Usuario findUsuarioById(Long idUsuario);
+
+	Usuario findById(Long id);
 }

@@ -394,3 +394,12 @@ footer {
         box-shadow: 0 0 0 0 rgba(59, 125, 221, 0);
     }
 }
+
+.release-notes-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+    margin: 12px 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    cursor: zoom-in;
+}

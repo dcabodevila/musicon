@@ -21,6 +21,7 @@
 
             <div th:replace="~{fragments/main-template :: navbar}"/>
             <div th:replace="~{fragments/modal-confirmacion :: modal-confirmacion}"/>
+            <div th:replace="~{fragments/modal-release-notes :: modal-release-notes}"/>
 
             <main class="content">
                 <div th:if="${message}" th:class="${'alert alert-' + alertClass+ ' alert-dismissible fade show'}" role="alert"
@@ -154,6 +155,7 @@
 
     <script type="text/javascript" th:src="@{/js/comun.js}"></script>
     <script type="text/javascript" th:src="@{/js/main.js}"></script>
+    <script type="text/javascript" th:src="@{/js/release-notes-startup.js}"></script>
 
     </body>
 </html>

@@ -258,4 +258,9 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(idUsuario).orElseThrow();
     }
 
+	@Override
+	public Usuario findById(Long id) {
+		return userRepository.findById(id).orElseThrow();
+	}
+
 }

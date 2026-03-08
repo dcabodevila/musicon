@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+
+<div th:fragment="modal-release-notes">
+    <style>
+        #releaseNotesContent img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 6px;
+            margin: 12px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+            cursor: zoom-in;
+        }
+
+        #releaseNotesContent h1 {
+            font-size: 1.75rem;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        #releaseNotesContent h2 {
+            font-size: 1.5rem;
+            margin-top: 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+
+        #releaseNotesContent h3 {
+            font-size: 1.25rem;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        #releaseNotesContent ul, #releaseNotesContent ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        #releaseNotesContent p {
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+        }
+
+        #releaseNotesContent code {
+            background-color: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+
+        #releaseNotesContent pre {
+            background-color: #f5f5f5;
+            padding: 12px;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+    </style>
+
+    <!-- Modal para mostrar Release Notes -->
+    <div class="modal fade" id="releaseNotesModal" tabindex="-1" aria-labelledby="releaseNotesModalLabel" 
+         aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="releaseNotesModalLabel">
+                        <i class="fas fa-rocket me-2"></i>¡Novedades de la versión <span id="releaseNotesVersion"></span>!
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="releaseNotesContent">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" id="btnMarkAsRead">
+                        <i class="fas fa-check me-2"></i>Entendido
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
