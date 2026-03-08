@@ -14,7 +14,7 @@
     <!-- CSS del proyecto -->
     <div th:replace="~{fragments/main-template :: header-css}"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-    <link th:href="@{/adminkit/flatpickr/flatpickr.min.css}" rel="stylesheet"/>
+
 </head>
 
 <body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
@@ -175,17 +175,11 @@
 </div>
 
 <script th:src="@{/adminkit/js/app.js}"></script>
-<script th:src="@{/adminkit/flatpickr/flatpickr.min.js}"></script>
+
 <script th:src="@{/adminkit/flatpickr/es.js}"></script>
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // Configurar flatpickr para los inputs de fecha
-        flatpickr("input[type='date']", {
-            locale: "es",
-            dateFormat: "Y-m-d"
-        });
-    });
-</script>
+<script th:src="@{/adminkit/flatpickr/es.js}"></script>
+<script type="text/javascript" th:src="@{/js/eventos.js}"></script>
+
 </body>
 
 </html>
