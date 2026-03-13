@@ -384,9 +384,13 @@ public class OcupacionServiceImpl implements OcupacionService {
 
         final StringBuilder sb = new StringBuilder();
 
-        if (poblacion!=null && !poblacion.isEmpty() && !poblacion.equalsIgnoreCase("PROVISIONAL")){
+		if (poblacion!=null && !poblacion.isEmpty() && !poblacion.equalsIgnoreCase("PROVISIONAL")){
 
-			if (poblacion.equalsIgnoreCase(municipio.toUpperCase())){
+			final boolean poblacionCoincideConMunicipio = municipio != null &&
+					(poblacion.equalsIgnoreCase(municipio) ||
+							municipio.toUpperCase().contains(poblacion.toUpperCase()));
+
+			if (poblacionCoincideConMunicipio){
 				sb.append(capitalizarNombreMunicipio(municipio));
 			}
 			else {
@@ -411,6 +415,7 @@ public class OcupacionServiceImpl implements OcupacionService {
 
     }
 
+
 	private static String capitalizarNombreMunicipio(String nombre) {
 		if (nombre == null || nombre.isEmpty()) {
 			return nombre;
@@ -423,24 +428,46 @@ public class OcupacionServiceImpl implements OcupacionService {
 				"e", "y", "o", "a"
 		);
 
-		String[] palabras = nombre.trim().toLowerCase().split("\\s+");
-		StringBuilder sb = new StringBuilder();
+		String[] partes = nombre.trim().split(",");
 
-		for (int i = 0; i < palabras.length; i++) {
-			String palabra = palabras[i];
-			// La primera palabra siempre va en mayúscula
-			if (i == 0 || !minusculas.contains(palabra)) {
-				sb.append(Character.toUpperCase(palabra.charAt(0)))
-						.append(palabra.substring(1));
-			} else {
-				sb.append(palabra);
+		// Si hay coma, reorganizar: la parte después de la coma va al principio
+		if (partes.length > 1) {
+			// Invertir el orden: [parte_después_coma, parte_antes_coma]
+			String[] partesReorganizadas = new String[partes.length];
+			for (int i = 0; i < partes.length; i++) {
+				partesReorganizadas[i] = partes[partes.length - 1 - i];
 			}
-			if (i < palabras.length - 1) {
-				sb.append(" ");
+			partes = partesReorganizadas;
+		}
+
+		StringBuilder sbFinal = new StringBuilder();
+
+		for (int p = 0; p < partes.length; p++) {
+			String parte = partes[p].trim();
+			String[] palabras = parte.toLowerCase().split("\\s+");
+			StringBuilder sb = new StringBuilder();
+
+			for (int i = 0; i < palabras.length; i++) {
+				String palabra = palabras[i];
+				// La primera palabra de cada parte siempre va en mayúscula
+				if (i == 0 || !minusculas.contains(palabra)) {
+					sb.append(Character.toUpperCase(palabra.charAt(0)))
+							.append(palabra.substring(1));
+				} else {
+					sb.append(palabra);
+				}
+				if (i < palabras.length - 1) {
+					sb.append(" ");
+				}
+			}
+
+			sbFinal.append(sb.toString());
+			if (p < partes.length - 1) {
+				sbFinal.append(" ");
 			}
 		}
 
-		return sb.toString();
+		return sbFinal.toString();
 	}
 
 	@Override
