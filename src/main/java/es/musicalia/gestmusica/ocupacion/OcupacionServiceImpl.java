@@ -380,40 +380,36 @@ public class OcupacionServiceImpl implements OcupacionService {
 		return actuacionExterna;
 	}
 
-    private static String obtenerLugarOrquestaDeGalicia(final String municipio, final String poblacion){
+	private static String obtenerLugarOrquestaDeGalicia(final String municipio, final String poblacion){
+		final StringBuilder sb = new StringBuilder();
 
-        final StringBuilder sb = new StringBuilder();
+		final String municipioNormalizado = capitalizarNombreMunicipio(municipio);
+		final String poblacionNormalizada = capitalizarNombreMunicipio(poblacion);
 
-		if (poblacion!=null && !poblacion.isEmpty() && !poblacion.equalsIgnoreCase("PROVISIONAL")){
+		if (poblacion != null && !poblacion.isEmpty() && !poblacion.equalsIgnoreCase("PROVISIONAL")) {
+			// Comparar sin considerar el case
+			final boolean poblacionCoincideConMunicipio = municipioNormalizado != null &&
+					(poblacionNormalizada.equalsIgnoreCase(municipioNormalizado) ||
+							municipioNormalizado.toUpperCase().contains(poblacionNormalizada.toUpperCase()));
 
-			final boolean poblacionCoincideConMunicipio = municipio != null &&
-					(poblacion.equalsIgnoreCase(municipio) ||
-							municipio.toUpperCase().contains(poblacion.toUpperCase()));
+			if (poblacionCoincideConMunicipio) {
+				// Si coinciden, mostrar solo el municipio
+				sb.append(municipioNormalizado);
+			} else {
+				// Si no coinciden, mostrar población, municipio
+				sb.append(poblacionNormalizada);
 
-			if (poblacionCoincideConMunicipio){
-				sb.append(capitalizarNombreMunicipio(municipio));
-			}
-			else {
-				String poblacionCaps = capitalizarNombreMunicipio(poblacion);
-
-				sb.append(poblacionCaps);
-
-				if (municipio!=null && !municipio.isEmpty()){
-					sb.append(", ").append(capitalizarNombreMunicipio(municipio));
+				if (municipioNormalizado != null && !municipioNormalizado.isEmpty()) {
+					sb.append(", ").append(municipioNormalizado);
 				}
-
 			}
+		} else {
+			// Si no hay población o es provisional, mostrar solo municipio
+			sb.append(municipioNormalizado);
+		}
 
-        }
-        else {
-            sb.append(capitalizarNombreMunicipio(municipio));
-        }
-
-
-        return sb.toString();
-
-
-    }
+		return sb.toString();
+	}
 
 
 	private static String capitalizarNombreMunicipio(String nombre) {
