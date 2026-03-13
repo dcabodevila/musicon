@@ -105,9 +105,11 @@ public class OcupacionServiceImpl implements OcupacionService {
 
 		final Ocupacion ocupacion =  this.ocupacionRepository.findById(id).orElseThrow();
 
-        actualizarTarifasAnularOcupacion(ocupacion.getTarifa());
+        final Tarifa nuevaTarifa = actualizarTarifasAnularOcupacion(ocupacion.getTarifa());
 
         ocupacion.setOcupacionEstado(this.ocupacionEstadoRepository.findById(OcupacionEstadoEnum.ANULADO.getId()).orElseThrow());
+		ocupacion.setFechaModificacion(LocalDateTime.now());
+		ocupacion.setTarifa(nuevaTarifa);
 		this.ocupacionRepository.save(ocupacion);
 
         if (ocupacion.isPublicadoOdg()){
@@ -134,13 +136,13 @@ public class OcupacionServiceImpl implements OcupacionService {
 
 	}
 
-    private void actualizarTarifasAnularOcupacion(Tarifa oldTarifa) {
+    private Tarifa actualizarTarifasAnularOcupacion(Tarifa oldTarifa) {
         Tarifa nuevaTarifa = copiarTarifa(oldTarifa);
 
         oldTarifa.setActivo(Boolean.FALSE);
 
         this.tarifaRepository.save(oldTarifa);
-        this.tarifaRepository.save(nuevaTarifa);
+        return this.tarifaRepository.save(nuevaTarifa);
     }
 
     private static Tarifa copiarTarifa(Tarifa oldTarifa) {
