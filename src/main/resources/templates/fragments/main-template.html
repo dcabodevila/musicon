@@ -287,5 +287,30 @@
 
 
 </div>
+
+<div th:fragment="footer-public">
+
+	<footer class="footer">
+		<div class="container-fluid">
+			<div class="row text-muted">
+
+				<div class="col-12 text-center">
+					<p class="mb-0">
+						<a href="https://festia.es/info" target="_blank" class="text-muted"><i
+								class="fas fa-info-circle me-1"></i><strong>Información sobre festia</strong></a>
+					</p>
+				</div>
+			</div>
+		</div>
+		<script th:src="@{/adminkit/js/app.js}"></script>
+		<script th:src="@{/adminkit/flatpickr/es.js}"></script>
+		<script th:src="@{/js/moment.js}"></script>
+		<script th:src="@{/js/comun.js}"></script>
+		<script th:src="@{/js/service-worker.js}"></script>
+
+	</footer>
+
+
+</div>
 </body>
 </html>

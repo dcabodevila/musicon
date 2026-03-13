@@ -172,7 +172,7 @@ public class EventoPublicoController {
             sitemap.append("  <url>\n");
             sitemap.append("    <loc>").append(baseUrl).append("/eventos/evento/")
                    .append(evento.getId()).append("</loc>\n");
-            sitemap.append("    <lastmod>").append(LocalDate.now().toString()).append("</lastmod>\n");
+            sitemap.append("    <lastmod>").append(evento.getFechaActualizacion().toString()).append("</lastmod>\n");
             sitemap.append("    <changefreq>daily</changefreq>\n");
             sitemap.append("    <priority>0.8</priority>\n");
             sitemap.append("  </url>\n");

@@ -150,6 +150,7 @@ public class EventoPublicoServiceImpl implements EventoPublicoService {
             .idArtista(ocupacion.getArtista().getId())
             .nombreArtista(ocupacion.getArtista().getNombre())
             .fecha(ocupacion.getFecha())
+            .fechaActualizacion(ocupacion.getFechaModificacion()!=null ? ocupacion.getFechaModificacion(): ocupacion.getFechaCreacion())
             .horaActuacion(ocupacion.getHoraActuacion())
             .lugar(ocupacion.getLugar() != null ? ocupacion.getLugar() : ocupacion.getPoblacion())
             .municipio(ocupacion.getMunicipio() != null ? ocupacion.getMunicipio().getNombre() : "")

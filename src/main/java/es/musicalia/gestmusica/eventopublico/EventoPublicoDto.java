@@ -23,6 +23,7 @@ public class EventoPublicoDto {
     private boolean tarde;
     private boolean noche;
     private String informacionAdicional;
+    private LocalDateTime fechaActualizacion;
 
     /**
      * Genera el JSON-LD de Schema.org para MusicEvent
