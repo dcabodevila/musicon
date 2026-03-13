@@ -116,4 +116,10 @@ public class Artista {
     @Column(name = "is_sincronizar_odg")
     private boolean isSincronizarOdg;
 
+    @Column(name = "solicitud_odg_pendiente")
+    private boolean solicitudOdgPendiente;
+
+    @Column(name = "solicitud_odg_aprobada")
+    private boolean solicitudOdgAprobada;
+
 }

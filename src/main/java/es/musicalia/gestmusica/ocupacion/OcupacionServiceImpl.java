@@ -103,18 +103,20 @@ public class OcupacionServiceImpl implements OcupacionService {
 	@Transactional(readOnly = false)
 	public DefaultResponseBody anularOcupacion(long id){
 
-		final Ocupacion ocupacion =  this.ocupacionRepository.findById(id).orElseThrow();
+		Ocupacion ocupacion =  this.ocupacionRepository.findById(id).orElseThrow();
 
         final Tarifa nuevaTarifa = actualizarTarifasAnularOcupacion(ocupacion.getTarifa());
 
         ocupacion.setOcupacionEstado(this.ocupacionEstadoRepository.findById(OcupacionEstadoEnum.ANULADO.getId()).orElseThrow());
 		ocupacion.setFechaModificacion(LocalDateTime.now());
 		ocupacion.setTarifa(nuevaTarifa);
-		this.ocupacionRepository.save(ocupacion);
+		ocupacion = this.ocupacionRepository.save(ocupacion);
 
         if (ocupacion.isPublicadoOdg()){
             try {
                 this.orquestasDeGaliciaService.eliminarActuacion(ocupacion.getId().intValue());
+				ocupacion.setPublicadoOdg(false);
+				this.ocupacionRepository.save(ocupacion);
             } catch (Exception e) {
                 log.error("error inesperado eliminando actuacion de orquestas de galicia", e);
             }

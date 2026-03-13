@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <title>festia.es</title>
     <meta charset="utf-8">
@@ -256,7 +256,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="mb-3 row">
+                                    <div class="mb-3 row" th:if="${artistaDto.id!=null && artistaDto.permiteOrquestasDeGalicia}">
                                         <label class="col-form-label col-sm-3 text-sm-end pt-sm-0" for="flexSwitchCheckChecked">Permite publicar en OrquestasDeGalicia.es</label>
                                         <div class="col-sm-9">
                                             <div class="form-check form-switch">
@@ -269,11 +269,37 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="mb-3 row">
+                                    <div class="mb-3 row" th:if="${artistaDto.id!=null && !artistaDto.permiteOrquestasDeGalicia}">
+                                        <label class="col-form-label col-sm-3 text-sm-end pt-sm-0">Permite publicar en OrquestasDeGalicia.es</label>
+                                        <div class="col-sm-9">
+                                            <button type="button"
+                                                    id="btnSolicitarActivacionOdg"
+                                                    class="btn btn-outline-primary"
+                                                    th:data-id-artista="${artistaDto.id}"
+                                                    th:if="${!(artistaDto.solicitudOdgPendiente and !artistaDto.solicitudOdgAprobada)}"
+                                                    th:disabled="${artistaDto.id == null or artistaDto.solicitudOdgPendiente}">
+                                                <span th:text="${artistaDto.solicitudOdgPendiente} ? 'Solicitud enviada' : 'Solicitar activación'">Solicitar activación</span>
+                                            </button>
+                                            <button type="button"
+                                                    id="btnActivarOdgAdmin"
+                                                    class="btn btn-success"
+                                                    th:data-id-artista="${artistaDto.id}"
+                                                    th:if="${artistaDto.solicitudOdgPendiente and !artistaDto.solicitudOdgAprobada}"
+                                                    sec:authorize="hasAuthority('ACCESO_PANEL_ADMIN')">
+                                                Activar Orquestas de Galicia
+                                            </button>
+                                            <i class="fas fa-info-circle ms-2 info-icon"
+                                               data-bs-toggle="tooltip"
+                                               data-bs-placement="right"
+                                               title="Solicita al equipo de Festia la activación de publicación en OrquestasDeGalicia.es para este artista."
+                                            ></i>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 row" th:if="${artistaDto.id!=null && artistaDto.permiteOrquestasDeGalicia}">
                                         <label class="col-form-label col-sm-3 text-sm-end pt-sm-0" for="sincronizarOdg">Sincronizar ocupaciones en OrquestasDeGalicia.es</label>
                                         <div class="col-sm-9">
                                             <div class="form-check form-switch">
-                                                <input class="form-check-input" type="checkbox" th:field="*{sincronizarOdg}" id="sincronizarOdg" checked="">
+                                                <input class="form-check-input" type="checkbox" th:field="*{sincronizarOdg}" id="sincronizarOdg" th:disabled="${!artistaDto.permiteOrquestasDeGalicia}" checked="">
                                                 <i class="fas fa-info-circle ms-2 info-icon"
                                                    data-bs-toggle="tooltip"
                                                    data-bs-placement="right"

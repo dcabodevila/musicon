@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +33,61 @@ public interface OcupacionRepository extends JpaRepository<Ocupacion, Long>, Jpa
 
     @Query("SELECT o FROM Ocupacion o WHERE o.fecha>= :fechaDesde AND o.activo AND o.idOcupacionLegacy NOT IN :ids")
     Optional<List<Ocupacion>> findByIdOcupacionLegacyNotIn(@Param("fechaDesde") LocalDateTime fechaDesde, @Param("ids") Set<Integer> ids);
+
+    @Query("""
+            SELECT o
+            FROM Ocupacion o
+            WHERE o.artista.activo = true
+            AND o.artista.isSincronizarOdg = true
+            AND o.activo = true
+            AND o.tipoOcupacion.id = 1
+            AND o.ocupacionEstado.id = :estadoOcupadoId
+            AND o.fecha >= :fechaDesde
+            AND o.fecha <= :fechaHasta
+            AND o.publicadoOdg = false
+            ORDER BY o.fecha ASC
+            """)
+    List<Ocupacion> findPendientesPublicarOdg(@Param("fechaDesde") LocalDateTime fechaDesde,
+                                              @Param("fechaHasta") LocalDateTime fechaHasta,
+                                              @Param("estadoOcupadoId") Long estadoOcupadoId);
+
+    @Query("""
+            SELECT o
+            FROM Ocupacion o
+            WHERE o.artista.activo = true
+            AND o.artista.isSincronizarOdg = true
+            AND o.activo = true
+            AND o.tipoOcupacion.id = 1
+            AND o.ocupacionEstado.id = :estadoOcupadoId
+            AND o.fecha >= :fechaDesde
+            AND o.fecha <= :fechaHasta
+            AND o.publicadoOdg = true
+            AND o.fechaPublicacionOdg IS NOT NULL
+            AND o.fechaModificacion IS NOT NULL
+            AND o.fechaModificacion > o.fechaPublicacionOdg
+            ORDER BY o.fecha ASC
+            """)
+    List<Ocupacion> findPendientesActualizarOdg(@Param("fechaDesde") LocalDateTime fechaDesde,
+                                                @Param("fechaHasta") LocalDateTime fechaHasta,
+                                                @Param("estadoOcupadoId") Long estadoOcupadoId);
+
+    @Query("""
+            SELECT o
+            FROM Ocupacion o
+            WHERE o.artista.activo = true
+            AND o.artista.isSincronizarOdg = true
+            AND o.fecha >= :fechaDesde
+            AND o.fecha <= :fechaHasta
+            AND o.publicadoOdg = true
+            AND o.fechaPublicacionOdg IS NOT NULL
+            AND o.fechaModificacion IS NOT NULL
+            AND o.fechaModificacion > o.fechaPublicacionOdg
+            AND (o.ocupacionEstado.id = :estadoAnuladoId OR o.activo = false)
+            ORDER BY o.fecha ASC
+            """)
+    List<Ocupacion> findPendientesEliminarOdg(@Param("fechaDesde") LocalDateTime fechaDesde,
+                                              @Param("fechaHasta") LocalDateTime fechaHasta,
+                                              @Param("estadoAnuladoId") Long estadoAnuladoId);
 
 
 	@Query("select new es.musicalia.gestmusica.actividad.ActividadRecord(o.artista.id, o.artista.agencia.nombre, o.artista.nombre, " +

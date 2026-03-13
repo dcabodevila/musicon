@@ -59,6 +59,77 @@ const multipleChoices = new Choices(document.querySelector('.choices-multiple'),
 
       $permiteOdg.on('change', syncSincronizarOdgWithPermiteOdg);
       syncSincronizarOdgWithPermiteOdg();
+    } else if ($sincronizarOdg.length) {
+      $sincronizarOdg.prop('disabled', true);
+      $sincronizarOdg.prop('checked', false);
+    }
+
+    const $btnSolicitarActivacionOdg = $('#btnSolicitarActivacionOdg');
+    if ($btnSolicitarActivacionOdg.length) {
+      $btnSolicitarActivacionOdg.on('click', function () {
+        const idArtista = $(this).data('id-artista');
+        if (!idArtista) {
+          notif('error', 'No se ha encontrado el artista');
+          return;
+        }
+
+        $btnSolicitarActivacionOdg.prop('disabled', true);
+
+        $.ajax({
+          type: "POST",
+          contentType: "application/json; charset=utf-8",
+          url: "/artista/" + idArtista + "/solicitar-activacion-odg",
+          dataType: 'json',
+          cache: false,
+          success: function (data) {
+            if (data.success) {
+              notif(data.messageType ? data.messageType : "success", data.message);
+              $btnSolicitarActivacionOdg.text("Solicitud enviada");
+            } else {
+              notif("error", data.message);
+              $btnSolicitarActivacionOdg.prop('disabled', false);
+            }
+          },
+          error: function () {
+            notif("error", "Error al solicitar la activación");
+            $btnSolicitarActivacionOdg.prop('disabled', false);
+          }
+        });
+      });
+    }
+
+    const $btnActivarOdgAdmin = $('#btnActivarOdgAdmin');
+    if ($btnActivarOdgAdmin.length) {
+      $btnActivarOdgAdmin.on('click', function () {
+        const idArtista = $(this).data('id-artista');
+        if (!idArtista) {
+          notif('error', 'No se ha encontrado el artista');
+          return;
+        }
+
+        $btnActivarOdgAdmin.prop('disabled', true);
+
+        $.ajax({
+          type: "POST",
+          contentType: "application/json; charset=utf-8",
+          url: "/artista/" + idArtista + "/activar-odg",
+          dataType: 'json',
+          cache: false,
+          success: function (data) {
+            if (data.success) {
+              notif("success", data.message);
+              window.location.reload();
+            } else {
+              notif(data.messageType ? data.messageType : "error", data.message);
+              $btnActivarOdgAdmin.prop('disabled', false);
+            }
+          },
+          error: function () {
+            notif("error", "Error al activar Orquestas de Galicia");
+            $btnActivarOdgAdmin.prop('disabled', false);
+          }
+        });
+      });
     }
 });
 
