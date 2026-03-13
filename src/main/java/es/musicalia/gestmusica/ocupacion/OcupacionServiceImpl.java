@@ -387,7 +387,7 @@ public class OcupacionServiceImpl implements OcupacionService {
         if (poblacion!=null && !poblacion.isEmpty() && !poblacion.equalsIgnoreCase("PROVISIONAL")){
 
 			if (poblacion.equalsIgnoreCase(municipio.toUpperCase())){
-				sb.append(municipio);
+				sb.append(capitalizarNombreMunicipio(municipio));
 			}
 			else {
 				String poblacionCaps = capitalizarNombreMunicipio(poblacion);
@@ -395,14 +395,14 @@ public class OcupacionServiceImpl implements OcupacionService {
 				sb.append(poblacionCaps);
 
 				if (municipio!=null && !municipio.isEmpty()){
-					sb.append(", ").append(municipio);
+					sb.append(", ").append(capitalizarNombreMunicipio(municipio));
 				}
 
 			}
 
         }
         else {
-            sb.append(municipio);
+            sb.append(capitalizarNombreMunicipio(municipio));
         }
 
 
