@@ -36,6 +36,8 @@ public class OcupacionExcelDto {
     @ExcelColumn(value = "Solo Matinal", order = 8)
     private String soloMatinal;
 
+    private String estado;
+
     @ExcelColumn(value = "Nombre Comercial Representante", order = 9)
     private String nombreComercialRepresentante;
 

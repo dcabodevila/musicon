@@ -792,6 +792,7 @@ public class OcupacionServiceImpl implements OcupacionService {
 				.provincia(ocupacion.provincia() != null ? ocupacion.provincia() : "")
 				.matinal(ocupacion.matinal() ? "Sí" : "No")
 				.soloMatinal(ocupacion.soloMatinal() ? "Sí" : "No")
+				.estado(ocupacion.estado() != null ? ocupacion.estado() : "")
 				.nombreComercialRepresentante(usuario.getNombreComercial() != null ? usuario.getNombreComercial() : "")
 				.telefonoRepresentante(usuario.getTelefono() != null ? usuario.getTelefono() : "")
 				.build();
