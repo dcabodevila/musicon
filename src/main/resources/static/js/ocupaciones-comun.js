@@ -29,6 +29,23 @@ $(document).ready(function(){
             $('#localidad-ocupacion').val('');
         });
 
+        $('#localidad-ocupacion').on('change input', function() {
+            const localidad = ($(this).val() || '').trim();
+            if (localidad === '') {
+                const idMunicipioSeleccionado = $('#municipio-ocupacion').val();
+                if (idMunicipioSeleccionado) {
+                    cargarLocalidades('#localidad-ocupacion', idMunicipioSeleccionado, null);
+                }
+            }
+        });
+
+        const idMunicipioSeleccionadoInicial = $('#municipio-ocupacion').val();
+        if (idMunicipioSeleccionadoInicial) {
+            cargarLocalidades('#localidad-ocupacion', idMunicipioSeleccionadoInicial, null);
+        }
+
+
+
         $('#solo-matinal-ocupacion').on('change', function() {
             if ($(this).is(':checked')) {
                 $('#matinal-ocupacion').prop('checked', true);
@@ -218,13 +235,14 @@ function obtenerOcupacionDto(idOcupacion) {
                 cargarProvincias('#provincia-ocupacion', ocupacionDto.idCcaa, ocupacionDto.idProvincia)
                     .done(function() {
                         cargarMunicipios('#municipio-ocupacion', ocupacionDto.idProvincia, ocupacionDto.idMunicipio).done(function() {
-                            cargarLocalidades('#localidad-ocupacion', ocupacionDto.idCcaa, ocupacionDto.localidad);
+                            cargarLocalidades('#localidad-ocupacion', ocupacionDto.idMunicipio, ocupacionDto.localidad || null);
                         });
 
                     });
 
                 // Datos de localización
                 $("#localidad-ocupacion").val(ocupacionDto.localidad);
+
                 $("#lugar-ocupacion").val(ocupacionDto.lugar);
 
                 // Datos económicos
