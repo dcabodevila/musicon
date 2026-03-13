@@ -63,6 +63,7 @@ public class ArtistaDto {
     private String condicionesContratacion;
     private String biografia;
     private boolean permiteOrquestasDeGalicia = true;
+    private boolean sincronizarOdg;
 
 
     public ArtistaDto(){

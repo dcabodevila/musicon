@@ -30,6 +30,7 @@ public interface ArtistaMapper {
     @Mapping(target = "telefono2", source = "contacto.telefono2")
     @Mapping(target = "telefono3", source = "contacto.telefono3")
     @Mapping(target = "youtube", source = "contacto.youtube")
+    @Mapping(target = "sincronizarOdg", source = "sincronizarOdg")
     ArtistaDto toDto(Artista artista);
 
     @Named("tipoArtistaToIdList")

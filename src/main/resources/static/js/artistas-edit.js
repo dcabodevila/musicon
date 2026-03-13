@@ -43,6 +43,23 @@ const multipleChoices = new Choices(document.querySelector('.choices-multiple'),
         return false;
       }
     });
+
+
+    const $permiteOdg = $('#permiteOrquestasDeGalicia');
+    const $sincronizarOdg = $('#sincronizarOdg');
+
+    if ($permiteOdg.length && $sincronizarOdg.length) {
+      const syncSincronizarOdgWithPermiteOdg = function () {
+        const permiteOdgActivo = $permiteOdg.is(':checked');
+        $sincronizarOdg.prop('disabled', !permiteOdgActivo);
+        if (!permiteOdgActivo) {
+          $sincronizarOdg.prop('checked', false);
+        }
+      };
+
+      $permiteOdg.on('change', syncSincronizarOdgWithPermiteOdg);
+      syncSincronizarOdgWithPermiteOdg();
+    }
 });
 
 

@@ -195,6 +195,7 @@ public class ArtistaServiceImpl implements ArtistaService {
 		artista.setBiografia(dto.getBiografia());
 		artista.setCondicionesContratacion(dto.getCondicionesContratacion());
 		artista.setPermiteOrquestasDeGalicia(dto.isPermiteOrquestasDeGalicia());
+        artista.setSincronizarOdg(dto.isSincronizarOdg());
         artista.setGoogle(StringUtils.removeHttp(dto.getGoogle()));
         artista.setTiktok(StringUtils.removeHttp(dto.getTiktok()));
         artista.setMusica(StringUtils.removeHttp(dto.getMusica()));

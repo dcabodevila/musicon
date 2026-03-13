@@ -270,6 +270,19 @@
                                         </div>
                                     </div>
                                     <div class="mb-3 row">
+                                        <label class="col-form-label col-sm-3 text-sm-end pt-sm-0" for="sincronizarOdg">Sincronizar ocupaciones en OrquestasDeGalicia.es</label>
+                                        <div class="col-sm-9">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" th:field="*{sincronizarOdg}" id="sincronizarOdg" checked="">
+                                                <i class="fas fa-info-circle ms-2 info-icon"
+                                                   data-bs-toggle="tooltip"
+                                                   data-bs-placement="right"
+                                                   title="Si está activado, se sincronizarán automáticamente todas las ocupaciones del artista en OrquestasDeGalicia.es cuando falten menos de 3 meses para el evento."
+                                                ></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 row">
                                         <label class="col-form-label col-sm-3 text-sm-end">Condiciones contratación</label>
                                         <div class="col-sm-9">
                                             <textarea class="form-control" th:field="*{condicionesContratacion}" placeholder="Condiciones de contratación" id="condiciones-contratacion" autocomplete="off" maxlength="900"></textarea>
@@ -281,6 +294,7 @@
                                             <textarea class="form-control" th:field="*{biografia}" placeholder="Biografía del artista" id="biografia" autocomplete="off" maxlength="900"></textarea>
                                         </div>
                                     </div>
+
 
                                     <button type="submit" class="btn btn-primary" th:text="${artistaDto.id==null ? 'Crear artista' : 'Guardar' }">Botón</button>
                                 </form>
