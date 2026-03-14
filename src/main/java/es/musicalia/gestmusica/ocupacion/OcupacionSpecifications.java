@@ -58,4 +58,21 @@ public class OcupacionSpecifications {
         }
         return null;
     }
+
+    public static Specification<Ocupacion> hasGlobalSearch(String searchValue) {
+        if (searchValue == null || searchValue.trim().isEmpty()) {
+            return null;
+        }
+
+        String pattern = "%" + searchValue.trim().toLowerCase() + "%";
+        return (root, query, criteriaBuilder) -> criteriaBuilder.or(
+                criteriaBuilder.like(criteriaBuilder.lower(root.get("artista").get("nombre")), pattern),
+                criteriaBuilder.like(criteriaBuilder.lower(root.get("poblacion")), pattern),
+                criteriaBuilder.like(criteriaBuilder.lower(root.get("municipio").get("nombre")), pattern),
+                criteriaBuilder.like(criteriaBuilder.lower(root.get("provincia").get("nombre")), pattern),
+                criteriaBuilder.like(criteriaBuilder.lower(root.get("usuario").get("nombre")), pattern),
+                criteriaBuilder.like(criteriaBuilder.lower(root.get("usuario").get("apellidos")), pattern),
+                criteriaBuilder.like(criteriaBuilder.lower(root.get("ocupacionEstado").get("nombre")), pattern)
+        );
+    }
 }

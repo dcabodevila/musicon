@@ -29,6 +29,8 @@ import es.musicalia.gestmusica.util.DateUtils;
 import es.musicalia.gestmusica.util.DefaultResponseBody;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -607,54 +609,66 @@ public class OcupacionServiceImpl implements OcupacionService {
 
 	@Override
 	public List<OcupacionListRecord> findOcupacionesByArtistasListAndDatesActivo(CustomAuthenticatedUser user, OcupacionListFilterDto ocupacionListFilterDto) {
+		return findOcupacionesByArtistasListAndDatesActivoPaginado(user, ocupacionListFilterDto, null, Pageable.unpaged()).getContent();
+	}
 
-		// Filtrar por los artistas sobre los que tenemos permiso OCUPACIONES
+	@Override
+	public Page<OcupacionListRecord> findOcupacionesByArtistasListAndDatesActivoPaginado(CustomAuthenticatedUser user,
+																							 OcupacionListFilterDto ocupacionListFilterDto,
+																							 String searchValue,
+																							 Pageable pageable) {
+		Specification<Ocupacion> spec = buildOcupacionListadoSpecification(user, ocupacionListFilterDto, searchValue, !pageable.isPaged());
+		return ocupacionRepository.findAll(spec, pageable).map(this::toOcupacionListRecord);
+	}
 
+	private Specification<Ocupacion> buildOcupacionListadoSpecification(CustomAuthenticatedUser user,
+																				 OcupacionListFilterDto ocupacionListFilterDto,
+																				 String searchValue,
+																				 boolean includeDefaultOrder) {
 		final CustomAuthenticatedUser authenticatedUser = (CustomAuthenticatedUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		final Set<Long> idsArtistas = authenticatedUser.getMapPermisosArtista().keySet().stream()
 				.filter(artistaId -> authenticatedUser.getMapPermisosArtista().get(artistaId).contains(PermisoArtistaEnum.OCUPACIONES.name()))
 				.collect(Collectors.toSet());
 
-		final Specification<Ocupacion> spec
-				= Specification
+		Specification<Ocupacion> specification = Specification
 				.where(OcupacionSpecifications.hasArtistaIdsIn(idsArtistas))
 				.and(OcupacionSpecifications.hasFechaAfter(ocupacionListFilterDto.getFechaDesde().atStartOfDay()))
-				.and(OcupacionSpecifications.hasFechaBefore(ocupacionListFilterDto.getFechaHasta() != null ? ocupacionListFilterDto.getFechaHasta().atTime(23, 59, 59): null))
+				.and(OcupacionSpecifications.hasFechaBefore(ocupacionListFilterDto.getFechaHasta() != null ? ocupacionListFilterDto.getFechaHasta().atTime(23, 59, 59) : null))
 				.and(OcupacionSpecifications.isActivo())
-				.and(OcupacionSpecifications.orderByIdDesc())
 				.and(OcupacionSpecifications.hasAgenciaId(ocupacionListFilterDto.getIdAgencia()))
 				.and(OcupacionSpecifications.hasArtistaId(ocupacionListFilterDto.getIdArtista()))
 				.and(OcupacionSpecifications.hasEstadoNotAnulado())
 				.and(OcupacionSpecifications.hasUsuarioId(isRolRepresentante(user.getUserId(), ocupacionListFilterDto.getIdAgencia()), user.getUserId()))
-				;
+				.and(OcupacionSpecifications.hasGlobalSearch(searchValue));
 
+		if (includeDefaultOrder) {
+			specification = specification.and(OcupacionSpecifications.orderByIdDesc());
+		}
 
-		// Ejecutar la consulta y mapear resultados a OcupacionListRecord
-		return ocupacionRepository.findAll(spec).stream()
-				.map(ocupacion -> new OcupacionListRecord(
-						ocupacion.getId(),
-						ocupacion.getFecha(),
-						ocupacion.getArtista().getId(),
-						ocupacion.getArtista().getNombre(),
-						ocupacion.getImporte().setScale(0).toPlainString(),
-						true,
-						ocupacion.getTipoOcupacion().getNombre(),
-						ocupacion.getProvincia().getNombre(),
-						ocupacion.getMunicipio().getNombre(),
-						ocupacion.getPoblacion(),
-						ocupacion.isMatinal(),
-						ocupacion.isSoloMatinal(),
-						ocupacion.getOcupacionEstado().getNombre(),
-						ocupacion.getUsuario().getId(),
-						ocupacion.getUsuario().getNombre() + " " + ocupacion.getUsuario().getApellidos(),
-						ocupacion.getUsuarioConfirmacion() != null ? ocupacion.getUsuarioConfirmacion().getId() : null,
-						ocupacion.getUsuarioConfirmacion() != null ? ocupacion.getUsuarioConfirmacion().getNombre() + " " + ocupacion.getUsuarioConfirmacion().getApellidos() : null,
-						ocupacion.getFechaCreacion()
+		return specification;
+	}
 
-				))
-				.toList();
-
-
+	private OcupacionListRecord toOcupacionListRecord(Ocupacion ocupacion) {
+		return new OcupacionListRecord(
+				ocupacion.getId(),
+				ocupacion.getFecha(),
+				ocupacion.getArtista().getId(),
+				ocupacion.getArtista().getNombre(),
+				ocupacion.getImporte().setScale(0).toPlainString(),
+				true,
+				ocupacion.getTipoOcupacion().getNombre(),
+				ocupacion.getProvincia().getNombre(),
+				ocupacion.getMunicipio().getNombre(),
+				ocupacion.getPoblacion(),
+				ocupacion.isMatinal(),
+				ocupacion.isSoloMatinal(),
+				ocupacion.getOcupacionEstado().getNombre(),
+				ocupacion.getUsuario().getId(),
+				ocupacion.getUsuario().getNombre() + " " + ocupacion.getUsuario().getApellidos(),
+				ocupacion.getUsuarioConfirmacion() != null ? ocupacion.getUsuarioConfirmacion().getId() : null,
+				ocupacion.getUsuarioConfirmacion() != null ? ocupacion.getUsuarioConfirmacion().getNombre() + " " + ocupacion.getUsuarioConfirmacion().getApellidos() : null,
+				ocupacion.getFechaCreacion()
+		);
 	}
 
 	private boolean isRolRepresentante(Long idUsuario, Long idAgencia){
