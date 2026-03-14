@@ -10,6 +10,7 @@ import es.musicalia.gestmusica.ocupacion.OcupacionSaveDto;
 import es.musicalia.gestmusica.ocupacion.OcupacionService;
 import es.musicalia.gestmusica.tarifa.TarifaAnualDto;
 import es.musicalia.gestmusica.usuario.UserService;
+import es.musicalia.gestmusica.util.DefaultResponseBody;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -209,6 +210,18 @@ public class ArtistaController {
     public ResponseEntity<List<ArtistaRecord>> obtenerArtistasPorAgencia(@PathVariable Long idAgencia) {
         List<ArtistaRecord> artistas = artistaService.findArtistasRecordByIdAgencia(idAgencia);
         return ResponseEntity.ok(artistas);
+    }
+
+    @PostMapping("/{id}/solicitar-activacion-odg")
+    @ResponseBody
+    public ResponseEntity<DefaultResponseBody> solicitarActivacionOdg(@PathVariable("id") Long idArtista) {
+        return ResponseEntity.ok(artistaService.solicitarActivacionOrquestasDeGalicia(idArtista));
+    }
+
+    @PostMapping("/{id}/activar-odg")
+    @ResponseBody
+    public ResponseEntity<DefaultResponseBody> activarOdg(@PathVariable("id") Long idArtista) {
+        return ResponseEntity.ok(artistaService.activarPublicacionOrquestasDeGalicia(idArtista));
     }
 
 

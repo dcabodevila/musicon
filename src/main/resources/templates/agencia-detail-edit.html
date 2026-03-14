@@ -139,20 +139,31 @@
                                             <small class="form-text text-muted">Logo de la empresa. Tamaño ideal 327x250</small>
                                         </div>
                                     </div>
-                                    <div class="mb-3 row">
-                                        <label class="col-form-label col-sm-3 text-sm-end pt-sm-0">Visibilidad de tarifas</label>
-                                        <div class="col-sm-9">
-                                            <label class="form-check m-0">
-                                                <input type="checkbox"  th:field="*{tarifasPublicas}" class="form-check-input">
-                                                <span class="form-check-label">Tarifas públicas</span>
-                                            </label>
+                                        <div class="mb-3 row">
+                                            <label class="col-form-label col-sm-3 text-sm-end pt-sm-0">Visibilidad de tarifas</label>
+
+                                            <div class="col-sm-9">
+                                                <label class="form-check m-0">
+                                                    <input type="checkbox"  th:field="*{tarifasPublicas}" class="form-check-input">
+                                                    <span class="form-check-label">Mostrar en listados</span>
+                                                    <i class="fas fa-info-circle ms-2 info-icon"
+                                                       data-bs-toggle="tooltip"
+                                                       data-bs-placement="right"
+                                                       title="Si está desactivado, la agencia no se mostrará en los listados de presupuestos. Solo se recomienda desactivar en caso de que no queramos aparecer de momento en los listados."
+                                                       ></i>
+                                                </label>
+                                            </div>
                                         </div>
-                                    </div>
                                     <div class="mb-3 row">
                                         <label class="col-form-label col-sm-3 text-sm-end pt-sm-0" for="flexSwitchCheckChecked">Agencia activa</label>
                                         <div class="col-sm-9">
                                             <div class="form-check form-switch">
                                                 <input class="form-check-input" type="checkbox" th:field="*{activo}" id="flexSwitchCheckChecked" checked="" wfd-id="id17">
+                                                <i class="fas fa-info-circle ms-2 info-icon"
+                                                   data-bs-toggle="tooltip"
+                                                   data-bs-placement="right"
+                                                   title="Desactivar para ocultar completamente la agencia. (Dejará de ser accesible)"
+                                                ></i>
                                             </div>
                                         </div>
                                     </div>
@@ -175,4 +186,3 @@
 
 </body>
 </html>
-

@@ -103,16 +103,20 @@ public class OcupacionServiceImpl implements OcupacionService {
 	@Transactional(readOnly = false)
 	public DefaultResponseBody anularOcupacion(long id){
 
-		final Ocupacion ocupacion =  this.ocupacionRepository.findById(id).orElseThrow();
+		Ocupacion ocupacion =  this.ocupacionRepository.findById(id).orElseThrow();
 
-        actualizarTarifasAnularOcupacion(ocupacion.getTarifa());
+        final Tarifa nuevaTarifa = actualizarTarifasAnularOcupacion(ocupacion.getTarifa());
 
         ocupacion.setOcupacionEstado(this.ocupacionEstadoRepository.findById(OcupacionEstadoEnum.ANULADO.getId()).orElseThrow());
-		this.ocupacionRepository.save(ocupacion);
+		ocupacion.setFechaModificacion(LocalDateTime.now());
+		ocupacion.setTarifa(nuevaTarifa);
+		ocupacion = this.ocupacionRepository.save(ocupacion);
 
         if (ocupacion.isPublicadoOdg()){
             try {
                 this.orquestasDeGaliciaService.eliminarActuacion(ocupacion.getId().intValue());
+				ocupacion.setPublicadoOdg(false);
+				this.ocupacionRepository.save(ocupacion);
             } catch (Exception e) {
                 log.error("error inesperado eliminando actuacion de orquestas de galicia", e);
             }
@@ -134,13 +138,13 @@ public class OcupacionServiceImpl implements OcupacionService {
 
 	}
 
-    private void actualizarTarifasAnularOcupacion(Tarifa oldTarifa) {
+    private Tarifa actualizarTarifasAnularOcupacion(Tarifa oldTarifa) {
         Tarifa nuevaTarifa = copiarTarifa(oldTarifa);
 
         oldTarifa.setActivo(Boolean.FALSE);
 
         this.tarifaRepository.save(oldTarifa);
-        this.tarifaRepository.save(nuevaTarifa);
+        return this.tarifaRepository.save(nuevaTarifa);
     }
 
     private static Tarifa copiarTarifa(Tarifa oldTarifa) {
@@ -377,36 +381,37 @@ public class OcupacionServiceImpl implements OcupacionService {
 		return actuacionExterna;
 	}
 
-    private static String obtenerLugarOrquestaDeGalicia(final String municipio, final String poblacion){
+	private static String obtenerLugarOrquestaDeGalicia(final String municipio, final String poblacion){
+		final StringBuilder sb = new StringBuilder();
 
-        final StringBuilder sb = new StringBuilder();
+		final String municipioNormalizado = capitalizarNombreMunicipio(municipio);
+		final String poblacionNormalizada = capitalizarNombreMunicipio(poblacion);
 
-        if (poblacion!=null && !poblacion.isEmpty() && !poblacion.equalsIgnoreCase("PROVISIONAL")){
+		if (poblacion != null && !poblacion.isEmpty() && !poblacion.equalsIgnoreCase("PROVISIONAL")) {
+			// Comparar sin considerar el case
+			final boolean poblacionCoincideConMunicipio = municipioNormalizado != null &&
+					(poblacionNormalizada.equalsIgnoreCase(municipioNormalizado) ||
+							municipioNormalizado.toUpperCase().contains(poblacionNormalizada.toUpperCase()));
 
-			if (poblacion.equalsIgnoreCase(municipio.toUpperCase())){
-				sb.append(municipio);
-			}
-			else {
-				String poblacionCaps = capitalizarNombreMunicipio(poblacion);
+			if (poblacionCoincideConMunicipio) {
+				// Si coinciden, mostrar solo el municipio
+				sb.append(municipioNormalizado);
+			} else {
+				// Si no coinciden, mostrar población, municipio
+				sb.append(poblacionNormalizada);
 
-				sb.append(poblacionCaps);
-
-				if (municipio!=null && !municipio.isEmpty()){
-					sb.append(", ").append(municipio);
+				if (municipioNormalizado != null && !municipioNormalizado.isEmpty()) {
+					sb.append(", ").append(municipioNormalizado);
 				}
-
 			}
+		} else {
+			// Si no hay población o es provisional, mostrar solo municipio
+			sb.append(municipioNormalizado);
+		}
 
-        }
-        else {
-            sb.append(municipio);
-        }
+		return sb.toString();
+	}
 
-
-        return sb.toString();
-
-
-    }
 
 	private static String capitalizarNombreMunicipio(String nombre) {
 		if (nombre == null || nombre.isEmpty()) {
@@ -420,24 +425,46 @@ public class OcupacionServiceImpl implements OcupacionService {
 				"e", "y", "o", "a"
 		);
 
-		String[] palabras = nombre.trim().toLowerCase().split("\\s+");
-		StringBuilder sb = new StringBuilder();
+		String[] partes = nombre.trim().split(",");
 
-		for (int i = 0; i < palabras.length; i++) {
-			String palabra = palabras[i];
-			// La primera palabra siempre va en mayúscula
-			if (i == 0 || !minusculas.contains(palabra)) {
-				sb.append(Character.toUpperCase(palabra.charAt(0)))
-						.append(palabra.substring(1));
-			} else {
-				sb.append(palabra);
+		// Si hay coma, reorganizar: la parte después de la coma va al principio
+		if (partes.length > 1) {
+			// Invertir el orden: [parte_después_coma, parte_antes_coma]
+			String[] partesReorganizadas = new String[partes.length];
+			for (int i = 0; i < partes.length; i++) {
+				partesReorganizadas[i] = partes[partes.length - 1 - i];
 			}
-			if (i < palabras.length - 1) {
-				sb.append(" ");
+			partes = partesReorganizadas;
+		}
+
+		StringBuilder sbFinal = new StringBuilder();
+
+		for (int p = 0; p < partes.length; p++) {
+			String parte = partes[p].trim();
+			String[] palabras = parte.toLowerCase().split("\\s+");
+			StringBuilder sb = new StringBuilder();
+
+			for (int i = 0; i < palabras.length; i++) {
+				String palabra = palabras[i];
+				// La primera palabra de cada parte siempre va en mayúscula
+				if (i == 0 || !minusculas.contains(palabra)) {
+					sb.append(Character.toUpperCase(palabra.charAt(0)))
+							.append(palabra.substring(1));
+				} else {
+					sb.append(palabra);
+				}
+				if (i < palabras.length - 1) {
+					sb.append(" ");
+				}
+			}
+
+			sbFinal.append(sb.toString());
+			if (p < partes.length - 1) {
+				sbFinal.append(" ");
 			}
 		}
 
-		return sb.toString();
+		return sbFinal.toString();
 	}
 
 	@Override
@@ -789,6 +816,7 @@ public class OcupacionServiceImpl implements OcupacionService {
 				.provincia(ocupacion.provincia() != null ? ocupacion.provincia() : "")
 				.matinal(ocupacion.matinal() ? "Sí" : "No")
 				.soloMatinal(ocupacion.soloMatinal() ? "Sí" : "No")
+				.estado(ocupacion.estado() != null ? ocupacion.estado() : "")
 				.nombreComercialRepresentante(usuario.getNombreComercial() != null ? usuario.getNombreComercial() : "")
 				.telefonoRepresentante(usuario.getTelefono() != null ? usuario.getTelefono() : "")
 				.build();

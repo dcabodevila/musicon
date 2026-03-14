@@ -8,16 +8,23 @@ import es.musicalia.gestmusica.contacto.Contacto;
 import es.musicalia.gestmusica.contacto.ContactoRepository;
 import es.musicalia.gestmusica.localizacion.CcaaRepository;
 import es.musicalia.gestmusica.localizacion.CodigoNombreDto;
+import es.musicalia.gestmusica.mail.EmailService;
+import es.musicalia.gestmusica.mensaje.Mensaje;
+import es.musicalia.gestmusica.mensaje.MensajeService;
 import es.musicalia.gestmusica.rol.RolEnum;
 import es.musicalia.gestmusica.tipoartista.TipoArtistaRepository;
 import es.musicalia.gestmusica.tipoescenario.TipoEscenarioRepository;
+import es.musicalia.gestmusica.usuario.EnvioEmailException;
+import es.musicalia.gestmusica.usuario.UserService;
 import es.musicalia.gestmusica.usuario.Usuario;
 import es.musicalia.gestmusica.usuario.UsuarioRepository;
+import es.musicalia.gestmusica.util.DefaultResponseBody;
 import es.musicalia.gestmusica.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,11 +45,14 @@ public class ArtistaServiceImpl implements ArtistaService {
 	private final AgenciaRepository agenciaRepository;
 	private final AccesoService accesoService;
 	private final ArtistaMapper artistaMapper;
+    private final EmailService emailService;
+    private final MensajeService mensajeService;
+    private final UserService userService;
 
 	public ArtistaServiceImpl(ArtistaRepository artistaRepository, UsuarioRepository usuarioRepository, ContactoRepository agenciaContactoRepository,
                               TipoEscenarioRepository tipoEscenarioRepository,
                               TipoArtistaRepository tipoArtistaRepository,
-                              CcaaRepository ccaaRepository, AgenciaRepository agenciaRepository, AccesoService accesoService, ArtistaMapper artistaMapper){
+                              CcaaRepository ccaaRepository, AgenciaRepository agenciaRepository, AccesoService accesoService, ArtistaMapper artistaMapper, EmailService emailService, MensajeService mensajeService, UserService userService){
 		this.artistaRepository = artistaRepository;
 		this.usuarioRepository = usuarioRepository;
 		this.agenciaContactoRepository = agenciaContactoRepository;
@@ -53,6 +63,9 @@ public class ArtistaServiceImpl implements ArtistaService {
 
         this.accesoService = accesoService;
         this.artistaMapper = artistaMapper;
+        this.emailService = emailService;
+        this.mensajeService = mensajeService;
+        this.userService = userService;
 
     }
     @Override
@@ -195,6 +208,7 @@ public class ArtistaServiceImpl implements ArtistaService {
 		artista.setBiografia(dto.getBiografia());
 		artista.setCondicionesContratacion(dto.getCondicionesContratacion());
 		artista.setPermiteOrquestasDeGalicia(dto.isPermiteOrquestasDeGalicia());
+        artista.setSincronizarOdg(dto.isSincronizarOdg());
         artista.setGoogle(StringUtils.removeHttp(dto.getGoogle()));
         artista.setTiktok(StringUtils.removeHttp(dto.getTiktok()));
         artista.setMusica(StringUtils.removeHttp(dto.getMusica()));
@@ -260,6 +274,122 @@ public class ArtistaServiceImpl implements ArtistaService {
 	public List<ArtistaRecord> findArtistasRecordByIdAgencia(Long idAgencia) {
 		return artistaRepository.findAllArtistasRecordByIdAgencia(idAgencia);
 	}
+
+    @Override
+    @Transactional(readOnly = false)
+    public DefaultResponseBody solicitarActivacionOrquestasDeGalicia(Long idArtista) {
+        Artista artista = artistaRepository.findById(idArtista).orElseThrow();
+
+        if (artista.isPermiteOrquestasDeGalicia()) {
+            return DefaultResponseBody.builder()
+                    .success(false)
+                    .messageType("warning")
+                    .message("El artista ya tiene activada la publicación en OrquestasDeGalicia")
+                    .build();
+        }
+
+        if (artista.isSolicitudOdgPendiente()) {
+            return DefaultResponseBody.builder()
+                    .success(false)
+                    .messageType("warning")
+                    .message("Ya existe una solicitud de activación pendiente para este artista")
+                    .build();
+        }
+
+        String asunto = "Solicitud activación OrquestasDeGalicia";
+        String cuerpo = "Solicito activar la publicación de orquestas de galicia al artista "
+                + artista.getNombre() + " con id " + artista.getId();
+
+        artista.setSolicitudOdgPendiente(true);
+        artista.setSolicitudOdgAprobada(false);
+        artistaRepository.save(artista);
+
+        try {
+            emailService.enviarCorreoPlano("info@festia.es", asunto, cuerpo);
+        } catch (EnvioEmailException e) {
+            log.error("Error enviando solicitud de activación ODG para artista {}", idArtista, e);
+            return DefaultResponseBody.builder()
+                    .success(true)
+                    .messageType("warning")
+                    .message("Solicitud registrada, pero no se ha podido enviar el correo a Festia")
+                    .build();
+        }
+
+        return DefaultResponseBody.builder()
+                .success(true)
+                .messageType("success")
+                .message("Solicitud de activación enviada correctamente")
+                .build();
+    }
+
+    @Override
+    @Transactional(readOnly = false)
+    public DefaultResponseBody activarPublicacionOrquestasDeGalicia(Long idArtista) {
+        if (!esAdmin()) {
+            return DefaultResponseBody.builder()
+                    .success(false)
+                    .messageType("error")
+                    .message("No tienes permisos para activar Orquestas de Galicia")
+                    .build();
+        }
+
+        Artista artista = artistaRepository.findById(idArtista).orElseThrow();
+
+        if (!artista.isSolicitudOdgPendiente() || artista.isSolicitudOdgAprobada()) {
+            return DefaultResponseBody.builder()
+                    .success(false)
+                    .messageType("warning")
+                    .message("No hay una solicitud pendiente de aprobación para este artista")
+                    .build();
+        }
+
+        artista.setSolicitudOdgPendiente(false);
+        artista.setSolicitudOdgAprobada(true);
+        artista.setPermiteOrquestasDeGalicia(true);
+        artistaRepository.save(artista);
+
+        try {
+            enviarNotificacionInternaActivacionOdg(artista);
+        } catch (Exception e) {
+            log.error("Error enviando notificación interna de activación ODG para artista {}", idArtista, e);
+            return DefaultResponseBody.builder()
+                    .success(true)
+                    .messageType("warning")
+                    .message("Publicación activada, pero no se pudo enviar la notificación interna")
+                    .build();
+        }
+
+        return DefaultResponseBody.builder()
+                .success(true)
+                .messageType("success")
+                .message("Publicación en OrquestasDeGalicia activada correctamente")
+                .build();
+    }
+
+    private boolean esAdmin() {
+        return SecurityContextHolder.getContext().getAuthentication() != null
+                && SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .anyMatch(authority -> "ACCESO_PANEL_ADMIN".equals(authority.getAuthority()));
+    }
+
+    private void enviarNotificacionInternaActivacionOdg(Artista artista) {
+        if (artista.getAgencia() == null || artista.getAgencia().getUsuario() == null) {
+            return;
+        }
+
+        Usuario receptor = artista.getAgencia().getUsuario();
+        Usuario remite = userService.obtenerUsuarioAutenticado().orElse(receptor);
+
+        Mensaje mensaje = new Mensaje();
+        mensaje.setUsuarioRemite(remite);
+        mensaje.setUsuarioReceptor(receptor);
+        mensaje.setAsunto("Publicación desde festia.es activada");
+        mensaje.setMensaje("La solicitud para publicar actuaciones desde festia.es a OrquestasDeGalicia fue activada, ya puedes publicar cualquiera de las ocupaciones.");
+        mensaje.setImagen("fa-check-circle text-success");
+        mensaje.setUrlEnlace("/artista/" + artista.getId());
+
+        mensajeService.enviarMensaje(mensaje, receptor.getId());
+    }
 
 
 }

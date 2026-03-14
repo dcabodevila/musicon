@@ -2,6 +2,7 @@ package es.musicalia.gestmusica.artista;
 
 import es.musicalia.gestmusica.localizacion.CodigoNombreDto;
 import es.musicalia.gestmusica.usuario.Usuario;
+import es.musicalia.gestmusica.util.DefaultResponseBody;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -28,4 +29,8 @@ public interface ArtistaService {
     List<ArtistaRecord> listaArtistaRecordByIdAgencia(Long idAgencia);
 
     List<ArtistaRecord> findArtistasRecordByIdAgencia(Long idAgencia);
+
+    DefaultResponseBody solicitarActivacionOrquestasDeGalicia(Long idArtista);
+
+    DefaultResponseBody activarPublicacionOrquestasDeGalicia(Long idArtista);
 }
