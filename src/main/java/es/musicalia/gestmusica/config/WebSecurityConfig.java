@@ -67,8 +67,8 @@ public class WebSecurityConfig {
                     "default-src 'self'; " +
                         "img-src 'self' data: https: http://res.cloudinary.com; " +
                         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; " +
-                        "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; " +
-                        "font-src 'self' https://fonts.gstatic.com; " +
+                        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com; " +
+                        "font-src 'self' data: https://fonts.gstatic.com; " +
                         "connect-src 'self'; " +
                         "frame-ancestors 'none'; " +
                         "form-action 'self'; " +
