@@ -32,6 +32,22 @@ public interface EventoPublicoService {
     List<EventoPublicoDto> obtenerEventosPublicosPorProvincia(String provincia, LocalDate fechaDesde, LocalDate fechaHasta);
 
     /**
+     * Obtiene eventos publicos con filtros combinables.
+     * @param provincia Nombre de provincia (opcional)
+     * @param municipio Nombre de municipio (opcional)
+     * @param idArtista ID de artista (opcional)
+     * @param fechaDesde Fecha desde (opcional)
+     * @param fechaHasta Fecha hasta (opcional)
+     * @return Lista de eventos publicos filtrados
+     */
+    List<EventoPublicoDto> obtenerEventosPublicosFiltrados(
+        String provincia,
+        String municipio,
+        Long idArtista,
+        LocalDate fechaDesde,
+        LocalDate fechaHasta);
+
+    /**
      * Obtiene todos los eventos públicos para el sitemap
      * @return Lista de todos los eventos públicos futuros
      */

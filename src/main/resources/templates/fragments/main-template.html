@@ -9,7 +9,7 @@
 		  content="https://festia.es/logo.png"/>
 	<meta property="og:url" content="https://festia.es/"/>
 
-    <div th:fragment="header-css">
+    <th:block th:fragment="header-css">
 
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -30,7 +30,7 @@
 		<link rel="apple-touch-icon" sizes="180x180" th:href="@{/apple-icon-180x180.png}">
 
 
-	</div>
+	</th:block>
 	<style>
 		body {
 			opacity: 0;
@@ -288,29 +288,29 @@
 
 </div>
 
-<div th:fragment="footer-public">
+<!--<div th:fragment="footer-public">-->
 
-	<footer class="footer">
-		<div class="container-fluid">
-			<div class="row text-muted">
+<!--	<footer class="footer">-->
+<!--		<div class="container-fluid">-->
+<!--			<div class="row text-muted">-->
 
-				<div class="col-12 text-center">
-					<p class="mb-0">
-						<a href="https://festia.es/info" target="_blank" class="text-muted"><i
-								class="fas fa-info-circle me-1"></i><strong>Información sobre festia</strong></a>
-					</p>
-				</div>
-			</div>
-		</div>
-		<script th:src="@{/adminkit/js/app.js}"></script>
-		<script th:src="@{/adminkit/flatpickr/es.js}"></script>
-		<script th:src="@{/js/moment.js}"></script>
-		<script th:src="@{/js/comun.js}"></script>
-		<script th:src="@{/js/service-worker.js}"></script>
+<!--				<div class="col-12 text-center">-->
+<!--					<p class="mb-0">-->
+<!--						<a href="https://festia.es/info" target="_blank" class="text-muted"><i-->
+<!--								class="fas fa-info-circle me-1"></i><strong>Información sobre festia</strong></a>-->
+<!--					</p>-->
+<!--				</div>-->
+<!--			</div>-->
+<!--		</div>-->
+<!--		<script th:src="@{/adminkit/js/app.js}"></script>-->
+<!--		<script th:src="@{/adminkit/flatpickr/es.js}"></script>-->
+<!--		<script th:src="@{/js/moment.js}"></script>-->
+<!--		<script th:src="@{/js/comun.js}"></script>-->
+<!--		<script th:src="@{/js/service-worker.js}"></script>-->
 
-	</footer>
+<!--	</footer>-->
 
 
-</div>
+<!--</div>-->
 </body>
 </html>

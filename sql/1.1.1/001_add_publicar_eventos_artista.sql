@@ -1,0 +1,2 @@
+ALTER TABLE gestmusica.artista
+    ADD COLUMN IF NOT EXISTS publicar_eventos BOOLEAN NOT NULL DEFAULT FALSE;

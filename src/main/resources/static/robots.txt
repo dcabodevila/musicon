@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://festia.es/eventos/sitemap.xml

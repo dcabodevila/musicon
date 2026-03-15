@@ -66,11 +66,13 @@ public class ArtistaDto {
     private boolean sincronizarOdg;
     private boolean solicitudOdgPendiente;
     private boolean solicitudOdgAprobada;
+    private Boolean publicarEventos;
 
 
     public ArtistaDto(){
         activo=true;
         tarifasPublicas = true;
+        publicarEventos = false;
     }
 
  }

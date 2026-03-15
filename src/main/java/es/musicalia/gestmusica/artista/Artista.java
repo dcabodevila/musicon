@@ -122,4 +122,7 @@ public class Artista {
     @Column(name = "solicitud_odg_aprobada")
     private boolean solicitudOdgAprobada;
 
+    @Column(name = "publicar_eventos")
+    private boolean publicarEventos;
+
 }

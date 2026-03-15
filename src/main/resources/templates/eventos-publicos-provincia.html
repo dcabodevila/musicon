@@ -5,14 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Título -->
     <title th:text="${titulo}">Eventos en provincia</title>
+    <meta name="description" th:content="${'Eventos musicales en ' + provincia}">
+    <meta name="robots" th:content="${metaRobots}">
+    <link rel="canonical" th:href="${canonicalUrl}">
 
-    <!-- Meta tags SEO -->
-    <meta name="description" th:content="'Eventos musicales en ' + ${provincia}">
-
-    <!-- CSS del proyecto -->
-    <div th:replace="~{fragments/main-template :: header-css}"/>
+    <th:block th:replace="~{fragments/main-template :: header-css}"></th:block>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 
 </head>
@@ -23,7 +21,6 @@
     <div class="main">
         <main class="content">
             <div class="container-fluid p-0">
-                <!-- Hero Section -->
                 <div class="row mb-4">
                     <section class="hero-section animate__animated animate__fadeIn"
                              style="max-height: 300px !important; height: 300px !important; min-height: 300px !important;">
@@ -36,7 +33,6 @@
                     </section>
                 </div>
 
-                <!-- Filtros -->
                 <div class="row mb-4">
                     <div class="col-12">
                         <div class="card">
@@ -46,30 +42,53 @@
                                 </h5>
                             </div>
                             <div class="card-body">
-                                <form method="get" th:action="@{/eventos/provincia/{prov}(prov=${provincia})}">
+                                <form method="get" th:action="@{/eventos}">
                                     <div class="row">
                                         <div class="col-md-3">
-                                            <label class="form-label">Municipio</label>
-                                            <select class="form-select" name="municipio">
+                                            <label class="form-label" for="idProvincia">Provincia</label>
+                                            <select id="idProvincia" class="form-select" name="provincia">
+                                                <option value="">Todas las provincias</option>
+                                                <option th:each="prov : ${provincias}"
+                                                        th:value="${prov}"
+                                                        th:text="${prov}"
+                                                        th:selected="${prov == provincia}">Provincia</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label" for="idMunicipio">Municipio</label>
+                                            <select id="idMunicipio" class="form-select" name="municipio">
                                                 <option value="">Todos los municipios</option>
-                                                <option th:each="mun : ${municipios}"
-                                                        th:value="${mun}"
-                                                        th:text="${mun}"
-                                                        th:selected="${mun == municipio}">Municipio</option>
+                                                <option th:each="mun : ${municipiosFiltro}"
+                                                        th:value="${mun.nombre}"
+                                                        th:text="${mun.nombre}"
+                                                        th:attr="data-provincia=${mun.provincia}"
+                                                        th:selected="${mun.nombre == municipio}">Municipio</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Artista</label>
+                                            <select id="idArtista" class="form-select" name="idArtista">
+                                                <option value="">Todos los artistas</option>
+                                                <option th:each="art : ${artistasDisponibles}"
+                                                        th:value="${art.idArtista}"
+                                                        th:text="${art.nombreArtista}"
+                                                        th:selected="${idArtistaSeleccionado != null and art.idArtista == idArtistaSeleccionado}">Artista</option>
                                             </select>
                                         </div>
                                         <div class="col-md-3">
                                             <label class="form-label">Fecha desde</label>
-                                            <input type="date" class="form-control" name="desde"
+                                            <input id="idFechaDesde" type="date" class="form-control" name="desde"
                                                    th:value="${fechaDesde}"
                                                    th:max="${fechaHasta}">
                                         </div>
                                         <div class="col-md-3">
-                                            <label class="form-label">Fecha hasta (máx. 6 meses)</label>
-                                            <input type="date" class="form-control" name="hasta"
+                                            <label class="form-label">Fecha hasta</label>
+                                            <input id="idFechaHasta" type="date" class="form-control" name="hasta"
                                                    th:value="${fechaHasta}"
                                                    th:min="${fechaDesde}">
                                         </div>
+                                    </div>
+                                    <div class="row mt-3">
                                         <div class="col-md-3 d-flex align-items-end">
                                             <button type="submit" class="btn btn-primary w-100">
                                                 <i class="fas fa-search me-1"></i> Buscar
@@ -82,11 +101,9 @@
                     </div>
                 </div>
 
-                <!-- Lista de eventos agrupados por día -->
                 <div class="row" th:if="${eventosPorDia != null and !eventosPorDia.isEmpty()}">
                     <div class="col-12">
                         <div th:each="diaEntry : ${eventosPorDia}" class="mb-4 animate__animated animate__fadeIn">
-                            <!-- Encabezado del día -->
                             <div class="mb-3">
                                 <h3 class="text-primary">
                                     <i class="fas fa-calendar-day me-2"></i>
@@ -95,7 +112,6 @@
                                 <span class="badge bg-secondary" th:text="${#lists.size(diaEntry.value)} + ' evento(s)'">0 eventos</span>
                             </div>
 
-                            <!-- Cards de eventos del día -->
                             <div class="row">
                                 <div th:each="evento : ${diaEntry.value}"
                                      class="col-12 col-md-6 col-lg-4 col-xl-3 mb-3">
@@ -115,6 +131,18 @@
                                             </div>
                                         </div>
                                         <div class="card-body">
+                                            <div style="min-height: 180px; display: flex; align-items: center; justify-content: center;">
+                                                <img class="card-img-top img-max-height"
+                                                     th:if="${evento.logoArtista != null and !#strings.isEmpty(evento.logoArtista)}"
+                                                     th:src="@{${evento.logoArtista}}"
+                                                     th:alt="${'Logo de ' + evento.nombreArtista}"
+                                                     style="max-height: 170px;">
+                                                <img class="card-img-top img-max-height"
+                                                     th:if="${evento.logoArtista == null or #strings.isEmpty(evento.logoArtista)}"
+                                                     th:src="@{/logo/logo_transparente.png}"
+                                                     th:alt="${'Logo de ' + evento.nombreArtista}"
+                                                     style="max-height: 170px;">
+                                            </div>
                                             <div class="d-flex align-items-center mb-2">
                                                 <div class="stat text-primary me-2">
                                                     <i class="align-middle" data-feather="clock"></i>
@@ -126,7 +154,7 @@
                                             </div>
 
                                             <ul class="list-unstyled mb-0">
-                                                <li class="mb-1">
+                                                <li class="mb-1" th:if="${evento.lugar != null and !#strings.isEmpty(evento.lugar)}">
                                                     <span class="fas fa-map-marker-alt fa-fw me-1 text-muted"></span>
                                                     <span th:text="${evento.lugar}">Lugar</span>
                                                 </li>
@@ -137,7 +165,7 @@
                                             </ul>
                                         </div>
                                         <div class="card-footer">
-                                            <a th:href="@{/eventos/evento/{id}(id=${evento.id})}"
+                                            <a th:href="@{/eventos/evento/{id}-{slug}(id=${evento.id},slug=${evento.slug})}"
                                                class="btn btn-primary btn-pill w-100">
                                                 <i class="fas fa-eye me-1"></i> Ver detalles
                                             </a>
@@ -149,7 +177,6 @@
                     </div>
                 </div>
 
-                <!-- Mensaje cuando no hay eventos -->
                 <div class="row" th:if="${eventos == null or eventos.isEmpty()}">
                     <div class="col-12">
                         <div class="card">
@@ -157,16 +184,15 @@
                                 <i class="fas fa-calendar-times fa-4x text-muted mb-3"></i>
                                 <h3>No hay eventos programados</h3>
                                 <p class="text-muted">
-                                    No hay eventos públicos en <strong th:text="${provincia}">la provincia</strong>
-                                    <span th:if="${municipio != null}"> en el municipio de <strong th:text="${municipio}">el municipio</strong></span>
-                                    en el rango de fechas seleccionado.
+                                    No hay eventos publicos en <strong th:text="${provincia}">la provincia</strong>
+                                    <span th:if="${municipio != null}"> para el municipio <strong th:text="${municipio}">municipio</strong></span>
+                                    con los filtros seleccionados.
                                 </p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Footer informativo -->
                 <div class="row mt-4 mb-4">
                     <div class="col-12 text-center">
                         <a th:href="@{/eventos}" class="btn btn-secondary mb-3">
@@ -175,8 +201,8 @@
                         <br>
                         <small class="text-muted">
                             <i class="fas fa-check-circle text-success"></i>
-                            Información actualizada proporcionada por <strong>festia.es</strong><br>
-                            Plataforma profesional de gestión de eventos musicales
+                            Informacion actualizada proporcionada por <strong>festia.es</strong><br>
+                            Plataforma profesional de gestion de eventos musicales
                         </small>
                     </div>
                 </div>
@@ -189,14 +215,7 @@
 
 <script th:src="@{/adminkit/js/app.js}"></script>
 <script th:src="@{/adminkit/flatpickr/es.js}"></script>
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        flatpickr("input[type='date']", {
-            locale: "es",
-            dateFormat: "Y-m-d"
-        });
-    });
-</script>
+<script type="text/javascript" th:src="@{/js/eventos.js}"></script>
 </body>
 
 </html>

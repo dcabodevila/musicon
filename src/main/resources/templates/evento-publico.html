@@ -5,25 +5,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Título SEO -->
     <title th:text="${titulo}">Evento Musical</title>
-
-    <!-- Meta tags para SEO -->
     <meta name="description" th:content="${descripcion}">
-    <meta name="keywords" th:content="${evento.nombreArtista} + ', ' + ${evento.municipio} + ', ' + ${evento.provincia} + ', orquesta, música, evento, fiesta'">
+    <meta name="keywords" th:content="${evento.nombreArtista + ', ' + evento.municipio + ', ' + evento.provincia + ', orquesta, musica, evento, fiesta'}">
+    <meta name="robots" th:content="${metaRobots}">
+    <link rel="canonical" th:href="${canonicalUrl}">
 
-    <!-- Open Graph para redes sociales -->
     <meta property="og:title" th:content="${titulo}">
     <meta property="og:description" th:content="${descripcion}">
     <meta property="og:type" content="event">
     <meta property="og:url" th:content="${urlEvento}">
+    <meta property="og:image" content="https://res.cloudinary.com/hseoceuyz/image/upload/v1760835633/landing-festia_epbr7a.png">
 
-    <!-- Schema.org JSON-LD para Google Events -->
     <script type="application/ld+json" th:utext="${jsonLd}">
     </script>
 
-    <!-- CSS del proyecto -->
-    <div th:replace="~{fragments/main-template :: header-css}"/>
+    <th:block th:replace="~{fragments/main-template :: header-css}"></th:block>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 </head>
 
@@ -33,7 +30,6 @@
     <div class="main">
         <main class="content">
             <div class="container-fluid p-0">
-                <!-- Hero Section -->
                 <div class="row mb-4">
                     <section class="hero-section animate__animated animate__fadeIn"
                              style="max-height: 300px !important; height: 300px !important; min-height: 300px !important;">
@@ -46,15 +42,26 @@
                     </section>
                 </div>
 
-                <!-- Contenido del evento -->
                 <div class="row">
                     <div class="col-12 col-lg-8 offset-lg-2">
                         <div class="card card-max-width animate__animated animate__fadeIn" style="max-width: 100%;">
                             <div class="card-header">
-                                <h5 class="card-title mb-0">Detalles del evento</h5>
+                                <h1 class="card-title mb-0" th:text="${evento.encabezadoPrincipal}">Detalles del evento</h1>
                             </div>
                             <div class="card-body">
-                                <!-- Badges de horario -->
+                                <div style="min-height: 220px; display: flex; align-items: center; justify-content: center;">
+                                    <img class="card-img-top img-max-height"
+                                         th:if="${evento.logoArtista != null and !#strings.isEmpty(evento.logoArtista)}"
+                                         th:src="@{${evento.logoArtista}}"
+                                         th:alt="${'Logo de ' + evento.nombreArtista}"
+                                         style="max-height: 300px;max-width: 300px;">
+                                    <img class="card-img-top img-max-height "
+                                         th:if="${evento.logoArtista == null or #strings.isEmpty(evento.logoArtista)}"
+                                         th:src="@{/logo/logo_transparente.png}"
+                                         th:alt="${'Logo de ' + evento.nombreArtista}"
+                                         style="max-height: 300px;max-width: 300px;">
+                                </div>
+
                                 <div class="mb-3">
                                     <span class="badge bg-success me-1" th:if="${evento.matinal}">
                                         <i class="fas fa-sun"></i> Matinal
@@ -67,7 +74,6 @@
                                     </span>
                                 </div>
 
-                                <!-- Fecha y hora -->
                                 <div class="mb-3">
                                     <div class="d-flex align-items-center mb-2">
                                         <div class="stat text-primary me-2">
@@ -88,9 +94,8 @@
 
                                 <hr>
 
-                                <!-- Ubicación -->
                                 <ul class="list-unstyled mb-0">
-                                    <li class="mb-2">
+                                    <li class="mb-2" th:if="${evento.lugar != null and !#strings.isEmpty(evento.lugar)}">
                                         <span class="fas fa-map-marker-alt fa-fw me-2 text-primary"></span>
                                         <strong>Lugar:</strong>
                                         <span th:text="${evento.lugar}">Lugar del evento</span>
@@ -107,12 +112,11 @@
                                     </li>
                                 </ul>
 
-                                <!-- Información adicional -->
                                 <div th:if="${evento.informacionAdicional != null and !#strings.isEmpty(evento.informacionAdicional)}">
                                     <hr>
                                     <div class="alert alert-info" role="alert">
                                         <i class="fas fa-info-circle me-2"></i>
-                                        <span th:text="${evento.informacionAdicional}">Información adicional</span>
+                                        <span th:text="${evento.informacionAdicional}">Informacion adicional</span>
                                     </div>
                                 </div>
                             </div>
@@ -121,17 +125,16 @@
                                     <i class="fas fa-arrow-left me-1"></i> Todos los eventos
                                 </a>
                                 <a th:href="@{/eventos/artista/{id}(id=${evento.idArtista})}" class="btn btn-primary">
-                                    Más de <span th:text="${evento.nombreArtista}">este artista</span>
+                                    Mas de <span th:text="${evento.nombreArtista}">este artista</span>
                                     <i class="fas fa-arrow-right ms-1"></i>
                                 </a>
                             </div>
                         </div>
 
-                        <!-- Footer informativo -->
                         <div class="text-center mt-4 mb-4">
                             <small class="text-muted">
                                 <i class="fas fa-check-circle text-success"></i>
-                                Información verificada proporcionada por <strong>festia.es</strong>
+                                Informacion verificada proporcionada por <strong>festia.es</strong>
                             </small>
                         </div>
                     </div>
