@@ -73,6 +73,9 @@ public class EventoPublicoServiceImpl implements EventoPublicoService {
         spec = spec.and((root, query, cb) -> cb.isTrue(root.get("activo")));
         spec = spec.and((root, query, cb) -> cb.isTrue(root.get("artista").get("activo")));
         spec = spec.and((root, query, cb) -> cb.isTrue(root.get("artista").get("publicarEventos")));
+        spec = spec.and((root, query, cb) -> cb.isNotNull(root.get("municipio")));
+        spec = spec.and((root, query, cb) -> cb.notEqual(cb.trim(root.get("municipio").get("nombre")), ""));
+        spec = spec.and((root, query, cb) -> cb.notLike(cb.lower(root.get("provincia").get("nombre")), "%provisional%"));
         spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("fecha"), LocalDateTime.now()));
 
         return ocupacionRepository.findAll(spec).stream()
@@ -136,6 +139,13 @@ public class EventoPublicoServiceImpl implements EventoPublicoService {
         spec = spec.and((root, query, cb) -> cb.isTrue(root.get("activo")));
         spec = spec.and((root, query, cb) -> cb.isTrue(root.get("artista").get("activo")));
         spec = spec.and((root, query, cb) -> cb.isTrue(root.get("artista").get("publicarEventos")));
+        spec = spec.and((root, query, cb) -> cb.isNotNull(root.get("municipio")));
+        spec = spec.and((root, query, cb) -> cb.notEqual(cb.trim(root.get("municipio").get("nombre")), ""));
+        spec = spec.and((root, query, cb) -> cb.notLike(cb.lower(root.get("provincia").get("nombre")), "%provisional%"));
+        spec = spec.and((root, query, cb) -> cb.or(
+            cb.isNull(root.get("lugar")),
+            cb.notLike(cb.lower(root.get("lugar")), "%provisional%")
+        ));
 
         if (provincia != null && !provincia.isBlank()) {
             String provinciaLower = provincia.toLowerCase();
