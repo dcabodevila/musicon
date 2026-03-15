@@ -68,6 +68,15 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="mb-3 row">
+                                    <label class="col-form-label col-sm-2">Agrupación</label>
+                                    <div class="col-sm-3">
+                                        <select id="modoAgrupacion" th:field="*{porDia}" class="form-control">
+                                            <option th:value="false">Mes</option>
+                                            <option th:value="true">Día</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="text-center mb-3">

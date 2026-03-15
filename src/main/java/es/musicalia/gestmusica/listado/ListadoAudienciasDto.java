@@ -19,5 +19,13 @@ public class ListadoAudienciasDto {
     private LocalDate fechaDesde;
     @DateTimeFormat(pattern = "dd-MM-yyyy")
     private LocalDate fechaHasta;
+    private Boolean porDia;
+
+    public ListadoAudienciasDto(Long idAgencia, LocalDate fechaDesde, LocalDate fechaHasta) {
+        this.idAgencia = idAgencia;
+        this.fechaDesde = fechaDesde;
+        this.fechaHasta = fechaHasta;
+        this.porDia = false;
+    }
 
 }

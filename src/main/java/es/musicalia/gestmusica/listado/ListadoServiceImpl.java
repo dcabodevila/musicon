@@ -101,6 +101,25 @@ public class ListadoServiceImpl implements ListadoService {
     }
 
     @Override
+    public List<ListadosPorMesDto> obtenerListadosPorPeriodo(List<ListadoRecord> listados, boolean porDia) {
+        if (!porDia) {
+            return obtenerListadosPorMes(listados);
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        Map<LocalDate, Long> contadorPorDia = listados.stream()
+                .collect(Collectors.groupingBy(
+                        listado -> listado.fechaCreacion().toLocalDate(),
+                        TreeMap::new,
+                        Collectors.counting()
+                ));
+
+        return contadorPorDia.entrySet().stream()
+                .map(entry -> new ListadosPorMesDto(entry.getKey().format(formatter), entry.getValue()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<CodigoNombreDto> findAllTiposOcupacion() {
         return Arrays.stream(TipoOcupacionEnum.values())
                 .map(tipo -> new CodigoNombreDto(tipo.getId(), tipo.getDescripcion()))

@@ -106,10 +106,14 @@ public class ListadoController {
         ListadoAudienciasDto listadoAudienciasDto = ListadoAudienciasDto.builder()
                 .fechaDesde(LocalDate.now().minusMonths(2).withDayOfMonth(1))
                 .fechaHasta(LocalDate.now())
+                .porDia(false)
                 .build();
         List<ListadoRecord> listadosGenerados = this.listadoService.obtenerListadoEntreFechas(listadoAudienciasDto);
         try {
-            List<ListadosPorMesDto> listadosPorMes = listadoService.obtenerListadosPorMes(listadosGenerados);
+            List<ListadosPorMesDto> listadosPorMes = listadoService.obtenerListadosPorPeriodo(
+                    listadosGenerados,
+                    Boolean.TRUE.equals(listadoAudienciasDto.getPorDia())
+            );
             List<Map<String, Object>> chartDataList = convertirListadosPorMesAMap(listadosPorMes);
             
             // Si no hay datos, crear un elemento con valor 0
@@ -219,7 +223,10 @@ public class ListadoController {
             List<ListadoRecord> listados = this.listadoService.obtenerListadoEntreFechas(listadoAudienciasDto);
 
             model.addAttribute("listadosGenerados", new ArrayList<ListadoRecord>());
-            List<ListadosPorMesDto> listadosPorMes = listadoService.obtenerListadosPorMes(listados);
+            List<ListadosPorMesDto> listadosPorMes = listadoService.obtenerListadosPorPeriodo(
+                    listados,
+                    Boolean.TRUE.equals(listadoAudienciasDto.getPorDia())
+            );
             List<Map<String, Object>> chartDataList = convertirListadosPorMesAMap(listadosPorMes);
             
             // Si no hay datos, crear un elemento con valor 0
@@ -325,7 +332,8 @@ public class ListadoController {
             @AuthenticationPrincipal CustomAuthenticatedUser user,
             @RequestParam(value = "idAgencia", required = false) Long idAgencia,
             @RequestParam(value = "fechaDesde", required = false) String fechaDesdeStr,
-            @RequestParam(value = "fechaHasta", required = false) String fechaHastaStr) {
+            @RequestParam(value = "fechaHasta", required = false) String fechaHastaStr,
+            @RequestParam(value = "porDia", defaultValue = "false") boolean porDia) {
         
         try {
             // Parsear fechas
@@ -345,13 +353,16 @@ public class ListadoController {
                     .idAgencia(idAgencia)
                     .fechaDesde(fechaDesde)
                     .fechaHasta(fechaHasta)
+                    .porDia(porDia)
                     .build();
                     
             // Obtener listados para el gráfico
             List<ListadoRecord> listados = this.listadoService.obtenerListadoEntreFechas(filtros);
             
             // Generar datos del gráfico
-            List<Map<String, Object>> chartData = convertirListadosPorMesAMap(listadoService.obtenerListadosPorMes(listados));
+            List<Map<String, Object>> chartData = convertirListadosPorMesAMap(
+                    listadoService.obtenerListadosPorPeriodo(listados, porDia)
+            );
             if (chartData.isEmpty()) {
                 chartData = crearDatosVaciosParaGrafico();
             }

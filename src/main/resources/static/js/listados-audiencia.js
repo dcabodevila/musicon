@@ -115,6 +115,7 @@ $(document).ready(function () {
         const idAgencia = $('#agencia').val();
         const fechaDesde = $('#idFechaDesde').val();
         const fechaHasta = $('#idFechaHasta').val();
+        const porDia = $('#modoAgrupacion').val() === 'true';
         
         // Realizar petición AJAX para obtener nuevos datos del gráfico
         $.ajax({
@@ -123,7 +124,8 @@ $(document).ready(function () {
             data: {
                 idAgencia: idAgencia,
                 fechaDesde: fechaDesde,
-                fechaHasta: fechaHasta
+                fechaHasta: fechaHasta,
+                porDia: porDia
             },
             success: function(response) {
                 if (response.success && response.chartData) {
@@ -247,6 +249,7 @@ function initializeChart() {
                 scales: {
                     y: {
                         beginAtZero: true,
+                        suggestedMin: 0,
                         min: 0,
                         grid: {
                             display: true
