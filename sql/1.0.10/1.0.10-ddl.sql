@@ -21,3 +21,12 @@ ALTER TABLE gestmusica.artista
 
 ALTER TABLE gestmusica.artista
     ADD COLUMN solicitud_odg_aprobada boolean DEFAULT false NOT NULL;
+
+ALTER TABLE gestmusica.ocupacion
+    ADD COLUMN IF NOT EXISTS hora_actuacion TIME NULL;
+
+COMMENT ON COLUMN gestmusica.ocupacion.hora_actuacion IS 'Hora específica de la actuación. Si es NULL, se muestra "Horario por confirmar"';
+
+ALTER TABLE gestmusica.artista
+    ADD COLUMN IF NOT EXISTS publicar_eventos BOOLEAN NOT NULL DEFAULT FALSE;
+
