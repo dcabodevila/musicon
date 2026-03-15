@@ -70,6 +70,7 @@
 		<parameter name="idProvincia" class="java.lang.Integer">
 			<defaultValueExpression><![CDATA[27]]></defaultValueExpression>
 		</parameter>
+		<parameter name="idCcaa" class="java.lang.Integer"/>
 		<parameter name="fecha1" class="java.lang.String"/>
 		<parameter name="fecha2" class="java.lang.String"/>
 		<parameter name="fecha3" class="java.lang.String"/>
@@ -114,6 +115,7 @@ END AS escenario, t.fecha::date,
    AND ata.tipo_artista_id in ($P!{idsTipoArtista})
    AND a.agencia_id in ($P!{idsAgencias})
    AND a.id_ccaa in ($P!{idsComunidades})
+   AND EXISTS (SELECT 1 FROM gestmusica.artista_ccaa ac WHERE ac.artista_id = a.id AND ac.ccaa_id = $P!{idCcaa}::bigint)
    AND a.id not in ($P!{idsArtistaRestringidos})
    AND a.activo
    AND a.tarifas_publicas
@@ -218,6 +220,7 @@ END AS escenario, t.fecha::date,
 	<parameter name="colNames" class="java.lang.String"/>
 	<parameter name="fechaListIn" class="java.lang.String"/>
 	<parameter name="idProvincia" class="java.lang.Integer"/>
+	<parameter name="idCcaa" class="java.lang.Integer"/>
 	<parameter name="fecha1" class="java.lang.String"/>
 	<parameter name="fecha2" class="java.lang.String"/>
 	<parameter name="fecha3" class="java.lang.String"/>
@@ -479,6 +482,9 @@ SMT = Solo sesión Matinal
 						</datasetParameter>
 						<datasetParameter name="idProvincia">
 							<datasetParameterExpression><![CDATA[$P{idProvincia}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="idCcaa">
+							<datasetParameterExpression><![CDATA[$P{idCcaa}]]></datasetParameterExpression>
 						</datasetParameter>
 						<datasetParameter name="idsTipoArtista">
 							<datasetParameterExpression><![CDATA[$P{idsTipoArtista}]]></datasetParameterExpression>

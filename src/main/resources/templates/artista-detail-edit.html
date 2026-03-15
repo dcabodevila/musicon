@@ -87,6 +87,21 @@
                                         </div>
                                     </div>
                                     <div class="mb-3 row">
+                                        <label class="col-form-label col-sm-3 text-sm-end">
+                                            Comunidades de trabajo
+                                            <i class="fas fa-info-circle ms-2 info-icon"
+                                               data-bs-toggle="tooltip"
+                                               data-bs-placement="right"
+                                               title="Indica las comunidades en las que trabajará el artista. El artista solamente aparecerá en los presupuestos para las comunidades seleccionadas."
+                                            ></i>
+                                        </label>
+                                        <div class="col-sm-9">
+                                            <select id="comunidadesTrabajo" th:field="*{idsComunidadesTrabajo}" class="form-control choices-multiple-comunidades" multiple>
+                                                <option th:each="ccaa : ${listaCcaa}" th:value="${ccaa.id}" th:text="${ccaa.nombre}"></option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 row">
                                         <label class="col-form-label col-sm-3 text-sm-end">CIF</label>
                                         <div class="col-sm-9">
                                             <input class="form-control" th:field="*{cif}" placeholder="CIF" id="cif" autocomplete="off" maxlength="50">

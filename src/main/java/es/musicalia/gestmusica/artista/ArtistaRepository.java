@@ -31,7 +31,8 @@ public interface ArtistaRepository extends JpaRepository<Artista, Long> {
 
 	@Query("SELECT DISTINCT a FROM Artista a " +
 		   "JOIN a.tiposArtista ta " +
-		   "WHERE a.ccaa.id IN (:idsComunidades) " +
+		   "JOIN a.comunidadesTrabajo ct " +
+		   "WHERE ct.id IN (:idsComunidades) " +
 		   "AND ta.id IN (:idsTipoArtista) " +
 		   "AND a.tarifasPublicas = true " +
 		   "AND a.activo = true")

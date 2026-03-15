@@ -1,5 +1,6 @@
 package es.musicalia.gestmusica.artista;
 
+import es.musicalia.gestmusica.localizacion.Ccaa;
 import es.musicalia.gestmusica.tipoartista.TipoArtista;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -22,6 +23,7 @@ public interface ArtistaMapper {
     @Mapping(target = "idTipoEscenario", source = "tipoEscenario.id")
     @Mapping(target = "nombreTipoEscenario", source = "tipoEscenario.nombre")
     @Mapping(target = "idsTipoArtista", source = "tiposArtista", qualifiedByName = "tipoArtistaToIdList")
+    @Mapping(target = "idsComunidadesTrabajo", source = "comunidadesTrabajo", qualifiedByName = "ccaaToIdList")
     @Mapping(target = "email", source = "contacto.email")
     @Mapping(target = "facebook", source = "contacto.facebook")
     @Mapping(target = "web", source = "contacto.web")
@@ -43,6 +45,16 @@ public interface ArtistaMapper {
         }
         return tiposArtista.stream()
                 .map(TipoArtista::getId)
+                .collect(Collectors.toList());
+    }
+
+    @Named("ccaaToIdList")
+    default List<Long> mapComunidadesToIds(Set<Ccaa> comunidades) {
+        if (comunidades == null || comunidades.isEmpty()) {
+            return List.of();
+        }
+        return comunidades.stream()
+                .map(Ccaa::getId)
                 .collect(Collectors.toList());
     }
 }

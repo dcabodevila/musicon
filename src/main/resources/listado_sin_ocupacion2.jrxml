@@ -58,6 +58,7 @@
 			<defaultValueExpression><![CDATA["''2023-08-01'', ''2023-08-02'', ''2023-08-03''"]]></defaultValueExpression>
 		</parameter>
 		<parameter name="idProvincia" class="java.lang.Integer"/>
+		<parameter name="idCcaa" class="java.lang.Integer"/>
 		<parameter name="fecha1" class="java.lang.String"/>
 		<parameter name="fecha2" class="java.lang.String"/>
 		<parameter name="fecha3" class="java.lang.String"/>
@@ -96,6 +97,7 @@ END AS escenario, t.fecha::date, (CASE WHEN (ip.tipo_incremento_id=1  AND t.impo
    AND ata.tipo_artista_id in ($P!{idsTipoArtista})
    AND a.agencia_id in ($P!{idsAgencias})
    AND a.id_ccaa in ($P!{idsComunidades})
+   AND EXISTS (SELECT 1 FROM gestmusica.artista_ccaa ac WHERE ac.artista_id = a.id AND ac.ccaa_id = $P!{idCcaa}::bigint)
    AND a.id not in ($P!{idsArtistaRestringidos})
    AND a.activo
    AND a.tarifas_publicas  
@@ -201,6 +203,7 @@ END AS escenario, t.fecha::date, (CASE WHEN (ip.tipo_incremento_id=1  AND t.impo
 	<parameter name="fechaListIn" class="java.lang.String"/>
 	<parameter name="provincia" class="java.lang.String"/>
 	<parameter name="idProvincia" class="java.lang.Integer"/>
+	<parameter name="idCcaa" class="java.lang.Integer"/>
 	<parameter name="fecha1" class="java.lang.String"/>
 	<parameter name="fecha2" class="java.lang.String"/>
 	<parameter name="fecha3" class="java.lang.String"/>
@@ -423,6 +426,9 @@ T = Trailer]]></text>
 						</datasetParameter>
 						<datasetParameter name="idProvincia">
 							<datasetParameterExpression><![CDATA[$P{idProvincia}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="idCcaa">
+							<datasetParameterExpression><![CDATA[$P{idCcaa}]]></datasetParameterExpression>
 						</datasetParameter>
 						<datasetParameter name="fecha1">
 							<datasetParameterExpression><![CDATA[$P{fecha1}]]></datasetParameterExpression>

@@ -41,6 +41,11 @@ public class ArtistaDto {
 
     @NotNull
     private List<Long> idsTipoArtista = new ArrayList<>();
+
+    @NotNull
+    @NotEmpty
+    private List<Long> idsComunidadesTrabajo = new ArrayList<>();
+
     @NotNull
     private Long idAgencia;
 

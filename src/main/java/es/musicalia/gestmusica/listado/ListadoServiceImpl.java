@@ -159,6 +159,7 @@ public class ListadoServiceImpl implements ListadoService {
         parametros.put("colNames", getColNamesListadoFechas());
         parametros.put("fechaListIn", getFechaListFechas(listadoDto.getFechaDesde(), listadoDto.getFechaHasta(), dateList));
         parametros.put("idProvincia", listadoDto.getIdProvincia().intValue());
+        parametros.put("idCcaa", listadoDto.getIdCcaa().intValue());
         parametros.put("observaciones", listadoDto.getComentario());
         parametros.put("solicitante", listadoDto.getSolicitadoPara());
         parametros.put("provincia", this.provinciaRepository.findById(listadoDto.getIdProvincia()).orElseThrow().getNombre());

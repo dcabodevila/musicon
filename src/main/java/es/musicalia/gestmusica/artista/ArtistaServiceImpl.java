@@ -6,6 +6,7 @@ import es.musicalia.gestmusica.acceso.AccesoService;
 import es.musicalia.gestmusica.agencia.AgenciaRepository;
 import es.musicalia.gestmusica.contacto.Contacto;
 import es.musicalia.gestmusica.contacto.ContactoRepository;
+import es.musicalia.gestmusica.localizacion.Ccaa;
 import es.musicalia.gestmusica.localizacion.CcaaRepository;
 import es.musicalia.gestmusica.localizacion.CodigoNombreDto;
 import es.musicalia.gestmusica.mail.EmailService;
@@ -148,6 +149,7 @@ public class ArtistaServiceImpl implements ArtistaService {
 
         // Actualizar tipos de artista
         actualizarTiposArtista(artista, artistaDto.getIdsTipoArtista());
+        actualizarComunidadesTrabajo(artista, artistaDto.getIdsComunidadesTrabajo());
 
         // Actualizar contacto
         Contacto contacto = actualizarContacto(artista.getContacto(), artistaDto);
@@ -223,6 +225,22 @@ public class ArtistaServiceImpl implements ArtistaService {
             }
             idsTipoArtista.forEach(id ->
                     artista.getTiposArtista().add(tipoArtistaRepository.findById(id).orElseThrow())
+            );
+        }
+    }
+
+    private void actualizarComunidadesTrabajo(Artista artista, List<Long> idsComunidadesTrabajo) {
+        if (artista.getComunidadesTrabajo() == null) {
+            artista.setComunidadesTrabajo(new HashSet<>());
+        } else {
+            artista.getComunidadesTrabajo().clear();
+        }
+
+        if (CollectionUtils.isNotEmpty(idsComunidadesTrabajo)) {
+            idsComunidadesTrabajo.forEach(id -> {
+                    Ccaa ccaa = ccaaRepository.findById(id).orElseThrow();
+                    artista.getComunidadesTrabajo().add(ccaa);
+                }
             );
         }
     }

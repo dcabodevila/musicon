@@ -79,6 +79,15 @@ public class Artista {
     )
     private Set<TipoArtista> tiposArtista;
 
+    @ManyToMany
+    @JoinTable(
+            name = "artista_ccaa",
+            schema = "gestmusica",
+            joinColumns = @JoinColumn(name = "artista_id"),
+            inverseJoinColumns = @JoinColumn(name = "ccaa_id")
+    )
+    private Set<Ccaa> comunidadesTrabajo;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "agencia_id")
     private Agencia agencia;
