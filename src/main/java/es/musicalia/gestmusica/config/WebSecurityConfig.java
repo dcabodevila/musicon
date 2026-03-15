@@ -3,6 +3,8 @@ package es.musicalia.gestmusica.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,6 +19,8 @@ import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.security.web.SecurityFilterChain;
 
 
@@ -30,6 +34,8 @@ public class WebSecurityConfig {
 	}
 	@Autowired
 	private UserDetailsService userDetailsService;
+    @Autowired
+    private RateLimitingFilter rateLimitingFilter;
 
 	@Bean
 	public AuthenticationProvider authProvider(){
@@ -49,11 +55,46 @@ public class WebSecurityConfig {
     }
 
     @Bean
-	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    @Order(1)
+    public SecurityFilterChain eventosPublicChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
+            .securityMatcher("/eventos/**", "/robots.txt")
+            .csrf(csrf -> csrf
+                .ignoringRequestMatchers("/eventos/**")
+            )
+            .headers(headers -> headers
+                .contentSecurityPolicy(csp -> csp.policyDirectives(
+                    "default-src 'self'; " +
+                        "img-src 'self' data: https: http://res.cloudinary.com; " +
+                        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; " +
+                        "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; " +
+                        "font-src 'self' https://fonts.gstatic.com; " +
+                        "connect-src 'self'; " +
+                        "frame-ancestors 'none'; " +
+                        "form-action 'self'; " +
+                        "base-uri 'self'; " +
+                        "upgrade-insecure-requests"
+                ))
+                .referrerPolicy(referrer ->
+                    referrer.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
+                .permissionsPolicy(permissions ->
+                    permissions.policy("geolocation=(), camera=(), microphone=(), payment=(), usb=()"))
+            )
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/auth/**").permitAll()
+                .anyRequest().permitAll()
+            )
+            .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+
+    @Bean
+    @Order(2)
+    public SecurityFilterChain appChain(HttpSecurity http) throws Exception {
+	        http
+	            .csrf(csrf -> csrf.disable())
+	            .authorizeHttpRequests(authz -> authz
+	                .requestMatchers("/auth/**").permitAll()
                     .requestMatchers("/info**","/info").permitAll()
 					.requestMatchers("/manifest.json").permitAll()
 					.requestMatchers("/robots.txt").permitAll()
@@ -78,9 +119,10 @@ public class WebSecurityConfig {
                 .defaultSuccessUrl("/", true)
             )
 
-            .logout(logout -> logout
-                .invalidateHttpSession(true)
-            );
+	            .logout(logout -> logout
+                    .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET"))
+	                .invalidateHttpSession(true)
+	            );
 
         return http.build();
 	}
