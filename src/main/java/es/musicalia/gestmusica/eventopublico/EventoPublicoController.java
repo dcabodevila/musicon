@@ -1,5 +1,7 @@
 package es.musicalia.gestmusica.eventopublico;
 
+import es.musicalia.gestmusica.generic.CodigoNombreRecord;
+import es.musicalia.gestmusica.localizacion.LocalizacionService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +14,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.web.util.UriUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
@@ -33,6 +37,7 @@ public class EventoPublicoController {
     private static final String ORGANIZER_NAME_FALLBACK = "festia.es";
 
     private final EventoPublicoService eventoPublicoService;
+    private final LocalizacionService localizacionService;
 
     /**
      * URL legada: /eventos/evento/{id}
@@ -66,7 +71,10 @@ public class EventoPublicoController {
             ? evento.getNombreAgencia()
             : ORGANIZER_NAME_FALLBACK;
         mv.addObject("evento", evento);
-        mv.addObject("jsonLd", evento.toJsonLd(baseUrl, organizerName, EVENT_IMAGE_URL));
+        String imageUrl = (evento.getLogoArtista() != null && !evento.getLogoArtista().isBlank())
+            ? evento.getLogoArtista()
+            : EVENT_IMAGE_URL;
+        mv.addObject("jsonLd", evento.toJsonLd(baseUrl, organizerName, evento.getUrlOrganizador(), imageUrl));
         mv.addObject("titulo", evento.getTituloSeo());
         mv.addObject("descripcion", evento.getDescripcionSeo());
         mv.addObject("urlEvento", urlCanonica);
@@ -102,16 +110,19 @@ public class EventoPublicoController {
         model.addAttribute("idArtistaSeleccionado", idArtista);
         List<EventoPublicoDto> eventosCatalogo = eventoPublicoService.obtenerEventosPublicosFiltrados(
             null, null, null, LocalDate.now(), null);
-        model.addAttribute("provincias", obtenerProvinciasOrdenadas(eventosCatalogo));
-        model.addAttribute("municipiosFiltro", obtenerMunicipiosParaFiltro(eventosCatalogo));
+        model.addAttribute("provincias", obtenerProvinciasOrdenadas());
+        model.addAttribute("municipiosFiltro", obtenerMunicipiosParaFiltro());
         model.addAttribute("artistasDisponibles", obtenerArtistasOrdenados(eventosCatalogo));
 
         if (!eventos.isEmpty()) {
             model.addAttribute("nombreArtista", eventos.get(0).getNombreArtista());
-            model.addAttribute("titulo", "Proximas actuaciones de " + eventos.get(0).getNombreArtista());
+            model.addAttribute("titulo", "Próximas actuaciones de " + eventos.get(0).getNombreArtista() + " | Festia");
+            model.addAttribute("descripcion", "Agenda de conciertos y actuaciones de " + eventos.get(0).getNombreArtista()
+                + ". Consulta fechas, municipios y detalles de cada evento en Festia.");
         } else {
             model.addAttribute("nombreArtista", "Artista");
-            model.addAttribute("titulo", "No hay proximas actuaciones");
+            model.addAttribute("titulo", "No hay próximas actuaciones | Festia");
+            model.addAttribute("descripcion", "No hay actuaciones programadas para este artista en este momento. Revisa otras fechas y artistas en Festia.");
         }
 
         return "eventos-publicos";
@@ -237,7 +248,8 @@ public class EventoPublicoController {
 
         model.addAttribute("eventosPorDia", eventosPorDia);
         model.addAttribute("eventos", eventos);
-        model.addAttribute("titulo", "Proximas actuaciones");
+        model.addAttribute("titulo", construirTituloListado(provincia, municipio, idArtista));
+        model.addAttribute("descripcion", construirDescripcionListado(provincia, municipio, idArtista));
         model.addAttribute("fechaDesde", fechaDesde.toString());
         model.addAttribute("fechaHasta", fechaHasta.toString());
         model.addAttribute("canonicalUrl", construirUrlAbsoluta(request, "/eventos"));
@@ -245,8 +257,8 @@ public class EventoPublicoController {
         model.addAttribute("provincia", provincia);
         model.addAttribute("municipio", municipio);
         model.addAttribute("idArtistaSeleccionado", idArtista);
-        model.addAttribute("provincias", obtenerProvinciasOrdenadas(eventosCatalogo));
-        model.addAttribute("municipiosFiltro", obtenerMunicipiosParaFiltro(eventosCatalogo));
+        model.addAttribute("provincias", obtenerProvinciasOrdenadas());
+        model.addAttribute("municipiosFiltro", obtenerMunicipiosParaFiltro());
         model.addAttribute("artistasDisponibles", obtenerArtistasOrdenados(eventosCatalogo));
 
         return "eventos-publicos";
@@ -256,60 +268,14 @@ public class EventoPublicoController {
      * Eventos por provincia con filtro por municipio.
      */
     @GetMapping("/provincia/{provincia}")
-    public String listarEventosPorProvincia(
+    public RedirectView listarEventosPorProvincia(
         @PathVariable String provincia,
-        @RequestParam(required = false) String municipio,
-        @RequestParam(required = false) Long idArtista,
-        @RequestParam(required = false) String desde,
-        @RequestParam(required = false) String hasta,
-        Model model,
         HttpServletRequest request) {
 
-        log.info("Listando eventos para provincia: {}, municipio: {}", provincia, municipio);
-
-        LocalDate fechaDesde = LocalDate.now();
-        LocalDate fechaHasta = LocalDate.now().plusMonths(1);
-
-        try {
-            if (desde != null && !desde.isBlank()) {
-                fechaDesde = LocalDate.parse(desde, DateTimeFormatter.ISO_LOCAL_DATE);
-            }
-            if (hasta != null && !hasta.isBlank()) {
-                fechaHasta = LocalDate.parse(hasta, DateTimeFormatter.ISO_LOCAL_DATE);
-            }
-        } catch (Exception e) {
-            log.error("Error parseando fechas: {}", e.getMessage());
-        }
-
-        List<EventoPublicoDto> eventosCatalogo = eventoPublicoService.obtenerEventosPublicosFiltrados(
-            null, null, null, LocalDate.now(), null);
-        List<EventoPublicoDto> eventos = eventoPublicoService.obtenerEventosPublicosFiltrados(
-            provincia, municipio, idArtista, fechaDesde, fechaHasta);
-
-        Map<LocalDate, List<EventoPublicoDto>> eventosPorDia = eventos.stream()
-            .collect(Collectors.groupingBy(e -> e.getFecha().toLocalDate(), TreeMap::new, Collectors.toList()));
-
-        boolean filtrosAplicados = (municipio != null && !municipio.isBlank()) ||
-            idArtista != null ||
-            (desde != null && !desde.isBlank()) ||
-            (hasta != null && !hasta.isBlank());
-        boolean noIndex = filtrosAplicados || eventos.isEmpty();
-
-        model.addAttribute("eventosPorDia", eventosPorDia);
-        model.addAttribute("eventos", eventos);
-        model.addAttribute("provincia", provincia);
-        model.addAttribute("municipio", municipio);
-        model.addAttribute("provincias", obtenerProvinciasOrdenadas(eventosCatalogo));
-        model.addAttribute("municipiosFiltro", obtenerMunicipiosParaFiltro(eventosCatalogo));
-        model.addAttribute("idArtistaSeleccionado", idArtista);
-        model.addAttribute("artistasDisponibles", obtenerArtistasOrdenados(eventosCatalogo));
-        model.addAttribute("titulo", "Eventos en " + provincia);
-        model.addAttribute("fechaDesde", fechaDesde.toString());
-        model.addAttribute("fechaHasta", fechaHasta.toString());
-        model.addAttribute("canonicalUrl", construirUrlAbsoluta(request, "/eventos/provincia/" + provincia));
-        model.addAttribute("metaRobots", noIndex ? "noindex,follow" : "index,follow");
-
-        return "eventos-publicos-provincia";
+        log.info("Redirigiendo eventos por provincia '{}' a listado principal con filtro", provincia);
+        String provinciaCodificada = UriUtils.encodeQueryParam(provincia, StandardCharsets.UTF_8);
+        String urlDestino = construirUrlAbsoluta(request, "/eventos?provincia=" + provinciaCodificada);
+        return crearRedireccionPermanente(urlDestino);
     }
 
     private EventoPublicoDto obtenerEventoONotFound(Long id) {
@@ -345,28 +311,20 @@ public class EventoPublicoController {
         return redirectView;
     }
 
-    private List<String> obtenerProvinciasOrdenadas(List<EventoPublicoDto> eventos) {
-        return eventos.stream()
-            .map(EventoPublicoDto::getProvincia)
+    private List<String> obtenerProvinciasOrdenadas() {
+        return localizacionService.findAllProvincias().stream()
+            .map(CodigoNombreRecord::nombre)
             .filter(nombre -> nombre != null && !nombre.isBlank())
             .distinct()
             .sorted(String.CASE_INSENSITIVE_ORDER)
             .collect(Collectors.toList());
     }
 
-    private List<MunicipioFiltro> obtenerMunicipiosParaFiltro(List<EventoPublicoDto> eventos) {
-        Map<String, MunicipioFiltro> unicos = new LinkedHashMap<>();
-        for (EventoPublicoDto evento : eventos) {
-            if (evento.getMunicipio() == null || evento.getMunicipio().isBlank()) {
-                continue;
-            }
-            if (evento.getProvincia() == null || evento.getProvincia().isBlank()) {
-                continue;
-            }
-            String clave = (evento.getProvincia() + "|" + evento.getMunicipio()).toLowerCase();
-            unicos.putIfAbsent(clave, new MunicipioFiltro(evento.getMunicipio(), evento.getProvincia()));
-        }
-        return unicos.values().stream()
+    private List<MunicipioFiltro> obtenerMunicipiosParaFiltro() {
+        return localizacionService.findAllProvincias().stream()
+            .flatMap(provincia -> localizacionService.findAllMunicipiosByIdProvincia(provincia.id()).stream()
+                .map(municipio -> new MunicipioFiltro(municipio.nombre(), provincia.nombre())))
+            .distinct()
             .sorted(Comparator.comparing(MunicipioFiltro::provincia, String.CASE_INSENSITIVE_ORDER)
                 .thenComparing(MunicipioFiltro::nombre, String.CASE_INSENSITIVE_ORDER))
             .collect(Collectors.toList());
@@ -383,6 +341,32 @@ public class EventoPublicoController {
         return artistasUnicos.values().stream()
             .sorted(Comparator.comparing(EventoPublicoDto::getNombreArtista, String.CASE_INSENSITIVE_ORDER))
             .collect(Collectors.toList());
+    }
+
+    private String construirTituloListado(String provincia, String municipio, Long idArtista) {
+        if (idArtista != null) {
+            return "Eventos musicales por artista | Festia";
+        }
+        if (municipio != null && !municipio.isBlank() && provincia != null && !provincia.isBlank()) {
+            return "Eventos musicales en " + municipio + " (" + provincia + ") | Festia";
+        }
+        if (provincia != null && !provincia.isBlank()) {
+            return "Eventos musicales en " + provincia + " | Festia";
+        }
+        return "Próximos eventos y actuaciones musicales | Festia";
+    }
+
+    private String construirDescripcionListado(String provincia, String municipio, Long idArtista) {
+        if (idArtista != null) {
+            return "Consulta actuaciones por artista, municipio y fecha en Festia. Accede al detalle de cada concierto y evento musical.";
+        }
+        if (municipio != null && !municipio.isBlank() && provincia != null && !provincia.isBlank()) {
+            return "Agenda de actuaciones en " + municipio + " (" + provincia + "). Filtra por artista y fecha para encontrar conciertos y eventos musicales.";
+        }
+        if (provincia != null && !provincia.isBlank()) {
+            return "Agenda de actuaciones en " + provincia + ". Filtra por artista, municipio y fecha para encontrar conciertos y eventos musicales.";
+        }
+        return "Agenda de próximos conciertos y actuaciones musicales en Festia. Busca por artista, localidad y fecha.";
     }
 
     private record MunicipioFiltro(String nombre, String provincia) {

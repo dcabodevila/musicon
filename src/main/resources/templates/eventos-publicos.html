@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title th:text="${titulo}">Proximas actuaciones</title>
-    <meta name="description" th:content="${'Consulta las proximas actuaciones y eventos musicales de ' + (nombreArtista != null ? nombreArtista : 'las mejores orquestas')}">
+    <title th:text="${titulo}">Próximos eventos y actuaciones musicales | Festia</title>
+    <meta name="description" th:content="${'Consulta las proximas actuaciones y eventos musicales de ' + (nombreArtista != null ? nombreArtista : ' orquestas y grupos de toda España')}">
     <meta name="robots" th:content="${metaRobots}">
     <link rel="canonical" th:href="${canonicalUrl}">
 
@@ -114,11 +114,23 @@
 
                             <div class="row">
                                 <div th:each="evento : ${diaEntry.value}"
-                                     class="col-12 col-md-6 col-lg-4 col-xl-3 mb-3">
-                                    <div class="card h-100 card-max-width" style="max-width: 100%;">
-                                        <div class="card-header">
-                                            <h5 class="card-title mb-1" th:text="${evento.nombreArtista}">Artista</h5>
-                                            <div>
+                                     class="col-12 col-md-6 col-lg-3 mb-3">
+                                    <div class="card card-max-width h-100" style="max-width: 100%; min-height: 500px;">
+                                        <div style="min-height: 340px; display: flex; align-items: center; justify-content: center;">
+                                            <img class="card-img-top img-max-height"
+                                                 th:if="${evento.logoArtista != null and !#strings.isEmpty(evento.logoArtista)}"
+                                                 th:src="@{${evento.logoArtista}}"
+                                                 th:alt="${'Logo de ' + evento.nombreArtista}"
+                                                 style="max-height: 327px; width: auto; display: block; margin: 0 auto;">
+                                            <img class="card-img-top img-max-height"
+                                                 th:if="${evento.logoArtista == null or #strings.isEmpty(evento.logoArtista)}"
+                                                 th:src="@{/logo/logo_transparente.png}"
+                                                 th:alt="${'Logo de ' + evento.nombreArtista}"
+                                                 style="max-height: 327px; width: auto; display: block; margin: 0 auto;">
+                                        </div>
+                                        <div class="card-header px-4 pt-4">
+                                            <h5 class="card-title mb-2" th:text="${evento.nombreArtista}">Artista</h5>
+                                            <div class="mb-1">
                                                 <span class="badge bg-success me-1" th:if="${evento.matinal}">
                                                     <i class="fas fa-sun"></i> Matinal
                                                 </span>
@@ -130,19 +142,7 @@
                                                 </span>
                                             </div>
                                         </div>
-                                        <div class="card-body card-max-width">
-                                            <div style="min-height: 180px; display: flex; align-items: center; justify-content: center;">
-                                                <img class="card-img-top img-max-height"
-                                                     th:if="${evento.logoArtista != null and !#strings.isEmpty(evento.logoArtista)}"
-                                                     th:src="@{${evento.logoArtista}}"
-                                                     th:alt="${'Logo de ' + evento.nombreArtista}"
-                                                     style="max-height: 170px;">
-                                                <img class="card-img-top img-max-height"
-                                                     th:if="${evento.logoArtista == null or #strings.isEmpty(evento.logoArtista)}"
-                                                     th:src="@{/logo/logo_transparente.png}"
-                                                     th:alt="${'Logo de ' + evento.nombreArtista}"
-                                                     style="max-height: 170px;">
-                                            </div>
+                                        <div class="card-body" style="min-height: 80px;">
                                             <div class="d-flex align-items-center mb-2">
                                                 <div class="stat text-primary me-2">
                                                     <i class="align-middle" data-feather="clock"></i>
@@ -163,12 +163,12 @@
                                                     <span th:text="${evento.municipio + ', ' + evento.provincia}">Ubicacion</span>
                                                 </li>
                                             </ul>
-                                        </div>
-                                        <div class="card-footer">
-                                            <a th:href="@{/eventos/evento/{id}-{slug}(id=${evento.id},slug=${evento.slug})}"
-                                               class="btn btn-primary btn-pill w-100">
-                                                <i class="fas fa-eye me-1"></i> Ver detalles
-                                            </a>
+                                            <div class="card-body text-center d-flex flex-column flex-sm-row justify-content-around px-0 mt-3">
+                                                <a th:href="@{/eventos/evento/{id}-{slug}(id=${evento.id},slug=${evento.slug})}"
+                                                   class="btn btn-pill btn-primary col-12">
+                                                    <i class="fas fa-eye me-1"></i> Ver detalles
+                                                </a>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

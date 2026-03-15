@@ -13,7 +13,7 @@
 
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-		<meta name="description" content="Plataforma de profesionales del espectáculo">
+		<meta th:if="${descripcion == null}" name="description" content="Plataforma de profesionales del espectáculo">
 		<meta name="author" content="Festia">
 		<meta name="theme-color" content="#ffffff">
 	    <meta http-equiv="x-ua-compatible" content="ie=edge">
@@ -214,7 +214,14 @@
 						<i class="align-middle me-2 fas fa-fw fa-users" ></i> <span class="align-middle">Representantes</span>
 					</a>
 				</li>
-
+				<li class="sidebar-header">
+					Eventos
+				</li>
+				<li class="sidebar-item">
+					<a class="sidebar-link" th:target="_blank" th:href="@{/eventos}">
+						<i class="align-middle me-2 fas fa-fw fa-calendar-check" ></i> <span class="align-middle">Eventos</span>
+					</a>
+				</li>
 				<div sec:authorize="hasAuthority('ACCESO_PANEL_ADMIN')">
 					<li class="sidebar-header">
 						Administración

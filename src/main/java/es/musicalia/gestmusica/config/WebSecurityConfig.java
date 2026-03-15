@@ -56,6 +56,7 @@ public class WebSecurityConfig {
                 .requestMatchers("/auth/**").permitAll()
                     .requestMatchers("/info**","/info").permitAll()
 					.requestMatchers("/manifest.json").permitAll()
+					.requestMatchers("/robots.txt").permitAll()
 					.requestMatchers("/release-notes/**").permitAll()
 					// Permitir acceso público a eventos para indexación de Google
 					.requestMatchers("/eventos/**").permitAll()

@@ -28,6 +28,7 @@ public class EventoPublicoDto {
     private Long idArtista;
     private String nombreArtista;
     private String nombreAgencia;
+    private String urlOrganizador;
     private String logoArtista;
     private LocalDateTime fecha;
     private LocalTime horaActuacion;
@@ -43,7 +44,7 @@ public class EventoPublicoDto {
     /**
      * Genera JSON-LD de Schema.org para MusicEvent sin concatenaciones manuales.
      */
-    public String toJsonLd(String baseUrl, String organizerName, String imageUrl) {
+    public String toJsonLd(String baseUrl, String organizerName, String organizerUrl, String imageUrl) {
         String eventoUrl = baseUrl + getPathPublico();
 
         Map<String, Object> root = new LinkedHashMap<>();
@@ -74,6 +75,9 @@ public class EventoPublicoDto {
         Map<String, Object> organizer = new LinkedHashMap<>();
         organizer.put("@type", "Organization");
         organizer.put("name", organizerName);
+        if (organizerUrl != null && !organizerUrl.isBlank()) {
+            organizer.put("url", organizerUrl);
+        }
         root.put("organizer", organizer);
 
         root.put("eventStatus", "https://schema.org/EventScheduled");
@@ -96,8 +100,8 @@ public class EventoPublicoDto {
      * Titulo SEO para la pagina del evento.
      */
     public String getTituloSeo() {
-        return nombreArtista + " en " + municipio + " - " +
-            fecha.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        return nombreArtista + " en " + municipio + " (" + provincia + ") | " +
+            fecha.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + " | Festia";
     }
 
     /**
@@ -105,12 +109,16 @@ public class EventoPublicoDto {
      */
     public String getDescripcionSeo() {
         StringBuilder desc = new StringBuilder();
-        desc.append("Actuacion de ").append(nombreArtista);
+        desc.append("Concierto de ").append(nombreArtista);
+        desc.append(" en ").append(municipio).append(" (").append(provincia).append(")");
         desc.append(" el ").append(fecha.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-        if (lugar != null && !lugar.isBlank()) {
-            desc.append(" en ").append(lugar);
+        if (horaActuacion != null) {
+            desc.append(" a las ").append(horaActuacion.format(DateTimeFormatter.ofPattern("HH:mm"))).append(" h");
         }
-        desc.append(", ").append(municipio).append(" (").append(provincia).append(")");
+        if (lugar != null && !lugar.isBlank()) {
+            desc.append(", en ").append(lugar);
+        }
+        desc.append(". Consulta todos los detalles en Festia.");
         return desc.toString();
     }
 
@@ -133,7 +141,7 @@ public class EventoPublicoDto {
     }
 
     public String getTituloEvento() {
-        return "Actuacion de " + nombreArtista + " en " + municipio;
+        return "Actuación de " + nombreArtista + " en " + municipio;
     }
 
     public String getEncabezadoPrincipal() {

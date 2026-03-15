@@ -13,6 +13,7 @@ function initDatePickers() {
 
     const form = desdeInput.closest("form");
     const maxMonths = 3;
+    const defaultMonthsFromDesde = 1;
 
     const fechaHastaPicker = flatpickr(hastaInput, {
         disableMobile: true,
@@ -23,8 +24,8 @@ function initDatePickers() {
         allowInput: false,
         defaultDate: hastaInput.value || null,
         minDate: desdeInput.value || null,
+        maxDate: desdeInput.value ? addMonths(desdeInput.value, maxMonths) : null,
         onChange: function (selectedDates) {
-            fechaDesdePicker.set("maxDate", selectedDates.length > 0 ? selectedDates[0] : null);
             aplicarLimiteRango(fechaDesdePicker, fechaHastaPicker, maxMonths, true);
         }
     });
@@ -37,9 +38,18 @@ function initDatePickers() {
         dateFormat: "Y-m-d",
         allowInput: false,
         defaultDate: desdeInput.value || null,
-        maxDate: hastaInput.value || null,
         onChange: function (selectedDates) {
-            fechaHastaPicker.set("minDate", selectedDates.length > 0 ? selectedDates[0] : null);
+            if (!selectedDates || selectedDates.length === 0) {
+                fechaHastaPicker.set("minDate", null);
+                fechaHastaPicker.set("maxDate", null);
+                return;
+            }
+            const desdeDate = selectedDates[0];
+            const maxHasta = addMonths(desdeDate, maxMonths);
+            const defaultHasta = addMonths(desdeDate, defaultMonthsFromDesde);
+            fechaHastaPicker.set("minDate", desdeDate);
+            fechaHastaPicker.set("maxDate", maxHasta);
+            fechaHastaPicker.setDate(defaultHasta, true, "Y-m-d");
             aplicarLimiteRango(fechaDesdePicker, fechaHastaPicker, maxMonths, true);
         }
     });
@@ -150,7 +160,8 @@ function getPickerDate(picker) {
 }
 
 function addMonths(date, months) {
-    const d = new Date(date.getTime());
+    const baseDate = date instanceof Date ? date : new Date(date);
+    const d = new Date(baseDate.getTime());
     d.setMonth(d.getMonth() + months);
     return d;
 }

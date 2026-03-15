@@ -91,6 +91,7 @@ public class EventoPublicoServiceImpl implements EventoPublicoService {
             .idArtista(ocupacion.getArtista().getId())
             .nombreArtista(ocupacion.getArtista().getNombre())
             .nombreAgencia(ocupacion.getArtista().getAgencia() != null ? ocupacion.getArtista().getAgencia().getNombre() : null)
+            .urlOrganizador(obtenerUrlOrganizador(ocupacion))
             .logoArtista(ocupacion.getArtista().getLogo())
             .fecha(ocupacion.getFecha())
             .fechaActualizacion(ocupacion.getFechaModificacion() != null ? ocupacion.getFechaModificacion() : ocupacion.getFechaCreacion())
@@ -102,6 +103,24 @@ public class EventoPublicoServiceImpl implements EventoPublicoService {
             .noche(esNoche)
             .informacionAdicional(informacion)
             .build();
+    }
+
+    private String obtenerUrlOrganizador(Ocupacion ocupacion) {
+        if (ocupacion.getArtista() == null || ocupacion.getArtista().getAgencia() == null
+            || ocupacion.getArtista().getAgencia().getAgenciaContacto() == null) {
+            return null;
+        }
+
+        String web = ocupacion.getArtista().getAgencia().getAgenciaContacto().getWeb();
+        if (web == null || web.isBlank()) {
+            return null;
+        }
+
+        String url = web.trim();
+        if (url.startsWith("http://") || url.startsWith("https://")) {
+            return url;
+        }
+        return "https://" + url;
     }
 
     private Specification<Ocupacion> buildFiltrosPublicosSpec(
