@@ -14,6 +14,7 @@ import java.util.List;
 
 public interface ListadoService {
     List<ListadosPorMesDto> obtenerListadosPorMes(List<ListadoRecord> listados);
+    List<ListadosPorMesDto> obtenerListadosPorPeriodo(List<ListadoRecord> listados, boolean porDia);
 
     List<CodigoNombreDto> findAllTiposOcupacion();
 

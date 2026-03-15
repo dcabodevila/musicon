@@ -14,6 +14,10 @@ import es.musicalia.gestmusica.util.DateUtils;
 import es.musicalia.gestmusica.util.DefaultResponseBody;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -26,6 +30,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -33,6 +38,7 @@ import java.util.stream.Collectors;
 @Controller
 @RequestMapping(value="ocupacion")
 public class OcupacionController {
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private final OcupacionService ocupacionService;
     private final AgenciaService agenciaService;
@@ -168,11 +174,71 @@ public class OcupacionController {
     public String postListadoOcupaciones(@AuthenticationPrincipal CustomAuthenticatedUser user,
                                          @ModelAttribute OcupacionListFilterDto ocupacionListFilterDto,
                                          Model model, RedirectAttributes redirectAttributes) {
-        redirectAttributes.addFlashAttribute("listaOcupaciones", this.ocupacionService.findOcupacionesByArtistasListAndDatesActivo(user, ocupacionListFilterDto));
         redirectAttributes.addFlashAttribute("ocupacionListFilterDto", ocupacionListFilterDto);
 
         return "redirect:/ocupacion/list";
 
+    }
+
+    @PostMapping("/list/data")
+    @ResponseBody
+    public Map<String, Object> getListadoOcupacionesData(
+            @AuthenticationPrincipal CustomAuthenticatedUser user,
+            @RequestParam(value = "draw", defaultValue = "1") int draw,
+            @RequestParam(value = "start", defaultValue = "0") int start,
+            @RequestParam(value = "length", defaultValue = "10") int length,
+            @RequestParam(value = "idAgencia", required = false) String idAgenciaStr,
+            @RequestParam(value = "idArtista", required = false) String idArtistaStr,
+            @RequestParam(value = "fechaDesde", required = false) String fechaDesdeStr,
+            @RequestParam(value = "fechaHasta", required = false) String fechaHastaStr,
+            @RequestParam(value = "search[value]", required = false) String searchValue,
+            @RequestParam(value = "order[0][column]", defaultValue = "1") int orderColumn,
+            @RequestParam(value = "order[0][dir]", defaultValue = "desc") String orderDir
+    ) {
+        try {
+            int pageSize = length > 0 ? length : 10;
+            int page = Math.max(0, start / pageSize);
+            Sort sort = Sort.by("desc".equalsIgnoreCase(orderDir) ? Sort.Direction.DESC : Sort.Direction.ASC, getSortColumnName(orderColumn));
+            Pageable pageable = PageRequest.of(page, pageSize, sort);
+            Long idAgencia = parseLongValue(idAgenciaStr);
+            Long idArtista = parseLongValue(idArtistaStr);
+            LocalDate fechaDesde = parseDateValue(fechaDesdeStr);
+            LocalDate fechaHasta = parseDateValue(fechaHastaStr);
+
+            OcupacionListFilterDto filtros = OcupacionListFilterDto.builder()
+                    .idAgencia(idAgencia)
+                    .idArtista(idArtista)
+                    .fechaDesde(fechaDesde != null ? fechaDesde : LocalDate.now())
+                    .fechaHasta(fechaHasta)
+                    .build();
+
+            Page<OcupacionListRecord> pageResult = this.ocupacionService.findOcupacionesByArtistasListAndDatesActivoPaginado(
+                    user, filtros, searchValue, pageable
+            );
+            Page<OcupacionListRecord> pageTotal = this.ocupacionService.findOcupacionesByArtistasListAndDatesActivoPaginado(
+                    user, filtros, null, PageRequest.of(0, 1)
+            );
+
+            List<Map<String, Object>> rows = pageResult.getContent().stream()
+                    .map(this::toDataTableRow)
+                    .toList();
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("draw", draw);
+            response.put("recordsTotal", pageTotal.getTotalElements());
+            response.put("recordsFiltered", pageResult.getTotalElements());
+            response.put("data", rows);
+            return response;
+        } catch (Exception e) {
+            log.error("Error obteniendo ocupaciones paginadas", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("draw", draw);
+            errorResponse.put("recordsTotal", 0);
+            errorResponse.put("recordsFiltered", 0);
+            errorResponse.put("data", new ArrayList<>());
+            errorResponse.put("error", "Error al cargar las ocupaciones");
+            return errorResponse;
+        }
     }
 
 
@@ -284,6 +350,50 @@ public class OcupacionController {
 
         model.addAttribute("listaArtistasPermisosOcupacion", this.artistaService.findMisArtistas(obtenerArtistasConPermisoOcupaciones(user.getMapPermisosArtista())));
 
+    }
+
+    private String getSortColumnName(int column) {
+        return switch (column) {
+            case 0 -> "artista.nombre";
+            case 1 -> "fechaCreacion";
+            case 2 -> "fecha";
+            case 3 -> "poblacion";
+            case 4 -> "municipio.nombre";
+            case 5 -> "usuario.nombre";
+            case 6 -> "ocupacionEstado.nombre";
+            case 7 -> "matinal";
+            default -> "fechaCreacion";
+        };
+    }
+
+    private Map<String, Object> toDataTableRow(OcupacionListRecord ocupacion) {
+        Map<String, Object> row = new HashMap<>();
+        row.put("id", ocupacion.id());
+        row.put("artista", ocupacion.artista());
+        row.put("fechaCreacion", ocupacion.fechaCreacion() != null ? ocupacion.fechaCreacion().format(DATE_FORMATTER) : "");
+        row.put("start", ocupacion.start() != null ? ocupacion.start().format(DATE_FORMATTER) : "");
+        row.put("localidad", ocupacion.localidad() != null ? ocupacion.localidad() : "");
+        row.put("municipioProvincia", String.format("%s, %s", ocupacion.municipio(), ocupacion.provincia()));
+        row.put("nombreUsuario", ocupacion.nombreUsuario());
+        row.put("tipoOcupacion", ocupacion.tipoOcupacion());
+        row.put("estado", ocupacion.estado());
+        row.put("matinal", ocupacion.matinal());
+        row.put("soloMatinal", ocupacion.soloMatinal());
+        return row;
+    }
+
+    private LocalDate parseDateValue(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        return DateUtils.parseLocalDate(value, "dd-MM-yyyy");
+    }
+
+    private Long parseLongValue(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        return Long.valueOf(value);
     }
 
 
