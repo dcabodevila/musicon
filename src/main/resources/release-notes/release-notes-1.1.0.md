@@ -31,6 +31,6 @@ Hemos asignado por defecto todas las comunidades a todos los artistas de festia,
 Cuando un cliente solicita un presupuesto para una comunidad concreta, el sistema solo mostrará los artistas que tengan esa comunidad entre las comunidades en las que trabaja. 
 Artistas sin la comunidad configurada **no aparecerán** en los resultados.
 
-![presupuesto-comunidad.png](/img/release-notes/presupuesto-comunidad.png)
+![presupuestos-comunidad.png](/img/release-notes/presupuestos-comunidad.png)
 
 <!-- END_FOR_ROLES -->
