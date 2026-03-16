@@ -106,6 +106,7 @@ public class WebSecurityConfig {
 					.requestMatchers("/android-icon-*.png", "/apple-icon-*.png", "/ms-icon-*.png").permitAll()
 
 					.requestMatchers("/service-worker.js", "/sw-register.js").permitAll()
+					.requestMatchers("/legal/**").permitAll()
 					.anyRequest().authenticated()
             )
 			.sessionManagement(session -> session
