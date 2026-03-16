@@ -22,8 +22,15 @@ Hemos asignado por defecto todas las comunidades a todos los artistas de festia,
 
 ![comunidades-artistas.png](/img/release-notes/comunidades-artistas.png)
 
-### Efecto en los presupuestos
 
-Cuando un cliente solicita un presupuesto para una comunidad concreta, el sistema solo mostrará los artistas que tengan esa comunidad entre sus comunidades de trabajo. Artistas sin la comunidad configurada **no aparecerán** en los resultados, aunque estén activos y con tarifas públicas.
+<!-- END_FOR_ROLES -->
+<!-- FOR_ROLES: AGENTE,AGENCIA -->
+
+### Comunidad autónoma en los presupuestos
+
+Cuando un cliente solicita un presupuesto para una comunidad concreta, el sistema solo mostrará los artistas que tengan esa comunidad entre las comunidades en las que trabaja. 
+Artistas sin la comunidad configurada **no aparecerán** en los resultados.
+
+![presupuesto-comunidad.png](/img/release-notes/presupuesto-comunidad.png)
 
 <!-- END_FOR_ROLES -->
