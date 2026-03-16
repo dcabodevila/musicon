@@ -1,0 +1,39 @@
+# Festia
+
+> Festia es una plataforma de información sobre eventos y actuaciones musicales en España. Publica las próximas fechas de actuación de orquestas, grupos y artistas de música en directo.
+
+## Información disponible
+
+- Próximos eventos musicales en toda España, organizados por fecha, provincia y municipio
+- Agenda completa de actuaciones por artista
+- Detalles de cada evento: fecha, hora, lugar, municipio, provincia y artista
+
+## Páginas principales
+
+- /eventos — Listado completo de próximos eventos musicales
+- /eventos/artista/{id} — Próximas actuaciones de un artista concreto
+- /eventos/evento/{id}-{slug} — Detalle de un evento específico
+
+## API pública
+
+- GET /eventos/api/artista/{id} — Eventos de un artista en JSON
+- GET /eventos/api/provincia/{nombre}?desde=YYYY-MM-DD&hasta=YYYY-MM-DD — Eventos por provincia en JSON
+- GET /eventos/sitemap.xml — Sitemap XML con todos los eventos y páginas de artistas
+
+## Cobertura geográfica
+
+España (todas las provincias y municipios) y Portugal.
+
+## Datos disponibles por evento
+
+- Nombre del artista
+- Fecha y hora de actuación (zona horaria: Europe/Madrid)
+- Lugar, municipio y provincia
+- Turno: matinal, tarde o noche
+- Información adicional del evento
+
+## Notas
+
+- Solo se publican eventos confirmados (estado: OCUPADO) con fecha futura
+- Los datos se actualizan en tiempo real
+- Marcado estructurado Schema.org MusicEvent en cada página de evento

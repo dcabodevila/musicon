@@ -1,14 +1,31 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title th:text="${titulo}">Próximos eventos y actuaciones musicales | Festia</title>
-    <meta name="description" th:content="${'Consulta las proximas actuaciones y eventos musicales de ' + (nombreArtista != null ? nombreArtista : ' orquestas y grupos de toda España')}">
+    <meta name="description" th:content="${descripcion}">
     <meta name="robots" th:content="${metaRobots}">
     <link rel="canonical" th:href="${canonicalUrl}">
+
+    <meta property="og:title" th:content="${titulo}">
+    <meta property="og:description" th:content="${descripcion}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" th:content="${canonicalUrl}">
+    <meta property="og:image" th:content="${ogImage}">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:site_name" content="Festia">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" th:content="${titulo}">
+    <meta name="twitter:description" th:content="${descripcion}">
+    <meta name="twitter:image" th:content="${ogImage}">
+
+    <script th:if="${jsonLd != null}" type="application/ld+json" th:utext="${jsonLd}">
+    </script>
 
     <th:block th:replace="~{fragments/main-template :: header-css}"></th:block>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
@@ -16,23 +33,61 @@
 
 <body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
 
+<!-- Barra de navegación pública (solo para visitantes no autenticados) -->
+<nav class="navbar bg-white border-bottom py-2 sticky-top shadow-sm" sec:authorize="isAnonymous()">
+    <div class="container-xl d-flex align-items-center justify-content-between px-3 px-md-4">
+        <a class="navbar-brand py-0" th:href="@{/eventos}">
+            <img src="/logo/logo-name-transparente-alt-color.png" alt="Festia" height="32">
+        </a>
+        <div class="d-flex gap-2">
+            <a th:href="@{/auth/login}" class="btn btn-outline-primary btn-sm">Acceder</a>
+            <a th:href="@{/auth/registration}" class="btn btn-primary btn-sm d-none d-md-inline-flex">Registrarse</a>
+        </div>
+    </div>
+</nav>
+
 <div class="wrapper">
     <div class="main">
         <main class="content">
             <div class="container-fluid p-0">
-                <div class="row mb-4">
-                    <section class="hero-section animate__animated animate__fadeIn"
-                             style="max-height: 300px !important; height: 300px !important; min-height: 300px !important;">
-                        <img src="https://res.cloudinary.com/hseoceuyz/image/upload/v1760835633/landing-festia_epbr7a.png"
-                             alt="Eventos Musicales"
-                             class="hero-image" style="max-height: 300px; height: 300px; object-fit: cover; width: 100%;"/>
-                        <div class="hero-content animate__animated animate__zoomIn animate__delay-1s">
-                            <img src="/logo/logo-name-transparente-alt-color.png" alt="festia.es" class="hero-logo" style="max-width: 250px;"/>
+
+                <!-- Hero compacto con H1 dinámico -->
+                <div class="row mb-0">
+                    <div class="col-12">
+                        <div class="py-4 px-4" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);">
+                            <h1 class="text-white fw-semibold mb-1 animate__animated animate__fadeIn" style="font-size: 1.5rem;"
+                                th:text="${nombreArtista != null
+                                    ? 'Próximas actuaciones de ' + nombreArtista
+                                    : (provincia != null and !#strings.isEmpty(provincia)
+                                        ? 'Próximas actuaciones en ' + provincia
+                                        : 'Próximas actuaciones musicales en España')}">
+                                Próximas actuaciones musicales en España
+                            </h1>
+                            <p class="mb-0 small" style="color: rgba(255,255,255,0.6);">
+                                Orquestas y grupos en toda España · Actualizado diariamente
+                            </p>
                         </div>
-                    </section>
+                    </div>
                 </div>
 
-                <div class="row mb-4">
+<!-- CTA para representantes (solo visitantes anónimos) -->
+                <div class="row mt-4 mb-0 px-2" sec:authorize="isAnonymous()">
+                    <div class="col-12">
+                        <div class="alert alert-primary d-flex align-items-center justify-content-between py-3 mb-0" role="alert">
+                            <div style="margin-left: 10px;">
+                                <strong>¿Eres representante o perteneces a una agencia?</strong>
+                                <span class="ms-1 d-none d-md-inline">Accede a tarifas, disponibilidad y gestión de contrataciones en tiempo real.</span>
+                            </div>
+                            <div class="d-flex gap-2 flex-shrink-0" style="margin-right: 10px;">
+                                <a href="/info" class="btn btn-outline-primary btn-sm">Más información</a>
+                                <a th:href="@{/auth/registration}" class="btn btn-primary btn-sm">Registrarse gratis</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filtros -->
+                <div class="row mb-4 mt-4">
                     <div class="col-12">
                         <div class="card">
                             <div class="card-header">
@@ -43,7 +98,7 @@
                             <div class="card-body">
                                 <form method="get" th:action="@{/eventos}">
                                     <div class="row">
-                                        <div class="col-md-3">
+                                        <div class="col-md-4">
                                             <label class="form-label" for="idProvincia">Provincia</label>
                                             <select id="idProvincia" class="form-select" name="provincia">
                                                 <option value="">Todas las provincias</option>
@@ -53,7 +108,7 @@
                                                         th:selected="${prov == provincia}">Provincia</option>
                                             </select>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-4">
                                             <label class="form-label" for="idMunicipio">Municipio</label>
                                             <select id="idMunicipio" class="form-select" name="municipio">
                                                 <option value="">Todos los municipios</option>
@@ -64,7 +119,7 @@
                                                         th:selected="${mun.nombre == municipio}">Municipio</option>
                                             </select>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-4">
                                             <label class="form-label" for="idArtista">Artista</label>
                                             <select id="idArtista" class="form-select" name="idArtista">
                                                 <option value="">Todos los artistas</option>
@@ -74,22 +129,21 @@
                                                         th:selected="${idArtistaSeleccionado != null and art.idArtista == idArtistaSeleccionado}">Artista</option>
                                             </select>
                                         </div>
-
                                     </div>
                                     <div class="row mt-3">
-                                        <div class="col-md-3">
+                                        <div class="col-md-4">
                                             <label for="idFechaDesde" class="form-label">Fecha desde</label>
                                             <input id="idFechaDesde" type="date" class="form-control" name="desde"
                                                    th:value="${fechaDesde}"
                                                    th:max="${fechaHasta}">
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-4">
                                             <label for="idFechaHasta" class="form-label">Fecha hasta</label>
                                             <input id="idFechaHasta" type="date" class="form-control" name="hasta"
                                                    th:value="${fechaHasta}"
                                                    th:min="${fechaDesde}">
                                         </div>
-                                        <div class="col-md-3 d-flex align-items-end">
+                                        <div class="col-md-4 d-flex align-items-end">
                                             <button type="submit" class="btn btn-primary w-100">
                                                 <i class="fas fa-search me-1"></i> Buscar
                                             </button>
@@ -101,82 +155,72 @@
                     </div>
                 </div>
 
-                <div class="row" th:if="${eventosPorDia != null and !eventosPorDia.isEmpty()}">
-                    <div class="col-12">
-                        <div th:each="diaEntry : ${eventosPorDia}" class="mb-4 animate__animated animate__fadeIn">
-                            <div class="mb-3">
-                                <h3 class="text-primary">
-                                    <i class="fas fa-calendar-day me-2"></i>
-                                    <span th:text="${#temporals.format(diaEntry.key, 'EEEE, dd MMMM yyyy', new java.util.Locale('es', 'ES'))}">Fecha</span>
-                                </h3>
-                                <span class="badge bg-secondary" th:text="${#lists.size(diaEntry.value)} + ' evento(s)'">0 eventos</span>
+                <!-- Grid unificado de eventos -->
+                <div th:if="${eventos != null and !eventos.isEmpty()}" class="row g-3 mb-4 animate__animated animate__fadeIn">
+                    <div th:each="evento : ${eventos}" class="col-12 col-sm-6 col-lg-4 col-xl-3">
+                        <div class="card card-max-width h-100">
+                            <div style="height: 240px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                                <img class="card-img-top img-max-height"
+                                     th:if="${evento.logoArtista != null and !#strings.isEmpty(evento.logoArtista)}"
+                                     th:src="${#strings.replace(evento.logoArtista, '/upload/', '/upload/f_auto,q_auto,w_400/')}"
+                                     th:alt="${'Logo de ' + evento.nombreArtista}"
+                                     loading="lazy"
+                                     style="max-height: 230px; width: auto; display: block; margin: 0 auto;">
+                                <img class="card-img-top img-max-height"
+                                     th:if="${evento.logoArtista == null or #strings.isEmpty(evento.logoArtista)}"
+                                     th:src="@{/logo/logo_transparente.png}"
+                                     th:alt="${'Logo de ' + evento.nombreArtista}"
+                                     style="max-height: 230px; width: auto; display: block; margin: 0 auto;">
                             </div>
-
-                            <div class="row">
-                                <div th:each="evento : ${diaEntry.value}"
-                                     class="col-12 col-md-6 col-lg-3 mb-3">
-                                    <div class="card card-max-width h-100" style="max-width: 100%; min-height: 500px;">
-                                        <div style="min-height: 340px; display: flex; align-items: center; justify-content: center;">
-                                            <img class="card-img-top img-max-height"
-                                                 th:if="${evento.logoArtista != null and !#strings.isEmpty(evento.logoArtista)}"
-                                                 th:src="@{${evento.logoArtista}}"
-                                                 th:alt="${'Logo de ' + evento.nombreArtista}"
-                                                 style="max-height: 327px; width: auto; display: block; margin: 0 auto;">
-                                            <img class="card-img-top img-max-height"
-                                                 th:if="${evento.logoArtista == null or #strings.isEmpty(evento.logoArtista)}"
-                                                 th:src="@{/logo/logo_transparente.png}"
-                                                 th:alt="${'Logo de ' + evento.nombreArtista}"
-                                                 style="max-height: 327px; width: auto; display: block; margin: 0 auto;">
-                                        </div>
-                                        <div class="card-header px-4 pt-4">
-                                            <h5 class="card-title mb-2" th:text="${evento.nombreArtista}">Artista</h5>
-                                            <div class="mb-1">
-                                                <span class="badge bg-success me-1" th:if="${evento.matinal}">
-                                                    <i class="fas fa-sun"></i> Matinal
-                                                </span>
-                                                <span class="badge bg-warning me-1" th:if="${evento.tarde}">
-                                                    <i class="fas fa-cloud-sun"></i> Tarde
-                                                </span>
-                                                <span class="badge bg-primary me-1" th:if="${evento.noche}">
-                                                    <i class="fas fa-moon"></i> Noche
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div class="card-body" style="min-height: 80px;">
-                                            <div class="d-flex align-items-center mb-2">
-                                                <div class="stat text-primary me-2">
-                                                    <i class="align-middle" data-feather="clock"></i>
-                                                </div>
-                                                <h4 class="mb-0">
-                                                    <span th:if="${evento.horaActuacion != null}" th:text="${#temporals.format(evento.horaActuacion, 'HH:mm')} + ' h'">Hora</span>
-                                                    <span th:if="${evento.horaActuacion == null}" class="text-muted">Por confirmar</span>
-                                                </h4>
-                                            </div>
-
-                                            <ul class="list-unstyled mb-0">
-                                                <li class="mb-1" th:if="${evento.lugar != null and !#strings.isEmpty(evento.lugar)}">
-                                                    <span class="fas fa-map-marker-alt fa-fw me-1 text-muted"></span>
-                                                    <span th:text="${evento.lugar}">Lugar</span>
-                                                </li>
-                                                <li class="mb-1">
-                                                    <span class="fas fa-city fa-fw me-1 text-muted"></span>
-                                                    <span th:text="${evento.municipio + ', ' + evento.provincia}">Ubicacion</span>
-                                                </li>
-                                            </ul>
-                                            <div class="card-body text-center d-flex flex-column flex-sm-row justify-content-around px-0 mt-3">
-                                                <a th:href="@{/eventos/evento/{id}-{slug}(id=${evento.id},slug=${evento.slug})}"
-                                                   class="btn btn-pill btn-primary col-12">
-                                                    <i class="fas fa-eye me-1"></i> Ver detalles
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
+                            <div class="card-header px-3 pt-3 pb-1">
+                                <h5 class="card-title mb-1" th:text="${evento.nombreArtista}">Artista</h5>
+                                <p class="text-primary small mb-1 fw-semibold">
+                                    <i class="fas fa-calendar-day me-1"></i>
+                                    <span th:text="${#temporals.format(evento.fecha, 'EEE dd MMM yyyy', new java.util.Locale('es', 'ES'))}">Fecha</span>
+                                </p>
+                                <div class="mb-1">
+                                    <span class="badge bg-success me-1" th:if="${evento.matinal}">
+                                        <i class="fas fa-sun"></i> Matinal
+                                    </span>
+                                    <span class="badge bg-warning me-1" th:if="${evento.tarde}">
+                                        <i class="fas fa-cloud-sun"></i> Tarde
+                                    </span>
+                                    <span class="badge bg-primary me-1" th:if="${evento.noche}">
+                                        <i class="fas fa-moon"></i> Noche
+                                    </span>
                                 </div>
+                            </div>
+                            <div class="card-body px-3 py-2">
+                                <ul class="list-unstyled mb-0 small">
+                                    <li class="mb-1" th:if="${evento.horaActuacion != null}">
+                                        <span class="fas fa-clock fa-fw me-1 text-muted"></span>
+                                        <span th:text="${#temporals.format(evento.horaActuacion, 'HH:mm')} + ' h'">Hora</span>
+                                    </li>
+                                    <li class="mb-1 text-muted" th:if="${evento.horaActuacion == null}">
+                                        <span class="fas fa-clock fa-fw me-1"></span>
+                                        Horario por confirmar
+                                    </li>
+                                    <li class="mb-1" th:if="${evento.lugarParaMapa != null}">
+                                        <span class="fas fa-map-marker-alt fa-fw me-1 text-muted"></span>
+                                        <span th:text="${evento.lugarParaMapa}">Lugar</span>
+                                    </li>
+                                    <li class="mb-1">
+                                        <span class="fas fa-city fa-fw me-1 text-muted"></span>
+                                        <span th:text="${evento.municipio + ', ' + evento.provincia}">Ubicacion</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="card-footer px-3 py-2">
+                                <a th:href="@{/eventos/evento/{id}-{slug}(id=${evento.id},slug=${evento.slug})}"
+                                   class="btn btn-pill btn-primary w-100 btn-sm">
+                                    <i class="fas fa-eye me-1"></i> Ver detalles
+                                </a>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- Estado vacío -->
                 <div class="row" th:if="${eventos == null or eventos.isEmpty()}">
                     <div class="col-12">
                         <div class="card">
@@ -187,7 +231,7 @@
                                     <span th:text="${nombreArtista}">El artista</span> no tiene actuaciones programadas en este momento.
                                 </p>
                                 <p class="text-muted" th:unless="${nombreArtista != null}">
-                                    No hay eventos publicos disponibles con los filtros seleccionados.
+                                    No hay eventos públicos disponibles con los filtros seleccionados.
                                 </p>
                             </div>
                         </div>
@@ -198,15 +242,14 @@
                     <div class="col-12 text-center">
                         <small class="text-muted">
                             <i class="fas fa-check-circle text-success"></i>
-                            Informacion actualizada proporcionada por <strong>festia.es</strong><br>
-                            Plataforma profesional de gestion de eventos musicales
+                            Información actualizada proporcionada por <strong>festia.es</strong><br>
+                            Plataforma profesional de gestión de eventos musicales
                         </small>
                     </div>
                 </div>
+
             </div>
         </main>
-
-
     </div>
 </div>
 

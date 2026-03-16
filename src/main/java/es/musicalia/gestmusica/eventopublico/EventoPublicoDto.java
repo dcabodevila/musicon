@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -42,9 +43,9 @@ public class EventoPublicoDto {
     private LocalDateTime fechaActualizacion;
 
     /**
-     * Genera JSON-LD de Schema.org para MusicEvent sin concatenaciones manuales.
+     * Genera el Map con los datos JSON-LD Schema.org MusicEvent (reutilizable en ItemList).
      */
-    public String toJsonLd(String baseUrl, String organizerName, String organizerUrl, String imageUrl) {
+    public Map<String, Object> toJsonLdMap(String baseUrl, String organizerName, String organizerUrl, String imageUrl) {
         String eventoUrl = baseUrl + getPathPublico();
 
         Map<String, Object> root = new LinkedHashMap<>();
@@ -54,6 +55,7 @@ public class EventoPublicoDto {
         root.put("url", eventoUrl);
         root.put("name", getTituloEvento());
         root.put("startDate", fecha.atZone(EVENT_TIME_ZONE).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+        root.put("endDate", fecha.plusHours(3).atZone(EVENT_TIME_ZONE).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
 
         Map<String, Object> location = new LinkedHashMap<>();
         location.put("@type", "Place");
@@ -88,9 +90,17 @@ public class EventoPublicoDto {
             root.put("image", imageUrl);
         }
 
+        return root;
+    }
+
+    /**
+     * Genera JSON-LD de Schema.org para MusicEvent como String (para incrustar en HTML).
+     */
+    public String toJsonLd(String baseUrl, String organizerName, String organizerUrl, String imageUrl) {
         try {
             // Evita cierre accidental de <script> en HTML.
-            return OBJECT_MAPPER.writeValueAsString(root).replace("</", "<\\/");
+            return OBJECT_MAPPER.writeValueAsString(toJsonLdMap(baseUrl, organizerName, organizerUrl, imageUrl))
+                .replace("</", "<\\/");
         } catch (JsonProcessingException ex) {
             throw new IllegalStateException("No se pudo serializar JSON-LD del evento " + id, ex);
         }
@@ -154,6 +164,37 @@ public class EventoPublicoDto {
             return fechaActualizacion.toLocalDate();
         }
         return fecha.toLocalDate();
+    }
+
+    /**
+     * Extrae el nombre de la localidad del campo lugar para usar en búsquedas de mapa.
+     * Si lugar contiene guiones (ej: "ROBRA-OUTEIRO DE REI-LUGO"), divide por guiones/comas,
+     * descarta las partes que ya están contenidas en municipio o provincia, y devuelve
+     * el primer elemento restante. Devuelve null si lugar es nulo o si todos los elementos
+     * son redundantes con municipio/provincia.
+     */
+    public String getLugarParaMapa() {
+        if (lugar == null || lugar.isBlank()) {
+            return null;
+        }
+        String municipioNorm = normalizarTexto(municipio);
+        String provinciaNorm = normalizarTexto(provincia);
+
+        return Arrays.stream(lugar.replace('-', ',').split(","))
+            .map(String::trim)
+            .filter(p -> !p.isBlank())
+            .filter(p -> {
+                String pNorm = normalizarTexto(p);
+                return !municipioNorm.contains(pNorm) && !provinciaNorm.contains(pNorm);
+            })
+            .findFirst()
+            .orElse(null);
+    }
+
+    private String normalizarTexto(String s) {
+        if (s == null) return "";
+        String n = Normalizer.normalize(s.toLowerCase(Locale.ROOT), Normalizer.Form.NFD);
+        return DIACRITICS_PATTERN.matcher(n).replaceAll("").trim();
     }
 
     private String getDescripcionJsonLd() {
