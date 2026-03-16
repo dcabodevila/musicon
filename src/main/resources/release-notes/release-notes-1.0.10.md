@@ -1,52 +1,29 @@
 <!-- FOR_ROLES: AGENCIA -->
 
-# Sincronización con OrquestasDeGalicia.es
+## Comunidades de trabajo de los artistas
 
-![odg.png](/img/release-notes/odg.png)
+Ahora puedes indicar en qué **comunidades autónomas** trabaja cada uno de tus artistas.
 
-La web OrquestasDeGalicia.es recibe **más de 30000 visitas únicas diarias**, siendo referencia en el sector.
+Esta configuración determina en qué comunidades aparecerá el artista cuando un cliente solicite un presupuesto, por lo que es importante mantenerla actualizada.
 
-Como parte de la estrategia de **festia.es** para mejorar la **visibilidad y alcance de los artistas**, queremos darte la posibilidad de publicar fácilmente todas las fechas en la plataforma.
+### Cómo configurarlo
 
-Ahora puedes sincronizar manualmente o incluso automáticamente.
+Hemos asignado por defecto todas las comunidades a todos los artistas de festia, para ajustarlo:
 
-### Cómo activarlo
+1. Accede al artista desde el menú **Artistas** y pulsa **Editar datos artista**.
 
-- Accede a cada Artista donde quieras activarlo en menú de Editar datos artista
- ![editar-datos-artista.png](/img/release-notes/editar-datos-artista.png)
-- Solicita la activación para un artista pulsando el botón "Solicitar activación".
-![solicita-activacion.png](/img/release-notes/solicita-activacion.png)
-- En cuanto nos den el OK desde OrquestasDeGalicia.es, te activaremos y recibirás una notificación interna para empezar a publicar.
+2. En el apartado de datos generales encontrarás el campo **Comunidades de trabajo**.
 
-### Cómo publicar manualmente en OrquestasDeGalicia.es
+3. Selecciona todas las comunidades en las que el artista está disponible para actuar. Puedes seleccionar varias a la vez.
 
-- Una vez activado el artista por los administradores de **festia.es**, ve a cualquiera de las ocupaciones de un artista.
-- Asegúrate de que está especificado el lugar del evento, es necesario indicar **municipio** y **provincina** (No provisonal).
-- Puedes completar la información sobre la actuación en el campo **Descripción para Orquestas de Galicia.es**
-  ![publicar-odg.png](/img/release-notes/publicar-odg.png)
+4. Guarda los cambios.
 
-## Sincronización automática con OrquestasDeGalicia
+> **Importante:** Un artista debe tener al menos una comunidad de trabajo asignada. Si no se selecciona ninguna, el formulario no permitirá guardar.
 
-También puedes sincronizar automáticamente tus ocupaciones con OrquestasDeGalicia.es.
+![comunidades-artistas.png](/img/release-notes/comunidades-artistas.png)
 
-> **Nota:** Debes haber solicitado primero la sincronización manual.
+### Efecto en los presupuestos
 
-- Accede a cada Artista donde quieras activarlo en menú de Editar datos artista.
-- Activa la casilla **Sincronizar ocupaciones en OrquestasDeGalicia.es**
-
-### Cuándo se sincroniza automáticamente
-
-- Todas las ocupaciones de los artistas seleccionados se actualizarán en OrquestasDeGalicia.es **cada día a las 20:00**.
-- Si modificas la ocupación, se actualizará en OrquestasDeGalicia.es.
-- Si anulas la ocupación, se borrará automáticameente de OrquestasDeGalicia.es.
-
-### Qué ocupaciones entran en sincronización
-
-Solo se procesan ocupaciones que cumplan estas condiciones:
-
-- El artista tiene activada la opción **Sincronizar ocupaciones en OrquestasDeGalicia.es**.
-- La fecha del evento está dentro de los **próximos 3 meses**, está ocupada (no reserva) y tiene Localidad y Municipio asignado (No provisional).
-
-
+Cuando un cliente solicita un presupuesto para una comunidad concreta, el sistema solo mostrará los artistas que tengan esa comunidad entre sus comunidades de trabajo. Artistas sin la comunidad configurada **no aparecerán** en los resultados, aunque estén activos y con tarifas públicas.
 
 <!-- END_FOR_ROLES -->
