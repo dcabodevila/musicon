@@ -235,7 +235,7 @@ public class EventoPublicoController {
             sitemap.append("  <url>\n");
             sitemap.append("    <loc>").append(baseUrl).append(evento.getPathPublico()).append("</loc>\n");
             sitemap.append("    <lastmod>").append(evento.getLastModDate()).append("</lastmod>\n");
-            sitemap.append("    <changefreq>weekly</changefreq>\n");
+            sitemap.append("    <changefreq>daily</changefreq>\n");
             sitemap.append("    <priority>0.8</priority>\n");
             sitemap.append("  </url>\n");
         }
@@ -250,7 +250,7 @@ public class EventoPublicoController {
             sitemap.append("  <url>\n");
             sitemap.append("    <loc>").append(baseUrl).append("/eventos/artista/").append(entry.getKey()).append("</loc>\n");
             sitemap.append("    <lastmod>").append(entry.getValue().getLastModDate()).append("</lastmod>\n");
-            sitemap.append("    <changefreq>weekly</changefreq>\n");
+            sitemap.append("    <changefreq>daily</changefreq>\n");
             sitemap.append("    <priority>0.7</priority>\n");
             sitemap.append("  </url>\n");
         }
