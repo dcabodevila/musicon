@@ -332,14 +332,14 @@ public class OcupacionController {
 
     private void getModelAttributeComunOcupacionList(CustomAuthenticatedUser user, Model model) {
 
-        OcupacionListFilterDto filter = model.containsAttribute("ocupacionListFilterDto") ? (OcupacionListFilterDto) model.getAttribute("ocupacionListFilterDto") : OcupacionListFilterDto.builder().fechaDesde(LocalDate.now()).build() ;
+        OcupacionListFilterDto filter = model.containsAttribute("ocupacionListFilterDto") ? (OcupacionListFilterDto) model.getAttribute("ocupacionListFilterDto") : OcupacionListFilterDto.builder().fechaDesde(LocalDate.now()).fechaHasta(LocalDate.now().plusMonths(2)).build() ;
 
         if (!model.containsAttribute("listaOcupaciones")) {
             model.addAttribute("listaOcupaciones", new ArrayList<>());
         }
 
         if (!model.containsAttribute("ocupacionListFilterDto")) {
-            model.addAttribute("ocupacionListFilterDto", OcupacionListFilterDto.builder().fechaDesde(LocalDate.now()).build());
+            model.addAttribute("ocupacionListFilterDto", OcupacionListFilterDto.builder().fechaDesde(LocalDate.now().minusMonths(2)).build());
         }
         final List<AgenciaRecord> listaAgenciaRecord = this.agenciaService.findMisAgencias(user.getMapPermisosAgencia().keySet());
 

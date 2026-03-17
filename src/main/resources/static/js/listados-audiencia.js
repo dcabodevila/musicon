@@ -249,7 +249,6 @@ function initializeChart() {
                 scales: {
                     y: {
                         beginAtZero: true,
-                        suggestedMin: 0,
                         min: 0,
                         grid: {
                             display: true

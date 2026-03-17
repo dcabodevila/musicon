@@ -79,7 +79,7 @@ public class EventoPublicoDto {
 
         Map<String, Object> address = new LinkedHashMap<>();
         address.put("@type", "PostalAddress");
-        address.put("addressLocality", municipio);
+        address.put("addressLocality", getMunicipioDisplay());
         address.put("addressRegion", provincia);
         address.put("addressCountry", "ES");
         location.put("address", address);
@@ -126,7 +126,7 @@ public class EventoPublicoDto {
      * Titulo SEO para la pagina del evento.
      */
     public String getTituloSeo() {
-        return nombreArtista + " en " + municipio + " (" + provincia + ") | " +
+        return nombreArtista + " en " + getMunicipioDisplay() + " (" + provincia + ") | " +
             fecha.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + " | Festia";
     }
 
@@ -135,8 +135,8 @@ public class EventoPublicoDto {
      */
     public String getDescripcionSeo() {
         StringBuilder desc = new StringBuilder();
-        desc.append("Concierto de ").append(nombreArtista);
-        desc.append(" en ").append(municipio).append(" (").append(provincia).append(")");
+        desc.append("Actuación de ").append(nombreArtista);
+        desc.append(" en ").append(getMunicipioDisplay()).append(" (").append(provincia).append(")");
         desc.append(" el ").append(fecha.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         if (horaActuacion != null) {
             desc.append(" a las ").append(horaActuacion.format(DateTimeFormatter.ofPattern("HH:mm"))).append(" h");
@@ -144,7 +144,7 @@ public class EventoPublicoDto {
         if (lugar != null && !lugar.isBlank()) {
             desc.append(", en ").append(lugar);
         }
-        desc.append(". Consulta todos los detalles en Festia.");
+        desc.append(". Consulta todos los detalles en https://festia.es/eventos");
         return desc.toString();
     }
 
@@ -167,11 +167,11 @@ public class EventoPublicoDto {
     }
 
     public String getTituloEvento() {
-        return "Actuación de " + nombreArtista + " en " + municipio;
+        return "Actuación de " + nombreArtista + " en " + getMunicipioDisplay();
     }
 
     public String getEncabezadoPrincipal() {
-        return nombreArtista + " en " + municipio + " - " +
+        return nombreArtista + " en " + getMunicipioDisplay() + " - " +
             fecha.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
     }
 
@@ -182,6 +182,19 @@ public class EventoPublicoDto {
         return fecha.toLocalDate();
     }
 
+    public String getMunicipioDisplay() {
+        String localidad = getLugarParaMapa();
+        return localidad != null ? localidad + ", " + municipio : municipio;
+    }
+
+    public String getLugarDisplay() {
+        String localidad = getLugarParaMapa();
+        if (localidad == null) return null;
+        return Arrays.stream(localidad.split("\\s+"))
+            .map(w -> w.isEmpty() ? w : Character.toUpperCase(w.charAt(0)) + w.substring(1).toLowerCase(Locale.ROOT))
+            .collect(java.util.stream.Collectors.joining(" "));
+    }
+
     /**
      * Extrae el nombre de la localidad del campo lugar para usar en búsquedas de mapa.
      * Si lugar contiene guiones (ej: "ROBRA-OUTEIRO DE REI-LUGO"), divide por guiones/comas,
@@ -189,6 +202,7 @@ public class EventoPublicoDto {
      * el primer elemento restante. Devuelve null si lugar es nulo o si todos los elementos
      * son redundantes con municipio/provincia.
      */
+
     public String getLugarParaMapa() {
         if (lugar == null || lugar.isBlank()) {
             return null;
