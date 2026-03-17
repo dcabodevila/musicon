@@ -33,6 +33,7 @@ public class EventoPublicoDto {
     private String logoArtista;
     private LocalDateTime fecha;
     private LocalTime horaActuacion;
+    private LocalTime horaActuacionHasta;
     private String lugar;
     private String municipio;
     private String provincia;
@@ -54,8 +55,23 @@ public class EventoPublicoDto {
         root.put("@id", eventoUrl);
         root.put("url", eventoUrl);
         root.put("name", getTituloEvento());
-        root.put("startDate", fecha.atZone(EVENT_TIME_ZONE).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
-        root.put("endDate", fecha.plusHours(3).atZone(EVENT_TIME_ZONE).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+        LocalDate fechaDate = fecha.toLocalDate();
+        if (horaActuacion != null) {
+            LocalDateTime startDateTime = fechaDate.atTime(horaActuacion);
+            LocalDateTime endDateTime;
+            if (horaActuacionHasta != null) {
+                LocalDate fechaHasta = (horaActuacion.getHour() >= 12 && horaActuacionHasta.getHour() < 12)
+                        ? fechaDate.plusDays(1)
+                        : fechaDate;
+                endDateTime = fechaHasta.atTime(horaActuacionHasta);
+            } else {
+                endDateTime = startDateTime.plusHours(3);
+            }
+            root.put("startDate", startDateTime.atZone(EVENT_TIME_ZONE).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+            root.put("endDate", endDateTime.atZone(EVENT_TIME_ZONE).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+        } else {
+            root.put("startDate", fechaDate.toString());
+        }
 
         Map<String, Object> location = new LinkedHashMap<>();
         location.put("@type", "Place");

@@ -167,7 +167,8 @@ function crearOcupacionSaveDto() {
     ocupacionSaveDto["provisional"] = $("#provisional-ocupacion").val();
     ocupacionSaveDto["textoOrquestasDeGalicia"] = $("#orquestasdegalicia-ocupacion").val();
     ocupacionSaveDto["idUsuario"] = $("#usuario-ocupacion").data('choicesInstance').getValue(true);
-    ocupacionSaveDto["horaActuacion"] = $("#hora-actuacion").val();
+    ocupacionSaveDto["horaActuacionDesde"] = $("#hora-actuacion-desde").val();
+    ocupacionSaveDto["horaActuacionHasta"] = $("#hora-actuacion-hasta").val();
 
 
     return ocupacionSaveDto;
@@ -261,7 +262,8 @@ function obtenerOcupacionDto(idOcupacion) {
                 $("#orquestasdegalicia-ocupacion").val(ocupacionDto.textoOrquestasDeGalicia);
 
                 $('#usuario-ocupacion').data('choicesInstance').setChoiceByValue(String(ocupacionDto.idUsuario));
-                $("#hora-actuacion").val(ocupacionDto.horaActuacion);
+                $("#hora-actuacion-desde").val(ocupacionDto.horaActuacionDesde);
+                $("#hora-actuacion-hasta").val(ocupacionDto.horaActuacionHasta);
 
 
                 // Gestionar estado y UI

@@ -11,6 +11,7 @@ Como parte de la estrategia de **festia.es** para mejorar la **visibilidad y alc
 Ahora puedes sincronizar manualmente o incluso automáticamente.
 
 ### Cómo activarlo
+- Si no estás registrado en OrquestasDeGalicia.es, regístrate en https://www.orquestasdegalicia.es/registrar-formacion
 
 - Accede a cada Artista donde quieras activarlo en menú de Editar datos artista
 ![editar-datos-artista.png](/img/release-notes/editar-datos-artista.png)

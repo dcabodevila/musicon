@@ -1,7 +1,30 @@
 {
   "permissions": {
     "allow": [
-      "WebFetch(domain:festia.es)"
+      "WebFetch(domain:festia.es)",
+      "Read(//mnt/c/Users/Sir Nolimit/IdeaProjects/**)",
+      "Bash(set -a)",
+      "Bash(source .env)",
+      "Bash(set +a)",
+      "Bash(./mvnw spring-boot:run -Dspring-boot.run.profiles=dev)",
+      "Bash(cd:*)",
+      "Bash(echo:*)",
+      "WebSearch",
+      "Bash(claude mcp:*)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_fill_form",
+      "mcp__playwright__browser_snapshot",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_select_option",
+      "mcp__playwright__browser_tabs",
+      "mcp__playwright__browser_take_screenshot",
+      "Bash(PGPASSWORD=admin psql -U postgres -h localhost -p 5432 -d gestmusica_db -c \"SELECT COUNT\\(*\\) FROM artista;\")",
+      "Bash(\"/c/Program Files/PostgreSQL/17/bin/psql\" -U postgres -h localhost -p 5432 -d gestmusica_db -c \"SELECT COUNT\\(*\\) FROM artista;\")",
+      "Bash(\"/c/Program Files/PostgreSQL/16/bin/psql\" -U postgres -h localhost -p 5432 -d gestmusica_db -c \"SELECT COUNT\\(*\\) FROM artista;\")",
+      "Bash(PGPASSWORD=admin \"/c/Program Files/PostgreSQL/16/bin/psql\" -U postgres -h localhost -p 5432 -d gestmusica_db -c \"SELECT COUNT\\(*\\) FROM gestmusica.artista;\")",
+      "Bash(export JAVA_HOME=\"/c/Program Files/Java/jdk-17\")",
+      "Bash(./mvnw clean:*)",
+      "Bash(./mvnw compile:*)"
     ]
   }
 }

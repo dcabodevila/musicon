@@ -128,8 +128,11 @@ public class Ocupacion {
     @Column(name = "fecha_publicacion_odg")
     private LocalDateTime fechaPublicacionOdg;
 
-    @Column(name = "hora_actuacion")
-    private LocalTime horaActuacion;
+    @Column(name = "hora_actuacion_desde")
+    private LocalTime horaActuacionDesde;
+
+    @Column(name = "hora_actuacion_hasta")
+    private LocalTime horaActuacionHasta;
 
 }
 

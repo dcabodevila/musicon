@@ -50,6 +50,8 @@ public class OcupacionSaveDto {
 
     private Integer idOcupacionLegacy;
 
-    private LocalTime horaActuacion;
+    private LocalTime horaActuacionDesde;
+
+    private LocalTime horaActuacionHasta;
 
 }

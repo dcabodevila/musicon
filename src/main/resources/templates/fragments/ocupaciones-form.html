@@ -32,13 +32,6 @@
         </div>
       </div>
       <div class="mb-3 row">
-        <label for="hora-actuacion" class="col-form-label col-sm-3 text-sm-end">Hora de actuación (opcional)</label>
-        <div class="col-sm-9">
-          <input id="hora-actuacion" th:field="*{horaActuacion}" type="time" class="form-control" placeholder="Ej: 22:00">
-          <small class="form-text text-muted">Si no se especifica, se mostrará "Horario por confirmar"</small>
-        </div>
-      </div>
-      <div class="mb-3 row">
         <label for="tipos-ocupacion" class="col-form-label col-sm-3 text-sm-end">Tipo ocupación</label>
         <div class="col-sm-9">
           <select id="tipos-ocupacion" th:field="*{idTipoOcupacion}" class="form-control choices-single" required>
@@ -151,15 +144,31 @@
 
             <div th:if="${isArtistaPermiteOrquestasDeGalicia}" class="card mb-3">
               <div class="card-header fw-bold">
-                Publicación OrquestasDeGalicia.es
+                Publicación de eventos
 <!--                <i class="fas fa-crown text-warning ms-2" title="Funcionalidad Premium"> Premium</i>-->
               </div>
               <div class="card-body">
                 <div class="mb-3 row">
-                  <label for="orquestasdegalicia-ocupacion" class="col-form-label col-sm-3 text-sm-end">Info adicional para Orquestas De Galicia.es</label>
+                  <label class="col-form-label col-sm-3 text-sm-end">Hora de actuación (opcional)</label>
+                  <div class="col-sm-9">
+                    <div class="d-flex gap-2 align-items-center">
+                      <div class="flex-fill">
+                        <label for="hora-actuacion-desde" class="form-label small text-muted mb-1">Desde</label>
+                        <input id="hora-actuacion-desde" th:field="*{horaActuacionDesde}" type="time" class="form-control" placeholder="Ej: 22:00">
+                      </div>
+                      <div class="flex-fill">
+                        <label for="hora-actuacion-hasta" class="form-label small text-muted mb-1">Hasta</label>
+                        <input id="hora-actuacion-hasta" th:field="*{horaActuacionHasta}" type="time" class="form-control" placeholder="Ej: 02:00">
+                      </div>
+                    </div>
+                    <small class="form-text text-muted">Si no se especifica, se mostrará "Horario por confirmar"</small>
+                  </div>
+                </div>
+                <div class="mb-3 row">
+                  <label for="orquestasdegalicia-ocupacion" class="col-form-label col-sm-3 text-sm-end">Info adicional evento</label>
                   <div class="col-sm-9">
                     <div class="d-flex gap-2">
-                      <textarea class="form-control" th:field="*{textoOrquestasDeGalicia}" placeholder="Información a publicar en OrquestasDeGalicia.es sobre la actuación" id="orquestasdegalicia-ocupacion"
+                      <textarea class="form-control" th:field="*{textoOrquestasDeGalicia}" placeholder="Información a publicar en el evento público (Eventos de festia y/o OrquestasDeGalicia.es" id="orquestasdegalicia-ocupacion"
                                 autocomplete="off" maxlength="400"></textarea>
                       <div class="d-flex flex-column gap-2">
                         <button type="button" class="btn btn-success" id="btn-publicar-orquestas" title="Publicar en OrquestasDeGalicia.es">

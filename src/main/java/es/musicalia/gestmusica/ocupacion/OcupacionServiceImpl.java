@@ -311,7 +311,8 @@ public class OcupacionServiceImpl implements OcupacionService {
 		ocupacion.setSoloMatinal(ocupacionSaveDto.getSoloMatinal());
 		ocupacion.setProvisional(ocupacionSaveDto.getProvisional());
 		ocupacion.setTextoOrquestasDeGalicia(ocupacionSaveDto.getTextoOrquestasDeGalicia());
-		ocupacion.setHoraActuacion(ocupacionSaveDto.getHoraActuacion());
+		ocupacion.setHoraActuacionDesde(ocupacionSaveDto.getHoraActuacionDesde());
+		ocupacion.setHoraActuacionHasta(ocupacionSaveDto.getHoraActuacionHasta());
 		if (ocupacion.getIdOcupacionLegacy()==null) {
 			ocupacion.setIdOcupacionLegacy(ocupacionSaveDto.getIdOcupacionLegacy());
 		}
