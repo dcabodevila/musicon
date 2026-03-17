@@ -34,3 +34,8 @@ build/
 /logs/app.log
 /CLAUDE.md
 .env
+/.claude/agent-memory/spec-analyst/domain_email_templates.md
+/.claude/agent-memory/spec-analyst/domain_registro_perfil_usuario.md
+/.claude/agent-memory/spec-analyst/domain_usuario_agencia.md
+/.claude/agent-memory/spec-analyst/MEMORY.md
+/.claude/agents/spec-analyst.md
