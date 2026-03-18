@@ -381,6 +381,8 @@ ORDER BY art.nombre, ag.nombre, cal.dia;]]>
 		</field>
 	</subDataset>
 	<parameter name="titulo" class="java.lang.String"/>
+	<parameter name="logoArtista" class="java.lang.String"/>
+	<parameter name="logoAgencia" class="java.lang.String"/>
 	<parameter name="idArtista" class="java.lang.Long">
 		<defaultValueExpression><![CDATA[7]]></defaultValueExpression>
 	</parameter>
@@ -395,30 +397,38 @@ ORDER BY art.nombre, ag.nombre, cal.dia;]]>
 		<![CDATA[]]>
 	</queryString>
 	<title>
-		<band height="47" splitType="Stretch">
+		<band height="63" splitType="Stretch">
 			<textField>
-				<reportElement x="0" y="0" width="802" height="47" uuid="a4676890-9119-497a-bc0c-584535b0ccae"/>
+				<reportElement x="0" y="0" width="802" height="60" uuid="a4676890-9119-497a-bc0c-584535b0ccae"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="SansSerif" size="20"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{titulo} +" " +$P{ano}]]></textFieldExpression>
 			</textField>
-			<image>
-				<reportElement x="0" y="0" width="50" height="47" uuid="4813f540-f28d-4ce7-a44d-72eaa59fbc68"/>
-				<imageExpression><![CDATA["https://res.cloudinary.com/hseoceuyz/image/upload/v1754229791/logo-name-transparente_mini_yfdyvi.png"]]></imageExpression>
+			<image scaleImage="RetainShape" hAlign="Left" onErrorType="Blank">
+				<reportElement x="0" y="0" width="102" height="59" uuid="4813f540-f28d-4ce7-a44d-72eaa59fbc68"/>
+				<imageExpression><![CDATA[$P{logoAgencia} != null && !$P{logoAgencia}.isEmpty() ? new java.net.URL($P{logoAgencia}) : null]]></imageExpression>
+			</image>
+			<image scaleImage="RetainShape" hAlign="Right" onErrorType="Blank">
+				<reportElement x="700" y="0" width="102" height="59" uuid="b1c2d3e4-f5a6-7890-abcd-ef1234567891"/>
+				<imageExpression><![CDATA[$P{logoArtista} != null && !$P{logoArtista}.isEmpty() ? new java.net.URL($P{logoArtista}) : null]]></imageExpression>
 			</image>
 		</band>
 	</title>
 	<pageFooter>
 		<band height="48" splitType="Stretch">
 			<textField textAdjust="StretchHeight" isBlankWhenNull="true">
-				<reportElement x="0" y="0" width="390" height="40" isRemoveLineWhenBlank="true" uuid="129981cf-9f40-47d8-80c8-55769f462514"/>
+				<reportElement x="0" y="0" width="280" height="40" isRemoveLineWhenBlank="true" uuid="129981cf-9f40-47d8-80c8-55769f462514"/>
 				<textFieldExpression><![CDATA[$P{datosAgrupacion}]]></textFieldExpression>
 			</textField>
 			<textField textAdjust="ScaleFont" isBlankWhenNull="true">
-				<reportElement x="402" y="0" width="400" height="40" isRemoveLineWhenBlank="true" uuid="1e324847-75ee-4936-85bf-ffa44edffac2"/>
+				<reportElement x="280" y="0" width="400" height="40" isRemoveLineWhenBlank="true" uuid="1e324847-75ee-4936-85bf-ffa44edffac2"/>
 				<textFieldExpression><![CDATA[$P{datosAgencia}]]></textFieldExpression>
 			</textField>
+			<image scaleImage="RetainShape" hAlign="Right" onErrorType="Blank">
+				<reportElement x="700" y="0" width="102" height="47" uuid="c2d3e4f5-a6b7-8901-bcde-f12345678902"/>
+				<imageExpression><![CDATA["https://res.cloudinary.com/hseoceuyz/image/upload/v1754229791/logo-name-transparente_mini_yfdyvi.png"]]></imageExpression>
+			</image>
 		</band>
 	</pageFooter>
 	<summary>

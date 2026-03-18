@@ -95,6 +95,8 @@ public class TarifaServiceImpl implements TarifaService {
         final String provincia = this.provinciaRepository.findById(tarifaAnualDto.getIdProvincia()).get().getNombre();
 
         parametros.put("datosAgencia", obtenerDatosAgencia(artista, provincia));
+        parametros.put("logoArtista", toCloudinaryPng(artista.getLogo()));
+        parametros.put("logoAgencia", toCloudinaryPng(artista.getAgencia().getLogo()));
 
 		String fileNameToExport = artista.getNombre().concat(DateUtils.getDateStr(new Date(), "ddMMyyyyHHmmss")).concat(".pdf");
 		String fileReport = TipoTarifaEnum.ANUAL.equals(tarifaAnualDto.getTipoTarifa())
@@ -268,5 +270,15 @@ public class TarifaServiceImpl implements TarifaService {
 		}
 		this.tarifaRepository.save(tarifa);
 	}
+
+    /**
+     * Cloudinary URLs con formato WebP no son renderizables por JasperReports (Java AWT).
+     * Insertamos f_png en la transformación para forzar conversión a PNG en la CDN.
+     * Ejemplo: .../upload/v123/foto.webp → .../upload/f_png/v123/foto.webp
+     */
+    private static String toCloudinaryPng(String url) {
+        if (url == null || url.isBlank()) return null;
+        return url.replace("/upload/", "/upload/f_png/");
+    }
 
 }
