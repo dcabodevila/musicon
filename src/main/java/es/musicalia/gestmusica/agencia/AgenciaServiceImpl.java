@@ -124,6 +124,10 @@ public class AgenciaServiceImpl implements AgenciaService {
 			}
 		}
 
+
+
+
+		Long oldUsuarioId = agencia.getUsuario() != null ? agencia.getUsuario().getId() : null;
 		if (agenciaDto.getIdUsuario()!=null){
 			final Usuario usuario = this.usuarioRepository.findById(agenciaDto.getIdUsuario()).orElseThrow();
 			usuario.setRolGeneral(this.rolRepository.findRolByCodigo(RolEnum.ROL_AGENCIA.getCodigo()));
@@ -154,8 +158,11 @@ public class AgenciaServiceImpl implements AgenciaService {
 		agencia.setAgenciaContacto(agenciaContacto);
 
 		agencia = this.agenciaRepository.save(agencia);
+		boolean isAsignarAccesoAgenciaUsuario = agenciaDto.getIdUsuario() != null && (agenciaDto.getId() == null || !agenciaDto.getIdUsuario().equals(oldUsuarioId));
 
-		this.accesoService.crearAccesoUsuarioAgenciaRol(agencia.getUsuario().getId(), agencia.getId(), this.rolRepository.findRolRecordByCodigo(RolEnum.ROL_AGENCIA.getCodigo()).id(), null);
+		if (isAsignarAccesoAgenciaUsuario){
+			this.accesoService.crearAccesoUsuarioAgenciaRol(agencia.getUsuario().getId(), agencia.getId(), this.rolRepository.findRolRecordByCodigo(RolEnum.ROL_AGENCIA.getCodigo()).id(), null);
+		}
 
 		asignarAgenciaAjustesListadosPorComunidad((agenciaDto.getId()==null), agencia);
 

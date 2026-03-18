@@ -273,9 +273,12 @@ public class AccesoServiceImpl implements AccesoService {
 	}
 
 	private AccesoArtista crearOActualizarAccesoArtista(Artista artista, Usuario usuario, Permiso permiso) {
-		AccesoArtista accesoArtista = accesoArtistaRepository
-				.findAllAccesosByIdArtistaIdUsuarioIdPermiso(artista.getId(), usuario.getId(), permiso.getId())
-				.orElse(new AccesoArtista());
+		List<AccesoArtista> existentes = accesoArtistaRepository
+				.findAllAccesosByIdArtistaIdUsuarioIdPermiso(artista.getId(), usuario.getId(), permiso.getId());
+		AccesoArtista accesoArtista = existentes.isEmpty() ? new AccesoArtista() : existentes.get(0);
+		if (existentes.size() > 1) {
+			accesoArtistaRepository.deleteAll(existentes.subList(1, existentes.size()));
+		}
 
 		accesoArtista.setPermiso(permiso);
 		accesoArtista.setArtista(artista);
@@ -300,8 +303,8 @@ public class AccesoServiceImpl implements AccesoService {
         Objects.requireNonNull(idUsuario, "El ID del usuario no puede ser null");
         Objects.requireNonNull(idPermiso, "El ID del permiso no puede ser null");
 
-        accesoArtistaRepository
-                .findAllAccesosByIdArtistaIdUsuarioIdPermiso(idArtista, idUsuario, idPermiso).ifPresent(accesoArtistaRepository::delete);
+        accesoArtistaRepository.deleteAll(
+                accesoArtistaRepository.findAllAccesosByIdArtistaIdUsuarioIdPermiso(idArtista, idUsuario, idPermiso));
 
     }
 
