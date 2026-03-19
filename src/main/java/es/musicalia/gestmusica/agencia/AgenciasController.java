@@ -3,6 +3,7 @@ package es.musicalia.gestmusica.agencia;
 
 import es.musicalia.gestmusica.artista.ArtistaService;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
+import es.musicalia.gestmusica.auth.model.SecurityService;
 import es.musicalia.gestmusica.file.FileService;
 import es.musicalia.gestmusica.localizacion.LocalizacionService;
 import es.musicalia.gestmusica.usuario.TipoUsuarioEnum;
@@ -34,14 +35,16 @@ public class AgenciasController {
     private final FileService fileService;
     private final AgenciaService agenciaService;
     private final ArtistaService artistaService;
+    private final SecurityService securityService;
 
     public AgenciasController(UserService userService, LocalizacionService localizacionService, AgenciaService agenciaService, FileService fileService,
-                              ArtistaService artistaService){
+                              ArtistaService artistaService, SecurityService securityService){
         this.userService = userService;
         this.localizacionService = localizacionService;
         this.agenciaService = agenciaService;
         this.fileService = fileService;
         this.artistaService = artistaService;
+        this.securityService = securityService;
     }
 
     @GetMapping
@@ -104,6 +107,15 @@ public class AgenciasController {
                 this.agenciaService.saveAgencia(agenciaDto);
             }
 
+            // Recarga/invalida sesión si se ha asignado un responsable
+            if (agenciaDto.getIdUsuario() != null) {
+                try {
+                    securityService.recargarOInvalidarSesion(agenciaDto.getIdUsuario());
+                } catch (Exception e) {
+                    log.error("Error recargando/invalidando sesión tras asignación de responsable: {}", e.getMessage());
+                }
+            }
+
             redirectAttributes.addFlashAttribute("message", "Agencia guardada correctamente");
             redirectAttributes.addFlashAttribute("alertClass", "success");
             return "redirect:/agencia/"+ agencia.getId();
@@ -120,6 +132,13 @@ public class AgenciasController {
 
     @GetMapping("/onboarding")
     public String mostrarOnboardingAgencia(@AuthenticationPrincipal CustomAuthenticatedUser user, Model model, RedirectAttributes redirectAttributes) {
+        // Validar que el usuario es de tipo AGENCIA
+        if (user.getUsuario().getTipoUsuario() != TipoUsuarioEnum.AGENCIA) {
+            redirectAttributes.addFlashAttribute("message", "Solo usuarios de tipo Agencia pueden acceder a esta página.");
+            redirectAttributes.addFlashAttribute("alertClass", "danger");
+            return "redirect:/";
+        }
+
         // Verificar si el usuario ya tiene agencia
         if (!user.getMapPermisosAgencia().isEmpty()) {
             redirectAttributes.addFlashAttribute("message", "Ya tienes una agencia creada. Accede a ella desde el menú principal.");
@@ -145,6 +164,14 @@ public class AgenciasController {
 
         try {
             Agencia agencia = this.agenciaService.crearAgenciaOnboarding(onboardingDto, user.getUsuario().getId());
+
+            // Recarga permisos del usuario actual tras onboarding exitoso
+            try {
+                securityService.reloadUserAuthorities();
+            } catch (Exception e) {
+                log.error("Error recargando permisos tras onboarding: {}", e.getMessage());
+            }
+
             redirectAttributes.addFlashAttribute("message", "Agencia creada correctamente. Bienvenido a festia.es");
             redirectAttributes.addFlashAttribute("alertClass", "success");
             return "redirect:/agencia/" + agencia.getId();
