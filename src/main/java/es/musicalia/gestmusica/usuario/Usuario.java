@@ -73,6 +73,9 @@ public class Usuario {
 	private Provincia provincia;
     @Column(name = "email_valido")
     private boolean emailVerified;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "tipo_usuario")
+	private TipoUsuarioEnum tipoUsuario;
 
 
 	public Usuario(String nombre, String password) {

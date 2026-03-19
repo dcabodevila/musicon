@@ -14,7 +14,8 @@ public enum EmailTemplateEnum {
     EMAIL_NOTIFICACION_ANULACION("Anulación de fecha", "festia", "Fecha anulada", "Se ha recibido una anulación de una fecha ocupada por ti. Podrás ver la información en festia.es.","base-email"),
     VALIDAR_USUARIO("Nuevo usuario registrado en festia.es", "festia","Nuevo usuario", "Se ha registrado un nuevo usuario, entre en la sección de Usuarios para validarlo.","base-email"),
     USUARIO_VALIDADO("Usuario activado en festia.es", "festia","Usuario activado", "Se ha activado su usuario en festia.es. Para actualizar sus permisos de acceso cierre e inicie sesión de nuevo.","base-email"),
-    REPORTE_MENSUAL_AGENCIA("Reporte mensual de listados - festia.es", "festia","Reporte mensual", "Este es tu reporte mensual de actividad en festia.es","reporte-mensual-agencia");
+    REPORTE_MENSUAL_AGENCIA("Reporte mensual de listados - festia.es", "festia","Reporte mensual", "Este es tu reporte mensual de actividad en festia.es","reporte-mensual-agencia"),
+    BIENVENIDA_AGENCIA("Bienvenido a festia.es como Agencia", "festia", "Bienvenido a festia.es", "Tu agencia ha sido creada exitosamente. Aquí están los próximos pasos para completar tu perfil.","bienvenida-agencia");
 
 
     private final String asunto;

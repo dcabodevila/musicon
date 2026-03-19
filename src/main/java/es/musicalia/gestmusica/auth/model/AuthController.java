@@ -82,11 +82,6 @@ public class AuthController {
             model.addAttribute("listaProvincias", this.localizacionService.findAllProvincias());
             return "registration";
         }
-        catch (EnvioEmailException m){
-            bindingResult.rejectValue("email", "error.email", "No se ha podido enviar el código al email seleccionado");
-            model.addAttribute("listaProvincias", this.localizacionService.findAllProvincias());
-            return "registration";
-        }
         catch (Exception e){
             model.addAttribute("errors", errors);
             model.addAttribute("listaProvincias", this.localizacionService.findAllProvincias());
@@ -95,12 +90,10 @@ public class AuthController {
 
         }
 
-        redirectAttributes.addFlashAttribute("email", registrationForm.getEmail());
         redirectAttributes.addFlashAttribute("message",
-                "Registro exitoso. Se ha enviado un código de verificación a tu email.");
+                "Registro exitoso. Bienvenido a festia.es. Inicia sesión con tus credenciales.");
 
-
-        return "redirect:/auth/verify-email";
+        return "redirect:/auth/login";
     }
 
     @GetMapping("/verify-email")

@@ -7,6 +7,8 @@ import es.musicalia.gestmusica.ajustes.AjustesRepository;
 import es.musicalia.gestmusica.contacto.ContactoRepository;
 import es.musicalia.gestmusica.contacto.Contacto;
 import es.musicalia.gestmusica.localizacion.*;
+import es.musicalia.gestmusica.mail.EmailService;
+import es.musicalia.gestmusica.mail.EmailTemplateEnum;
 import es.musicalia.gestmusica.mensaje.Mensaje;
 import es.musicalia.gestmusica.mensaje.MensajeService;
 import es.musicalia.gestmusica.rol.RolEnum;
@@ -39,8 +41,9 @@ public class AgenciaServiceImpl implements AgenciaService {
 	private final AjustesRepository ajustesRepository;
 	private final MensajeService mensajeService;
 	private final UserService userService;
+	private final EmailService emailService;
 
-	public AgenciaServiceImpl(AgenciaRepository agenciaRepository, MunicipioRepository municipioRepository, ProvinciaRepository provinciaRepository, UsuarioRepository usuarioRepository, ContactoRepository agenciaContactoRepository, AccesoService accesoService, RolRepository rolRepository, AgenciaMapper agenciaMapper, AjustesRepository ajustesRepository, MensajeService mensajeService, UserService userService){
+	public AgenciaServiceImpl(AgenciaRepository agenciaRepository, MunicipioRepository municipioRepository, ProvinciaRepository provinciaRepository, UsuarioRepository usuarioRepository, ContactoRepository agenciaContactoRepository, AccesoService accesoService, RolRepository rolRepository, AgenciaMapper agenciaMapper, AjustesRepository ajustesRepository, MensajeService mensajeService, UserService userService, EmailService emailService){
 		this.agenciaRepository = agenciaRepository;
 		this.municipioRepository = municipioRepository;
 		this.provinciaRepository = provinciaRepository;
@@ -52,6 +55,7 @@ public class AgenciaServiceImpl implements AgenciaService {
         this.ajustesRepository = ajustesRepository;
         this.mensajeService = mensajeService;
         this.userService = userService;
+        this.emailService = emailService;
     }
 	@Override
 	public List<AgenciaRecord> findAllAgenciasForUser(){
@@ -228,7 +232,51 @@ public class AgenciaServiceImpl implements AgenciaService {
 
 	}
 
+	@Transactional(readOnly = false)
+	public Agencia crearAgenciaOnboarding(AgenciaOnboardingDto onboardingDto, Long idUsuarioAutenticado) {
+		// Verificar que el usuario no tiene agencia previa
+		Usuario usuario = usuarioRepository.findById(idUsuarioAutenticado)
+				.orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
+		boolean usuarioTieneAgencia = agenciaRepository.existsByUsuarioId(idUsuarioAutenticado);
+		if (usuarioTieneAgencia) {
+			throw new RuntimeException("El usuario ya tiene una agencia asignada");
+		}
 
+		// Construir AgenciaDto desde AgenciaOnboardingDto
+		AgenciaDto agenciaDto = new AgenciaDto();
+		agenciaDto.setNombre(onboardingDto.getNombre());
+		agenciaDto.setDescripcion(onboardingDto.getDescripcion());
+		agenciaDto.setIdProvincia(onboardingDto.getIdProvincia());
+		agenciaDto.setIdUsuario(idUsuarioAutenticado);
+		agenciaDto.setActivo(true);
+		agenciaDto.setTarifasPublicas(false);
+
+		// Si viene teléfono, crear un contacto básico
+		if (onboardingDto.getTelefono() != null && !onboardingDto.getTelefono().isEmpty()) {
+			agenciaDto.setTelefono(onboardingDto.getTelefono());
+		}
+
+		// Guardar la agencia (notificarNuevaAgencia se invoca automáticamente)
+		Agencia agencia = saveAgencia(agenciaDto);
+
+		// Enviar email de bienvenida (no-bloqueante)
+		try {
+			enviarBienvenidaAgencia(usuario.getEmail(), agencia.getNombre());
+		} catch (Exception e) {
+			log.error("Error enviando email de bienvenida a {}: {}", usuario.getEmail(), e.getMessage());
+		}
+
+		return agencia;
+	}
+
+	private void enviarBienvenidaAgencia(String email, String nombreAgencia) {
+		try {
+			this.emailService.enviarMensajePorEmail(email, EmailTemplateEnum.BIENVENIDA_AGENCIA);
+			log.info("Email de bienvenida de agencia enviado a: {}", email);
+		} catch (Exception e) {
+			log.error("Error enviando email de bienvenida a {}: {}", email, e.getMessage());
+		}
+	}
 
 }

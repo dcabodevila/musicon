@@ -18,4 +18,6 @@ public interface AgenciaService {
 
     AgenciaDto findAgenciaDtoById(Long idAgencia);
 
+    Agencia crearAgenciaOnboarding(AgenciaOnboardingDto onboardingDto, Long idUsuarioAutenticado);
+
 }

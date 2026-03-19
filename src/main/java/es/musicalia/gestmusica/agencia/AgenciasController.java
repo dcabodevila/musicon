@@ -5,6 +5,7 @@ import es.musicalia.gestmusica.artista.ArtistaService;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.file.FileService;
 import es.musicalia.gestmusica.localizacion.LocalizacionService;
+import es.musicalia.gestmusica.usuario.TipoUsuarioEnum;
 import es.musicalia.gestmusica.usuario.UserService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -115,6 +116,56 @@ public class AgenciasController {
         }
 
 
+    }
+
+    @GetMapping("/onboarding")
+    public String mostrarOnboardingAgencia(@AuthenticationPrincipal CustomAuthenticatedUser user, Model model, RedirectAttributes redirectAttributes) {
+        // Verificar si el usuario ya tiene agencia
+        if (!user.getMapPermisosAgencia().isEmpty()) {
+            redirectAttributes.addFlashAttribute("message", "Ya tienes una agencia creada. Accede a ella desde el menú principal.");
+            redirectAttributes.addFlashAttribute("alertClass", "info");
+            return "redirect:/";
+        }
+
+        model.addAttribute("agenciaOnboardingDto", new AgenciaOnboardingDto());
+        model.addAttribute("listaProvincias", this.localizacionService.findAllProvincias());
+
+        return "agencia-onboarding";
+    }
+
+    @PostMapping("/onboarding")
+    public String guardarAgenciaOnboarding(@AuthenticationPrincipal CustomAuthenticatedUser user,
+                                           @ModelAttribute("agenciaOnboardingDto") @Valid AgenciaOnboardingDto onboardingDto,
+                                           BindingResult bindingResult, Model model, RedirectAttributes redirectAttributes) {
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("listaProvincias", this.localizacionService.findAllProvincias());
+            return "agencia-onboarding";
+        }
+
+        try {
+            Agencia agencia = this.agenciaService.crearAgenciaOnboarding(onboardingDto, user.getUsuario().getId());
+            redirectAttributes.addFlashAttribute("message", "Agencia creada correctamente. Bienvenido a festia.es");
+            redirectAttributes.addFlashAttribute("alertClass", "success");
+            return "redirect:/agencia/" + agencia.getId();
+        } catch (RuntimeException e) {
+            log.error("Error creando agencia onboarding: {}", e.getMessage());
+            if (e.getMessage().contains("ya tiene una agencia")) {
+                redirectAttributes.addFlashAttribute("message", "Ya tienes una agencia creada.");
+                redirectAttributes.addFlashAttribute("alertClass", "warning");
+                return "redirect:/";
+            }
+            model.addAttribute("listaProvincias", this.localizacionService.findAllProvincias());
+            model.addAttribute("message", "Error al crear la agencia: " + e.getMessage());
+            model.addAttribute("alertClass", "danger");
+            return "agencia-onboarding";
+        } catch (Exception e) {
+            log.error("Error inesperado creando agencia onboarding", e);
+            model.addAttribute("listaProvincias", this.localizacionService.findAllProvincias());
+            model.addAttribute("message", "Error inesperado al crear la agencia");
+            model.addAttribute("alertClass", "danger");
+            return "agencia-onboarding";
+        }
     }
 
 

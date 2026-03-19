@@ -87,6 +87,30 @@
                             </div>
                         </div>
 
+                        <!-- Banner de onboarding de agencia -->
+                        <div class="row mb-4" th:if="${mostrarBannerOnboardingAgencia}">
+                            <div class="col-12">
+                                <div class="card bg-light border-info">
+                                    <div class="card-body d-flex align-items-center">
+                                        <div class="flex-grow-1">
+                                            <h5 class="card-title mb-2">
+                                                <i class="align-middle me-2 fas fa-fw fa-building text-info"></i>
+                                                Crea tu agencia
+                                            </h5>
+                                            <p class="card-text text-muted mb-0">
+                                                Completa la creación de tu perfil de agencia para comenzar a gestionar artistas y crear listados de disponibilidad.
+                                            </p>
+                                        </div>
+                                        <div class="ms-3">
+                                            <a th:href="@{/agencia/onboarding}" class="btn btn-info btn-sm">
+                                                <i class="align-middle me-1 fas fa-arrow-right"></i>
+                                                Ir al onboarding
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
                         <!-- Reemplazar el div existente por: -->
                         <div class="row mb-4" th:if="${listaOcupacionPendiente != null && not #lists.isEmpty(listaOcupacionPendiente)}">

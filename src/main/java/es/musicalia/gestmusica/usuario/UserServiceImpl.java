@@ -54,28 +54,20 @@ public class UserServiceImpl implements UserService {
 
 
 	@Transactional(readOnly = false)
-	public Usuario saveRegistration(RegistrationForm registrationForm) throws EmailYaExisteException, EnvioEmailException {
+	public Usuario saveRegistration(RegistrationForm registrationForm) throws EmailYaExisteException {
 
 		if (userRepository.existsUsuarioByEmail(registrationForm.getEmail())) {
 			throw new EmailYaExisteException("El email ya está registrado");
 		}
 		Usuario user = registrationFormToUsuario(registrationForm);
-		userRepository.save(user);
 
-		// Generar y enviar código de verificación
-		try {
-			codigoVerificacionService.generarYEnviarCodigo(
-					registrationForm.getEmail(),
-					EmailTemplateEnum.REGISTRO
-			);
-			log.info("Código de verificación enviado a: {}", registrationForm.getEmail());
+		// Si es agencia, validar automáticamente y asignar rol ROL_AGENTE
+		if (registrationForm.getTipoUsuario() == TipoUsuarioEnum.AGENCIA) {
+			user.setValidado(true);
+			user.setRolGeneral(this.rolRepository.findRolByCodigo(RolEnum.ROL_AGENTE.getCodigo()));
 		}
-		catch (Exception e) {
-			log.error("Error enviando código de verificación: {}", e.getMessage());
-			// Eliminar usuario si no se pudo enviar el código
-			userRepository.delete(user);
-			throw e;
-		}
+
+		userRepository.save(user);
 
         final List<Usuario> usuariosAdmin = findUsuariosAdmin();
 
@@ -107,6 +99,7 @@ public class UserServiceImpl implements UserService {
 		user.setProvincia(this.provinciaRepository.findById(registrationForm.getIdProvincia()).orElseThrow());
 		user.setActivo(true);
         user.setEmailVerified(false);
+		user.setTipoUsuario(registrationForm.getTipoUsuario());
 		return user;
 	}
 

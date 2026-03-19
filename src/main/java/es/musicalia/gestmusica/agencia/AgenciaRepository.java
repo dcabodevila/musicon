@@ -24,4 +24,6 @@ public interface AgenciaRepository extends JpaRepository<Agencia, Long> {
 	@Query("select new es.musicalia.gestmusica.agencia.AgenciaRecord(a.id, a.nombre, a.descripcion, a.logo, a.usuario.id, concat(a.usuario.nombre, ' ', a.usuario.apellidos)) from Agencia a where a.id not in (:idsAgencias) and a.activo order by a.nombre")
 	List<AgenciaRecord> findAllAgenciasNotByIds(@Param("idsAgencias") Set<Long> idsAgencias);
 
+	boolean existsByUsuarioId(Long usuarioId);
+
 }

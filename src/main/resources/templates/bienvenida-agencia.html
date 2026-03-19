@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>festia.es</title>
+    <div th:replace="~{fragments/mail-header :: header}"></div>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1 th:text="${titulo}">Bienvenido a festia.es</h1>
+        <p th:text="${subtitulo}">Tu agencia ha sido creada</p>
+    </div>
+    <div class="content">
+        <p class="message" th:text="${mensaje}">Tu agencia ha sido creada exitosamente.</p>
+
+        <h3 style="margin-top: 30px; color: #333;">Próximos pasos:</h3>
+        <ol style="color: #666; line-height: 1.8;">
+            <li><strong>Sube el logo de tu agencia</strong> - Accede a tu perfil de agencia y añade un logo profesional que represente tu marca.</li>
+            <li><strong>Añade tu primer artista</strong> - Crea tus primeros artistas en el sistema para comenzar a crear listados.</li>
+            <li><strong>Configura tus tarifas</strong> - Establece tus tarifas base y personalízalas según tus necesidades.</li>
+        </ol>
+
+        <div style="margin-top: 30px; text-align: center;">
+            <a href="https://festia.es/agencia" style="display: inline-block; background-color: #007bff; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                Acceder a mi Agencia
+            </a>
+        </div>
+    </div>
+    <div class="footer">
+        <p>Este es un mensaje automático de <strong>festia.es</strong></p>
+    </div>
+</div>
+</body>
+</html>
