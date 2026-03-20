@@ -24,7 +24,12 @@
       "Bash(PGPASSWORD=admin \"/c/Program Files/PostgreSQL/16/bin/psql\" -U postgres -h localhost -p 5432 -d gestmusica_db -c \"SELECT COUNT\\(*\\) FROM gestmusica.artista;\")",
       "Bash(export JAVA_HOME=\"/c/Program Files/Java/jdk-17\")",
       "Bash(./mvnw clean:*)",
-      "Bash(./mvnw compile:*)"
+      "Bash(./mvnw compile:*)",
+      "mcp__db__query",
+      "Read(//c/Program Files/PostgreSQL/**)",
+      "Read(//c/ProgramData/**)",
+      "Bash(\"/c/Program Files/PostgreSQL/16/bin/psql\" --version)",
+      "Bash(PGPASSWORD=admin \"/c/Program Files/PostgreSQL/16/bin/psql\" -U postgres -h localhost -p 5432 -d gestmusica_db -f \"/c/Users/Sir Nolimit/IdeaProjects/musicon/sql/1.2.0/1.2.0-ddl.sql\")"
     ]
   }
 }
