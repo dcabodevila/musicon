@@ -51,3 +51,4 @@ build/
 /.claude/worktrees**
 /.claude/**
 /.playwright-mcp
+/doc

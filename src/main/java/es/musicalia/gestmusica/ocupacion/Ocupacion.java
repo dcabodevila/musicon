@@ -128,6 +128,9 @@ public class Ocupacion {
     @Column(name = "fecha_publicacion_odg")
     private LocalDateTime fechaPublicacionOdg;
 
+    @Column(name = "excluir_sincronizacion_odg")
+    private boolean excluirSincronizacionOdg;
+
     @Column(name = "hora_actuacion_desde")
     private LocalTime horaActuacionDesde;
 

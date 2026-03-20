@@ -45,6 +45,7 @@ public interface OcupacionRepository extends JpaRepository<Ocupacion, Long>, Jpa
             AND o.fecha >= :fechaDesde
             AND o.fecha <= :fechaHasta
             AND o.publicadoOdg = false
+            AND o.excluirSincronizacionOdg = false
             ORDER BY o.fecha ASC
             """)
     List<Ocupacion> findPendientesPublicarOdg(@Param("fechaDesde") LocalDateTime fechaDesde,
@@ -65,6 +66,7 @@ public interface OcupacionRepository extends JpaRepository<Ocupacion, Long>, Jpa
             AND o.fechaPublicacionOdg IS NOT NULL
             AND o.fechaModificacion IS NOT NULL
             AND o.fechaModificacion > o.fechaPublicacionOdg
+            AND o.excluirSincronizacionOdg = false
             ORDER BY o.fecha ASC
             """)
     List<Ocupacion> findPendientesActualizarOdg(@Param("fechaDesde") LocalDateTime fechaDesde,
