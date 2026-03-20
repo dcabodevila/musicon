@@ -120,6 +120,8 @@ public class ArtistaController {
     private void getModelAttributeDetail(Model model, ArtistaDto artistaDto) {
         model.addAttribute("artistaDto", artistaDto);
         model.addAttribute("isArtistaPermiteOrquestasDeGalicia", artistaDto.isPermiteOrquestasDeGalicia());
+        model.addAttribute("isArtistaPermiteOdg", artistaDto.isPermiteOrquestasDeGalicia());
+        model.addAttribute("isArtistaPublicarEventos", Boolean.TRUE.equals(artistaDto.getPublicarEventos()));
         model.addAttribute("listaUsuarios", this.userService.findAllUsuarioRecordsNotAdmin());
         model.addAttribute("idUsuarioAutenticado", this.userService.isUserAutheticated()? this.userService.obtenerUsuarioAutenticado().get().getId() : null);
         model.addAttribute("listaAgencias", artistaDto.getIdAgencia() != null ? this.agenciaService.findAgenciaRecordById(artistaDto.getIdAgencia()) : this.agenciaService.findAllAgenciasForUser());

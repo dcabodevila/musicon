@@ -109,7 +109,12 @@ public class OcupacionController {
         model.addAttribute("listaLocalidadesListado", ocupacion.getIdMunicipio() != null ? this.localizacionService.findLocalidadByIdMunicipio(ocupacion.getIdMunicipio()): this.localizacionService.findLocalidadByIdMunicipio(listaMunicipios.get(0).id()) );
 
         model.addAttribute("listaTiposOcupacion", this.ocupacionService.listarTiposOcupacion(ocupacion.getIdArtista()));
-        model.addAttribute("isArtistaPermiteOrquestasDeGalicia", this.artistaService.findArtistaDtoById(ocupacion.getIdArtista()).isPermiteOrquestasDeGalicia());
+        final ArtistaDto artista = this.artistaService.findArtistaDtoById(ocupacion.getIdArtista());
+        boolean isArtistaPermiteOdg = artista.isPermiteOrquestasDeGalicia();
+        boolean isArtistaPublicarEventos = Boolean.TRUE.equals(artista.getPublicarEventos());
+        model.addAttribute("isArtistaPermiteOrquestasDeGalicia", isArtistaPermiteOdg);
+        model.addAttribute("isArtistaPermiteOdg", isArtistaPermiteOdg);
+        model.addAttribute("isArtistaPublicarEventos", isArtistaPublicarEventos);
         model.addAttribute("listaUsuarios", this.userService.findAllUsuarioRecordsNotAdmin());
         model.addAttribute("idUsuarioAutenticado", this.userService.isUserAutheticated()? this.userService.obtenerUsuarioAutenticado().get().getId() : null);
     }
