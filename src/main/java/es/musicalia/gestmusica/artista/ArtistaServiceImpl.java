@@ -23,6 +23,7 @@ import es.musicalia.gestmusica.util.DefaultResponseBody;
 import es.musicalia.gestmusica.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -49,6 +50,9 @@ public class ArtistaServiceImpl implements ArtistaService {
     private final EmailService emailService;
     private final MensajeService mensajeService;
     private final UserService userService;
+
+    @Value("${app.odg.activacion.destinatario:info@festia.es}")
+    private String odgActivacionDestinatario;
 
 	public ArtistaServiceImpl(ArtistaRepository artistaRepository, UsuarioRepository usuarioRepository, ContactoRepository agenciaContactoRepository,
                               TipoEscenarioRepository tipoEscenarioRepository,
@@ -284,6 +288,44 @@ public class ArtistaServiceImpl implements ArtistaService {
 	}
 
 
+    private String construirCuerpoSolicitudOdg(Artista artista) {
+        Contacto contacto = artista.getContacto();
+        es.musicalia.gestmusica.agencia.Agencia agencia = artista.getAgencia();
+        Contacto agenciaContacto = agencia != null ? agencia.getAgenciaContacto() : null;
+
+        String tiposArtista = artista.getTiposArtista() != null
+                ? artista.getTiposArtista().stream()
+                    .map(t -> t.getNombre())
+                    .collect(Collectors.joining(", "))
+                : "";
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("<p>Se solicita la creación de una nueva formación y asociación a festia para su sincronización.</p>");
+        sb.append("<table border=\"1\" cellpadding=\"6\" cellspacing=\"0\" style=\"border-collapse:collapse\">");
+
+        appendFila(sb, "Tipo Formación", tiposArtista);
+        appendFila(sb, "Nombre formación", artista.getNombre());
+        appendFila(sb, "Email formación", contacto != null ? contacto.getEmail() : null);
+        appendFila(sb, "Web", contacto != null ? contacto.getWeb() : null);
+        appendFila(sb, "Facebook", contacto != null ? contacto.getFacebook() : null);
+        appendFila(sb, "Twitter", contacto != null ? contacto.getTwitter() : null);
+        appendFila(sb, "Instagram", contacto != null ? contacto.getInstagram() : null);
+        appendFila(sb, "Vídeo Youtube", contacto != null ? contacto.getYoutube() : null);
+        appendFila(sb, "Agencia", agencia != null ? agencia.getNombre() : null);
+        appendFila(sb, "Comentario", artista.getCcaa() != null ? artista.getCcaa().getNombre() : null);
+        appendFila(sb, "Tu nombre", agencia != null ? agencia.getNombre() : null);
+        appendFila(sb, "email", agenciaContacto != null ? agenciaContacto.getEmail() : null);
+
+        sb.append("</table>");
+        return sb.toString();
+    }
+
+    private void appendFila(StringBuilder sb, String etiqueta, String valor) {
+        if (valor != null && !valor.isBlank()) {
+            sb.append("<tr><td><strong>").append(etiqueta).append("</strong></td><td>").append(valor).append("</td></tr>");
+        }
+    }
+
     private Artista findOrCreateArtista(Long idArtista) {
         return Optional.ofNullable(idArtista)
                 .flatMap(artistaRepository::findById)
@@ -315,16 +357,15 @@ public class ArtistaServiceImpl implements ArtistaService {
                     .build();
         }
 
-        String asunto = "Solicitud activación OrquestasDeGalicia";
-        String cuerpo = "Solicito activar la publicación de orquestas de galicia al artista "
-                + artista.getNombre() + " con id " + artista.getId();
+        String asunto = "Nueva formación festia";
+        String cuerpo = construirCuerpoSolicitudOdg(artista);
 
         artista.setSolicitudOdgPendiente(true);
         artista.setSolicitudOdgAprobada(false);
         artistaRepository.save(artista);
 
         try {
-            emailService.enviarCorreoPlano("info@festia.es", asunto, cuerpo);
+            emailService.enviarCorreoHtmlConCc(odgActivacionDestinatario, List.of("info@festia.es"), asunto, cuerpo);
         } catch (EnvioEmailException e) {
             log.error("Error enviando solicitud de activación ODG para artista {}", idArtista, e);
             return DefaultResponseBody.builder()

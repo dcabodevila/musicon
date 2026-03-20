@@ -7,6 +7,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.List;
+
 @Service
 public class MailgunEmailService {
 
@@ -25,6 +27,10 @@ public class MailgunEmailService {
     }
 
     public MailgunResponse sendSimpleEmail(String to, String subject, String text) {
+        return sendSimpleEmail(to, subject, text, null);
+    }
+
+    public MailgunResponse sendSimpleEmail(String to, String subject, String text, List<String> cc) {
         String mailgunUrl = String.format("https://api.eu.mailgun.net/v3/%s/messages", domain);
 
         MultiValueMap<String, String> request = new LinkedMultiValueMap<>();
@@ -32,6 +38,9 @@ public class MailgunEmailService {
         request.add("to", to);
         request.add("subject", subject);
         request.add("html", text);
+        if (cc != null && !cc.isEmpty()) {
+            request.add("cc", String.join(",", cc));
+        }
 
         return restTemplate.postForObject(mailgunUrl, request, MailgunResponse.class);
     }

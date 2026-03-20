@@ -167,8 +167,31 @@ public class EmailService {
 
 
     public MailgunResponse sendMailgunEmail(EmailDto emailDto) {
+        return mailgunEmailService.sendSimpleEmail(emailDto.getTo(), emailDto.getSubject(), emailDto.getContent(), emailDto.getCc());
+    }
 
-        return mailgunEmailService.sendSimpleEmail(emailDto.getTo(), emailDto.getSubject(), emailDto.getContent());
+    public void enviarCorreoHtmlConCc(String to, List<String> cc, String asunto, String contenidoHtml) throws EnvioEmailException {
+        if (!isMailEnabled) {
+            log.info("Envío de correo deshabilitado por configuración. No se enviará el mensaje a: {}", to);
+            return;
+        }
+
+        EmailDto emailDto = EmailDto.builder()
+                .to(to)
+                .cc(cc)
+                .subject(asunto)
+                .content(contenidoHtml)
+                .plainContent(contenidoHtml)
+                .isHtml(true)
+                .build();
+
+        try {
+            final MailgunResponse mailgunResponse = sendMailgunEmail(emailDto);
+            log.info("Email enviado correctamente a: {} - Respuesta: {}", to, mailgunResponse);
+        } catch (Exception e) {
+            log.error("Error enviando email a {}: {}", to, e.getMessage());
+            throw new EnvioEmailException("No se pudo enviar el correo");
+        }
     }
 
 
