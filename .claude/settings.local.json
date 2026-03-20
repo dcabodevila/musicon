@@ -60,7 +60,20 @@
       "Read(//c/Program Files/PostgreSQL/**)",
       "Read(//c/ProgramData/**)",
       "Bash(\"/c/Program Files/PostgreSQL/16/bin/psql\" --version)",
-      "Bash(PGPASSWORD=admin \"/c/Program Files/PostgreSQL/16/bin/psql\" -U postgres -h localhost -p 5432 -d gestmusica_db -f \"/c/Users/Sir Nolimit/IdeaProjects/musicon/sql/1.2.0/1.2.0-ddl.sql\")"
+      "Bash(PGPASSWORD=admin \"/c/Program Files/PostgreSQL/16/bin/psql\" -U postgres -h localhost -p 5432 -d gestmusica_db -f \"/c/Users/Sir Nolimit/IdeaProjects/musicon/sql/1.2.0/1.2.0-ddl.sql\")",
+      "mcp__playwright__browser_file_upload",
+      "mcp__playwright__browser_close",
+      "mcp__postgres-prod__query",
+      "Bash(pkill -f gestmusica)",
+      "Bash(pkill -f spring-boot)",
+      "Bash(lsof -ti:8081)",
+      "Bash(xargs kill:*)",
+      "Bash(xargs -r taskkill //PID //F)",
+      "Bash(cmd.exe /c \"netstat -ano | findstr :8081 | findstr LISTENING\")",
+      "Bash(xargs -r cmd.exe /c 'taskkill /PID {} /F')",
+      "Bash(cmd.exe /c \"for /f \"\"tokens=5\"\" %a in \\(''netstat -ano ^| findstr :8081 ^| findstr LISTENING''\\) do taskkill /PID %a /F\")",
+      "Bash(powershell.exe -Command \"Get-NetTCPConnection -LocalPort 8081 -State Listen | Select-Object -ExpandProperty OwningProcess\" 2>/dev/null)",
+      "Bash(powershell.exe -Command \"Stop-Process -Id 28416 -Force; Start-Sleep -Milliseconds 500; if \\(Get-NetTCPConnection -LocalPort 8081 -State Listen -ErrorAction SilentlyContinue\\) { 'still running' } else { 'port 8081 free' }\")"
     ]
   }
 }

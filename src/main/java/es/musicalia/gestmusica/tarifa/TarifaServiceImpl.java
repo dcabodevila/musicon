@@ -271,6 +271,11 @@ public class TarifaServiceImpl implements TarifaService {
 		this.tarifaRepository.save(tarifa);
 	}
 
+	@Override
+	public boolean agenciaTieneTarifasActivas(Long idAgencia) {
+		return this.tarifaRepository.existsByArtistaAgenciaIdAndActivoTrue(idAgencia);
+	}
+
     /**
      * Cloudinary URLs con formato WebP no son renderizables por JasperReports (Java AWT).
      * Insertamos f_png en la transformación para forzar conversión a PNG en la CDN.

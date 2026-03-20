@@ -7,5 +7,6 @@ package es.musicalia.gestmusica.usuario;
 public enum TipoUsuarioEnum {
     REPRESENTANTE,
     ARTISTA,
-    AGENCIA
+    AGENCIA,
+    PUBLICO
 }

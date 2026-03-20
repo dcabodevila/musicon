@@ -67,7 +67,8 @@
 
                             <a th:if="${#authorization.expression('hasPermission(' + agenciaDto.id + ', ''AGENCIA'', ''AGENCIA_EDITAR'')')}"
                                th:href="@{/agencia/edit/__${agenciaDto.id}__}"
-                               class="btn btn-pill btn-secondary m-1 col-12">
+                               th:class="${'btn btn-pill m-1 col-12 ' + (agenciaDto.logo == null ? 'btn-primary tutorial-focus' : 'btn-secondary')}">
+                                <i th:if="${agenciaDto.logo == null}" class="fas fa-image me-1"></i>
                                 Editar agencia
                             </a>
 
@@ -94,12 +95,31 @@
 
                                     <a th:if="${#authorization.expression('hasPermission(' + agenciaDto.id + ', ''AGENCIA'', ''ARTISTA_CREAR'')')}"
                                        th:href="@{/artista/crear/__${agenciaDto.id}__}"
-                                       class="btn btn-pill btn-primary m-1 col-12 col-sm-3">
+                                       th:class="${'btn btn-pill m-1 col-12 col-sm-3 ' + (#lists.isEmpty(listaArtistas) ? 'btn-success tutorial-focus' : 'btn-primary')}">
+                                        <i class="fas fa-plus-circle me-1"></i>
                                         Nuevo artista
                                     </a>
 
                                 </div>
 
+                            </div>
+                        </div>
+
+                        <div th:if="${#lists.isEmpty(listaArtistas) and #authorization.expression('hasPermission(' + agenciaDto.id + ', ''AGENCIA'', ''ARTISTA_CREAR'')')}"
+                             class="alert alert-info d-flex align-items-center mb-3" role="alert">
+                            <i class="fas fa-info-circle fa-lg me-3"></i>
+                            <div>
+                                <strong>Todavía no tienes artistas.</strong>
+                                Pulsa <strong>Nuevo artista</strong> para añadir el primero a tu agencia.
+                            </div>
+                        </div>
+
+                        <div th:if="${sinTarifasActivas and #authorization.expression('hasPermission(' + agenciaDto.id + ', ''AGENCIA'', ''AGENCIA_EDITAR'')')}"
+                             class="alert alert-info d-flex align-items-center mb-3" role="alert">
+                            <i class="fas fa-info-circle fa-lg me-3"></i>
+                            <div>
+                                <strong>Ninguno de tus artistas tiene tarifas configuradas.</strong>
+                                <a th:href="@{/artista/{id}(id=${listaArtistas[0].id})}">Haz clic aquí para gestionar tarifas y ocupaciones</a>
                             </div>
                         </div>
 
@@ -168,7 +188,7 @@
                 </div>
             </div>
         </main>
-        <div th:replace="~{fragments/main-template :: footer}"/>
+        <div th:replace="~{fragments/main-template :: footer}"></div>
 
     </div>
 </div>
@@ -176,6 +196,6 @@
 </body>
 <script type="text/javascript" th:src="@{/js/agencias.js}"></script>
 
-</body>
 </html>
+
 

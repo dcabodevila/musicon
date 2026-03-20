@@ -276,4 +276,6 @@ public interface TarifaRepository extends JpaRepository<Tarifa, Long> {
 		@Param("fechaFin") LocalDateTime fechaFin,
 		@Param("idArtistaExcluir") Long idArtistaExcluir
 	);
+
+	boolean existsByArtistaAgenciaIdAndActivoTrue(Long agenciaId);
 }

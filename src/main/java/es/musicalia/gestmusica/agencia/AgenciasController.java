@@ -6,6 +6,7 @@ import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.auth.model.SecurityService;
 import es.musicalia.gestmusica.file.FileService;
 import es.musicalia.gestmusica.localizacion.LocalizacionService;
+import es.musicalia.gestmusica.tarifa.TarifaService;
 import es.musicalia.gestmusica.usuario.TipoUsuarioEnum;
 import es.musicalia.gestmusica.usuario.UserService;
 import jakarta.validation.Valid;
@@ -36,15 +37,17 @@ public class AgenciasController {
     private final AgenciaService agenciaService;
     private final ArtistaService artistaService;
     private final SecurityService securityService;
+    private final TarifaService tarifaService;
 
     public AgenciasController(UserService userService, LocalizacionService localizacionService, AgenciaService agenciaService, FileService fileService,
-                              ArtistaService artistaService, SecurityService securityService){
+                              ArtistaService artistaService, SecurityService securityService, TarifaService tarifaService){
         this.userService = userService;
         this.localizacionService = localizacionService;
         this.agenciaService = agenciaService;
         this.fileService = fileService;
         this.artistaService = artistaService;
         this.securityService = securityService;
+        this.tarifaService = tarifaService;
     }
 
     @GetMapping
@@ -83,8 +86,10 @@ public class AgenciasController {
     @GetMapping("/{id}")
     public String detalleAgencia(Model model, @PathVariable("id") Long idAgencia) {
         model.addAttribute("agenciaDto", this.agenciaService.findAgenciaDtoById(idAgencia));
-        model.addAttribute("listaArtistas", this.artistaService.findAllArtistasByAgenciaId(idAgencia));
-
+        final var listaArtistas = this.artistaService.findAllArtistasByAgenciaId(idAgencia);
+        model.addAttribute("listaArtistas", listaArtistas);
+        final boolean sinTarifasActivas = !listaArtistas.isEmpty() && !this.tarifaService.agenciaTieneTarifasActivas(idAgencia);
+        model.addAttribute("sinTarifasActivas", sinTarifasActivas);
 
         return "agencia-detail";
     }
