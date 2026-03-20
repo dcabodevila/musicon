@@ -794,6 +794,7 @@ public class OcupacionServiceImpl implements OcupacionService {
         if (response.isSuccess()){
             ocupacion.setPublicadoOdg(false);
             ocupacion.setFechaPublicacionOdg(LocalDateTime.now());
+            ocupacion.setExcluirSincronizacionOdg(true);
             ocupacionRepository.save(ocupacion);
         }
 
