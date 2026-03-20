@@ -3,6 +3,9 @@ package es.musicalia.gestmusica.util;
 public class StringUtils {
 
     public static String removeHttp(String input) {
+        if (input == null || input.isEmpty()) {
+            return input;
+        }
         if (input.startsWith("http://")) {
             return input.substring(7);
         }
