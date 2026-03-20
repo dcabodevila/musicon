@@ -39,3 +39,6 @@ build/
 /.claude/agent-memory/spec-analyst/domain_usuario_agencia.md
 /.claude/agent-memory/spec-analyst/MEMORY.md
 /.claude/agents/spec-analyst.md
+/.claude/**
+/.playwright-mcp
+/doc
