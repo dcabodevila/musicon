@@ -69,6 +69,12 @@ public class UserServiceImpl implements UserService {
 
 		userRepository.save(user);
 
+		try {
+			codigoVerificacionService.generarYEnviarCodigo(user.getEmail(), EmailTemplateEnum.REGISTRO);
+		} catch (Exception e) {
+			log.error("No se pudo enviar el código de verificación a {}: {}", user.getEmail(), e.getMessage(), e);
+		}
+
         final List<Usuario> usuariosAdmin = findUsuariosAdmin();
 
         for (Usuario admin : usuariosAdmin) {

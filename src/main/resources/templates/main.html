@@ -117,6 +117,28 @@
                                     <i class="fas fa-chevron-right quick-card__arrow"></i>
                                 </a>
                             </div>
+
+                            <div class="col-12 col-sm-6 col-xl-3 mb-2" th:if="${misAgencias != null and #sets.size(misAgencias) == 0}">
+                                <a th:href="@{/ajustes}" class="quick-card quick-card--settings">
+                                    <div class="quick-card__icon"><i class="fas fa-cog"></i></div>
+                                    <div class="quick-card__body">
+                                        <span class="quick-card__title">Configuración presupuestos</span>
+                                        <span class="quick-card__subtitle">Ajustes y preferencias</span>
+                                    </div>
+                                    <i class="fas fa-chevron-right quick-card__arrow"></i>
+                                </a>
+                            </div>
+
+                            <div class="col-12 col-sm-6 col-xl-3 mb-2" th:if="${misAgencias != null and #sets.size(misAgencias) == 0}">
+                                <a th:href="@{/usuarios/mi-perfil}" class="quick-card quick-card--profile">
+                                    <div class="quick-card__icon"><i class="fas fa-user"></i></div>
+                                    <div class="quick-card__body">
+                                        <span class="quick-card__title">Mi perfil</span>
+                                        <span class="quick-card__subtitle">Editar datos personales</span>
+                                    </div>
+                                    <i class="fas fa-chevron-right quick-card__arrow"></i>
+                                </a>
+                            </div>
                         </div>
 
                         <!-- ONBOARDING BANNER -->
@@ -151,13 +173,11 @@
                                 <div id="carrousel-lista-ocupaciones-pendientes" class="carousel slide" data-bs-ride="carousel">
                                     <div class="carousel-inner">
                                         <div class="carousel-item active">
-                                            <div class="row">
+                                            <div class="row g-">
                                                 <div th:each="ocupacion, iterStat : ${listaOcupacionPendiente}"
                                                      th:if="${iterStat.index < 4}"
                                                      class="col-12 col-md-6 col-lg-3">
-                                                    <div class="card card-max-width animate__animated animate__fadeIn">
-                                                        <div th:replace="~{fragments/ocupaciones-pendientes :: ocupaciones-pendientes}"/>
-                                                    </div>
+                                                    <div th:replace="~{fragments/ocupaciones-pendientes :: ocupaciones-pendientes}" class="animate__animated animate__fadeIn w-100"/>
                                                 </div>
                                             </div>
                                         </div>
@@ -168,9 +188,7 @@
                                                 <div th:each="ocupacion, iterStat : ${listaOcupacionPendiente}"
                                                      th:if="${iterStat.index >= batch && iterStat.index < batch + 4}"
                                                      class="col-12 col-md-6 col-lg-3">
-                                                    <div class="card card-max-width animate__animated animate__fadeIn">
-                                                        <div th:replace="~{fragments/ocupaciones-pendientes :: ocupaciones-pendientes}"/>
-                                                    </div>
+                                                    <div th:replace="~{fragments/ocupaciones-pendientes :: ocupaciones-pendientes}" class="animate__animated animate__fadeIn w-100"/>
                                                 </div>
                                             </div>
                                         </div>

@@ -53,6 +53,17 @@
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 </div>
+                <div th:if="${tarifasAnoActual < 30}">
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <strong><i class="fas fa-exclamation-triangle"></i> Añade tarifas. </strong>
+                        Debes establecer tarifas en todas las fechas en las que trabajes para que aparezcan en los listados de presupuestos. Si prefieres no poner el importe exacto, el importe de la tarifa puede ser 0.
+                    </div>
+
+                    <div class="alert alert-info alert-dismissible fade show" role="alert">
+                        <strong><i class="fas fa-info-circle"></i> Consejo. </strong>
+                        Puedes crear una tarifa general para un rango de fechas desde/hasta y después ajustarlas individualmente haciendo click en ellas.
+                    </div>
+                </div>
 
                 <div class="row g-4" th:with="permisoCrearTarifas=${#authorization.expression('hasPermission(' + artistaDto.id + ', ''ARTISTA'', ''CREAR_TARIFAS'')')},
                                              permisoOcupaciones=${#authorization.expression('hasPermission(' + artistaDto.id + ', ''ARTISTA'', ''OCUPACIONES'')')},

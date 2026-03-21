@@ -3,6 +3,7 @@ package es.musicalia.gestmusica.auth.model;
 import es.musicalia.gestmusica.localizacion.LocalizacionService;
 import es.musicalia.gestmusica.mail.EmailTemplateEnum;
 import es.musicalia.gestmusica.usuario.*;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -23,11 +24,13 @@ public class AuthController {
     private final UserService userService;
     private final CodigoVerificacionService codigoVerificacionService;
     private final LocalizacionService localizacionService;
+    private final SecurityService securityService;
 
-    public AuthController(UserService userService, CodigoVerificacionService codigoVerificacionService, LocalizacionService localizacionService){
+    public AuthController(UserService userService, CodigoVerificacionService codigoVerificacionService, LocalizacionService localizacionService, SecurityService securityService){
         this.userService = userService;
         this.codigoVerificacionService = codigoVerificacionService;
         this.localizacionService = localizacionService;
+        this.securityService = securityService;
     }
 
     @GetMapping(value = "/login")
@@ -90,21 +93,22 @@ public class AuthController {
 
         }
 
-        redirectAttributes.addFlashAttribute("message",
-                "Registro exitoso. Bienvenido a festia.es. Inicia sesión con tus credenciales.");
+        redirectAttributes.addFlashAttribute("email", registrationForm.getEmail());
 
-        return "redirect:/auth/login";
+        return "redirect:/auth/verify-email";
     }
 
     @GetMapping("/verify-email")
-    public String mostrarVerificacionEmail(Model model) {
+    public String mostrarVerificacionEmail(Model model, @ModelAttribute("email") String email) {
+        model.addAttribute("email", email);
         return "verify-email";
     }
 
     @PostMapping("/verify-email")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> verificarEmail(@RequestParam String email,
-                                                              @RequestParam String codigo) {
+                                                              @RequestParam String codigo,
+                                                              HttpServletRequest request) {
         try {
             boolean verificado = codigoVerificacionService.verificarCodigo(email, codigo, EmailTemplateEnum.REGISTRO, false);
 
@@ -112,11 +116,21 @@ public class AuthController {
 
                 this.userService.activateUserByEmail(email);
 
-                return ResponseEntity.ok(Map.of(
-                        "success", true,
-                        "message", "Email verificado correctamente. Ya puedes iniciar sesión.",
-                        "redirect", "/auth/login"
-                ));
+                try {
+                    securityService.autologin(email, request);
+                    return ResponseEntity.ok(Map.of(
+                            "success", true,
+                            "message", "Email verificado correctamente.",
+                            "redirect", "/"
+                    ));
+                } catch (Exception autologinEx) {
+                    log.warn("Autologin fallido tras verificación de email para {}: {}", email, autologinEx.getMessage());
+                    return ResponseEntity.ok(Map.of(
+                            "success", true,
+                            "message", "Email verificado correctamente. Ya puedes iniciar sesión.",
+                            "redirect", "/auth/login"
+                    ));
+                }
             } else {
                 return ResponseEntity.badRequest().body(Map.of(
                         "success", false,

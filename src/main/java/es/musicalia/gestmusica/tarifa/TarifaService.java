@@ -20,4 +20,6 @@ public interface TarifaService {
     ByteArrayOutputStream exportTarifaAnualToExcel(TarifaAnualDto tarifaAnualDto);
 
     boolean agenciaTieneTarifasActivas(Long idAgencia);
+
+    int contarTarifasActivasAnio(Long idArtista, int ano);
 }

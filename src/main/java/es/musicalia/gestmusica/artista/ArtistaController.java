@@ -9,6 +9,7 @@ import es.musicalia.gestmusica.localizacion.LocalizacionService;
 import es.musicalia.gestmusica.ocupacion.OcupacionSaveDto;
 import es.musicalia.gestmusica.ocupacion.OcupacionService;
 import es.musicalia.gestmusica.tarifa.TarifaAnualDto;
+import es.musicalia.gestmusica.tarifa.TarifaService;
 import es.musicalia.gestmusica.usuario.UserService;
 import es.musicalia.gestmusica.util.DefaultResponseBody;
 import jakarta.validation.Valid;
@@ -47,10 +48,12 @@ public class ArtistaController {
     private final IncrementoService incrementoService;
     private final OcupacionService ocupacionService;
     private final SecurityService securityService;
+    private final TarifaService tarifaService;
 
 
     public ArtistaController(UserService userService, ArtistaService artistaService, FileService fileService, AgenciaService agenciaService,
-                             LocalizacionService localizacionService, IncrementoService incrementoService, OcupacionService ocupacionService, SecurityService securityService){
+                             LocalizacionService localizacionService, IncrementoService incrementoService, OcupacionService ocupacionService,
+                             SecurityService securityService, TarifaService tarifaService){
         this.userService = userService;
         this.artistaService = artistaService;
         this.fileService = fileService;
@@ -58,8 +61,8 @@ public class ArtistaController {
         this.localizacionService = localizacionService;
         this.incrementoService =incrementoService;
         this.ocupacionService = ocupacionService;
-
         this.securityService = securityService;
+        this.tarifaService = tarifaService;
     }
 
     @GetMapping
@@ -153,6 +156,11 @@ public class ArtistaController {
         model.addAttribute("listaArtistas", List.of(this.artistaService.findArtistaDtoById(idArtista)));
 
         addTarifaAnualModelAttribute(model, idArtista);
+
+        int anioActual = Year.now().getValue();
+        int tarifasAnoActual = tarifaService.contarTarifasActivasAnio(idArtista, anioActual);
+        model.addAttribute("tarifasAnoActual", tarifasAnoActual);
+        model.addAttribute("anioActual", anioActual);
 
         return "artista-detail";
     }

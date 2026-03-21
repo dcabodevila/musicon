@@ -1,5 +1,7 @@
 package es.musicalia.gestmusica.auth.model;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 public interface SecurityService {
 	String findLoggedInUsername();
 
@@ -8,4 +10,6 @@ public interface SecurityService {
 	void invalidarSesionDeUsuario(Long idUsuario);
 
 	void recargarOInvalidarSesion(Long idUsuarioAfectado);
+
+	void autologin(String email, HttpServletRequest request);
 }

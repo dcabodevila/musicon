@@ -73,7 +73,8 @@
       "Bash(xargs -r cmd.exe /c 'taskkill /PID {} /F')",
       "Bash(cmd.exe /c \"for /f \"\"tokens=5\"\" %a in \\(''netstat -ano ^| findstr :8081 ^| findstr LISTENING''\\) do taskkill /PID %a /F\")",
       "Bash(powershell.exe -Command \"Get-NetTCPConnection -LocalPort 8081 -State Listen | Select-Object -ExpandProperty OwningProcess\" 2>/dev/null)",
-      "Bash(powershell.exe -Command \"Stop-Process -Id 28416 -Force; Start-Sleep -Milliseconds 500; if \\(Get-NetTCPConnection -LocalPort 8081 -State Listen -ErrorAction SilentlyContinue\\) { 'still running' } else { 'port 8081 free' }\")"
+      "Bash(powershell.exe -Command \"Stop-Process -Id 28416 -Force; Start-Sleep -Milliseconds 500; if \\(Get-NetTCPConnection -LocalPort 8081 -State Listen -ErrorAction SilentlyContinue\\) { 'still running' } else { 'port 8081 free' }\")",
+      "mcp__ide__getDiagnostics"
     ]
   }
 }

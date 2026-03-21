@@ -480,6 +480,8 @@ footer {
 .quick-card--artist      { border-left-color: #FCB92C; }
 .quick-card--occupations { border-left-color: #1CBB8C; }
 .quick-card--budgets     { border-left-color: #3B7DDD; }
+.quick-card--settings    { border-left-color: #6f42c1; }
+.quick-card--profile     { border-left-color: #fd7e14; }
 
 .quick-card__icon {
     width: 40px;
@@ -497,6 +499,8 @@ footer {
 .quick-card--artist .quick-card__icon      { background: #FCB92C; }
 .quick-card--occupations .quick-card__icon { background: #1CBB8C; }
 .quick-card--budgets .quick-card__icon     { background: #3B7DDD; }
+.quick-card--settings .quick-card__icon    { background: #6f42c1; }
+.quick-card--profile .quick-card__icon     { background: #fd7e14; }
 
 .quick-card__body {
     flex: 1;
@@ -1143,4 +1147,210 @@ footer {
         padding: 20px 10px 8px;
         font-size: 0.78rem;
     }
+}
+
+/* ===== OCUPACION PENDIENTE CARD ===== */
+.ocp-card {
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    border-top: 3px solid var(--color-reserva);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    height: 100%;
+}
+
+.ocp-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.11);
+}
+
+/* Cabecera */
+.ocp-card__header {
+    padding: 14px 16px 10px;
+    background: linear-gradient(135deg, #fffdf5 0%, #fff9e6 100%);
+    border-bottom: 1px solid #f0e9d2;
+}
+
+.ocp-card__header-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ocp-card__artist-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    background: var(--color-reserva);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.ocp-card__artist-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.ocp-card__artist-name {
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: #21344b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+}
+
+.ocp-card__estado {
+    align-self: flex-start;
+    font-size: 0.65rem;
+    font-weight: 600;
+    background: var(--color-reserva) !important;
+    color: #fff !important;
+    padding: 2px 7px;
+    border-radius: 20px;
+    letter-spacing: 0.04em;
+}
+
+/* Cuerpo */
+.ocp-card__body {
+    padding: 14px 16px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Bloque de fecha */
+.ocp-card__date-block {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f0f8ff;
+    border-radius: 8px;
+    padding: 10px 12px;
+}
+
+.ocp-card__date-icon {
+    font-size: 1rem;
+    color: var(--secondary-color);
+    flex-shrink: 0;
+}
+
+.ocp-card__date-value {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #21344b;
+    letter-spacing: 0.02em;
+    line-height: 1;
+}
+
+/* Bloque de importe */
+.ocp-card__importe-block {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f0faf6;
+    border-radius: 8px;
+    padding: 8px 12px;
+}
+
+.ocp-card__importe-icon {
+    font-size: 0.85rem;
+    color: var(--color-ocupacion);
+    flex-shrink: 0;
+}
+
+.ocp-card__importe-value {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-ocupacion);
+    line-height: 1;
+}
+
+/* Separador */
+.ocp-card__divider {
+    margin: 4px 0;
+    border-color: #f0f0f0;
+    opacity: 1;
+}
+
+/* Lista de metadatos */
+.ocp-card__meta-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.ocp-card__meta-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: #5a6a7a;
+    line-height: 1.4;
+}
+
+.ocp-card__meta-item--badges {
+    align-items: center;
+}
+
+.ocp-card__meta-icon {
+    width: 14px;
+    text-align: center;
+    color: #adb5bd;
+    flex-shrink: 0;
+    margin-top: 2px;
+    font-size: 0.75rem;
+}
+
+.ocp-card__meta-item--badges .ocp-card__meta-icon {
+    margin-top: 0;
+}
+
+/* Pie: CTA */
+.ocp-card__footer {
+    padding: 0;
+    border-top: 1px solid #f0f0f0;
+}
+
+.ocp-card__cta {
+    display: block;
+    padding: 10px 16px;
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #3B7DDD;
+    text-decoration: none;
+    background: #f8f9fa;
+    transition: background 0.15s, color 0.15s;
+}
+
+.ocp-card__cta:hover {
+    background: #e8f0fd;
+    color: #2a5fc8;
+    text-decoration: none;
+}
+
+/* Ajuste del wrapper de carrusel para tarjetas sin altura fija */
+#carrousel-lista-ocupaciones-pendientes .card-max-width {
+    max-width: none;
+}
+
+#carrousel-lista-ocupaciones-pendientes .card {
+    height: 100%;
 }

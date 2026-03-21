@@ -72,9 +72,6 @@ $(document).ready(function(){
               url: "/fecha/list/" + idArtista,
               method: 'GET',
               success: function(content, xhr) {
-                if (!content || content.length === 0) {
-                    notifUnica("warning", "Es necesario añadir tarifas para que los artistas aparezcan en los listados. Si no quieres especificar importe, puedes crear tarifas con precio 0.");
-                }
                 resaltarBotonNuevaTarifa(!content || content.length === 0);
               },
               failure: function() {
