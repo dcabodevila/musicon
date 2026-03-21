@@ -138,36 +138,50 @@
                             </div>
                             <hr class="my-0">
                             <div class="card-body">
-                                <ul class="list-unstyled mb-0">
-                                    <li class="mb-1" th:if="${artistaDto.web!=null && artistaDto.web!=''}"><span
-                                            class="fas fa-globe fa-fw me-1"></span> <a
-                                            th:href="${'http://'+artistaDto.web}" th:target="_blank"
-                                            th:text="${artistaDto.web}"></a></li>
-                                    <li class="mb-1" th:if="${artistaDto.facebook!=null && artistaDto.facebook!=''}">
-                                        <span class="fab fa-fw fa-facebook"></span> <a th:text="${artistaDto.facebook}"
-                                                                                       th:href="${'http://'+artistaDto.facebook}"
-                                                                                       th:target="_blank"></a></li>
-                                    <li class="mb-1" th:if="${artistaDto.instagram!=null && artistaDto.instagram!=''}">
-                                        <span class="fab fa-fw fa-instagram"></span> <a
-                                            th:text="${artistaDto.instagram}"
-                                            th:href="${'http://'+artistaDto.instagram}" th:target="_blank"></a></li>
-                                    <li class="mb-1" th:if="${artistaDto.youtube!=null && artistaDto.youtube!=''}"><span
-                                            class="fab fa-fw fa-youtube"></span> <a th:text="${artistaDto.youtube}"
-                                                                                    th:href="${'http://'+artistaDto.youtube}"
-                                                                                    th:target="_blank"></a></li>
-                                    <li class="mb-1" th:if="${artistaDto.google!=null && artistaDto.google!=''}"><span
-                                            class="fab fa-fw fa-google"></span> <a th:text="${artistaDto.google}"
-                                                                                    th:href="${'https://'+artistaDto.google}"
-                                                                                    th:target="_blank"></a></li>
-                                    <li class="mb-1" th:if="${artistaDto.tiktok!=null && artistaDto.tiktok!=''}"><span
-                                            class="fab fa-fw fa-tiktok"></span> <a th:text="${artistaDto.tiktok}"
-                                                                                   th:href="${'https://'+artistaDto.tiktok}"
-                                                                                   th:target="_blank"></a></li>
-                                    <li class="mb-1" th:if="${artistaDto.musica!=null && artistaDto.musica!=''}"><span
-                                            class="fas fa-fw fa-music"></span> <a th:text="${artistaDto.musica}"
-                                                                                   th:href="${'https://'+artistaDto.musica}"
-                                                                                   th:target="_blank"></a></li>
-                                </ul>
+                                <div class="social-links">
+                                    <a th:if="${artistaDto.instagram!=null && artistaDto.instagram!=''}"
+                                       th:href="${#strings.startsWith(artistaDto.instagram,'http') ? artistaDto.instagram : 'https://' + artistaDto.instagram}"
+                                       target="_blank" rel="noopener noreferrer" title="Instagram"
+                                       class="social-btn social-btn--instagram">
+                                        <i class="fab fa-instagram"></i>
+                                    </a>
+                                    <a th:if="${artistaDto.facebook!=null && artistaDto.facebook!=''}"
+                                       th:href="${#strings.startsWith(artistaDto.facebook,'http') ? artistaDto.facebook : 'https://' + artistaDto.facebook}"
+                                       target="_blank" rel="noopener noreferrer" title="Facebook"
+                                       class="social-btn social-btn--facebook">
+                                        <i class="fab fa-facebook-f"></i>
+                                    </a>
+                                    <a th:if="${artistaDto.youtube!=null && artistaDto.youtube!=''}"
+                                       th:href="${#strings.startsWith(artistaDto.youtube,'http') ? artistaDto.youtube : 'https://' + artistaDto.youtube}"
+                                       target="_blank" rel="noopener noreferrer" title="YouTube"
+                                       class="social-btn social-btn--youtube">
+                                        <i class="fab fa-youtube"></i>
+                                    </a>
+                                    <a th:if="${artistaDto.tiktok!=null && artistaDto.tiktok!=''}"
+                                       th:href="${#strings.startsWith(artistaDto.tiktok,'http') ? artistaDto.tiktok : 'https://' + artistaDto.tiktok}"
+                                       target="_blank" rel="noopener noreferrer" title="TikTok"
+                                       class="social-btn social-btn--tiktok">
+                                        <i class="fab fa-tiktok"></i>
+                                    </a>
+                                    <a th:if="${artistaDto.musica!=null && artistaDto.musica!=''}"
+                                       th:href="${#strings.startsWith(artistaDto.musica,'http') ? artistaDto.musica : 'https://' + artistaDto.musica}"
+                                       target="_blank" rel="noopener noreferrer" title="Música"
+                                       class="social-btn social-btn--musica">
+                                        <i class="fas fa-music"></i>
+                                    </a>
+                                    <a th:if="${artistaDto.web!=null && artistaDto.web!=''}"
+                                       th:href="${#strings.startsWith(artistaDto.web,'http') ? artistaDto.web : 'https://' + artistaDto.web}"
+                                       target="_blank" rel="noopener noreferrer" title="Web"
+                                       class="social-btn social-btn--web">
+                                        <i class="fas fa-globe"></i>
+                                    </a>
+                                    <a th:if="${artistaDto.google!=null && artistaDto.google!=''}"
+                                       th:href="${#strings.startsWith(artistaDto.google,'http') ? artistaDto.google : 'https://' + artistaDto.google}"
+                                       target="_blank" rel="noopener noreferrer" title="Google"
+                                       class="social-btn social-btn--google">
+                                        <i class="fab fa-google"></i>
+                                    </a>
+                                </div>
 
 
                                 <a th:if="${#authorization.expression('hasPermission(' + artistaDto.id + ', ''ARTISTA'', ''ARTISTAS_EDITAR'')')}"

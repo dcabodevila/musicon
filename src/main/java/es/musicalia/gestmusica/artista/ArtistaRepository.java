@@ -14,19 +14,19 @@ import java.util.Set;
 @Repository
 public interface ArtistaRepository extends JpaRepository<Artista, Long> {
 
-	@Query("select new es.musicalia.gestmusica.artista.ArtistaRecord(a.id, a.nombre, a.logo) from Artista a where a.activo order by a.nombre")
+	@Query("select new es.musicalia.gestmusica.artista.ArtistaRecord(a.id, a.nombre, a.logo, c.instagram, c.facebook, c.youtube, c.web, a.tiktok, a.musica, a.google) from Artista a left join a.contacto c where a.activo order by a.nombre")
 	List<ArtistaRecord> findAllArtistasOrderedByName();
 
 	@Query("select a from Artista a where a.agencia.id=?1 and a.activo order by a.nombre")
 	List<Artista> findAllArtistasByIdAgencia(Long idAgencia);
 
-	@Query("select new es.musicalia.gestmusica.artista.ArtistaRecord(a.id, a.nombre, a.logo) from Artista a where a.agencia.id=?1 and a.activo order by a.nombre")
+	@Query("select new es.musicalia.gestmusica.artista.ArtistaRecord(a.id, a.nombre, a.logo, c.instagram, c.facebook, c.youtube, c.web, a.tiktok, a.musica, a.google) from Artista a left join a.contacto c where a.agencia.id=?1 and a.activo order by a.nombre")
 	List<ArtistaRecord> findAllArtistasRecordByIdAgencia(Long idAgencia);
 
-	@Query("select new es.musicalia.gestmusica.artista.ArtistaRecord(a.id, a.nombre, a.logo) from Artista a where a.id in (:idsMisArtistas) and a.activo order by a.nombre")
+	@Query("select new es.musicalia.gestmusica.artista.ArtistaRecord(a.id, a.nombre, a.logo, c.instagram, c.facebook, c.youtube, c.web, a.tiktok, a.musica, a.google) from Artista a left join a.contacto c where a.id in (:idsMisArtistas) and a.activo order by a.nombre")
 	List<ArtistaRecord> findMisArtistas(@Param("idsMisArtistas") Set<Long> idsMisArtistas);
 
-	@Query("select new es.musicalia.gestmusica.artista.ArtistaRecord(a.id, a.nombre, a.logo) from Artista a where a.id not in (:idsMisArtistas) and a.activo order by a.nombre")
+	@Query("select new es.musicalia.gestmusica.artista.ArtistaRecord(a.id, a.nombre, a.logo, c.instagram, c.facebook, c.youtube, c.web, a.tiktok, a.musica, a.google) from Artista a left join a.contacto c where a.id not in (:idsMisArtistas) and a.activo order by a.nombre")
 	List<ArtistaRecord> findOtrosArtistas(@Param("idsMisArtistas") Set<Long> idsMisArtistas);
 
 	@Query("SELECT DISTINCT a FROM Artista a " +
@@ -44,10 +44,10 @@ public interface ArtistaRepository extends JpaRepository<Artista, Long> {
 	@Query("select new es.musicalia.gestmusica.artista.ArtistaAgenciaRecord(a.id, a.agencia.id) from Artista a where a.idArtistaGestmanager = :idArtistaGestmanager")
 	Optional<ArtistaAgenciaRecord> findArtistaByIdArtistaGestmanager(@Param("idArtistaGestmanager") Long idArtistaGestmanager);
 
-    @Query("select new es.musicalia.gestmusica.artista.ArtistaRecord(a.id, a.nombre, a.logo) from Artista a where a.activo order by a.nombre")
+    @Query("select new es.musicalia.gestmusica.artista.ArtistaRecord(a.id, a.nombre, a.logo, c.instagram, c.facebook, c.youtube, c.web, a.tiktok, a.musica, a.google) from Artista a left join a.contacto c where a.activo order by a.nombre")
     Page<ArtistaRecord> findAllArtistasOrderedByNamePaginated(Pageable pageable);
 
-    @Query("select new es.musicalia.gestmusica.artista.ArtistaRecord(a.id, a.nombre, a.logo) from Artista a where a.id in (:idsMisArtistas) and a.activo order by a.nombre")
+    @Query("select new es.musicalia.gestmusica.artista.ArtistaRecord(a.id, a.nombre, a.logo, c.instagram, c.facebook, c.youtube, c.web, a.tiktok, a.musica, a.google) from Artista a left join a.contacto c where a.id in (:idsMisArtistas) and a.activo order by a.nombre")
     Page<ArtistaRecord> findMisArtistasPaginated(@Param("idsMisArtistas") Set<Long> idsMisArtistas, Pageable pageable);
 
 }

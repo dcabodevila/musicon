@@ -52,3 +52,4 @@ build/
 /.claude/**
 /.playwright-mcp
 /doc
+/product

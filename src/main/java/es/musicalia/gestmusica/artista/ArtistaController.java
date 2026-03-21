@@ -93,7 +93,7 @@ public class ArtistaController {
             Page<ArtistaRecord> paginaArtistas = this.artistaService.findMisArtistasPaginated(mapPermisosArtista.keySet(),pageable);
             model.addAttribute("listaArtistasSelect", mapPermisosArtista.isEmpty() ? new ArrayList<>() : this.artistaService.findMisArtistas(mapPermisosArtista.keySet()));
 
-            model.addAttribute("listaArtistas", paginaArtistas.getContent());
+            model.addAttribute("listaArtistas", mapPermisosArtista.isEmpty() ? new ArrayList<>() : paginaArtistas.getContent());
             model.addAttribute("paginaActual", page);
             model.addAttribute("totalPaginas", paginaArtistas.getTotalPages());
             model.addAttribute("totalElementos", paginaArtistas.getTotalElements());
@@ -101,7 +101,13 @@ public class ArtistaController {
             model.addAttribute("tieneAnterior", paginaArtistas.hasPrevious());
             model.addAttribute("isMisArtistas", true);
 
-            model.addAttribute("listaArtistas", mapPermisosArtista.isEmpty() ? new ArrayList<>() : paginaArtistas);
+            final Map<Long, Set<String>> mapPermisosAgencia = user.getMapPermisosAgencia();
+            Long idAgenciaCrear = mapPermisosAgencia.entrySet().stream()
+                    .filter(e -> e.getValue().contains("ARTISTA_CREAR"))
+                    .map(Map.Entry::getKey)
+                    .findFirst()
+                    .orElse(null);
+            model.addAttribute("idAgenciaCrear", idAgenciaCrear);
 
         }
         return "artistas";

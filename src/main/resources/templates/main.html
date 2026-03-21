@@ -32,94 +32,124 @@
 
                 <div id="content-usuario" th:if="${isUsuarioValidado}">
                     <div class="container-fluid p-0">
-                        <div class="row mb-4">
-                            <section class="hero-section animate__animated animate__fadeIn"
-                                     style="max-height: 400px !important; height: 400px !important; min-height: 400px !important;">
-                                <img src="https://res.cloudinary.com/hseoceuyz/image/upload/v1760835633/landing-festia_epbr7a.png"
-                                     alt="Concierto multitudinario"
-                                     class="hero-image" style="max-height: 400px; height: 400px; object-fit: cover; width: 100%;"/>
-                                <div class="hero-content animate__animated animate__zoomIn animate__delay-1s">
-                                    <img src="/logo/logo-name-transparente-alt-color.png" alt="festia.es" class="hero-logo" style="max-width: 320px;"/>
-                                </div>
-                            </section>
-                        </div>
 
+                        <!-- HERO -->
                         <div class="row mb-4">
                             <div class="col-12">
-                                <div class="d-flex flex-column flex-sm-row justify-content-around">
-                                    <a th:if="${#sets.size(misAgencias)==1}"
-                                       th:href="@{'/agencia/{id}'(id=${misAgencias[0]})}"
-                                       class="btn btn-pill btn-secondary m-1 col-12 col-sm-3">
-                                        <i class="align-middle me-2 fas fa-fw fa-suitcase"></i>
-                                        <span class="align-middle">Mi agencia</span>
-                                    </a>
-                                    <a th:if="${#sets.size(misAgencias)>1}"
-                                       th:href="@{/agencia/mis-agencias}"
-                                       class="btn btn-pill btn-secondary m-1 col-12 col-sm-3">
-                                        <i class="align-middle me-2 fas fa-fw fa-suitcase"></i>
-                                        <span class="align-middle">Mis agencias</span>
-                                    </a>
-                                    <a th:if="${#sets.size(misArtistas)==1}"
-                                       th:href="@{'/artista/{id}'(id=${misArtistas[0]})}"
-                                       class="btn btn-pill btn-warning m-1 col-12 col-sm-3">
-                                        <i class="align-middle me-2 fas fa-fw fa-music"></i>
-                                        <span class="align-middle">Mi artista</span>
-                                    </a>
-                                    <a th:if="${#sets.size(misArtistas)>1}"
-                                       th:href="@{/artista/mis-artistas}"
-                                       class="btn btn-pill btn-warning m-1 col-12 col-sm-3">
-                                        <i class="align-middle me-2 fas fa-fw fa-music"></i>
-                                        <span class="align-middle">Mis artistas</span>
-                                    </a>
-                                    <a th:if="${hasPermisoOcupaciones != null and hasPermisoOcupaciones}"
-                                       th:href="@{/ocupacion/list}"
-                                       class="btn btn-pill btn-success m-1 col-12 col-sm-3">
-                                        <i class="align-middle me-2 fas fa-fw fa-calendar-plus"></i>
-                                        <span class="align-middle">Ocupaciones</span>
-                                    </a>
-                                    <a sec:authorize="hasAuthority('MENU_LISTADOS')" href="/listado"
-                                       class="btn btn-pill btn-primary m-1 col-12 col-sm-3">
-                                        <i class="align-middle me-2 fas fa-fw fa-calendar-alt"></i>
-                                        <span class="align-middle">Presupuestos</span>
-                                    </a>
-
+                                <div class="dashboard-hero animate__animated animate__fadeIn">
+                                    <img src="https://res.cloudinary.com/hseoceuyz/image/upload/v1760835633/landing-festia_epbr7a.png"
+                                         alt="Concierto multitudinario"
+                                         class="dashboard-hero__img"/>
+                                    <div class="dashboard-hero__overlay"></div>
+                                    <img src="/logo/logo-name-transparente-alt-color.png"
+                                         alt="festia.es"
+                                         class="dashboard-hero__logo animate__animated animate__zoomIn animate__delay-1s"/>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Banner de onboarding de agencia -->
+                        <!-- ACCESO RÁPIDO -->
+                        <div class="row mb-4">
+                            <div class="col-12 mb-2">
+                                <p class="text-muted small text-uppercase fw-semibold mb-0" style="letter-spacing:.07em;">Acceso rápido</p>
+                            </div>
+
+                            <div class="col-12 col-sm-6 col-xl-3 mb-2" th:if="${#sets.size(misAgencias)==1}">
+                                <a th:href="@{'/agencia/{id}'(id=${misAgencias[0]})}" class="quick-card quick-card--agency">
+                                    <div class="quick-card__icon"><i class="fas fa-suitcase"></i></div>
+                                    <div class="quick-card__body">
+                                        <span class="quick-card__title">Mi agencia</span>
+                                        <span class="quick-card__subtitle">Ver perfil completo</span>
+                                    </div>
+                                    <i class="fas fa-chevron-right quick-card__arrow"></i>
+                                </a>
+                            </div>
+                            <div class="col-12 col-sm-6 col-xl-3 mb-2" th:if="${#sets.size(misAgencias)>1}">
+                                <a th:href="@{/agencia/mis-agencias}" class="quick-card quick-card--agency">
+                                    <div class="quick-card__icon"><i class="fas fa-suitcase"></i></div>
+                                    <div class="quick-card__body">
+                                        <span class="quick-card__title">Mis agencias</span>
+                                        <span class="quick-card__subtitle" th:text="${#sets.size(misAgencias) + ' agencias activas'}">Ver todas</span>
+                                    </div>
+                                    <i class="fas fa-chevron-right quick-card__arrow"></i>
+                                </a>
+                            </div>
+
+                            <div class="col-12 col-sm-6 col-xl-3 mb-2" th:if="${#sets.size(misArtistas)==1}">
+                                <a th:href="@{'/artista/{id}'(id=${misArtistas[0]})}" class="quick-card quick-card--artist">
+                                    <div class="quick-card__icon"><i class="fas fa-music"></i></div>
+                                    <div class="quick-card__body">
+                                        <span class="quick-card__title">Mi artista</span>
+                                        <span class="quick-card__subtitle">Ver perfil completo</span>
+                                    </div>
+                                    <i class="fas fa-chevron-right quick-card__arrow"></i>
+                                </a>
+                            </div>
+                            <div class="col-12 col-sm-6 col-xl-3 mb-2" th:if="${#sets.size(misArtistas)>1}">
+                                <a th:href="@{/artista/mis-artistas}" class="quick-card quick-card--artist">
+                                    <div class="quick-card__icon"><i class="fas fa-music"></i></div>
+                                    <div class="quick-card__body">
+                                        <span class="quick-card__title">Mis artistas</span>
+                                        <span class="quick-card__subtitle" th:text="${#sets.size(misArtistas) + ' artistas activos'}">Ver todos</span>
+                                    </div>
+                                    <i class="fas fa-chevron-right quick-card__arrow"></i>
+                                </a>
+                            </div>
+
+                            <div class="col-12 col-sm-6 col-xl-3 mb-2" th:if="${hasPermisoOcupaciones != null and hasPermisoOcupaciones}">
+                                <a th:href="@{/ocupacion/list}" class="quick-card quick-card--occupations">
+                                    <div class="quick-card__icon"><i class="fas fa-calendar-plus"></i></div>
+                                    <div class="quick-card__body">
+                                        <span class="quick-card__title">Ocupaciones</span>
+                                        <span class="quick-card__subtitle">Gestionar disponibilidad</span>
+                                    </div>
+                                    <i class="fas fa-chevron-right quick-card__arrow"></i>
+                                </a>
+                            </div>
+
+                            <div class="col-12 col-sm-6 col-xl-3 mb-2" sec:authorize="hasAuthority('MENU_LISTADOS')">
+                                <a href="/listado" class="quick-card quick-card--budgets">
+                                    <div class="quick-card__icon"><i class="fas fa-calendar-alt"></i></div>
+                                    <div class="quick-card__body">
+                                        <span class="quick-card__title">Presupuestos</span>
+                                        <span class="quick-card__subtitle">Ver listados y fechas</span>
+                                    </div>
+                                    <i class="fas fa-chevron-right quick-card__arrow"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- ONBOARDING BANNER -->
                         <div class="row mb-4" th:if="${mostrarBannerOnboardingAgencia}">
                             <div class="col-12">
-                                <div class="card bg-light border-info">
-                                    <div class="card-body d-flex align-items-center">
-                                        <div class="flex-grow-1">
-                                            <h5 class="card-title mb-2">
-                                                <i class="align-middle me-2 fas fa-fw fa-building text-info"></i>
-                                                Crea tu agencia
-                                            </h5>
-                                            <p class="card-text text-muted mb-0">
-                                                Completa la creación de tu perfil de agencia para comenzar a gestionar artistas y crear listados de disponibilidad.
-                                            </p>
-                                        </div>
-                                        <div class="ms-3">
-                                            <a th:href="@{/agencia/onboarding}" class="btn btn-info btn-sm">
-                                                <i class="align-middle me-1 fas fa-arrow-right"></i>
-                                                Crea tu agencia
-                                            </a>
-                                        </div>
+                                <div class="onboarding-banner">
+                                    <div class="onboarding-banner__icon">
+                                        <i class="fas fa-building"></i>
+                                    </div>
+                                    <div class="onboarding-banner__body">
+                                        <h5 class="onboarding-banner__title">Crea tu agencia</h5>
+                                        <p class="onboarding-banner__text">Completa la creación de tu perfil de agencia para comenzar a gestionar artistas y crear listados de disponibilidad.</p>
+                                    </div>
+                                    <div class="onboarding-banner__action">
+                                        <a th:href="@{/agencia/onboarding}" class="btn btn-primary btn-sm">
+                                            Comenzar <i class="fas fa-arrow-right ms-1"></i>
+                                        </a>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Reemplazar el div existente por: -->
+                        <!-- OCUPACIONES PENDIENTES -->
                         <div class="row mb-4" th:if="${listaOcupacionPendiente != null && not #lists.isEmpty(listaOcupacionPendiente)}">
                             <div class="col-12">
-                                <h3 class="h3 d-inline align-middle"><strong>Ocupaciones</strong> pendientes de confirmación</h3>
+                                <div class="section-header mb-3">
+                                    <h3 class="section-header__title">Ocupaciones pendientes</h3>
+                                    <span class="section-header__badge" th:text="${#lists.size(listaOcupacionPendiente)}">0</span>
+                                    <span class="section-header__sub text-muted small">de confirmación</span>
+                                </div>
 
                                 <div id="carrousel-lista-ocupaciones-pendientes" class="carousel slide" data-bs-ride="carousel">
                                     <div class="carousel-inner">
-                                        <!-- Primera tarjeta activa -->
                                         <div class="carousel-item active">
                                             <div class="row">
                                                 <div th:each="ocupacion, iterStat : ${listaOcupacionPendiente}"
@@ -132,7 +162,6 @@
                                             </div>
                                         </div>
 
-                                        <!-- Resto de las tarjetas -->
                                         <div th:each="batch : ${#numbers.sequence(4, #lists.size(listaOcupacionPendiente)-1, 4)}"
                                              class="carousel-item">
                                             <div class="row">
@@ -140,16 +169,13 @@
                                                      th:if="${iterStat.index >= batch && iterStat.index < batch + 4}"
                                                      class="col-12 col-md-6 col-lg-3">
                                                     <div class="card card-max-width animate__animated animate__fadeIn">
-                                                        <!-- El mismo contenido de la tarjeta que arriba -->
                                                         <div th:replace="~{fragments/ocupaciones-pendientes :: ocupaciones-pendientes}"/>
-
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <!-- Controles del carrusel -->
                                     <button class="carousel-control-prev" type="button" data-bs-target="#carrousel-lista-ocupaciones-pendientes" data-bs-slide="prev">
                                         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                                         <span class="visually-hidden">Anterior</span>
@@ -161,6 +187,7 @@
                                 </div>
                             </div>
                         </div>
+
                     </div>
                 </div>
                 <div th:if="${!isUsuarioValidado}">
@@ -174,7 +201,6 @@
         </div>
     </div>
 
-    <!-- Área transparente para detectar el swipe -->
     <div id="swipeArea" style="position: fixed; left: 0; top: 0; bottom: 0; width: 20px; z-index: 1000;"></div>
 
     <script type="text/javascript" th:src="@{/js/comun.js}"></script>

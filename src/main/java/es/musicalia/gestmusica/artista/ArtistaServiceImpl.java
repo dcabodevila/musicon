@@ -82,6 +82,13 @@ public class ArtistaServiceImpl implements ArtistaService {
             dto.setId(artistaRecord.id());
             dto.setNombre(artistaRecord.nombre());
             dto.setLogo(artistaRecord.logo());
+            dto.setInstagram(artistaRecord.instagram());
+            dto.setFacebook(artistaRecord.facebook());
+            dto.setYoutube(artistaRecord.youtube());
+            dto.setWeb(artistaRecord.web());
+            dto.setTiktok(artistaRecord.tiktok());
+            dto.setMusica(artistaRecord.musica());
+            dto.setGoogle(artistaRecord.google());
             return dto;
         });
     }

@@ -1,15 +1,13 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>festia.es</title>
+    <title>Artistas · festia.es</title>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <div th:replace="~{fragments/main-template :: header-css}"/>
-
 </head>
-<body>
 <body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
 <div class="wrapper">
 
@@ -19,96 +17,155 @@
         <div th:replace="~{fragments/main-template :: navbar}"/>
         <main class="content">
             <div class="container-fluid p-0" th:if="${not #lists.isEmpty(listaArtistas)}">
-                <div class="mb-3">
-                    <h1 class="h3 d-inline align-middle">Artistas</h1>
+
+                <!-- Hero -->
+                <div class="artistas-hero">
+                    <div class="artistas-hero__content">
+                        <div class="artistas-hero__icon"><i class="fas fa-music"></i></div>
+                        <div>
+                            <h1 class="artistas-hero__title">Artistas</h1>
+                        </div>
+                    </div>
+                    <div th:if="${isMisArtistas and idAgenciaCrear != null}" class="artistas-hero__cta">
+                        <a th:href="@{/artista/crear/__${idAgenciaCrear}__}" class="btn">
+                            <i class="fas fa-plus me-1"></i> Nuevo artista
+                        </a>
+                    </div>
                 </div>
-                <div class="row mb-4">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="row align-items-center">
-                                    <div class="col-md-10">
-                                        <select id="selectArtista" class="form-select" onchange="updateButton()">
-                                            <option value="">Selecciona un artista...</option>
-                                            <option th:each="artista : ${listaArtistasSelect}"
-                                                    th:value="${artista.id}"
-                                                    th:text="${artista.nombre}">
-                                            </option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <a id="btnIrArtista" href="#" class="btn btn-primary disabled w-100">Ir al Artista</a>
-                                    </div>
+
+                <!-- Buscador -->
+                <div class="px-3 pt-3 pb-0">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body py-3">
+                            <div class="row align-items-end g-2">
+                                <div class="col">
+                                    <label class="form-label small text-muted mb-1" for="selectArtista">Ir directamente a un artista</label>
+                                    <select id="selectArtista" class="form-select form-select-sm" onchange="updateButton()">
+                                        <option value="">Busca por nombre...</option>
+                                        <option th:each="artista : ${listaArtistasSelect}"
+                                                th:value="${artista.id}"
+                                                th:text="${artista.nombre}">
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-auto">
+                                    <a id="btnIrArtista" href="#" class="btn btn-primary btn-sm disabled">
+                                        <i class="fas fa-arrow-right me-1"></i> Ir al artista
+                                    </a>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-12 col-md-6 col-lg-3" th:each="artista: ${listaArtistas}">
-                        <div class="card card-max-width" style="height: 500px">
-                            <div style="min-height: 340px; display: flex; align-items: center;">
-                                <img class="card-img-top img-max-height" th:if="${artista.logo!=null}"  th:src="@{${artista.logo}}" alt="Unsplash" style="max-height: 327px;">
-                            </div>
-                            <div class="card-header px-4 pt-4">
-                                <h5 class="card-title mb-0" th:text="${artista.nombre}">Card with image and button</h5>
-                            </div>
-                            <div class="card-body" style="min-height: 80px;">
-                                <div class="card-body text-center d-flex flex-column flex-sm-row justify-content-around">
-                                    <a th:href="@{/artista/__${artista.id}__}" class="btn btn-pill btn-primary col-12">Entrar</a>
-                                </div>
+
+                <!-- Grid de artistas -->
+                <div class="px-3 pt-3 pb-0">
+                    <div class="row g-3">
+                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3" th:each="artista: ${listaArtistas}">
+                            <div class="artista-card">
+                                <!-- Enlace principal sobre la imagen -->
+                                <a th:href="@{/artista/__${artista.id}__}" class="artista-card__main-link">
+                                    <img class="artista-card__img"
+                                         th:if="${artista.logo != null}"
+                                         th:src="@{${artista.logo}}"
+                                         th:alt="${artista.nombre}"
+                                         loading="lazy">
+                                    <img class="artista-card__img"
+                                         th:if="${artista.logo == null}"
+                                         th:src="@{/logo/logo_transparente.png}"
+                                         th:alt="${artista.nombre}">
+                                </a>
+                                <!-- Nombre (aparece al hover) -->
+                                <h3 class="artista-card__name" th:text="${artista.nombre}">Artista</h3>
+                                <!-- Panel de acciones -->
+                                <ul class="artista-card__actions">
+                                    <li>
+                                        <a th:href="@{/artista/__${artista.id}__}" title="Ver artista">
+                                            <i class="fas fa-user"></i>
+                                        </a>
+                                    </li>
+                                    <li th:if="${artista.instagram != null and !#strings.isEmpty(artista.instagram)}">
+                                        <a th:href="${#strings.startsWith(artista.instagram,'http') ? artista.instagram : 'https://' + artista.instagram}" target="_blank" rel="noopener noreferrer" title="Instagram">
+                                            <i class="fab fa-instagram"></i>
+                                        </a>
+                                    </li>
+                                    <li th:if="${artista.facebook != null and !#strings.isEmpty(artista.facebook)}">
+                                        <a th:href="${#strings.startsWith(artista.facebook,'http') ? artista.facebook : 'https://' + artista.facebook}" target="_blank" rel="noopener noreferrer" title="Facebook">
+                                            <i class="fab fa-facebook-f"></i>
+                                        </a>
+                                    </li>
+                                    <li th:if="${artista.youtube != null and !#strings.isEmpty(artista.youtube)}">
+                                        <a th:href="${#strings.startsWith(artista.youtube,'http') ? artista.youtube : 'https://' + artista.youtube}" target="_blank" rel="noopener noreferrer" title="YouTube">
+                                            <i class="fab fa-youtube"></i>
+                                        </a>
+                                    </li>
+                                    <li th:if="${artista.tiktok != null and !#strings.isEmpty(artista.tiktok)}">
+                                        <a th:href="${#strings.startsWith(artista.tiktok,'http') ? artista.tiktok : 'https://' + artista.tiktok}" target="_blank" rel="noopener noreferrer" title="TikTok">
+                                            <i class="fab fa-tiktok"></i>
+                                        </a>
+                                    </li>
+                                    <li th:if="${artista.musica != null and !#strings.isEmpty(artista.musica)}">
+                                        <a th:href="${#strings.startsWith(artista.musica,'http') ? artista.musica : 'https://' + artista.musica}" target="_blank" rel="noopener noreferrer" title="Música">
+                                            <i class="fas fa-music"></i>
+                                        </a>
+                                    </li>
+                                    <li th:if="${artista.web != null and !#strings.isEmpty(artista.web)}">
+                                        <a th:href="${#strings.startsWith(artista.web,'http') ? artista.web : 'https://' + artista.web}" target="_blank" rel="noopener noreferrer" title="Web">
+                                            <i class="fas fa-globe"></i>
+                                        </a>
+                                    </li>
+                                    <li th:if="${artista.google != null and !#strings.isEmpty(artista.google)}">
+                                        <a th:href="${#strings.startsWith(artista.google,'http') ? artista.google : 'https://' + artista.google}" target="_blank" rel="noopener noreferrer" title="Google">
+                                            <i class="fab fa-google"></i>
+                                        </a>
+                                    </li>
+                                </ul>
                             </div>
                         </div>
                     </div>
                 </div>
-                
-                <!-- Controles de paginación -->
-                <div class="row mt-4" th:if="${totalPaginas > 1}">
-                    <div class="col-12">
-                        <!-- Paginador con expresión condicional más limpia -->
-                        <nav aria-label="Paginación de artistas">
-                            <ul class="pagination justify-content-center">
-                                <!-- Botón anterior -->
-                                <li class="page-item" th:classappend="${!tieneAnterior} ? 'disabled'">
-                                    <a class="page-link" 
-                                       th:href="@{${isMisArtistas ? '/artista/mis-artistas' : '/artista'}(page=${paginaActual - 1})}"
-                                       th:if="${tieneAnterior}">
-                                        Anterior
-                                    </a>
-                                    <span class="page-link" th:unless="${tieneAnterior}">Anterior</span>
-                                </li>
 
-                                <!-- Números de página -->
-                                <li class="page-item" 
-                                    th:each="i : ${#numbers.sequence(0, totalPaginas - 1)}" 
-                                    th:classappend="${i == paginaActual} ? 'active'">
-                                    <a class="page-link" 
-                                       th:href="@{${isMisArtistas ? '/artista/mis-artistas' : '/artista'}(page=${i})}"
-                                       th:text="${i + 1}">1</a>
-                                </li>
-
-                                <!-- Botón siguiente -->
-                                <li class="page-item" th:classappend="${!tieneSiguiente} ? 'disabled'">
-                                    <a class="page-link" 
-                                       th:href="@{${isMisArtistas ? '/artista/mis-artistas' : '/artista'}(page=${paginaActual + 1})}"
-                                       th:if="${tieneSiguiente}">
-                                        Siguiente
-                                    </a>
-                                    <span class="page-link" th:unless="${tieneSiguiente}">Siguiente</span>
-                                </li>
-                            </ul>
-                        </nav>
-                        
-                        <!-- Información de paginación -->
-                        <div class="text-center mt-2">
-                            <small class="text-muted">
-                                Mostrando <span th:text="${#lists.size(listaArtistas)}">0</span> de 
-                                <span th:text="${totalElementos}">0</span> artistas
-                                (Página <span th:text="${paginaActual + 1}">1</span> de <span th:text="${totalPaginas}">1</span>)
-                            </small>
-                        </div>
+                <!-- Paginación -->
+                <div class="px-3 pt-4 pb-4" th:if="${totalPaginas > 1}">
+                    <nav aria-label="Paginación de artistas">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item" th:classappend="${!tieneAnterior} ? 'disabled'">
+                                <a class="page-link"
+                                   th:href="@{${isMisArtistas ? '/artista/mis-artistas' : '/artista'}(page=${paginaActual - 1})}"
+                                   th:if="${tieneAnterior}">
+                                    <i class="fas fa-chevron-left me-1"></i> Anterior
+                                </a>
+                                <span class="page-link" th:unless="${tieneAnterior}">
+                                    <i class="fas fa-chevron-left me-1"></i> Anterior
+                                </span>
+                            </li>
+                            <li class="page-item"
+                                th:each="i : ${#numbers.sequence(0, totalPaginas - 1)}"
+                                th:classappend="${i == paginaActual} ? 'active'">
+                                <a class="page-link"
+                                   th:href="@{${isMisArtistas ? '/artista/mis-artistas' : '/artista'}(page=${i})}"
+                                   th:text="${i + 1}">1</a>
+                            </li>
+                            <li class="page-item" th:classappend="${!tieneSiguiente} ? 'disabled'">
+                                <a class="page-link"
+                                   th:href="@{${isMisArtistas ? '/artista/mis-artistas' : '/artista'}(page=${paginaActual + 1})}"
+                                   th:if="${tieneSiguiente}">
+                                    Siguiente <i class="fas fa-chevron-right ms-1"></i>
+                                </a>
+                                <span class="page-link" th:unless="${tieneSiguiente}">
+                                    Siguiente <i class="fas fa-chevron-right ms-1"></i>
+                                </span>
+                            </li>
+                        </ul>
+                    </nav>
+                    <div class="text-center mt-2">
+                        <small class="text-muted">
+                            Página <span th:text="${paginaActual + 1}">1</span> de <span th:text="${totalPaginas}">1</span>
+                            · <span th:text="${#lists.size(listaArtistas)}">0</span> de <span th:text="${totalElementos}">0</span> artistas
+                        </small>
                     </div>
                 </div>
+
             </div>
         </main>
         <div th:replace="~{fragments/main-template :: footer}"/>
@@ -117,13 +174,11 @@
 </div>
 
 <script>
-
     const selectArtista = new Choices('#selectArtista');
 
     function updateButton() {
         const select = document.getElementById('selectArtista');
         const button = document.getElementById('btnIrArtista');
-
         if (select.value) {
             button.href = '/artista/' + select.value;
             button.classList.remove('disabled');
@@ -136,4 +191,3 @@
 
 </body>
 </html>
-

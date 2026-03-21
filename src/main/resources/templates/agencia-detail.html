@@ -56,12 +56,32 @@
                             </div>
                             <hr class="my-0">
                             <div class="card-body">
-                                <ul class="list-unstyled mb-0">
-                                    <li class="mb-1" th:if="${agenciaDto.web!=null && agenciaDto.web!=''}"><span class="fas fa-globe fa-fw me-1"></span> <a th:href="${'http://'+agenciaDto.web}" th:target="_blank" th:text="${agenciaDto.web}" ></a></li>
-                                    <li class="mb-1" th:if="${agenciaDto.facebook!=null && agenciaDto.facebook!=''}"><span class="fab fa-fw fa-facebook" ></span> <a th:text="${agenciaDto.facebook}" th:href="${'http://'+agenciaDto.facebook}" th:target="_blank"></a></li>
-                                    <li class="mb-1" th:if="${agenciaDto.instagram!=null  && agenciaDto.instagram!=''}"><span class="fab fa-fw fa-instagram" ></span> <a th:text="${agenciaDto.instagram}" th:href="${'http://'+agenciaDto.instagram}" th:target="_blank"></a></li>
-                                    <li class="mb-1" th:if="${agenciaDto.youtube!=null  && agenciaDto.youtube!=''}"><span class="fab fa-fw fa-youtube" ></span> <a th:text="${agenciaDto.youtube}" th:href="${'http://'+agenciaDto.youtube}" th:target="_blank"></a></li>
-                                </ul>
+                                <div class="social-links">
+                                    <a th:if="${agenciaDto.instagram!=null && agenciaDto.instagram!=''}"
+                                       th:href="${#strings.startsWith(agenciaDto.instagram,'http') ? agenciaDto.instagram : 'https://' + agenciaDto.instagram}"
+                                       target="_blank" rel="noopener noreferrer" title="Instagram"
+                                       class="social-btn social-btn--instagram">
+                                        <i class="fab fa-instagram"></i>
+                                    </a>
+                                    <a th:if="${agenciaDto.facebook!=null && agenciaDto.facebook!=''}"
+                                       th:href="${#strings.startsWith(agenciaDto.facebook,'http') ? agenciaDto.facebook : 'https://' + agenciaDto.facebook}"
+                                       target="_blank" rel="noopener noreferrer" title="Facebook"
+                                       class="social-btn social-btn--facebook">
+                                        <i class="fab fa-facebook-f"></i>
+                                    </a>
+                                    <a th:if="${agenciaDto.youtube!=null && agenciaDto.youtube!=''}"
+                                       th:href="${#strings.startsWith(agenciaDto.youtube,'http') ? agenciaDto.youtube : 'https://' + agenciaDto.youtube}"
+                                       target="_blank" rel="noopener noreferrer" title="YouTube"
+                                       class="social-btn social-btn--youtube">
+                                        <i class="fab fa-youtube"></i>
+                                    </a>
+                                    <a th:if="${agenciaDto.web!=null && agenciaDto.web!=''}"
+                                       th:href="${#strings.startsWith(agenciaDto.web,'http') ? agenciaDto.web : 'https://' + agenciaDto.web}"
+                                       target="_blank" rel="noopener noreferrer" title="Web"
+                                       class="social-btn social-btn--web">
+                                        <i class="fas fa-globe"></i>
+                                    </a>
+                                </div>
 
                             </div>
 
