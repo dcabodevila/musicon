@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <title>festia.es</title>
+    <title>Agencias · festia.es</title>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <div th:replace="~{fragments/main-template :: header-css}"/>
-    </head>
+</head>
 <body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
 <div class="wrapper">
 
@@ -16,39 +16,67 @@
 
         <div th:replace="~{fragments/main-template :: navbar}"/>
         <main class="content">
-            <div class="col-xs-12 mb-3" sec:authorize="hasAuthority('AGENCIA_CREAR')">
-                <div class="d-flex justify-content-end">
-                    <a th:href="@{/agencia/crear}" class="btn btn-primary"><i class="fas fa-plus"></i> Crear agencia</a>
-                </div>
-            </div>
+            <div class="container-fluid p-0" th:if="${not #lists.isEmpty(listaAgencias)}">
 
-            <div class="container-fluid p-0">
-
-
-                <div class="row" th:if="${not #lists.isEmpty(listaAgencias)}">
-                    <div class="mb-3">
-                        <h1 class="h3 d-inline align-middle">Agencias</h1>
+                <!-- Hero -->
+                <div class="artistas-hero">
+                    <div class="artistas-hero__content">
+                        <div class="artistas-hero__icon"><i class="fas fa-building"></i></div>
+                        <div>
+                            <h1 class="artistas-hero__title">Agencias</h1>
+                        </div>
                     </div>
-                    <div class="col-12 col-md-6 col-lg-3" th:each="agencia: ${listaAgencias}">
-                        <div class="card card-max-width" style="height: 550px">
-                            <div style="min-height: 340px; display: flex; align-items: center;">
-                                <img class="card-img-top img-max-height" th:if="${agencia.logo!=null}"
-                                     th:src="@{${agencia.logo}}" alt="Unsplash">
-                            </div>
-                            <div class="card-header px-4 pt-4">
-                                <h5 class="card-title mb-0" th:text="${agencia.nombre}">Card with image and button</h5>
-                            </div>
-                            <div class="card-body" style="min-height: 80px;">
-                                <p class="card-text" th:text="${agencia.descripcion}">Descripción</p>
-                                <ul class="list-unstyled mb-0">
-                                    <li class="mb-1"><span class="fas fa-user fa-fw me-1"></span> <a
-                                            th:href="@{/usuarios/__${agencia.idUsuario}__}"
-                                            th:text="${agencia.nombreUsuario}"></a>
+                    <div sec:authorize="hasAuthority('AGENCIA_CREAR')" class="artistas-hero__cta">
+                        <a th:href="@{/agencia/crear}" class="btn">
+                            <i class="fas fa-plus me-1"></i> Crear agencia
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Grid de agencias -->
+                <div class="px-3 pt-3 pb-4">
+                    <div class="row g-3">
+                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3" th:each="agencia: ${listaAgencias}">
+                            <div class="artista-card">
+                                <a th:href="@{/agencia/__${agencia.id}__}" class="artista-card__main-link">
+                                    <img class="artista-card__img"
+                                         th:if="${agencia.logo != null}"
+                                         th:src="@{${agencia.logo}}"
+                                         th:alt="${agencia.nombre}"
+                                         loading="lazy">
+                                    <img class="artista-card__img"
+                                         th:if="${agencia.logo == null}"
+                                         th:src="@{/logo/logo_transparente.png}"
+                                         th:alt="${agencia.nombre}">
+                                </a>
+                                <h3 class="artista-card__name" th:text="${agencia.nombre}">Agencia</h3>
+                                <ul class="artista-card__actions">
+                                    <li>
+                                        <a th:href="@{/agencia/__${agencia.id}__}" title="Ver agencia">
+                                            <i class="fas fa-building"></i>
+                                        </a>
+                                    </li>
+                                    <li th:if="${agencia.instagram != null and !#strings.isEmpty(agencia.instagram)}">
+                                        <a th:href="${#strings.startsWith(agencia.instagram,'http') ? agencia.instagram : 'https://' + agencia.instagram}" target="_blank" rel="noopener noreferrer" title="Instagram">
+                                            <i class="fab fa-instagram"></i>
+                                        </a>
+                                    </li>
+                                    <li th:if="${agencia.facebook != null and !#strings.isEmpty(agencia.facebook)}">
+                                        <a th:href="${#strings.startsWith(agencia.facebook,'http') ? agencia.facebook : 'https://' + agencia.facebook}" target="_blank" rel="noopener noreferrer" title="Facebook">
+                                            <i class="fab fa-facebook-f"></i>
+                                        </a>
+                                    </li>
+                                    <li th:if="${agencia.youtube != null and !#strings.isEmpty(agencia.youtube)}">
+                                        <a th:href="${#strings.startsWith(agencia.youtube,'http') ? agencia.youtube : 'https://' + agencia.youtube}" target="_blank" rel="noopener noreferrer" title="YouTube">
+                                            <i class="fab fa-youtube"></i>
+                                        </a>
+                                    </li>
+                                    <li th:if="${agencia.web != null and !#strings.isEmpty(agencia.web)}">
+                                        <a th:href="${#strings.startsWith(agencia.web,'http') ? agencia.web : 'https://' + agencia.web}" target="_blank" rel="noopener noreferrer" title="Web">
+                                            <i class="fas fa-globe"></i>
+                                        </a>
                                     </li>
                                 </ul>
-                                <div class="card-body text-center d-flex flex-column flex-sm-row justify-content-around">
-                                    <a th:href="@{/agencia/__${agencia.id}__}" class="btn btn-pill btn-primary col-12">Entrar</a>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -60,8 +88,6 @@
 
     </div>
 </div>
-
-</body>
 
 </body>
 </html>

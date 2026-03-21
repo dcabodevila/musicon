@@ -276,4 +276,9 @@ public interface TarifaRepository extends JpaRepository<Tarifa, Long> {
 		@Param("fechaFin") LocalDateTime fechaFin,
 		@Param("idArtistaExcluir") Long idArtistaExcluir
 	);
+
+	boolean existsByArtistaAgenciaIdAndActivoTrue(Long agenciaId);
+
+	@Query(value = "SELECT COUNT(*) FROM gestmusica.tarifa WHERE artista_id = :idArtista AND activo = true AND EXTRACT(YEAR FROM fecha) = :ano", nativeQuery = true)
+	int countTarifasActivasByArtistaAndAnio(@Param("idArtista") Long idArtista, @Param("ano") int ano);
 }

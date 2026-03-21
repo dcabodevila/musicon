@@ -18,4 +18,25 @@ $(document).ready(function(){
     new Choices(document.querySelector("#usuario"));
     new Choices(document.querySelector("#provincia"));
 
+    // Preview de logo de agencia
+    const logoInputAgencia = document.getElementById('logo-input-agencia');
+    const logoPreviewAgencia = document.getElementById('logo-preview-agencia');
+    if (logoInputAgencia && logoPreviewAgencia) {
+        logoInputAgencia.addEventListener('change', function () {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    logoPreviewAgencia.src = e.target.result;
+                    logoPreviewAgencia.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                if (!logoPreviewAgencia.dataset.hasExisting) {
+                    logoPreviewAgencia.style.display = 'none';
+                }
+            }
+        });
+    }
+
 });

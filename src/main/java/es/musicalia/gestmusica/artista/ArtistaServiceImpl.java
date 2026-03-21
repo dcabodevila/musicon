@@ -82,6 +82,13 @@ public class ArtistaServiceImpl implements ArtistaService {
             dto.setId(artistaRecord.id());
             dto.setNombre(artistaRecord.nombre());
             dto.setLogo(artistaRecord.logo());
+            dto.setInstagram(artistaRecord.instagram());
+            dto.setFacebook(artistaRecord.facebook());
+            dto.setYoutube(artistaRecord.youtube());
+            dto.setWeb(artistaRecord.web());
+            dto.setTiktok(artistaRecord.tiktok());
+            dto.setMusica(artistaRecord.musica());
+            dto.setGoogle(artistaRecord.google());
             return dto;
         });
     }
@@ -165,11 +172,30 @@ public class ArtistaServiceImpl implements ArtistaService {
 
         if (artistaDto.getId() == null) {
             guardarPermisosArtistaRolesAgenciaRepresentante(artista);
+            try {
+                notificarNuevoArtista(artista);
+            } catch (Exception e) {
+                log.error("Error enviando notificación de nuevo artista {}", artista.getId(), e);
+            }
         }
 
-
-
         return artista;
+    }
+
+    private void notificarNuevoArtista(Artista artista) {
+        Usuario remite = userService.obtenerUsuarioAutenticado()
+                .orElseGet(() -> userService.findUsuariosAdmin().get(0));
+        List<Usuario> usuarios = usuarioRepository.findByActivoTrue();
+        for (Usuario receptor : usuarios) {
+            Mensaje mensaje = new Mensaje();
+            mensaje.setUsuarioRemite(remite);
+            mensaje.setUsuarioReceptor(receptor);
+            mensaje.setAsunto("Nuevo artista en festia");
+            mensaje.setMensaje(artista.getNombre() + " ha comenzado a tocar en festia");
+            mensaje.setImagen("fa-music text-success");
+            mensaje.setUrlEnlace("/artista/" + artista.getId());
+            mensajeService.enviarMensaje(mensaje, receptor.getId());
+        }
     }
 
     private void guardarPermisosArtistaRolesAgenciaRepresentante(Artista artista) {

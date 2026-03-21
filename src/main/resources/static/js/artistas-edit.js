@@ -137,4 +137,25 @@ $(document).ready(function () {
             });
         });
     }
+
+    // Preview de imagen de artista
+    const logoInputArtista = document.getElementById('logo-input-artista');
+    const logoPreviewArtista = document.getElementById('logo-preview-artista');
+    if (logoInputArtista && logoPreviewArtista) {
+        logoInputArtista.addEventListener('change', function () {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    logoPreviewArtista.src = e.target.result;
+                    logoPreviewArtista.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                if (!logoPreviewArtista.dataset.hasExisting) {
+                    logoPreviewArtista.style.display = 'none';
+                }
+            }
+        });
+    }
 });

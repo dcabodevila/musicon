@@ -9,6 +9,7 @@ import es.musicalia.gestmusica.localizacion.LocalizacionService;
 import es.musicalia.gestmusica.ocupacion.OcupacionSaveDto;
 import es.musicalia.gestmusica.ocupacion.OcupacionService;
 import es.musicalia.gestmusica.tarifa.TarifaAnualDto;
+import es.musicalia.gestmusica.tarifa.TarifaService;
 import es.musicalia.gestmusica.usuario.UserService;
 import es.musicalia.gestmusica.util.DefaultResponseBody;
 import jakarta.validation.Valid;
@@ -47,10 +48,12 @@ public class ArtistaController {
     private final IncrementoService incrementoService;
     private final OcupacionService ocupacionService;
     private final SecurityService securityService;
+    private final TarifaService tarifaService;
 
 
     public ArtistaController(UserService userService, ArtistaService artistaService, FileService fileService, AgenciaService agenciaService,
-                             LocalizacionService localizacionService, IncrementoService incrementoService, OcupacionService ocupacionService, SecurityService securityService){
+                             LocalizacionService localizacionService, IncrementoService incrementoService, OcupacionService ocupacionService,
+                             SecurityService securityService, TarifaService tarifaService){
         this.userService = userService;
         this.artistaService = artistaService;
         this.fileService = fileService;
@@ -58,8 +61,8 @@ public class ArtistaController {
         this.localizacionService = localizacionService;
         this.incrementoService =incrementoService;
         this.ocupacionService = ocupacionService;
-
         this.securityService = securityService;
+        this.tarifaService = tarifaService;
     }
 
     @GetMapping
@@ -93,7 +96,7 @@ public class ArtistaController {
             Page<ArtistaRecord> paginaArtistas = this.artistaService.findMisArtistasPaginated(mapPermisosArtista.keySet(),pageable);
             model.addAttribute("listaArtistasSelect", mapPermisosArtista.isEmpty() ? new ArrayList<>() : this.artistaService.findMisArtistas(mapPermisosArtista.keySet()));
 
-            model.addAttribute("listaArtistas", paginaArtistas.getContent());
+            model.addAttribute("listaArtistas", mapPermisosArtista.isEmpty() ? new ArrayList<>() : paginaArtistas.getContent());
             model.addAttribute("paginaActual", page);
             model.addAttribute("totalPaginas", paginaArtistas.getTotalPages());
             model.addAttribute("totalElementos", paginaArtistas.getTotalElements());
@@ -101,7 +104,13 @@ public class ArtistaController {
             model.addAttribute("tieneAnterior", paginaArtistas.hasPrevious());
             model.addAttribute("isMisArtistas", true);
 
-            model.addAttribute("listaArtistas", mapPermisosArtista.isEmpty() ? new ArrayList<>() : paginaArtistas);
+            final Map<Long, Set<String>> mapPermisosAgencia = user.getMapPermisosAgencia();
+            Long idAgenciaCrear = mapPermisosAgencia.entrySet().stream()
+                    .filter(e -> e.getValue().contains("ARTISTA_CREAR"))
+                    .map(Map.Entry::getKey)
+                    .findFirst()
+                    .orElse(null);
+            model.addAttribute("idAgenciaCrear", idAgenciaCrear);
 
         }
         return "artistas";
@@ -120,6 +129,8 @@ public class ArtistaController {
     private void getModelAttributeDetail(Model model, ArtistaDto artistaDto) {
         model.addAttribute("artistaDto", artistaDto);
         model.addAttribute("isArtistaPermiteOrquestasDeGalicia", artistaDto.isPermiteOrquestasDeGalicia());
+        model.addAttribute("isArtistaPermiteOdg", artistaDto.isPermiteOrquestasDeGalicia());
+        model.addAttribute("isArtistaPublicarEventos", Boolean.TRUE.equals(artistaDto.getPublicarEventos()));
         model.addAttribute("listaUsuarios", this.userService.findAllUsuarioRecordsNotAdmin());
         model.addAttribute("idUsuarioAutenticado", this.userService.isUserAutheticated()? this.userService.obtenerUsuarioAutenticado().get().getId() : null);
         model.addAttribute("listaAgencias", artistaDto.getIdAgencia() != null ? this.agenciaService.findAgenciaRecordById(artistaDto.getIdAgencia()) : this.agenciaService.findAllAgenciasForUser());
@@ -145,6 +156,11 @@ public class ArtistaController {
         model.addAttribute("listaArtistas", List.of(this.artistaService.findArtistaDtoById(idArtista)));
 
         addTarifaAnualModelAttribute(model, idArtista);
+
+        int anioActual = Year.now().getValue();
+        int tarifasAnoActual = tarifaService.contarTarifasActivasAnio(idArtista, anioActual);
+        model.addAttribute("tarifasAnoActual", tarifasAnoActual);
+        model.addAttribute("anioActual", anioActual);
 
         return "artista-detail";
     }

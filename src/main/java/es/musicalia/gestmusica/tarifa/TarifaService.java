@@ -18,4 +18,8 @@ public interface TarifaService {
     List<TarifaArtistaCcaaDto> findTarifasByFechaAndNumComponentesArtista(Long idArtista, LocalDate fecha);
 
     ByteArrayOutputStream exportTarifaAnualToExcel(TarifaAnualDto tarifaAnualDto);
+
+    boolean agenciaTieneTarifasActivas(Long idAgencia);
+
+    int contarTarifasActivasAnio(Long idArtista, int ano);
 }

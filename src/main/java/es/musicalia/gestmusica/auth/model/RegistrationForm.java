@@ -1,5 +1,6 @@
 package es.musicalia.gestmusica.auth.model;
 
+import es.musicalia.gestmusica.usuario.TipoUsuarioEnum;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -43,6 +44,7 @@ public class RegistrationForm {
 	@NotNull
 	private Long idProvincia;
 
-
-
+	@NotNull(message = "El tipo de usuario es obligatorio")
+	private TipoUsuarioEnum tipoUsuario;
 }
+

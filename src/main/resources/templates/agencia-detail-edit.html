@@ -135,7 +135,15 @@
                                     <div class="mb-3 row">
                                         <label class="col-form-label col-sm-3 text-sm-end">Logo</label>
                                         <div class="col-sm-9">
-                                            <input type="file" name="image" accept="image/*" class="form-control-file">
+                                            <div class="mb-2">
+                                                <img id="logo-preview-agencia"
+                                                     th:src="${agenciaDto.logo != null ? agenciaDto.logo : '#'}"
+                                                     th:data-has-existing="${agenciaDto.logo != null ? 'true' : ''}"
+                                                     alt="Preview del logo"
+                                                     class="img-thumbnail"
+                                                     th:style="${agenciaDto.logo != null ? 'max-height:150px;max-width:300px;object-fit:contain;display:block;' : 'max-height:150px;max-width:300px;object-fit:contain;display:none;'}">
+                                            </div>
+                                            <input type="file" id="logo-input-agencia" name="image" accept="image/*" class="form-control-file">
                                             <small class="form-text text-muted">Logo de la empresa. Tamaño ideal 327x250</small>
                                         </div>
                                     </div>

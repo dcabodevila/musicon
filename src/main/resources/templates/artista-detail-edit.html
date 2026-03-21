@@ -9,7 +9,6 @@
     <div th:replace="~{fragments/main-template :: header-css}"/>
 
 </head>
-<body>
 <body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
 <div class="wrapper">
 
@@ -237,7 +236,15 @@
                                     <div class="mb-3 row">
                                         <label class="col-form-label col-sm-3 text-sm-end">Imagen</label>
                                         <div class="col-sm-9">
-                                            <input type="file" name="image" accept="image/*" class="form-control-file">
+                                            <div class="mb-2">
+                                                <img id="logo-preview-artista"
+                                                     th:src="${artistaDto.logo != null ? artistaDto.logo : '#'}"
+                                                     th:data-has-existing="${artistaDto.logo != null ? 'true' : ''}"
+                                                     alt="Preview del logo"
+                                                     class="img-thumbnail"
+                                                     th:style="${artistaDto.logo != null ? 'max-height:150px;max-width:300px;object-fit:contain;display:block;' : 'max-height:150px;max-width:300px;object-fit:contain;display:none;'}">
+                                            </div>
+                                            <input type="file" id="logo-input-artista" name="image" accept="image/*" class="form-control-file">
                                             <small class="form-text text-muted">Logo de la empresa. Tamaño máximo 400x400</small>
                                         </div>
                                     </div>

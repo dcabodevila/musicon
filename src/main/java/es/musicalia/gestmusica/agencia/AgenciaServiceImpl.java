@@ -7,11 +7,17 @@ import es.musicalia.gestmusica.ajustes.AjustesRepository;
 import es.musicalia.gestmusica.contacto.ContactoRepository;
 import es.musicalia.gestmusica.contacto.Contacto;
 import es.musicalia.gestmusica.localizacion.*;
+import es.musicalia.gestmusica.mail.EmailService;
+import es.musicalia.gestmusica.mail.EmailTemplateEnum;
+import es.musicalia.gestmusica.mensaje.Mensaje;
+import es.musicalia.gestmusica.mensaje.MensajeService;
 import es.musicalia.gestmusica.rol.RolEnum;
 import es.musicalia.gestmusica.rol.RolRepository;
+import es.musicalia.gestmusica.usuario.UserService;
 import es.musicalia.gestmusica.usuario.Usuario;
 import es.musicalia.gestmusica.usuario.UsuarioRepository;
 import es.musicalia.gestmusica.util.StringUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 public class AgenciaServiceImpl implements AgenciaService {
@@ -32,8 +39,11 @@ public class AgenciaServiceImpl implements AgenciaService {
 	private final RolRepository rolRepository;
 	private final AgenciaMapper agenciaMapper;
 	private final AjustesRepository ajustesRepository;
+	private final MensajeService mensajeService;
+	private final UserService userService;
+	private final EmailService emailService;
 
-	public AgenciaServiceImpl(AgenciaRepository agenciaRepository, MunicipioRepository municipioRepository, ProvinciaRepository provinciaRepository, UsuarioRepository usuarioRepository, ContactoRepository agenciaContactoRepository, AccesoService accesoService, RolRepository rolRepository, AgenciaMapper agenciaMapper, AjustesRepository ajustesRepository){
+	public AgenciaServiceImpl(AgenciaRepository agenciaRepository, MunicipioRepository municipioRepository, ProvinciaRepository provinciaRepository, UsuarioRepository usuarioRepository, ContactoRepository agenciaContactoRepository, AccesoService accesoService, RolRepository rolRepository, AgenciaMapper agenciaMapper, AjustesRepository ajustesRepository, MensajeService mensajeService, UserService userService, EmailService emailService){
 		this.agenciaRepository = agenciaRepository;
 		this.municipioRepository = municipioRepository;
 		this.provinciaRepository = provinciaRepository;
@@ -43,6 +53,9 @@ public class AgenciaServiceImpl implements AgenciaService {
         this.rolRepository = rolRepository;
         this.agenciaMapper = agenciaMapper;
         this.ajustesRepository = ajustesRepository;
+        this.mensajeService = mensajeService;
+        this.userService = userService;
+        this.emailService = emailService;
     }
 	@Override
 	public List<AgenciaRecord> findAllAgenciasForUser(){
@@ -164,11 +177,35 @@ public class AgenciaServiceImpl implements AgenciaService {
 			this.accesoService.crearAccesoUsuarioAgenciaRol(agencia.getUsuario().getId(), agencia.getId(), this.rolRepository.findRolRecordByCodigo(RolEnum.ROL_AGENCIA.getCodigo()).id(), null);
 		}
 
-		asignarAgenciaAjustesListadosPorComunidad((agenciaDto.getId()==null), agencia);
+		boolean isCreacion = agenciaDto.getId() == null;
+		asignarAgenciaAjustesListadosPorComunidad(isCreacion, agencia);
 
+		if (isCreacion) {
+			try {
+				notificarNuevaAgencia(agencia);
+			} catch (Exception e) {
+				log.error("Error enviando notificación de nueva agencia {}", agencia.getId(), e);
+			}
+		}
 
 		return agencia;
 
+	}
+
+	private void notificarNuevaAgencia(Agencia agencia) {
+		Usuario remite = userService.obtenerUsuarioAutenticado()
+				.orElseGet(() -> userService.findUsuariosAdmin().get(0));
+		List<Usuario> usuarios = usuarioRepository.findByActivoTrue();
+		for (Usuario receptor : usuarios) {
+			Mensaje mensaje = new Mensaje();
+			mensaje.setUsuarioRemite(remite);
+			mensaje.setUsuarioReceptor(receptor);
+			mensaje.setAsunto("Nueva agencia en festia");
+			mensaje.setMensaje("La agencia " + agencia.getNombre() + " se ha unido a festia. ¡Bienvenidos!");
+			mensaje.setImagen("fa-building text-primary");
+			mensaje.setUrlEnlace("/agencia/" + agencia.getId());
+			mensajeService.enviarMensaje(mensaje, receptor.getId());
+		}
 	}
 
 	private void asignarAgenciaAjustesListadosPorComunidad(boolean isCreacion, Agencia agencia) {
@@ -195,7 +232,51 @@ public class AgenciaServiceImpl implements AgenciaService {
 
 	}
 
+	@Transactional(readOnly = false)
+	public Agencia crearAgenciaOnboarding(AgenciaOnboardingDto onboardingDto, Long idUsuarioAutenticado) {
+		// Verificar que el usuario no tiene agencia previa
+		Usuario usuario = usuarioRepository.findById(idUsuarioAutenticado)
+				.orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
+		boolean usuarioTieneAgencia = agenciaRepository.existsByUsuarioId(idUsuarioAutenticado);
+		if (usuarioTieneAgencia) {
+			throw new RuntimeException("El usuario ya tiene una agencia asignada");
+		}
 
+		// Construir AgenciaDto desde AgenciaOnboardingDto
+		AgenciaDto agenciaDto = new AgenciaDto();
+		agenciaDto.setNombre(onboardingDto.getNombre());
+		agenciaDto.setDescripcion(onboardingDto.getDescripcion());
+		agenciaDto.setIdProvincia(onboardingDto.getIdProvincia());
+		agenciaDto.setIdUsuario(idUsuarioAutenticado);
+		agenciaDto.setActivo(true);
+		agenciaDto.setTarifasPublicas(false);
+
+		// Si viene teléfono, crear un contacto básico
+		if (onboardingDto.getTelefono() != null && !onboardingDto.getTelefono().isEmpty()) {
+			agenciaDto.setTelefono(onboardingDto.getTelefono());
+		}
+
+		// Guardar la agencia (notificarNuevaAgencia se invoca automáticamente)
+		Agencia agencia = saveAgencia(agenciaDto);
+
+		// Enviar email de bienvenida (no-bloqueante)
+		try {
+			enviarBienvenidaAgencia(usuario.getEmail(), agencia.getNombre());
+		} catch (Exception e) {
+			log.error("Error enviando email de bienvenida a {}: {}", usuario.getEmail(), e.getMessage());
+		}
+
+		return agencia;
+	}
+
+	private void enviarBienvenidaAgencia(String email, String nombreAgencia) {
+		try {
+			this.emailService.enviarMensajePorEmail(email, EmailTemplateEnum.BIENVENIDA_AGENCIA);
+			log.info("Email de bienvenida de agencia enviado a: {}", email);
+		} catch (Exception e) {
+			log.error("Error enviando email de bienvenida a {}: {}", email, e.getMessage());
+		}
+	}
 
 }

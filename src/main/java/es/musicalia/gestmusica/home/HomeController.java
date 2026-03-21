@@ -3,6 +3,7 @@ package es.musicalia.gestmusica.home;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.ocupacion.OcupacionService;
 import es.musicalia.gestmusica.permiso.PermisoAgenciaEnum;
+import es.musicalia.gestmusica.usuario.TipoUsuarioEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -40,6 +41,12 @@ public class HomeController {
 
         }
 
+        // Banner de onboarding de agencia
+        boolean mostrarBannerOnboardingAgencia =
+            user.getUsuario().getTipoUsuario() == TipoUsuarioEnum.AGENCIA
+            && user.getUsuario().isValidado()
+            && user.getMapPermisosAgencia().isEmpty();
+        model.addAttribute("mostrarBannerOnboardingAgencia", mostrarBannerOnboardingAgencia);
 
         model.addAttribute("isUsuarioAutenticado", !SecurityContextHolder.getContext().getAuthentication().getName().equals("anonymousUser"));
         model.addAttribute("listaOcupacionPendiente", this.ocupacionService.findOcupacionesDtoByAgenciaPendientes(mapPermisosAgencia.keySet()));

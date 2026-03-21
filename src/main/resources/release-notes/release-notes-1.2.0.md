@@ -12,14 +12,12 @@ Ahora puedes sincronizar manualmente o incluso automáticamente.
 
 ### Cómo activarlo
 
-- Accede a cada Artista donde quieras activarlo en menú de Editar datos artista
-Si ya estás registrado en OrquestasDeGalicia.es y no ves este botón, puedes pasar al siguiente paso.
-![editar-datos-artista.png](/img/release-notes/editar-datos-artista.png)
-
+- Accede a cada Artista donde quieras activarlo y pulsa **Editar datos artista**
 - Solicita la activación para un artista pulsando el botón "Solicitar activación".
+ > **Nota:** Si ya estás registrado en OrquestasDeGalicia.es y no ves este botón, puedes pasar al siguiente paso.
 
 ![solicita-activacion.png](/img/release-notes/solicita-activacion.png)
--
+
 - En cuanto nos den el OK desde OrquestasDeGalicia.es, te activaremos y recibirás una notificación interna para empezar a publicar.
 
 ### Cómo publicar manualmente en OrquestasDeGalicia.es
@@ -27,6 +25,7 @@ Si ya estás registrado en OrquestasDeGalicia.es y no ves este botón, puedes pa
 - Una vez activado el artista por los administradores de **festia.es**, ve a cualquiera de las ocupaciones de un artista.
 - Asegúrate de que está especificado el lugar del evento, es necesario indicar **municipio** y **provincina** (No provisonal).
 - Puedes completar la información sobre la actuación en el campo **Descripción para Orquestas de Galicia.es**
+
 
 ![publicar-odg.png](/img/release-notes/publicar-odg.png)
 
@@ -44,6 +43,7 @@ También puedes sincronizar automáticamente tus ocupaciones con OrquestasDeGali
 - Todas las ocupaciones de los artistas seleccionados se actualizarán en OrquestasDeGalicia.es **cada día a las 20:00**.
 - Si modificas la ocupación, se actualizará en OrquestasDeGalicia.es.
 - Si anulas la ocupación, se borrará automáticameente de OrquestasDeGalicia.es.
+- Si eliminas manulamente una publicación en OrquestasDeGalicia.es, dejará de sincronizarse.
 
 ### Qué ocupaciones entran en sincronización
 
@@ -51,7 +51,7 @@ Solo se procesan ocupaciones que cumplan estas condiciones:
 
 - El artista tiene activada la opción **Sincronizar ocupaciones en OrquestasDeGalicia.es**.
 - La fecha del evento está dentro de los **próximos 3 meses**, está ocupada (no reserva) y tiene Localidad y Municipio asignado (No provisional).
-
+- Las que no hayan sido eliminadas manualmente.
 
 
 <!-- END_FOR_ROLES -->

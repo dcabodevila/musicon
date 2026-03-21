@@ -125,6 +125,21 @@
                                               </small>
                                           </div>
                                       </div>
+                                      <div class="mb-3">
+                                          <label class="form-label">¿Cual es tu relación con el espectáculo?</label>
+                                          <select th:field="*{tipoUsuario}" class="form-control" required>
+                                              <option value="">Selecciona tu tipo de usuario</option>
+                                              <option value="AGENCIA">Agencia o responsable de un espectáculo</option>
+                                              <option value="REPRESENTANTE">Representante o agente</option>
+                                              <option value="ARTISTA">Artista</option>
+                                          </select>
+                                          <div class="col-sm-12">
+                                              <small class="text-danger">
+                                                  <p th:each="error: ${#fields.errors('tipoUsuario')}"
+                                                     th:text="${error}">Validation error</p>
+                                              </small>
+                                          </div>
+                                      </div>
                                       <div class="mb-3 form-check">
                                           <input type="checkbox" class="form-check-input" id="aceptaPolitica" required/>
                                           <label class="form-check-label" for="aceptaPolitica">

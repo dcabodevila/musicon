@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Crear Agencia - festia.es</title>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <div th:replace="~{fragments/main-template :: header-css}"/>
+</head>
+
+<body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
+
+<div class="wrapper">
+
+    <div th:replace="~{fragments/main-template :: sidebar}"/>
+    <div class="main">
+
+        <div th:replace="~{fragments/main-template :: navbar}"/>
+
+        <main class="content">
+
+            <!-- Mensajes de alerta -->
+            <div th:if="${message}" th:class="${'alert alert-' + alertClass+ ' alert-dismissible fade show'}" role="alert"
+                 style="padding: 15px;">
+                <strong th:text="${message}">Hello there!</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <div class="container-fluid p-0">
+                <div class="page-header d-print-none">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h2 class="page-title">
+                                <span class="text-truncate">
+                                    <i class="align-middle me-2 fas fa-fw fa-building"></i>
+                                    Crear mi agencia
+                                </span>
+                            </h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-wrapper">
+                <div class="container-fluid">
+                    <div class="row justify-content-center">
+                        <div class="col-12 col-lg-8">
+                            <div class="card">
+                                <div class="card-body">
+
+                                    <form method="POST" th:object="${agenciaOnboardingDto}" th:action="@{/agencia/onboarding}">
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Nombre de la agencia *</label>
+                                            <input type="text" th:field="*{nombre}" class="form-control form-control-lg"
+                                                   placeholder="Nombre de tu agencia" required maxlength="250"/>
+                                            <div class="col-sm-12">
+                                                <small class="text-danger">
+                                                    <p th:each="error: ${#fields.errors('nombre')}"
+                                                       th:text="${error}">Validation error</p>
+                                                </small>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Descripción de la agencia *</label>
+                                            <textarea th:field="*{descripcion}" class="form-control form-control-lg"
+                                                      placeholder="Breve descripción de tu agencia" rows="4" required maxlength="250"></textarea>
+                                            <small class="form-text text-muted">Máximo 250 caracteres</small>
+                                            <div class="col-sm-12">
+                                                <small class="text-danger">
+                                                    <p th:each="error: ${#fields.errors('descripcion')}"
+                                                       th:text="${error}">Validation error</p>
+                                                </small>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Provincia *</label>
+                                            <select th:field="*{idProvincia}" class="form-control form-control-lg choices-single" required>
+                                                <option value="">Selecciona una provincia</option>
+                                                <option th:each="provincia : ${listaProvincias}"
+                                                        th:value="${provincia.id}"
+                                                        th:text="${provincia.nombre}"></option>
+                                            </select>
+                                            <div class="col-sm-12">
+                                                <small class="text-danger">
+                                                    <p th:each="error: ${#fields.errors('idProvincia')}"
+                                                       th:text="${error}">Validation error</p>
+                                                </small>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Teléfono de contacto</label>
+                                            <input type="tel" th:field="*{telefono}" class="form-control form-control-lg"
+                                                   placeholder="Teléfono de contacto (opcional)" maxlength="16"/>
+                                            <small class="form-text text-muted">Será visible en tu perfil de agencia</small>
+                                        </div>
+
+                                        <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 18px 20px;">
+                                            <div class="d-flex align-items-center mb-3">
+                                                <i class="fas fa-fw fa-rocket" style="color: #3b82f6; font-size: 1rem;"></i>
+                                                <span class="ms-2 fw-semibold" style="color: #1e40af; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em;">Próximos pasos</span>
+                                            </div>
+                                            <div class="d-flex flex-column gap-2">
+                                                <div class="d-flex align-items-center" style="gap: 12px;">
+                                                    <span style="min-width: 24px; height: 24px; background: #3b82f6; color: white; border-radius: 50%; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; justify-content: center;">1</span>
+                                                    <span style="color: #1e3a5f; font-size: 0.9rem;">Crea la agencia</span>
+                                                </div>
+                                                <div class="d-flex align-items-center" style="gap: 12px;">
+                                                    <span style="min-width: 24px; height: 24px; background: #3b82f6; color: white; border-radius: 50%; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; justify-content: center;">2</span>
+                                                    <span style="color: #1e3a5f; font-size: 0.9rem;">Ve a editar agencia para completar el resto de la información</span>
+                                                </div>
+                                                <div class="d-flex align-items-center" style="gap: 12px;">
+                                                    <span style="min-width: 24px; height: 24px; background: #3b82f6; color: white; border-radius: 50%; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; justify-content: center;">3</span>
+                                                    <span style="color: #1e3a5f; font-size: 0.9rem;">Sube el logo de tu agencia</span>
+                                                </div>
+                                                <div class="d-flex align-items-center" style="gap: 12px;">
+                                                    <span style="min-width: 24px; height: 24px; background: #3b82f6; color: white; border-radius: 50%; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; justify-content: center;">4</span>
+                                                    <span style="color: #1e3a5f; font-size: 0.9rem;">Añade tu primer artista</span>
+                                                </div>
+                                                <div class="d-flex align-items-center" style="gap: 12px;">
+                                                    <span style="min-width: 24px; height: 24px; background: #3b82f6; color: white; border-radius: 50%; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; justify-content: center;">5</span>
+                                                    <span style="color: #1e3a5f; font-size: 0.9rem;">Configura tus tarifas</span>
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                        <div class="form-footer" style="margin-top: 1.5rem;">
+                                            <a th:href="@{/}" class="btn btn-link">Cancelar</a>
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="align-middle me-2 fas fa-fw fa-check"></i>
+                                                Crear agencia
+                                            </button>
+                                        </div>
+
+                                    </form>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <div th:replace="~{fragments/main-template :: footer}"/>
+
+    </div>
+
+</div>
+
+<script type="text/javascript" th:src="@{/js/comun.js}"></script>
+
+</body>
+</html>
