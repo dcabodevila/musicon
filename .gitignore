@@ -41,4 +41,4 @@ build/
 /.claude/agents/spec-analyst.md
 /.claude/**
 /.playwright-mcp
-/doc
+/product
