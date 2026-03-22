@@ -291,7 +291,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="mb-3 row" th:if="${artistaDto.id!=null && artistaDto.permiteOrquestasDeGalicia}">
+                                    <div class="mb-3 row" th:if="${artistaDto.id!=null && artistaDto.solicitudOdgAprobada}">
                                         <label class="col-form-label col-sm-3 text-sm-end pt-sm-0" for="flexSwitchCheckChecked">Permite publicar en OrquestasDeGalicia.es</label>
                                         <div class="col-sm-9">
                                             <div class="form-check form-switch">
@@ -304,14 +304,14 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="mb-3 row" th:if="${artistaDto.id!=null && !artistaDto.permiteOrquestasDeGalicia}">
+                                    <div class="mb-3 row" th:if="${artistaDto.id!=null && !artistaDto.permiteOrquestasDeGalicia && (artistaDto.solicitudOdgPendiente or !artistaDto.solicitudOdgAprobada)} ">
                                         <label class="col-form-label col-sm-3 text-sm-end pt-sm-0">Permite publicar en OrquestasDeGalicia.es</label>
                                         <div class="col-sm-9">
                                             <button type="button"
                                                     id="btnSolicitarActivacionOdg"
                                                     class="btn btn-outline-primary"
                                                     th:data-id-artista="${artistaDto.id}"
-                                                    th:if="${!(artistaDto.solicitudOdgPendiente and !artistaDto.solicitudOdgAprobada)}"
+                                                    th:if="${(!artistaDto.solicitudOdgPendiente and !artistaDto.solicitudOdgAprobada)}"
                                                     th:disabled="${artistaDto.id == null or artistaDto.solicitudOdgPendiente}">
                                                 <span th:text="${artistaDto.solicitudOdgPendiente} ? 'Solicitud enviada' : 'Solicitar activación'">Solicitar activación</span>
                                             </button>
@@ -330,7 +330,7 @@
                                             ></i>
                                         </div>
                                     </div>
-                                    <div class="mb-3 row" th:if="${artistaDto.id!=null && artistaDto.permiteOrquestasDeGalicia}">
+                                    <div class="mb-3 row" th:if="${artistaDto.id!=null && artistaDto.solicitudOdgAprobada}">
                                         <label class="col-form-label col-sm-3 text-sm-end pt-sm-0" for="sincronizarOdg">Sincronizar ocupaciones en OrquestasDeGalicia.es</label>
                                         <div class="col-sm-9">
                                             <div class="form-check form-switch">
