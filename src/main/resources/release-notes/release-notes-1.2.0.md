@@ -14,11 +14,14 @@ Ahora puedes sincronizar manualmente o incluso automáticamente.
 
 - Accede a cada Artista donde quieras activarlo y pulsa **Editar datos artista**
 - Solicita la activación para un artista pulsando el botón "Solicitar activación".
+- En cuanto nos den el OK desde OrquestasDeGalicia.es, te activaremos y recibirás una notificación interna para empezar a publicar.
  > **Nota:** Si ya estás registrado en OrquestasDeGalicia.es y no ves este botón, puedes pasar al siguiente paso.
 
 ![solicita-activacion.png](/img/release-notes/solicita-activacion.png)
 
-- En cuanto nos den el OK desde OrquestasDeGalicia.es, te activaremos y recibirás una notificación interna para empezar a publicar.
+- Activa o desactiva *Permite publicar en OrquestasDeGalicia.es*
+
+![permite-odg.png](/img/release-notes/permite-odg.png)
 
 ### Cómo publicar manualmente en OrquestasDeGalicia.es
 
