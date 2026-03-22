@@ -1,6 +1,7 @@
 {
   "permissions": {
     "allow": [
+      "Bash",
       "WebFetch(domain:festia.es)",
       "Read(//mnt/c/Users/Sir Nolimit/IdeaProjects/**)",
       "Bash(set -a)",
