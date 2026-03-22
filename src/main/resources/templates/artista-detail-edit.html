@@ -307,6 +307,10 @@
                                     <div class="mb-3 row" th:if="${artistaDto.id!=null && !artistaDto.permiteOrquestasDeGalicia && (artistaDto.solicitudOdgPendiente or !artistaDto.solicitudOdgAprobada)} ">
                                         <label class="col-form-label col-sm-3 text-sm-end pt-sm-0">Permite publicar en OrquestasDeGalicia.es</label>
                                         <div class="col-sm-9">
+                                            <div class="alert alert-info py-2 mb-2" role="alert" th:if="${!artistaDto.solicitudOdgPendiente and !artistaDto.solicitudOdgAprobada}">
+                                                <i class="fas fa-info-circle me-2"></i>
+                                                <small>Antes de solicitar asegúrate de que tienes un perfil y cuenta de administrador en OrquestasDeGalicia.es. Puedes crearla en <a href="https://www.orquestasdegalicia.es/registrar-formacion" target="_blank" rel="noopener noreferrer">https://www.orquestasdegalicia.es/registrar-formacion</a></small>
+                                            </div>
                                             <button type="button"
                                                     id="btnSolicitarActivacionOdg"
                                                     class="btn btn-outline-primary"
@@ -315,6 +319,7 @@
                                                     th:disabled="${artistaDto.id == null or artistaDto.solicitudOdgPendiente}">
                                                 <span th:text="${artistaDto.solicitudOdgPendiente} ? 'Solicitud enviada' : 'Solicitar activación'">Solicitar activación</span>
                                             </button>
+
                                             <button type="button"
                                                     id="btnActivarOdgAdmin"
                                                     class="btn btn-success"

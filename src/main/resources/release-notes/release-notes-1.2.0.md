@@ -6,12 +6,14 @@
 
 La web OrquestasDeGalicia.es recibe **más de 30000 visitas únicas diarias**, siendo referencia en el sector.
 
+Se ha consolidado como la plataforma de referencia absoluta para el sector de la verbena, actuando como el mayor escaparate digital y punto de encuentro entre agrupaciones, profesionales y el público. Su importancia estructural en la industria musical queda patente en el enorme volumen de actividad que alberga, habiendo registrado durante el ejercicio 2025 más de 17.800 actuaciones anunciadas, superando las 3.500 noticias difundidas, y dinamizando el mercado laboral del sector con cerca de 850 ofertas de empleo y el seguimiento de más de 1.100 altas y bajas de componentes.
+
 Como parte de la estrategia de **festia.es** para mejorar la **visibilidad y alcance de los artistas**, queremos darte la posibilidad de publicar fácilmente todas las fechas en la plataforma.
 
 Ahora puedes sincronizar manualmente o incluso automáticamente.
 
 ### Cómo activarlo
-
+- Primero debes disponer de un perfil y cuenta de administrador en OrquestasDeGalicia.es. Créala en https://www.orquestasdegalicia.es/registrar-formacion   
 - Accede a cada Artista donde quieras activarlo y pulsa **Editar datos artista**
 - Solicita la activación para un artista pulsando el botón "Solicitar activación".
 - En cuanto nos den el OK desde OrquestasDeGalicia.es, te activaremos y recibirás una notificación interna para empezar a publicar.
