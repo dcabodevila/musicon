@@ -78,7 +78,12 @@
       "Read(//c/Users/Sir Nolimit/.claude/**)",
       "Bash(find ~/.claude -name \"*.md\" -path \"*/skills/*\" -name \"SKILL.md\" -exec head -5 {})",
       "Bash(-print)",
-      "Bash(find . -name *.md -path *skill* ! -path */node_modules/*)"
-    ]
+      "Bash(find . -name *.md -path *skill* ! -path */node_modules/*)",
+      "Bash(find 'C:\\\\Users\\\\Sir Nolimit\\\\IdeaProjects\\\\musicon' -name eventos*.html -type f)",
+      "Bash(xargs -I {} taskkill //PID {} //F)",
+      "Bash(PGPASSWORD=* \"/c/Program Files/*)",
+      "Bash(claude doctor:*)"
+    ],
+    "defaultMode": "acceptEdits"
   }
 }

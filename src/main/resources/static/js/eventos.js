@@ -11,10 +11,6 @@ function initDatePickers() {
         return;
     }
 
-    const form = desdeInput.closest("form");
-    const maxMonths = 3;
-    const defaultMonthsFromDesde = 1;
-
     const fechaHastaPicker = flatpickr(hastaInput, {
         disableMobile: true,
         locale: "es",
@@ -23,11 +19,7 @@ function initDatePickers() {
         dateFormat: "Y-m-d",
         allowInput: false,
         defaultDate: hastaInput.value || null,
-        minDate: desdeInput.value || null,
-        maxDate: desdeInput.value ? addMonths(desdeInput.value, maxMonths) : null,
-        onChange: function (selectedDates) {
-            aplicarLimiteRango(fechaDesdePicker, fechaHastaPicker, maxMonths, true);
-        }
+        minDate: desdeInput.value || null
     });
 
     const fechaDesdePicker = flatpickr(desdeInput, {
@@ -41,29 +33,12 @@ function initDatePickers() {
         onChange: function (selectedDates) {
             if (!selectedDates || selectedDates.length === 0) {
                 fechaHastaPicker.set("minDate", null);
-                fechaHastaPicker.set("maxDate", null);
                 return;
             }
             const desdeDate = selectedDates[0];
-            const maxHasta = addMonths(desdeDate, maxMonths);
-            const defaultHasta = addMonths(desdeDate, defaultMonthsFromDesde);
             fechaHastaPicker.set("minDate", desdeDate);
-            fechaHastaPicker.set("maxDate", maxHasta);
-            fechaHastaPicker.setDate(defaultHasta, true, "Y-m-d");
-            aplicarLimiteRango(fechaDesdePicker, fechaHastaPicker, maxMonths, true);
         }
     });
-
-    aplicarLimiteRango(fechaDesdePicker, fechaHastaPicker, maxMonths, false);
-
-    if (form) {
-        form.addEventListener("submit", function (event) {
-            const corregido = aplicarLimiteRango(fechaDesdePicker, fechaHastaPicker, maxMonths, true);
-            if (corregido) {
-                event.preventDefault();
-            }
-        });
-    }
 }
 
 function initFiltrosChoices() {
@@ -88,6 +63,10 @@ function initFiltrosChoices() {
         searchEnabled: true,
         shouldSort: false
     });
+    const provinciaSeleccionada = provinciaEl.dataset.valorSeleccionado || "";
+    if (provinciaSeleccionada) {
+        provinciaChoice.setChoiceByValue(provinciaSeleccionada);
+    }
     if (artistaEl) {
         new Choices(artistaEl, {
             searchEnabled: true,
@@ -98,6 +77,10 @@ function initFiltrosChoices() {
         searchEnabled: true,
         shouldSort: false
     });
+    const municipioSeleccionado = municipioEl.dataset.valorSeleccionado || "";
+    if (municipioSeleccionado) {
+        municipioChoice.setChoiceByValue(municipioSeleccionado);
+    }
 
     function refrescarMunicipios() {
         const provinciaSeleccionada = provinciaChoice.getValue(true) || "";
@@ -136,57 +119,3 @@ function initFiltrosChoices() {
     refrescarMunicipios();
 }
 
-function aplicarLimiteRango(desdePicker, hastaPicker, maxMonths, notify) {
-    const desdeDate = getPickerDate(desdePicker);
-    const hastaDate = getPickerDate(hastaPicker);
-    if (!desdeDate || !hastaDate) {
-        return false;
-    }
-
-    const maxHasta = addMonths(desdeDate, maxMonths);
-    if (hastaDate <= maxHasta) {
-        return false;
-    }
-
-    hastaPicker.setDate(maxHasta, true, "Y-m-d");
-    if (notify) {
-        mostrarAvisoRangoMaximo(maxMonths);
-    }
-    return true;
-}
-
-function getPickerDate(picker) {
-    return picker.selectedDates && picker.selectedDates.length > 0 ? picker.selectedDates[0] : null;
-}
-
-function addMonths(date, months) {
-    const baseDate = date instanceof Date ? date : new Date(date);
-    const d = new Date(baseDate.getTime());
-    d.setMonth(d.getMonth() + months);
-    return d;
-}
-
-function mostrarAvisoRangoMaximo(maxMonths) {
-    const message = "El rango maximo permitido es de " + maxMonths + " meses.";
-    if (typeof notifUnica === "function") {
-        notifUnica("warning", message);
-        return;
-    }
-    if (typeof notif === "function") {
-        notif("warning", message);
-        return;
-    }
-    if (window.notyf && typeof window.notyf.open === "function") {
-        window.notyf.open({
-            type: "warning",
-            message: message,
-            duration: 5000,
-            ripple: true,
-            dismissible: false,
-            position: {
-                x: "center",
-                y: "top"
-            }
-        });
-    }
-}

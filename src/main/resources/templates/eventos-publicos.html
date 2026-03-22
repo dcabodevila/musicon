@@ -26,6 +26,7 @@
 
     <script th:if="${jsonLd != null}" type="application/ld+json" th:utext="${jsonLd}">
     </script>
+    <script th:if="${breadcrumbJsonLd != null}" type="application/ld+json" th:utext="${breadcrumbJsonLd}"></script>
 
     <th:block th:replace="~{fragments/main-template :: header-css}"></th:block>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
@@ -51,14 +52,41 @@
         <main class="content">
             <div class="container-fluid p-0">
 
+                <!-- Breadcrumb visual (solo en contextos provincia y municipio) -->
+                <nav th:if="${contextoPagina == 'provincia' or contextoPagina == 'municipio'}" aria-label="breadcrumb" class="px-3 pt-3">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a th:href="@{/eventos}">Eventos</a></li>
+
+                        <!-- Item provincia como enlace: solo en contexto municipio y si provincia no está vacía -->
+                        <li class="breadcrumb-item"
+                            th:if="${contextoPagina == 'municipio' and provincia != null and !#strings.isEmpty(provincia)}">
+                            <a th:href="@{/eventos/provincia/{p}(p=${provincia})}" th:text="${provincia}">Provincia</a>
+                        </li>
+
+                        <!-- Item activo provincia -->
+                        <li class="breadcrumb-item active" aria-current="page"
+                            th:if="${contextoPagina == 'provincia'}"
+                            th:text="${provincia}">Provincia</li>
+
+                        <!-- Item activo municipio -->
+                        <li class="breadcrumb-item active" aria-current="page"
+                            th:if="${contextoPagina == 'municipio'}"
+                            th:text="${municipio}">Municipio</li>
+                    </ol>
+                </nav>
+
                 <!-- Hero -->
                 <div class="eventos-hero animate__animated animate__fadeIn">
                     <h1 class="eventos-hero__title"
                         th:text="${nombreArtista != null
                             ? 'Próximas actuaciones de ' + nombreArtista
-                            : (provincia != null and !#strings.isEmpty(provincia)
-                                ? 'Próximas actuaciones en ' + provincia
-                                : 'Próximas actuaciones musicales en España')}">
+                            : (contextoPagina == 'municipio' and provincia != null and !#strings.isEmpty(provincia)
+                                ? 'Próximas actuaciones en ' + municipio + ' (' + provincia + ')'
+                                : (contextoPagina == 'municipio'
+                                    ? 'Próximas actuaciones en ' + municipio
+                                    : (contextoPagina == 'provincia'
+                                        ? 'Próximas actuaciones en ' + provincia
+                                        : 'Próximas actuaciones musicales en España')))}">
                         Próximas actuaciones musicales en España
                     </h1>
                     <p class="eventos-hero__sub">Orquestas y grupos · Actualizado diariamente</p>
@@ -89,7 +117,8 @@
                                 <div class="row g-2">
                                     <div class="col-12 col-md-4">
                                         <label class="form-label small text-muted mb-1" for="idProvincia">Provincia</label>
-                                        <select id="idProvincia" class="form-select form-select-sm" name="provincia">
+                                        <select id="idProvincia" class="form-select form-select-sm" name="provincia"
+                                                th:attr="data-valor-seleccionado=${provincia != null ? provincia : ''}">
                                             <option value="">Todas las provincias</option>
                                             <option th:each="prov : ${provincias}"
                                                     th:value="${prov}"
@@ -99,7 +128,8 @@
                                     </div>
                                     <div class="col-12 col-md-4">
                                         <label class="form-label small text-muted mb-1" for="idMunicipio">Municipio</label>
-                                        <select id="idMunicipio" class="form-select form-select-sm" name="municipio">
+                                        <select id="idMunicipio" class="form-select form-select-sm" name="municipio"
+                                                th:attr="data-valor-seleccionado=${municipio != null ? municipio : ''}">
                                             <option value="">Todos los municipios</option>
                                             <option th:each="mun : ${municipiosFiltro}"
                                                     th:value="${mun.nombre}"
@@ -142,65 +172,105 @@
                     </div>
                 </div>
 
-                <!-- Grid de eventos -->
+                <!-- Grid de eventos agrupados por día -->
                 <div th:if="${eventos != null and !eventos.isEmpty()}" class="px-3 pt-3 pb-0 animate__animated animate__fadeIn">
-                    <div class="row g-3">
-                        <div th:each="evento : ${eventos}" class="col-12 col-sm-6 col-lg-4 col-xl-3">
-                            <div class="event-card">
-                                <div class="event-card__img-wrap">
-                                    <img class="event-card__img"
-                                         th:if="${evento.logoArtista != null and !#strings.isEmpty(evento.logoArtista)}"
-                                         th:src="${#strings.replace(evento.logoArtista, '/upload/', '/upload/f_auto,q_auto,w_400/')}"
-                                         th:alt="${'Logo de ' + evento.nombreArtista}"
-                                         loading="lazy">
-                                    <img class="event-card__img"
-                                         th:if="${evento.logoArtista == null or #strings.isEmpty(evento.logoArtista)}"
-                                         th:src="@{/logo/logo_transparente.png}"
-                                         th:alt="${'Logo de ' + evento.nombreArtista}">
-                                    <div class="event-card__date">
-                                        <span class="event-card__date-day"
-                                              th:text="${#temporals.format(evento.fecha, 'dd')}">15</span>
-                                        <span class="event-card__date-month"
-                                              th:text="${#temporals.format(evento.fecha, 'MMM', new java.util.Locale('es', 'ES'))}">Jun</span>
+                    <div th:each="entry : ${eventosPorDia}" class="mb-4">
+                        <h2 class="h6 text-muted text-uppercase fw-semibold mb-2 border-bottom pb-1"
+                            th:text="${#temporals.format(entry.key, 'EEEE, d MMMM yyyy', new java.util.Locale('es', 'ES'))}">
+                            Lunes, 1 Enero 2025
+                        </h2>
+                        <div class="row g-3">
+                            <div th:each="evento : ${entry.value}" class="col-12 col-sm-6 col-lg-4 col-xl-3">
+                                <div class="event-card">
+                                    <div class="event-card__img-wrap">
+                                        <img class="event-card__img"
+                                             th:if="${evento.logoArtista != null and !#strings.isEmpty(evento.logoArtista)}"
+                                             th:src="${#strings.replace(evento.logoArtista, '/upload/', '/upload/f_auto,q_auto,w_400/')}"
+                                             th:alt="${'Logo de ' + evento.nombreArtista}"
+                                             loading="lazy">
+                                        <img class="event-card__img"
+                                             th:if="${evento.logoArtista == null or #strings.isEmpty(evento.logoArtista)}"
+                                             th:src="@{/logo/logo_transparente.png}"
+                                             th:alt="${'Logo de ' + evento.nombreArtista}">
+                                        <div class="event-card__date">
+                                            <span class="event-card__date-day"
+                                                  th:text="${#temporals.format(evento.fecha, 'dd')}">15</span>
+                                            <span class="event-card__date-month"
+                                                  th:text="${#temporals.format(evento.fecha, 'MMM', new java.util.Locale('es', 'ES'))}">Jun</span>
+                                        </div>
+                                        <div class="event-card__badges">
+                                            <span class="badge bg-success" th:if="${evento.matinal}">
+                                                <i class="fas fa-sun me-1"></i>Matinal
+                                            </span>
+                                            <span class="badge bg-warning text-dark" th:if="${evento.tarde}">
+                                                <i class="fas fa-cloud-sun me-1"></i>Tarde
+                                            </span>
+                                            <span class="badge bg-primary" th:if="${evento.noche}">
+                                                <i class="fas fa-moon me-1"></i>Noche
+                                            </span>
+                                        </div>
                                     </div>
-                                    <div class="event-card__badges">
-                                        <span class="badge bg-success" th:if="${evento.matinal}">
-                                            <i class="fas fa-sun me-1"></i>Matinal
-                                        </span>
-                                        <span class="badge bg-warning text-dark" th:if="${evento.tarde}">
-                                            <i class="fas fa-cloud-sun me-1"></i>Tarde
-                                        </span>
-                                        <span class="badge bg-primary" th:if="${evento.noche}">
-                                            <i class="fas fa-moon me-1"></i>Noche
-                                        </span>
+                                    <div class="event-card__body">
+                                        <p class="event-card__artist" th:text="${evento.nombreArtista}">Artista</p>
+                                        <div class="event-card__meta" th:if="${evento.horaActuacion != null}">
+                                            <i class="fas fa-clock"></i>
+                                            <span th:text="${#temporals.format(evento.horaActuacion, 'HH:mm')} + ' h'">Hora</span>
+                                        </div>
+                                        <div class="event-card__meta" th:if="${evento.horaActuacion == null}">
+                                            <i class="fas fa-clock"></i>
+                                            <span class="fst-italic">Horario por confirmar</span>
+                                        </div>
+                                        <div class="event-card__meta" th:if="${evento.lugarParaMapa != null}">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                            <span th:text="${evento.lugarParaMapa}">Lugar</span>
+                                        </div>
+                                        <div class="event-card__meta">
+                                            <i class="fas fa-city"></i>
+                                            <span th:text="${evento.municipio + ', ' + evento.provincia}">Ubicacion</span>
+                                        </div>
                                     </div>
+                                    <a th:href="@{/eventos/evento/{id}-{slug}(id=${evento.id},slug=${evento.slug})}"
+                                       class="event-card__cta stretched-link">
+                                        Ver detalles <i class="fas fa-arrow-right ms-1"></i>
+                                    </a>
                                 </div>
-                                <div class="event-card__body">
-                                    <p class="event-card__artist" th:text="${evento.nombreArtista}">Artista</p>
-                                    <div class="event-card__meta" th:if="${evento.horaActuacion != null}">
-                                        <i class="fas fa-clock"></i>
-                                        <span th:text="${#temporals.format(evento.horaActuacion, 'HH:mm')} + ' h'">Hora</span>
-                                    </div>
-                                    <div class="event-card__meta" th:if="${evento.horaActuacion == null}">
-                                        <i class="fas fa-clock"></i>
-                                        <span class="fst-italic">Horario por confirmar</span>
-                                    </div>
-                                    <div class="event-card__meta" th:if="${evento.lugarParaMapa != null}">
-                                        <i class="fas fa-map-marker-alt"></i>
-                                        <span th:text="${evento.lugarParaMapa}">Lugar</span>
-                                    </div>
-                                    <div class="event-card__meta">
-                                        <i class="fas fa-city"></i>
-                                        <span th:text="${evento.municipio + ', ' + evento.provincia}">Ubicacion</span>
-                                    </div>
-                                </div>
-                                <a th:href="@{/eventos/evento/{id}-{slug}(id=${evento.id},slug=${evento.slug})}"
-                                   class="event-card__cta stretched-link">
-                                    Ver detalles <i class="fas fa-arrow-right ms-1"></i>
-                                </a>
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <!-- Paginación -->
+                <div th:if="${totalPaginas != null and totalPaginas > 1}" class="d-flex justify-content-center align-items-center gap-2 mt-4 mb-3">
+                    <!-- Botón Anterior -->
+                    <a th:if="${hayPaginaAnterior}"
+                       th:href="${urlBase + '?page=' + paginaAnterior
+                                 + (provincia != null and !#strings.isEmpty(provincia) ? '&provincia=' + provincia : '')
+                                 + (municipio != null and !#strings.isEmpty(municipio) ? '&municipio=' + municipio : '')
+                                 + (idArtistaSeleccionado != null ? '&idArtista=' + idArtistaSeleccionado : '')
+                                 + (fechaDesde != null and !#strings.isEmpty(fechaDesde) ? '&desde=' + fechaDesde : '')
+                                 + (fechaHasta != null and !#strings.isEmpty(fechaHasta) ? '&hasta=' + fechaHasta : '')}"
+                       class="btn btn-outline-secondary btn-sm">
+                        &laquo; Anterior
+                    </a>
+                    <span th:unless="${hayPaginaAnterior}" class="btn btn-outline-secondary btn-sm disabled">&laquo; Anterior</span>
+
+                    <!-- Indicador de página -->
+                    <span class="text-muted small">
+                        Página <strong th:text="${paginaActual}">1</strong> de <strong th:text="${totalPaginas}">1</strong>
+                    </span>
+
+                    <!-- Botón Siguiente -->
+                    <a th:if="${hayPaginaSiguiente}"
+                       th:href="${urlBase + '?page=' + paginaSiguiente
+                                 + (provincia != null and !#strings.isEmpty(provincia) ? '&provincia=' + provincia : '')
+                                 + (municipio != null and !#strings.isEmpty(municipio) ? '&municipio=' + municipio : '')
+                                 + (idArtistaSeleccionado != null ? '&idArtista=' + idArtistaSeleccionado : '')
+                                 + (fechaDesde != null and !#strings.isEmpty(fechaDesde) ? '&desde=' + fechaDesde : '')
+                                 + (fechaHasta != null and !#strings.isEmpty(fechaHasta) ? '&hasta=' + fechaHasta : '')}"
+                       class="btn btn-outline-secondary btn-sm">
+                        Siguiente &raquo;
+                    </a>
+                    <span th:unless="${hayPaginaSiguiente}" class="btn btn-outline-secondary btn-sm disabled">Siguiente &raquo;</span>
                 </div>
 
                 <!-- Estado vacío -->
@@ -210,11 +280,17 @@
                             <div class="mb-3" style="font-size: 3rem; opacity: 0.25;">
                                 <i class="fas fa-calendar-times"></i>
                             </div>
-                            <h3 class="h5 mb-2">No hay eventos programados</h3>
-                            <p class="text-muted small mb-3" th:if="${nombreArtista != null}">
+                            <h2 class="h5 mb-2">No hay eventos programados</h2>
+                            <p class="text-muted small mb-3" th:if="${contextoPagina == 'municipio'}">
+                                No hay actuaciones disponibles en <span th:text="${municipio}">este municipio</span> en este momento.
+                            </p>
+                            <p class="text-muted small mb-3" th:if="${contextoPagina == 'provincia'}">
+                                No hay actuaciones disponibles en <span th:text="${provincia}">esta provincia</span> en este momento.
+                            </p>
+                            <p class="text-muted small mb-3" th:if="${nombreArtista != null and contextoPagina != 'municipio' and contextoPagina != 'provincia'}">
                                 <span th:text="${nombreArtista}">El artista</span> no tiene actuaciones programadas en este momento.
                             </p>
-                            <p class="text-muted small mb-3" th:unless="${nombreArtista != null}">
+                            <p class="text-muted small mb-3" th:if="${contextoPagina != 'municipio' and contextoPagina != 'provincia' and nombreArtista == null}">
                                 No hay eventos disponibles con los filtros seleccionados.
                             </p>
                             <a th:href="@{/eventos}" class="btn btn-outline-primary btn-sm">Ver todos los eventos</a>

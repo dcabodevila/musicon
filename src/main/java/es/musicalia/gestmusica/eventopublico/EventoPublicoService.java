@@ -1,6 +1,8 @@
 package es.musicalia.gestmusica.eventopublico;
 
 import es.musicalia.gestmusica.ocupacion.Ocupacion;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -32,6 +34,15 @@ public interface EventoPublicoService {
     List<EventoPublicoDto> obtenerEventosPublicosPorProvincia(String provincia, LocalDate fechaDesde, LocalDate fechaHasta);
 
     /**
+     * Obtiene eventos públicos por municipio (coincidencia parcial, case-insensitive)
+     * @param municipio Nombre del municipio
+     * @param fechaDesde Fecha desde (opcional)
+     * @param fechaHasta Fecha hasta (opcional)
+     * @return Lista de eventos públicos
+     */
+    List<EventoPublicoDto> obtenerEventosPublicosPorMunicipio(String municipio, LocalDate fechaDesde, LocalDate fechaHasta);
+
+    /**
      * Obtiene eventos publicos con filtros combinables.
      * @param provincia Nombre de provincia (opcional)
      * @param municipio Nombre de municipio (opcional)
@@ -46,6 +57,24 @@ public interface EventoPublicoService {
         Long idArtista,
         LocalDate fechaDesde,
         LocalDate fechaHasta);
+
+    /**
+     * Obtiene eventos públicos con filtros combinables y paginación.
+     * @param provincia Nombre de provincia (opcional)
+     * @param municipio Nombre de municipio (opcional)
+     * @param idArtista ID de artista (opcional)
+     * @param fechaDesde Fecha desde (opcional)
+     * @param fechaHasta Fecha hasta (opcional)
+     * @param pageable Configuración de paginación y ordenación
+     * @return Página de eventos públicos filtrados
+     */
+    Page<EventoPublicoDto> obtenerEventosPublicosFiltradosPaginados(
+        String provincia,
+        String municipio,
+        Long idArtista,
+        LocalDate fechaDesde,
+        LocalDate fechaHasta,
+        Pageable pageable);
 
     /**
      * Obtiene todos los eventos públicos para el sitemap

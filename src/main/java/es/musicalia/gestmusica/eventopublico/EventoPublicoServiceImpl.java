@@ -5,6 +5,8 @@ import es.musicalia.gestmusica.ocupacion.OcupacionEstadoEnum;
 import es.musicalia.gestmusica.ocupacion.OcupacionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,6 +52,12 @@ public class EventoPublicoServiceImpl implements EventoPublicoService {
     }
 
     @Override
+    public List<EventoPublicoDto> obtenerEventosPublicosPorMunicipio(String municipio, LocalDate fechaDesde, LocalDate fechaHasta) {
+        log.info("Obteniendo eventos publicos para municipio: {}", municipio);
+        return obtenerEventosPublicosFiltrados(null, municipio, null, fechaDesde, fechaHasta);
+    }
+
+    @Override
     public List<EventoPublicoDto> obtenerEventosPublicosFiltrados(
         String provincia,
         String municipio,
@@ -61,6 +69,20 @@ public class EventoPublicoServiceImpl implements EventoPublicoService {
         return ocupacionRepository.findAll(spec).stream()
             .map(this::convertirAEventoPublico)
             .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<EventoPublicoDto> obtenerEventosPublicosFiltradosPaginados(
+        String provincia,
+        String municipio,
+        Long idArtista,
+        LocalDate fechaDesde,
+        LocalDate fechaHasta,
+        Pageable pageable) {
+
+        Specification<Ocupacion> spec = buildFiltrosPublicosSpec(provincia, municipio, idArtista, fechaDesde, fechaHasta);
+        return ocupacionRepository.findAll(spec, pageable)
+            .map(this::convertirAEventoPublico);
     }
 
     @Override
@@ -104,6 +126,7 @@ public class EventoPublicoServiceImpl implements EventoPublicoService {
             .municipio(ocupacion.getMunicipio() != null ? ocupacion.getMunicipio().getNombre() : "")
             .provincia(ocupacion.getProvincia() != null ? ocupacion.getProvincia().getNombre() : "")
             .matinal(esMatinal)
+            .tarde(false)
             .noche(esNoche)
             .informacionAdicional(informacion)
             .build();
@@ -151,13 +174,13 @@ public class EventoPublicoServiceImpl implements EventoPublicoService {
         if (provincia != null && !provincia.isBlank()) {
             String provinciaLower = provincia.toLowerCase();
             spec = spec.and((root, query, cb) ->
-                cb.like(cb.lower(root.get("provincia").get("nombre")), "%" + provinciaLower + "%"));
+                cb.equal(cb.lower(root.get("provincia").get("nombre")), provinciaLower));
         }
 
         if (municipio != null && !municipio.isBlank()) {
             String municipioLower = municipio.toLowerCase();
             spec = spec.and((root, query, cb) ->
-                cb.like(cb.lower(root.get("municipio").get("nombre")), "%" + municipioLower + "%"));
+                cb.equal(cb.lower(root.get("municipio").get("nombre")), municipioLower));
         }
 
         if (idArtista != null) {
