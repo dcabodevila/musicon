@@ -13,7 +13,9 @@ Como parte de la estrategia de **festia.es** para mejorar la **visibilidad y alc
 Ahora puedes sincronizar manualmente o incluso automáticamente.
 
 ### Cómo activarlo
-- Primero debes disponer de un perfil y cuenta de administrador en OrquestasDeGalicia.es. Créala en https://www.orquestasdegalicia.es/registrar-formacion   
+
+- Primero debes disponer de un perfil y cuenta de administrador en OrquestasDeGalicia.es. Créala
+  en [https://www.orquestasdegalicia.es/registrar-formacion](https://www.orquestasdegalicia.es/registrar-formacion)
 - Accede a cada Artista donde quieras activarlo y pulsa **Editar datos artista**
 - Solicita la activación para un artista pulsando el botón "Solicitar activación".
 - En cuanto nos den el OK desde OrquestasDeGalicia.es, te activaremos y recibirás una notificación interna para empezar a publicar.

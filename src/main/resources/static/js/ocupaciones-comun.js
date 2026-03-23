@@ -22,11 +22,13 @@ $(document).ready(function(){
 
         $('#provincia-ocupacion').on('change', function() {
             cargarMunicipios('#municipio-ocupacion', $(this).val(), null);
+            evaluarWarningOdgLocalizacion();
         });
 
         $('#municipio-ocupacion').on('change', function() {
             cargarLocalidades('#localidad-ocupacion', $(this).val(), null);
             $('#localidad-ocupacion').val('');
+            evaluarWarningOdgLocalizacion();
         });
 
         $('#localidad-ocupacion').on('change input', function() {
@@ -239,6 +241,7 @@ function obtenerOcupacionDto(idOcupacion) {
                     .done(function() {
                         cargarMunicipios('#municipio-ocupacion', ocupacionDto.idProvincia, ocupacionDto.idMunicipio).done(function() {
                             cargarLocalidades('#localidad-ocupacion', ocupacionDto.idMunicipio, ocupacionDto.localidad || null);
+                            evaluarWarningOdgLocalizacion();
                         });
 
                     });
@@ -424,6 +427,28 @@ function enviarPeticionActualizarEnOrquestasDeGalicia() {
         }
     });
 
+}
+
+function evaluarWarningOdgLocalizacion() {
+    const $warning = $('#warning-odg-localizacion');
+    if ($warning.length === 0) {
+        return;
+    }
+
+    const ID_PROVINCIA_PROVISIONAL = '53';
+    const ID_MUNICIPIO_PROVISIONAL = '8117';
+
+    const idProvincia = String($('#provincia-ocupacion').val() || '');
+    const idMunicipio = String($('#municipio-ocupacion').val() || '');
+
+    const provinciaInvalida = idProvincia === '' || idProvincia === ID_PROVINCIA_PROVISIONAL;
+    const municipioInvalido = idMunicipio === '' || idMunicipio === ID_MUNICIPIO_PROVISIONAL;
+
+    if (provinciaInvalida || municipioInvalido) {
+        $warning.removeClass('d-none');
+    } else {
+        $warning.addClass('d-none');
+    }
 }
 
 function eliminarDeOrquestasDeGalicia() {

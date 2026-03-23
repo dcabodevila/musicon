@@ -81,6 +81,7 @@
           </select>
         </div>
       </div>
+
       <div class="mb-3 row">
         <label for="localidad-ocupacion" class="col-form-label col-sm-3 text-sm-end">Localidad</label>
         <div class="col-sm-9">
@@ -148,6 +149,10 @@
 <!--                <i class="fas fa-crown text-warning ms-2" title="Funcionalidad Premium"> Premium</i>-->
               </div>
               <div class="card-body">
+                <div th:if="${isArtistaPermiteOdg == true}" id="warning-odg-localizacion" class="alert alert-warning d-none" role="alert">
+                  <i class="fas fa-exclamation-triangle me-2"></i>
+                  Esta ocupación no se sincronizará con OrquestasDeGalicia porque no tiene provincia o municipio especificados.
+                </div>
                 <div class="mb-3 row">
                   <label class="col-form-label col-sm-3 text-sm-end">Hora de actuación (opcional)</label>
                   <div class="col-sm-9">
