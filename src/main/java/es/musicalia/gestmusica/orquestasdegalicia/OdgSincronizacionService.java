@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -45,6 +46,10 @@ public class OdgSincronizacionService {
     private void sincronizarAltas(String idEjecucion, LocalDateTime fechaEjecucion, LocalDateTime fechaDesde, LocalDateTime fechaHasta, Long idEstadoOcupado) {
         final List<Ocupacion> ocupaciones = ocupacionRepository.findPendientesPublicarOdg(fechaDesde, fechaHasta, idEstadoOcupado);
         for (Ocupacion ocupacion : ocupaciones) {
+            if (debeSkipear(ocupacion)) {
+                registrarSkip(idEjecucion, fechaEjecucion, ocupacion, "CREAR");
+                continue;
+            }
             ejecutarOperacionConTracking(idEjecucion, fechaEjecucion, ocupacion, "CREAR",
                     () -> ocupacionService.publicarOcupacionOrquestasDeGalicia(ocupacion.getId()));
         }
@@ -53,6 +58,10 @@ public class OdgSincronizacionService {
     private void sincronizarModificaciones(String idEjecucion, LocalDateTime fechaEjecucion, LocalDateTime fechaDesde, LocalDateTime fechaHasta, Long idEstadoOcupado) {
         final List<Ocupacion> ocupaciones = ocupacionRepository.findPendientesActualizarOdg(fechaDesde, fechaHasta, idEstadoOcupado);
         for (Ocupacion ocupacion : ocupaciones) {
+            if (debeSkipear(ocupacion)) {
+                registrarSkip(idEjecucion, fechaEjecucion, ocupacion, "ACTUALIZAR");
+                continue;
+            }
             ejecutarOperacionConTracking(idEjecucion, fechaEjecucion, ocupacion, "ACTUALIZAR",
                     () -> ocupacionService.actualizarOcupacionOrquestasDeGalicia(ocupacion.getId()));
         }
@@ -61,9 +70,37 @@ public class OdgSincronizacionService {
     private void sincronizarBorrados(String idEjecucion, LocalDateTime fechaEjecucion, LocalDateTime fechaDesde, LocalDateTime fechaHasta, Long idEstadoAnulado) {
         final List<Ocupacion> ocupaciones = ocupacionRepository.findPendientesEliminarOdg(fechaDesde, fechaHasta, idEstadoAnulado);
         for (Ocupacion ocupacion : ocupaciones) {
+            if (debeSkipear(ocupacion)) {
+                registrarSkip(idEjecucion, fechaEjecucion, ocupacion, "ELIMINAR");
+                continue;
+            }
             ejecutarOperacionConTracking(idEjecucion, fechaEjecucion, ocupacion, "ELIMINAR",
                     () -> ocupacionService.eliminarOcupacionOrquestasDeGalicia(ocupacion.getId()));
         }
+    }
+
+    private boolean debeSkipear(Ocupacion ocupacion) {
+        Optional<LocalDateTime> ultimoErrorValidacion =
+                trackingRepository.findUltimoErrorValidacion(ocupacion.getId());
+        if (ultimoErrorValidacion.isEmpty()) return false;
+        LocalDateTime fechaModificacion = ocupacion.getFechaModificacion();
+        return fechaModificacion == null || !fechaModificacion.isAfter(ultimoErrorValidacion.get());
+    }
+
+    private void registrarSkip(String idEjecucion, LocalDateTime fechaEjecucion, Ocupacion ocupacion, String accion) {
+        log.info("Saltando ocupacion {} (accion={}) por error de validacion previo sin cambios en los datos",
+                ocupacion.getId(), accion);
+        trackingRepository.save(OdgSincronizacionTracking.builder()
+                .idEjecucion(idEjecucion)
+                .fechaEjecucion(fechaEjecucion)
+                .ocupacionId(ocupacion.getId())
+                .artistaId(ocupacion.getArtista().getId())
+                .fechaEvento(ocupacion.getFecha())
+                .accion(accion)
+                .resultado("SKIPPED")
+                .messageType("info")
+                .mensaje("Omitido por error de validación previo. Actualiza la ocupación para reintentar.")
+                .build());
     }
 
     private void ejecutarOperacionConTracking(String idEjecucion, LocalDateTime fechaEjecucion, Ocupacion ocupacion, String accion, OperacionOdg operacion) {
