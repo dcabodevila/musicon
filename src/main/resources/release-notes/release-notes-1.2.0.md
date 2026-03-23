@@ -28,7 +28,7 @@ Ahora puedes sincronizar manualmente o incluso automáticamente.
 ### Cómo publicar manualmente en OrquestasDeGalicia.es
 
 - Una vez activado el artista por los administradores de **festia.es**, ve a cualquiera de las ocupaciones de un artista.
-- Asegúrate de que está especificado el lugar del evento, es necesario indicar **municipio** y **provincina** (No provisonal).
+- Asegúrate de que está especificado el lugar del evento, es necesario indicar **municipio** y **provincia** (No provisional).
 - Puedes completar la información sobre la actuación en el campo **Descripción para Orquestas de Galicia.es**
 
 

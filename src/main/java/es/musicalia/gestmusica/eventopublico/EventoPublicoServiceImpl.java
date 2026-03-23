@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,7 +67,7 @@ public class EventoPublicoServiceImpl implements EventoPublicoService {
         LocalDate fechaHasta) {
 
         Specification<Ocupacion> spec = buildFiltrosPublicosSpec(provincia, municipio, idArtista, fechaDesde, fechaHasta);
-        return ocupacionRepository.findAll(spec).stream()
+        return ocupacionRepository.findAll(spec, Sort.by(Sort.Direction.ASC, "fecha", "artista.nombre")).stream()
             .map(this::convertirAEventoPublico)
             .collect(Collectors.toList());
     }
@@ -100,7 +101,7 @@ public class EventoPublicoServiceImpl implements EventoPublicoService {
         spec = spec.and((root, query, cb) -> cb.notLike(cb.lower(root.get("provincia").get("nombre")), "%provisional%"));
         spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("fecha"), LocalDateTime.now()));
 
-        return ocupacionRepository.findAll(spec).stream()
+        return ocupacionRepository.findAll(spec, Sort.by(Sort.Direction.ASC, "fecha", "artista.nombre")).stream()
             .map(this::convertirAEventoPublico)
             .collect(Collectors.toList());
     }

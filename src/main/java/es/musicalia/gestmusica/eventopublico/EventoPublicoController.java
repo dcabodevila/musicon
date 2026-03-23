@@ -339,7 +339,7 @@ public class EventoPublicoController {
         }
 
         int pageIndex = Math.max(0, page - 1);
-        Pageable pageable = PageRequest.of(pageIndex, 10, Sort.by("fecha").ascending());
+        Pageable pageable = PageRequest.of(pageIndex, 10, Sort.by("fecha").ascending().and(Sort.by("artista.nombre").ascending()));
 
         List<EventoPublicoDto> eventosCatalogo = eventoPublicoService.obtenerEventosPublicosFiltrados(
             null, null, null, LocalDate.now(), null);
@@ -426,7 +426,7 @@ public class EventoPublicoController {
 
         LocalDate fechaDesde = LocalDate.now();
         int pageIndex = Math.max(0, page - 1);
-        Pageable pageable = PageRequest.of(pageIndex, 10, Sort.by("fecha").ascending());
+        Pageable pageable = PageRequest.of(pageIndex, 10, Sort.by("fecha").ascending().and(Sort.by("artista.nombre").ascending()));
 
         Page<EventoPublicoDto> paginaEventos = eventoPublicoService.obtenerEventosPublicosFiltradosPaginados(
             provinciaTrim, null, null, fechaDesde, null, pageable);
@@ -504,7 +504,7 @@ public class EventoPublicoController {
 
         LocalDate fechaDesde = LocalDate.now();
         int pageIndex = Math.max(0, page - 1);
-        Pageable pageable = PageRequest.of(pageIndex, 10, Sort.by("fecha").ascending());
+        Pageable pageable = PageRequest.of(pageIndex, 10, Sort.by("fecha").ascending().and(Sort.by("artista.nombre").ascending()));
 
         Page<EventoPublicoDto> paginaEventos = eventoPublicoService.obtenerEventosPublicosFiltradosPaginados(
             null, municipioTrim, null, fechaDesde, null, pageable);
