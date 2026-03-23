@@ -27,4 +27,10 @@ COPY --from=build /app/target/gestmusica.war /app/gestmusica.war
 EXPOSE 8080
 
 # Comando para ejecutar la aplicación con la zona horaria configurada
-CMD ["java", "-jar", "/app/gestmusica.war"]
+CMD ["java", \
+  "-XX:+UseContainerSupport", \
+  "-XX:MaxRAMPercentage=75.0", \
+  "-XX:InitialRAMPercentage=50.0", \
+  "-XX:+UseG1GC", \
+  "-XX:+ExitOnOutOfMemoryError", \
+  "-jar", "/app/gestmusica.war"]
