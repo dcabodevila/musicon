@@ -12,6 +12,6 @@ import java.util.Optional;
 public interface OdgSincronizacionTrackingRepository extends JpaRepository<OdgSincronizacionTracking, Long> {
 
     @Query("SELECT MAX(t.fechaEjecucion) FROM OdgSincronizacionTracking t " +
-           "WHERE t.ocupacionId = :ocupacionId AND t.resultado = 'ERROR' AND t.messageType = 'danger'")
+           "WHERE t.ocupacionId = :ocupacionId AND t.resultado = 'ERROR' AND t.messageType IN ('danger', 'error')")
     Optional<LocalDateTime> findUltimoErrorValidacion(@Param("ocupacionId") Long ocupacionId);
 }
