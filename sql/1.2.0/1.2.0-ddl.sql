@@ -47,5 +47,6 @@ CREATE TABLE IF NOT EXISTS gestmusica.email_reactivacion_log (
     template    VARCHAR(100)
     );
 
+
 CREATE INDEX IF NOT EXISTS idx_reactivacion_usuario ON gestmusica.email_reactivacion_log(usuario_id);
 CREATE INDEX IF NOT EXISTS idx_reactivacion_fecha   ON gestmusica.email_reactivacion_log(fecha_envio);
