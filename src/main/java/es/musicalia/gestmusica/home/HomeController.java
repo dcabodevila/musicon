@@ -36,7 +36,7 @@ public class HomeController {
         final boolean isUsuarioValidado = user.getUsuario().isValidado();
         model.addAttribute("isUsuarioValidado", isUsuarioValidado);
         if (!isUsuarioValidado){
-            model.addAttribute("message", "Tu cuenta de usuario está siendo validado por los administradores, mientras tanto, puedes echar un vistazo a las características de festia.");
+            model.addAttribute("message", "Tu cuenta de usuario está siendo validada por los administradores, mientras tanto, puedes echar un vistazo a las características de festia.");
             model.addAttribute("alertClass", "success");
 
         }

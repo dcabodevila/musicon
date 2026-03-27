@@ -23,6 +23,10 @@
     </div>
     <div class="footer">
         <p>Este es un mensaje automático de <strong>festia</strong></p>
+        <p th:if="${urlBaja != null}">
+            Si prefieres dejar de recibir estos emails:
+            <a th:href="${urlBaja}">darte de baja</a>
+        </p>
     </div>
 </div>
 </body>

@@ -53,3 +53,4 @@ build/
 /.playwright-mcp
 /doc
 /product
+/nul

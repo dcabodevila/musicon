@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Baja de emails — festia.es</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 40px 20px; background-color: #f5f5f5; text-align: center; }
+        .card { max-width: 480px; margin: 0 auto; background-color: white; border-radius: 10px; padding: 48px 32px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .card img { max-width: 140px; margin-bottom: 28px; }
+        .card h1 { font-size: 22px; color: #333; margin: 0 0 16px; }
+        .card p { font-size: 15px; color: #666; line-height: 1.6; margin: 0 0 24px; }
+        .card a { color: #007bff; text-decoration: none; font-size: 14px; }
+        .icon { font-size: 48px; margin-bottom: 16px; }
+        .error { color: #dc3545; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <img src="/logo/logo_transparente.png" alt="festia.es" />
+
+    <div th:if="${estado == 'CONFIRMAR'}">
+        <h1>Confirmar baja</h1>
+        <p>
+            ¿Seguro que quieres dejar de recibir emails de reactivación de festia.es?
+        </p>
+        <form th:action="@{/baja/email/{token}(token=${token})}" method="post" style="margin: 0 0 24px;">
+            <button type="submit" style="background-color:#007bff;color:#fff;border:none;border-radius:6px;padding:12px 24px;font-size:15px;cursor:pointer;">
+                Confirmar baja
+            </button>
+        </form>
+        <a href="https://festia.es">Cancelar y volver a festia.es</a>
+    </div>
+
+    <div th:if="${estado == 'RESULTADO' and exito}">
+        <div class="icon">&#10003;</div>
+        <h1>Baja registrada</h1>
+        <p>
+            Tu solicitud ha sido procesada correctamente.
+            No volverás a recibir emails de reactivación de festia.es.
+        </p>
+        <p>Si en algún momento quieres volver a recibirlos, puedes ajustarlo desde tu perfil.</p>
+        <a href="https://festia.es">Volver a festia.es</a>
+    </div>
+
+    <div th:if="${estado == 'RESULTADO' and !exito}">
+        <div class="icon error">&#10007;</div>
+        <h1>Enlace no válido</h1>
+        <p>
+            El enlace de baja no es válido o ya fue utilizado.
+            Si crees que esto es un error, contacta con
+            <a href="mailto:info@festia.es">info@festia.es</a>.
+        </p>
+        <a href="https://festia.es">Volver a festia.es</a>
+    </div>
+</div>
+</body>
+</html>

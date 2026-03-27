@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -46,4 +47,10 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 	List<Usuario> findUsuariosByRolGeneralCodigo(String codigo);
 
 	List<Usuario> findByActivoTrue();
+
+	@Query("select u from Usuario u where u.emailBajaToken = ?1")
+	Optional<Usuario> findByEmailBajaToken(String token);
+
+	@Query("SELECT COUNT(u) FROM Usuario u WHERE u.rolGeneral.codigo IN :codigos")
+	long countByRolGeneralCodigoIn(@Param("codigos") List<String> codigos);
 }

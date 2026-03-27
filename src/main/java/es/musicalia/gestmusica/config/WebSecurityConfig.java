@@ -64,9 +64,9 @@ public class WebSecurityConfig {
     @Order(1)
     public SecurityFilterChain eventosPublicChain(HttpSecurity http) throws Exception {
         http
-            .securityMatcher("/eventos/**", "/robots.txt")
+            .securityMatcher("/eventos/**", "/baja/**", "/robots.txt")
             .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/eventos/**")
+                .ignoringRequestMatchers("/eventos/**", "/baja/**")
             )
             .headers(headers -> headers
                 .contentSecurityPolicy(csp -> csp.policyDirectives(

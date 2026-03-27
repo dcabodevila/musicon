@@ -1,6 +1,7 @@
 package es.musicalia.gestmusica.usuario;
 
 import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 import java.util.Set;
 
 import es.musicalia.gestmusica.acceso.Acceso;
@@ -47,7 +48,7 @@ public class Usuario {
 	@Column(name = "ACTIVATE_KEY")
 	private String activateKey;
 	@Column(name = "FECHA_ULTIMO_ACCESO")
-	private Timestamp fechaUltimoAcceso;
+	private OffsetDateTime fechaUltimoAcceso;
 	@Column(name = "FECHA_REGISTRO")
 	private Timestamp fechaRegistro;
 	@Column(name = "ACTIVO")
@@ -76,6 +77,15 @@ public class Usuario {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "tipo_usuario")
 	private TipoUsuarioEnum tipoUsuario;
+
+	@Column(name = "email_baja")
+	private boolean emailBaja;
+
+	@Column(name = "email_baja_token", length = 64)
+	private String emailBajaToken;
+
+	@Column(name = "email_baja_fecha")
+	private java.time.OffsetDateTime emailBajaFecha;
 
 
 	public Usuario(String nombre, String password) {

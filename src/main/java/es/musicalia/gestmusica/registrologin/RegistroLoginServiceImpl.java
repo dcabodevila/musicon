@@ -9,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -37,7 +39,7 @@ public class RegistroLoginServiceImpl implements RegistroLoginService {
 				Timestamp.valueOf(LocalDateTime.now())
 		);
 		
-		usuario.setFechaUltimoAcceso(registro.getFechaLogin());
+		usuario.setFechaUltimoAcceso(registro.getFechaLogin().toInstant().atOffset(ZoneOffset.UTC));
 		usuarioRepository.save(usuario);
 		
 		return registroLoginRepository.save(registro);

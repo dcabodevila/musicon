@@ -1,6 +1,9 @@
 package es.musicalia.gestmusica.mail;
 
 import es.musicalia.gestmusica.usuario.EnvioEmailException;
+import es.musicalia.gestmusica.usuario.Usuario;
+import es.musicalia.gestmusica.usuario.UsuarioRepository;
+import es.musicalia.gestmusica.reactivacion.ReactivacionTokenService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +25,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -32,6 +36,8 @@ public class EmailService {
     private final JavaMailSender mailSender;
     private final SpringTemplateEngine templateEngine;
     private final MailgunEmailService mailgunEmailService;
+    private final UsuarioRepository usuarioRepository;
+    private final ReactivacionTokenService reactivacionTokenService;
 
     @Value("${spring.mail.username}")
     private String fromEmail;
@@ -43,6 +49,8 @@ public class EmailService {
     private int maxIntentos;
     @Value("${app.mail.enabled:true}")
     private boolean isMailEnabled;
+    @Value("${app.base-url:https://festia.es}")
+    private String baseUrl;
 
 
     public void enviarMensajePorEmail(String email, EmailTemplateEnum tipo) throws EnvioEmailException {
@@ -54,7 +62,7 @@ public class EmailService {
         EmailDto emailDto = EmailDto.builder()
                 .to(email)
                 .subject(tipo.getAsunto())
-                .content(buildContenidoEmailSimple(tipo))
+                .content(buildContenidoEmailSimple(email, tipo))
                 .plainContent(construirContenidoEmailSimplePlain(tipo))
                 .isHtml(true)
                 .build();
@@ -75,7 +83,7 @@ public class EmailService {
             EmailDto emailDto = EmailDto.builder()
                     .to(email)
                     .subject(tipo.getAsunto())
-                    .content(buildContenidoEmailCodigoAuth(codigo, tipo))
+                    .content(buildContenidoEmailCodigoAuth(email, codigo, tipo))
                     .plainContent(construirContenidoEmailCodigoAuthPlain(codigo, tipo))
                     .isHtml(true)
                     .build();
@@ -113,7 +121,7 @@ public class EmailService {
     }
 
 
-    private String buildContenidoEmailCodigoAuth(String codigo, EmailTemplateEnum tipo) {
+    private String buildContenidoEmailCodigoAuth(String email, String codigo, EmailTemplateEnum tipo) {
 
 
 
@@ -121,14 +129,16 @@ public class EmailService {
         addContextoPorTipo(context, tipo, "codigo", codigo);
         context.setVariable("expiracionMinutos", minutosExpiracion);
         context.setVariable("contenidoExtra", ""); // puedes inyectar HTML adicional opcionalmente
+        context.setVariable("urlBaja", construirUrlBajaPorEmail(email).orElse(null));
 
         return templateEngine.process(tipo.getTemplate(), context);
     }
 
-    private String buildContenidoEmailSimple(EmailTemplateEnum tipo) {
+    private String buildContenidoEmailSimple(String email, EmailTemplateEnum tipo) {
 
         Context context = new Context();
         addContextoPorTipo(context, tipo, "contenidoExtra", "");
+        context.setVariable("urlBaja", construirUrlBajaPorEmail(email).orElse(null));
 
         return templateEngine.process(tipo.getTemplate(), context);
     }
@@ -167,7 +177,24 @@ public class EmailService {
 
 
     public MailgunResponse sendMailgunEmail(EmailDto emailDto) {
-        return mailgunEmailService.sendSimpleEmail(emailDto.getTo(), emailDto.getSubject(), emailDto.getContent(), emailDto.getCc());
+        Optional<Usuario> optUsuario = usuarioRepository.findUsuarioByMail(emailDto.getTo());
+
+        if (optUsuario.isPresent() && optUsuario.get().isEmailBaja()) {
+            log.info("Email no enviado a {} porque el usuario está dado de baja", emailDto.getTo());
+            MailgunResponse response = new MailgunResponse();
+            response.setStatus("skipped");
+            response.setMessage("Usuario dado de baja para correos electrónicos");
+            return response;
+        }
+
+        String contenido = emailDto.getContent();
+        if (emailDto.isHtml()) {
+            contenido = enriquecerContenidoHtmlConBaja(contenido, optUsuario);
+        } else {
+            contenido = enriquecerContenidoPlanoConBaja(contenido, optUsuario);
+        }
+
+        return mailgunEmailService.sendSimpleEmail(emailDto.getTo(), emailDto.getSubject(), contenido, emailDto.getCc());
     }
 
     public void enviarCorreoHtmlConCc(String to, List<String> cc, String asunto, String contenidoHtml) throws EnvioEmailException {
@@ -209,6 +236,7 @@ public class EmailService {
         context.setVariable("nombreAgencia", nombreAgencia);
         context.setVariable("periodo", periodo);
         context.setVariable("totalListados", totalListados);
+        context.setVariable("urlBaja", construirUrlBajaPorEmail(email).orElse(null));
 
         // Generar URL de imagen del gráfico usando QuickChart
         String chartImageUrl = generarUrlGraficoQuickChart(chartData);
@@ -285,6 +313,80 @@ public class EmailService {
         } catch (Exception e) {
             log.error("Error generando URL del gráfico", e);
             return "";
+        }
+    }
+
+    private Optional<String> construirUrlBajaPorEmail(String email) {
+        Optional<Usuario> optUsuario = usuarioRepository.findUsuarioByMail(email)
+                .filter(usuario -> !usuario.isEmailBaja());
+
+        if (optUsuario.isEmpty()) {
+            return Optional.empty();
+        }
+
+        try {
+            String token = reactivacionTokenService.generarYPersistirToken(optUsuario.get().getId());
+            return Optional.of(baseUrl + "/baja/email/" + token);
+        } catch (Exception e) {
+            log.warn("No se pudo generar token de baja para {}: {}", email, e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    private String enriquecerContenidoHtmlConBaja(String html, Optional<Usuario> optUsuario) {
+        if (html == null || html.isBlank()) {
+            return html;
+        }
+        if (html.contains("/baja/email/")) {
+            return html;
+        }
+
+        Optional<String> urlBaja = optUsuario
+                .filter(usuario -> !usuario.isEmailBaja())
+                .flatMap(this::construirUrlBajaPorUsuario);
+
+        if (urlBaja.isEmpty()) {
+            return html;
+        }
+
+        String footerBaja = """
+                <div style=\"margin-top:24px;padding-top:16px;border-top:1px solid #e5e7eb;text-align:center;font-size:12px;color:#6b7280;\">
+                  Si prefieres dejar de recibir estos emails,
+                  <a href=\"%s\" style=\"color:#2563eb;text-decoration:none;\">darte de baja</a>.
+                </div>
+                """.formatted(urlBaja.get());
+
+        if (html.toLowerCase().contains("</body>")) {
+            return html.replaceFirst("(?i)</body>", footerBaja + "</body>");
+        }
+        return html + footerBaja;
+    }
+
+    private String enriquecerContenidoPlanoConBaja(String contenido, Optional<Usuario> optUsuario) {
+        if (contenido == null || contenido.isBlank()) {
+            return contenido;
+        }
+        if (contenido.contains("/baja/email/")) {
+            return contenido;
+        }
+
+        Optional<String> urlBaja = optUsuario
+                .filter(usuario -> !usuario.isEmailBaja())
+                .flatMap(this::construirUrlBajaPorUsuario);
+
+        if (urlBaja.isEmpty()) {
+            return contenido;
+        }
+        return contenido + "\n\nSi prefieres dejar de recibir estos emails, podés darte de baja aquí: " + urlBaja.get();
+    }
+
+    private Optional<String> construirUrlBajaPorUsuario(Usuario usuario) {
+        try {
+            String token = reactivacionTokenService.generarYPersistirToken(usuario.getId());
+            return Optional.of(baseUrl + "/baja/email/" + token);
+        } catch (Exception e) {
+            log.warn("No se pudo generar token de baja para usuario {}: {}", usuario.getId(), e.getMessage());
+            return Optional.empty();
         }
     }
 

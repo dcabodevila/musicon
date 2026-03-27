@@ -1,6 +1,7 @@
 package es.musicalia.gestmusica.usuario;
 
 import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 
 /**
  *
@@ -16,7 +17,7 @@ public class UsuarioDTO {
 
 	private String email;
 
-	private Timestamp fechaUltimoAcceso;
+	private OffsetDateTime fechaUltimoAcceso;
 
 	private Timestamp fechaRegistro;
 
@@ -77,11 +78,11 @@ public class UsuarioDTO {
 		this.email = email;
 	}
 
-	public Timestamp getFechaUltimoAcceso() {
+	public OffsetDateTime getFechaUltimoAcceso() {
 		return fechaUltimoAcceso;
 	}
 
-	public void setFechaUltimoAcceso(Timestamp fechaUltimoAcceso) {
+	public void setFechaUltimoAcceso(OffsetDateTime fechaUltimoAcceso) {
 		this.fechaUltimoAcceso = fechaUltimoAcceso;
 	}
 

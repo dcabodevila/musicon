@@ -1,6 +1,6 @@
 package es.musicalia.gestmusica.auth.model;
 
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 import java.util.*;
 
 import es.musicalia.gestmusica.acceso.AccesoService;
@@ -61,8 +61,7 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService {
 		final Map<Long, Set<String>> mapPermisosAgencia = this.permisoService.obtenerMapPermisosAgencia(usuario.getId());
 
 		final UserDetails userDetails = new CustomAuthenticatedUser(usuario, true, true, true, true, auth, mapPermisosArtista, mapPermisosAgencia);
-		final Date date = new Date();
-		usuario.setFechaUltimoAcceso(new Timestamp(date.getTime()));
+		usuario.setFechaUltimoAcceso(OffsetDateTime.now());
 		this.usuarioRepository.save(usuario);
 
         this.registroLoginService.registrarLogin(usuario.getId());

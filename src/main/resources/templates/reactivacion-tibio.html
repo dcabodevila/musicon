@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${asunto}">festia.es</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f5f5f5; }
+        .container { max-width: 600px; margin: 0 auto; background-color: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .header { background-color: #ffffff; padding: 24px 20px; text-align: center; border-bottom: 1px solid #e9ecef; }
+        .header img { max-width: 160px; height: auto; }
+        .content { padding: 36px 32px; color: #333; font-size: 15px; line-height: 1.7; }
+        .content p { margin: 0 0 16px; }
+        .btn { display: inline-block; background-color: #007bff; color: #ffffff !important; padding: 13px 32px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 15px; margin: 20px 0; }
+        .secondary-link { font-size: 13px; color: #666; margin-top: 8px; }
+        .secondary-link a { color: #007bff; }
+        .footer { background-color: #f8f9fa; padding: 20px 32px; text-align: center; font-size: 13px; color: #888; border-top: 1px solid #e9ecef; }
+        .footer a { color: #aaa; text-decoration: none; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <img src="https://festia.es/logo/logo_transparente.png" alt="festia.es" />
+    </div>
+    <div class="content">
+        <p>Hola <span th:text="${nombre}">amigo</span>,</p>
+        <p>
+            Hace <strong th:text="${diasInactivo}">X</strong> días que no te pasas por festia.es
+            y quería avisarte de que la plataforma sigue creciendo.
+        </p>
+        <p>
+            Ahora mismo tienes acceso a presupuestos actualizados de
+            <strong th:text="${totalArtistas}">X</strong> artistas de
+            <strong th:text="${totalAgencias}">X</strong> agencias activas.
+            Todo filtrable por zona, disponibilidad y tipo de evento.
+        </p>
+        <p>
+            Si ya estás moviendo fechas para la temporada, te va a venir bien
+            tener los listados al día.
+        </p>
+        <div style="text-align: center; margin: 28px 0 12px;">
+            <a href="https://festia.es" class="btn">Entrar a festia.es</a>
+        </div>
+        <p class="secondary-link" style="text-align: center;">
+            Si no recuerdas tu contraseña:
+            <a href="https://festia.es/auth/remember-password">Recuperar contraseña</a>
+        </p>
+        <p style="margin-top: 28px;">Un saludo,<br><strong>El equipo de festia.es</strong></p>
+    </div>
+    <div class="footer">
+        <p style="margin: 0 0 8px;">
+            <img src="https://festia.es/logo/logo_transparente.png" alt="festia.es" style="max-width: 80px; opacity: 0.5;" />
+        </p>
+        <p style="margin: 0;">
+            Si prefieres dejar de recibir estos emails:
+            <a th:href="${urlBaja}">darme de baja</a>
+        </p>
+    </div>
+</div>
+</body>
+</html>
