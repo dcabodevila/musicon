@@ -171,9 +171,6 @@ public class ReactivacionEmailService {
         String asunto     = candidato.segmento() == SegmentoReactivacion.TIBIO
                 ? construirAsuntoTibio(candidato.nombre(), candidato.totalArtistas())
                 : construirAsuntoFrio(candidato.nombre());
-        String plainText  = candidato.segmento() == SegmentoReactivacion.TIBIO
-                ? "Tienes " + candidato.totalArtistas() + " artistas esperándote en festia.es"
-                : "La temporada está a la vuelta de la esquina. Mantené tus presupuestos al día en festia.es";
 
         String html = renderizarTemplate(template, asunto, ctx);
 
@@ -182,7 +179,6 @@ public class ReactivacionEmailService {
                         .to(candidato.email())
                         .subject(asunto)
                         .content(html)
-                        .plainContent(plainText)
                         .isHtml(true)
                         .build()
         );

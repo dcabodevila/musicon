@@ -29,7 +29,7 @@ public interface EmailReactivacionLogRepository extends JpaRepository<EmailReact
               AND u.fechaUltimoAcceso IS NOT NULL
               AND u.fechaUltimoAcceso < :limite60dias
               AND u.fechaUltimoAcceso > :limite365dias
-              AND r.codigo IN ('REPRE', 'AGENTE')
+              AND r.codigo = 'AGENTE'
               AND u.id NOT IN (
                   SELECT log.usuario.id
                   FROM EmailReactivacionLog log
