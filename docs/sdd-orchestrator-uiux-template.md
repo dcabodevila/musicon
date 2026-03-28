@@ -80,3 +80,37 @@ En `sdd-verify`, validar:
 - Evidencia de decisiones (referencia a spec/design/tasks)
 - Próxima fase sugerida
 ```
+
+---
+
+## Backend-only guard (para cambios sin UI/UX)
+
+Usá este bloque cuando el cambio sea 100% backend (Spring/DB/API/jobs/security) para evitar cargar skills de frontend por error.
+
+```md
+## Backend-Only Guard
+
+Clasificar el cambio ANTES de iniciar fases:
+
+Se considera **backend-only** si afecta únicamente:
+- entidades/DTO/repositorios/servicios/controladores backend
+- SQL/migraciones/configuración
+- seguridad/autenticación/autorización
+- integraciones externas/schedulers/cache
+- endpoints API sin cambios en vistas/componentes/interacción UI
+
+Si backend-only = true:
+- NO ejecutar `skill(name="frontend-design")`
+- Ejecutar SDD normal: sdd-explore → sdd-propose → sdd-spec → sdd-design → sdd-tasks → sdd-apply → sdd-verify
+- En spec/design/verify enfocarse en: contratos API, validaciones, errores, performance, seguridad, observabilidad
+
+Si backend-only = false:
+- aplicar el bloque UI/UX y cargar `frontend-design` en fases aplicables.
+
+Checklist de confirmación (obligatorio):
+- ¿Se modifica alguna vista/pantalla/componente? (sí/no)
+- ¿Cambia flujo de interacción del usuario? (sí/no)
+- ¿Se agregan requisitos de accesibilidad visual/teclado? (sí/no)
+
+Si las 3 respuestas son “no” => backend-only = true.
+```
