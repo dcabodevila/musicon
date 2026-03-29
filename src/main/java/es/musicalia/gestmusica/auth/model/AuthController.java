@@ -124,7 +124,7 @@ public class AuthController {
                             "redirect", "/"
                     ));
                 } catch (Exception autologinEx) {
-                    log.warn("Autologin fallido tras verificación de email para {}: {}", email, autologinEx.getMessage());
+                    log.warn("Autologin fallido tras verificación de email para {}", email, autologinEx);
                     return ResponseEntity.ok(Map.of(
                             "success", true,
                             "message", "Email verificado correctamente. Ya puedes iniciar sesión.",
@@ -138,10 +138,11 @@ public class AuthController {
                 ));
             }
         } catch (Exception e) {
+            log.error("Error verificando email para {}", email, e);
 
             return ResponseEntity.badRequest().body(Map.of(
                     "success", false,
-                    "message", "Error en la verificación: " + e.getMessage()
+                    "message", "Error en la verificación. Inténtalo de nuevo más tarde."
             ));
         }
     }
@@ -164,9 +165,10 @@ public class AuthController {
                 ));
             }
         } catch (Exception e) {
+            log.error("Error reenviando código de registro para {}", email, e);
             return ResponseEntity.badRequest().body(Map.of(
                     "success", false,
-                    "message", "Error reenviando código: " + e.getMessage()
+                    "message", "Error reenviando código. Inténtalo de nuevo más tarde."
             ));
         }
     }
@@ -240,9 +242,10 @@ public class AuthController {
                 ));
             }
         } catch (Exception e) {
+            log.error("Error verificando código de recuperación para {}", email, e);
             return ResponseEntity.badRequest().body(Map.of(
                     "success", false,
-                    "message", "Error en la verificación: " + e.getMessage()
+                    "message", "Error en la verificación. Inténtalo de nuevo más tarde."
             ));
         }
     }
@@ -323,9 +326,10 @@ public class AuthController {
                 ));
             }
         } catch (Exception e) {
+            log.error("Error reenviando código de recuperación para {}", email, e);
             return ResponseEntity.badRequest().body(Map.of(
                     "success", false,
-                    "message", "Error reenviando código: " + e.getMessage()
+                    "message", "Error reenviando código. Inténtalo de nuevo más tarde."
             ));
         }
     }

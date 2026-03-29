@@ -115,7 +115,12 @@
 								<div class="dropdown-divider"></div>
 								<a class="dropdown-item" th:href="@{/ajustes}"><i class="align-middle me-1" data-feather="settings"></i> Configuración presupuestos</a>
 								<div class="dropdown-divider"></div>
-								<a class="dropdown-item sign-out-alt" th:href=@{/logout}><i class="align-middle me-1" data-feather="log-out"></i>Cerrar sesión</a>
+								<form th:action="@{/logout}" method="post" class="m-0">
+									<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+									<button type="submit" class="dropdown-item sign-out-alt border-0 bg-transparent w-100 text-start">
+										<i class="align-middle me-1" data-feather="log-out"></i>Cerrar sesión
+									</button>
+								</form>
 							</div>
 						</div>
 					</div>
@@ -242,9 +247,12 @@
 					</div>
 				</div>
                 <li class="sidebar-item">
-                    <a class="sidebar-link" th:href="@{/logout}">
-                        <i class="align-middle me-2 fas fa-fw fa-sign-out-alt"></i> <span class="align-middle">Cerrar sesión</span>
-                    </a>
+                    <form th:action="@{/logout}" method="post" class="m-0">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <button type="submit" class="sidebar-link border-0 bg-transparent w-100 text-start">
+                            <i class="align-middle me-2 fas fa-fw fa-sign-out-alt"></i> <span class="align-middle">Cerrar sesión</span>
+                        </button>
+                    </form>
                 </li>
 			</ul>
 

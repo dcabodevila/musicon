@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
@@ -19,7 +20,6 @@ import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
@@ -98,7 +98,7 @@ public class WebSecurityConfig {
     @Order(2)
     public SecurityFilterChain appChain(HttpSecurity http) throws Exception {
 	        http
-	            .csrf(csrf -> csrf.disable())
+	            .csrf(Customizer.withDefaults())
 	            .authorizeHttpRequests(authz -> authz
 	                .requestMatchers("/auth/**").permitAll()
                     .requestMatchers("/info**","/info").permitAll()
@@ -117,19 +117,26 @@ public class WebSecurityConfig {
             )
 			.sessionManagement(session -> session
 					.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+					.sessionFixation(sessionFixation -> sessionFixation.migrateSession())
 					.maximumSessions(1)
 					.expiredUrl("/auth/login?expired").sessionRegistry(sessionRegistry())
 			)
             .formLogin(form -> form
                 .loginPage("/auth/login")
+                .loginProcessingUrl("/auth/login")
                 .permitAll()
                 .defaultSuccessUrl("/", true)
             )
 
 	            .logout(logout -> logout
-                    .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET"))
+	                .logoutUrl("/logout")
 	                .invalidateHttpSession(true)
-	            );
+	                .clearAuthentication(true)
+	                .deleteCookies("JSESSIONID")
+	                .logoutSuccessUrl("/auth/login?logout")
+	                .permitAll()
+	            )
+	            .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
 	}
