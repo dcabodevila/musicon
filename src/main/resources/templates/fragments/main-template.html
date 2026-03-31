@@ -19,6 +19,8 @@
 	    <meta http-equiv="x-ua-compatible" content="ie=edge">
 
 		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}"/>
+		<meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}"/>
 
 		<link th:href="@{/adminkit/css/light.css}" rel="stylesheet"/>
 		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">

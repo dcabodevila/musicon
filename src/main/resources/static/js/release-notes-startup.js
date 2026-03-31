@@ -66,10 +66,7 @@
         btnMarkAsRead.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Guardando...';
 
         fetch('/release-notes/api/mark-read?version=' + encodeURIComponent(version), {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
+            method: 'POST'
         })
         .then(response => response.json())
         .then(data => {

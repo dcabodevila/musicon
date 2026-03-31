@@ -1,3 +1,113 @@
+(() => {
+    'use strict';
+
+    const MUTATING_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+
+    function getCsrfMetaValues() {
+        const tokenMeta = document.querySelector('meta[name="_csrf"]');
+        const headerMeta = document.querySelector('meta[name="_csrf_header"]');
+
+        return {
+            token: tokenMeta ? tokenMeta.getAttribute('content') : null,
+            headerName: headerMeta ? headerMeta.getAttribute('content') : null
+        };
+    }
+
+    function isMutatingMethod(method) {
+        return MUTATING_METHODS.has(String(method || 'GET').toUpperCase());
+    }
+
+    function isSameOriginUrl(url) {
+        try {
+            const targetUrl = new URL(url || window.location.href, window.location.href);
+            return targetUrl.origin === window.location.origin;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function resolveFetchMethod(input, init) {
+        if (init && init.method) {
+            return init.method;
+        }
+
+        if (input && typeof input === 'object' && input.method) {
+            return input.method;
+        }
+
+        return 'GET';
+    }
+
+    function resolveFetchUrl(input) {
+        if (typeof input === 'string' || input instanceof URL) {
+            return input.toString();
+        }
+
+        if (input && typeof input === 'object' && input.url) {
+            return input.url;
+        }
+
+        return window.location.href;
+    }
+
+    function installFetchCsrfPatch() {
+        if (window.__csrfFetchPatched) {
+            return;
+        }
+
+        if (typeof window.fetch !== 'function') {
+            return;
+        }
+
+        const originalFetch = window.fetch.bind(window);
+
+        window.fetch = function(input, init) {
+            const { token, headerName } = getCsrfMetaValues();
+            const method = resolveFetchMethod(input, init);
+            const url = resolveFetchUrl(input);
+
+            if (!token || !headerName || !isMutatingMethod(method) || !isSameOriginUrl(url)) {
+                return originalFetch(input, init);
+            }
+
+            const headers = new Headers((init && init.headers) || (input && input.headers) || undefined);
+            if (!headers.has(headerName)) {
+                headers.set(headerName, token);
+            }
+
+            return originalFetch(input, {
+                ...(init || {}),
+                headers
+            });
+        };
+
+        window.__csrfFetchPatched = true;
+    }
+
+    function installJqueryCsrfHook() {
+        if (window.__csrfJqueryHookInstalled || !window.jQuery) {
+            return;
+        }
+
+        window.jQuery(document).ajaxSend(function(event, xhr, settings) {
+            const { token, headerName } = getCsrfMetaValues();
+            const method = (settings && (settings.type || settings.method)) || 'GET';
+            const url = settings && settings.url ? settings.url : window.location.href;
+
+            if (!token || !headerName || !isMutatingMethod(method) || !isSameOriginUrl(url)) {
+                return;
+            }
+
+            xhr.setRequestHeader(headerName, token);
+        });
+
+        window.__csrfJqueryHookInstalled = true;
+    }
+
+    installFetchCsrfPatch();
+    installJqueryCsrfHook();
+})();
+
 function cargarProvincias(input,ccaaId, provinciaSelectId) {
 
       const url = '/localizacion/provincias/' + ccaaId;
