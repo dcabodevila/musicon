@@ -109,8 +109,8 @@ public class ReactivacionEmailService {
 
         List<Usuario> usuarios = logRepository.findUsuariosElegibles(limite60, limite365, limiteCooldown);
 
-        long totalArtistas       = artistaRepository.count();
-        long totalAgencias       = agenciaRepository.count();
+        long totalArtistas       = artistaRepository.countByActivoTrue();
+        long totalAgencias       = agenciaRepository.countByActivoTrue();
         long totalRepresentantes = usuarioRepository.countByRolGeneralCodigoIn(List.of("REPRE", "AGENTE"));
 
         return usuarios.stream()

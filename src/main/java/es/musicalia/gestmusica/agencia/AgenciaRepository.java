@@ -11,6 +11,8 @@ import java.util.Set;
 @Repository
 public interface AgenciaRepository extends JpaRepository<Agencia, Long> {
 
+	long countByActivoTrue();
+
 	@Query("select new es.musicalia.gestmusica.agencia.AgenciaRecord(a.id, a.nombre, a.descripcion, a.logo, a.usuario.id, concat(a.usuario.nombre, ' ', a.usuario.apellidos), c.instagram, c.facebook, c.youtube, c.web) from Agencia a left join a.agenciaContacto c where a.activo order by a.nombre")
 	List<AgenciaRecord> findAllAgenciasOrderedByName();
 
