@@ -132,29 +132,27 @@ class OrquestasDeGaliciaServiceTest {
         Optional<ActuacionExterna> result = service.obtenerActuacion(999);
 
         // THEN
-        assertNull(result);
+        assertTrue(result.isEmpty());
         mockServer.verify();
     }
 
     @Test
     void testTokenCleanupOnUnauthorized() throws Exception {
-        // 1. Simular primera auth
+        // 1) Primera auth + primera llamada que devuelve 401
         mockAuthSuccess();
-
-        // 2. Simular llamada a API que devuelve 401 (token caducado)
         mockServer.expect(requestTo(API_URL + "/1"))
                 .andRespond(withStatus(HttpStatus.UNAUTHORIZED));
 
+        // 2) Segunda auth + segunda llamada exitosa (el token anterior se limpió)
+        mockAuthSuccess();
+        mockServer.expect(requestTo(API_URL + "/1"))
+                .andRespond(withSuccess("{}", MediaType.APPLICATION_JSON));
+
         // WHEN
         service.obtenerActuacion(1);
-
-        // THEN: Verificar que la próxima vez que se llame a getHeaders (vía obtenerActuacion),
-        // se intentará obtener el token de nuevo porque el anterior se limpió
-        mockAuthSuccess(); // Segunda petición de token esperada
-        mockServer.expect(requestTo(API_URL + "/1"))
-                .andRespond(withSuccess());
-
         service.obtenerActuacion(1);
+
+        // THEN
         mockServer.verify();
     }
 }

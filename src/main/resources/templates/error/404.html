@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/main-template :: header-css}"></th:block>
+    <title>Página no encontrada | Festia</title>
+</head>
+<body class="error-page">
+<main class="card error-page__card">
+    <section class="error-page__hero">
+        <span class="error-page__status" th:text="${status ?: 404}">404</span>
+        <h1 class="error-page__title">No encontramos la página que buscabas</h1>
+    </section>
+    <section class="error-page__body">
+        <p class="error-page__lead">
+            Puede que la URL haya cambiado o que el contenido ya no esté disponible.
+        </p>
+
+        <div class="error-page__meta">
+            <div><strong>Error:</strong> <span th:text="${error ?: 'Not Found'}">Not Found</span></div>
+            <div><strong>Ruta:</strong> <span th:text="${path ?: '/'}">/</span></div>
+            <div><strong>Fecha:</strong> <span th:text="${timestamp ?: 'N/D'}">N/D</span></div>
+        </div>
+
+        <div class="error-page__actions">
+            <a th:href="${path != null and #strings.startsWith(path, '/eventos') ? '/eventos' : '/'}" class="btn btn-primary">
+                Volver a un lugar seguro
+            </a>
+            <a href="/auth/login" class="btn btn-outline-secondary">Iniciar sesión</a>
+        </div>
+    </section>
+</main>
+</body>
+</html>

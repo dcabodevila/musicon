@@ -6,6 +6,8 @@
 (function() {
     'use strict';
 
+    const NO_RELEASE_NOTES_MESSAGE = 'No hay release notes disponibles para esta versión.';
+
     // Verificar si estamos en resolución mayor que móvil (> 768px)
     function isDesktopResolution() {
         return window.innerWidth > 768;
@@ -22,13 +24,19 @@
         fetch('/release-notes/api/check')
             .then(response => response.json())
             .then(data => {
-                if (data.shouldShow) {
+                if (data.shouldShow && hasDisplayableContent(data.content)) {
                     showReleaseNotesModal(data.version, data.content);
                 }
             })
             .catch(error => {
                 console.error('Error verificando release notes:', error);
             });
+    }
+
+    function hasDisplayableContent(content) {
+        return typeof content === 'string'
+            && content.trim().length > 0
+            && !content.includes(NO_RELEASE_NOTES_MESSAGE);
     }
 
     // Mostrar el modal con las release notes

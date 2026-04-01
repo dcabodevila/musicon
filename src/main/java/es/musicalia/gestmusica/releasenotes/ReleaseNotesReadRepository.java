@@ -9,6 +9,8 @@ import java.util.Optional;
 public interface ReleaseNotesReadRepository extends JpaRepository<ReleaseNotesRead, Long> {
     
     boolean existsByUsuarioIdAndVersion(Long usuarioId, String version);
+
+    boolean existsByUsuarioIdAndVersionStartingWith(Long usuarioId, String versionPrefix);
     
     Optional<ReleaseNotesRead> findByUsuarioIdAndVersion(Long usuarioId, String version);
 }

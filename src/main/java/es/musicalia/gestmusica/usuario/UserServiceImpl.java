@@ -11,6 +11,7 @@ import es.musicalia.gestmusica.mensaje.MensajeService;
 import es.musicalia.gestmusica.rol.RolEnum;
 import es.musicalia.gestmusica.rol.RolRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -125,7 +126,8 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public boolean isUserAutheticated() {
-		return !SecurityContextHolder.getContext().getAuthentication().getName().equals("anonymousUser");
+		final var authentication = SecurityContextHolder.getContext().getAuthentication();
+		return authentication != null && !"anonymousUser".equals(authentication.getName());
 	}
 
 	@Override
@@ -226,13 +228,18 @@ public class UserServiceImpl implements UserService {
 
 	@Transactional(readOnly = false)
 	@Override
-	public Usuario guardarUsuario(UsuarioEdicionDTO usuarioEdicionDTO, MultipartFile multipartFile) {
+	public Usuario guardarUsuario(UsuarioEdicionDTO usuarioEdicionDTO, MultipartFile multipartFile) throws EmailYaExisteException {
+
+		final String emailNormalizado = usuarioEdicionDTO.getEmail() != null ? usuarioEdicionDTO.getEmail().trim() : null;
+		if (emailNormalizado != null && this.userRepository.existsByEmailAndIdNot(emailNormalizado, usuarioEdicionDTO.getId())) {
+			throw new EmailYaExisteException("El email ya está registrado por otro usuario");
+		}
 
 		final Usuario usuario = this.userRepository.findById(usuarioEdicionDTO.getId()).orElseThrow();
 		usuario.setUsername( usuarioEdicionDTO.getUsername() );
 		usuario.setNombre( usuarioEdicionDTO.getNombre() );
 		usuario.setApellidos( usuarioEdicionDTO.getApellidos() );
-		usuario.setEmail( usuarioEdicionDTO.getEmail() );
+		usuario.setEmail(emailNormalizado);
 		usuario.setTelefono( usuarioEdicionDTO.getTelefono() );
 		usuario.setProvincia(this.provinciaRepository.findById(usuarioEdicionDTO.getIdProvincia()).orElseThrow());
 		usuario.setNombreComercial( usuarioEdicionDTO.getNombreComercial() );
@@ -245,7 +252,30 @@ public class UserServiceImpl implements UserService {
 			}
 		}
 
-		return userRepository.save(usuario);
+		try {
+			return userRepository.save(usuario);
+		} catch (DataIntegrityViolationException e) {
+			if (esConflictoUnicidadEmail(e)) {
+				throw new EmailYaExisteException("El email ya está registrado por otro usuario");
+			}
+			throw e;
+		}
+	}
+
+	private boolean esConflictoUnicidadEmail(DataIntegrityViolationException e) {
+		Throwable current = e;
+		while (current != null) {
+			final String message = current.getMessage();
+			if (message != null) {
+				final String lower = message.toLowerCase();
+				if (lower.contains("uk_usuario_email") || lower.contains("usuario_email_key")
+					|| (lower.contains("duplicate key") && lower.contains("email"))) {
+					return true;
+				}
+			}
+			current = current.getCause();
+		}
+		return false;
 	}
 
 	@Override

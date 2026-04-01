@@ -3,7 +3,6 @@ package es.musicalia.gestmusica.releasenotes;
 import es.musicalia.gestmusica.usuario.Usuario;
 import es.musicalia.gestmusica.usuario.UserService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.http.ResponseEntity;
@@ -21,12 +20,10 @@ import java.util.regex.Pattern;
 @RequestMapping("/release-notes")
 public class ReleaseNotesController {
 
-    private static final Pattern VERSION_PATTERN = Pattern.compile("^\\d+\\.\\d+\\.\\d+$");
     private static final Pattern FILENAME_VERSION_PATTERN = Pattern.compile("release-notes-([\\d.]+)\\.md$");
+    private static final String NO_RELEASE_NOTES_MESSAGE = "No hay release notes disponibles para esta versión.";
+    private static final String RELEASE_NOTES_LOAD_ERROR_MESSAGE = "Error cargando las release notes.";
 
-    @Value("${spring.application.version}")
-    private String currentVersion;
-    
     private final ReleaseNotesService releaseNotesService;
     private final UserService userService;
 
@@ -37,24 +34,28 @@ public class ReleaseNotesController {
 
     @GetMapping
     public String releaseNotesActual(Model model) {
-        return releaseNotesPorVersion(currentVersion, model);
+        return releaseNotesService.getCurrentEffectiveVersion()
+                .map(version -> releaseNotesPorVersion(version, model))
+                .orElse("redirect:/");
     }
 
     @GetMapping("/{version}")
     public String releaseNotesPorVersion(@PathVariable String version, Model model) {
-        // Validación de seguridad: solo formato x.y.z permitido
-        if (!VERSION_PATTERN.matcher(version).matches()) {
+        Optional<String> effectiveVersion = releaseNotesService.getEffectiveVersion(version);
+        if (effectiveVersion.isEmpty()) {
             log.warn("Intento de acceso con versión inválida: {}", version);
             return "redirect:/release-notes";
         }
+
+        String normalizedVersion = effectiveVersion.get();
 
         // Obtener el usuario autenticado
         Usuario usuario = userService.obtenerUsuarioAutenticado().orElse(null);
 
         // Obtener el contenido SIN filtrar (mostrar todo para la página web)
-        String htmlContent = releaseNotesService.getReleaseNotesContent(version, usuario, false);
+        String htmlContent = releaseNotesService.getReleaseNotesContent(normalizedVersion, usuario, false);
 
-        model.addAttribute("version", version);
+        model.addAttribute("version", normalizedVersion);
         model.addAttribute("releaseNotesHtml", htmlContent);
         model.addAttribute("versionesDisponibles", getVersionesDisponibles());
         return "release-notes";
@@ -99,7 +100,13 @@ public class ReleaseNotesController {
             Usuario usuario = userService.obtenerUsuarioAutenticado()
                     .orElseThrow(() -> new RuntimeException("Usuario no autenticado"));
 
-            String currentAppVersion = releaseNotesService.getCurrentVersion();
+            Optional<String> effectiveCurrentVersion = releaseNotesService.getCurrentEffectiveVersion();
+            if (effectiveCurrentVersion.isEmpty()) {
+                log.warn("Versión actual inválida para release notes: {}", releaseNotesService.getCurrentVersion());
+                return ResponseEntity.ok(Map.of("shouldShow", false));
+            }
+
+            String currentAppVersion = effectiveCurrentVersion.get();
 
             // Verificar si ya las leyó
             boolean hasRead = releaseNotesService.hasReadReleaseNotes(usuario.getId(), currentAppVersion);
@@ -121,6 +128,10 @@ public class ReleaseNotesController {
 
             // Obtener el contenido filtrado por rol del usuario (para la modal)
             String content = releaseNotesService.getReleaseNotesContent(currentAppVersion, usuario, true);
+
+            if (!hasDisplayableReleaseNotesContent(content)) {
+                return ResponseEntity.ok(Map.of("shouldShow", false));
+            }
 
             return ResponseEntity.ok(Map.of(
                     "shouldShow", true,
@@ -146,8 +157,11 @@ public class ReleaseNotesController {
 
             releaseNotesService.markAsRead(usuario.getId(), version);
 
+            Optional<String> effectiveVersion = releaseNotesService.getEffectiveVersion(version);
+
             return ResponseEntity.ok(Map.of(
                     "success", true,
+                    "version", effectiveVersion.orElse(version),
                     "message", "Release notes marcadas como leídas"
             ));
 
@@ -158,5 +172,14 @@ public class ReleaseNotesController {
                     "message", "Error marcando release notes como leídas: " + e.getMessage()
             ));
         }
+    }
+
+    private boolean hasDisplayableReleaseNotesContent(String content) {
+        if (content == null || content.isBlank()) {
+            return false;
+        }
+
+        return !content.contains(NO_RELEASE_NOTES_MESSAGE)
+                && !content.contains(RELEASE_NOTES_LOAD_ERROR_MESSAGE);
     }
 }

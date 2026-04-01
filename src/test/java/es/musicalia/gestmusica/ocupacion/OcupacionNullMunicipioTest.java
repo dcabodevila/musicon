@@ -1,5 +1,6 @@
 package es.musicalia.gestmusica.ocupacion;
 
+import com.cloudinary.Cloudinary;
 import es.musicalia.gestmusica.artista.Artista;
 import es.musicalia.gestmusica.artista.ArtistaRepository;
 import es.musicalia.gestmusica.localizacion.Provincia;
@@ -11,6 +12,7 @@ import es.musicalia.gestmusica.usuario.UsuarioRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +28,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @SpringBootTest
 @ActiveProfiles("dev")
 public class OcupacionNullMunicipioTest {
+
+    @MockBean
+    private Cloudinary cloudinary;
 
     @Autowired
     private OcupacionServiceImpl ocupacionService;
@@ -77,12 +82,14 @@ public class OcupacionNullMunicipioTest {
         ocupacionSaveDto.setImporte(BigDecimal.TEN);
         ocupacionSaveDto.setPorcentajeRepre(BigDecimal.ONE);
         ocupacionSaveDto.setIva(BigDecimal.ZERO);
+        ocupacionSaveDto.setProvisional(false);
+        ocupacionSaveDto.setIdUsuario(usuarioRepository.findAll().stream().findFirst().orElseThrow().getId());
         ocupacionSaveDto.setIdTipoOcupacion(tipoOcupacionRepository.findAll().stream().findFirst().orElseThrow().getId());
         
         // Act & Assert
         // This should not throw an exception even though municipio is null
         assertDoesNotThrow(() -> {
-            Ocupacion ocupacion = ocupacionService.guardarOcupacion(ocupacionSaveDto, true, false);
+            Ocupacion ocupacion = ocupacionService.guardarOcupacion(ocupacionSaveDto, true, true);
             assertNotNull(ocupacion);
             assertNotNull(ocupacion.getMunicipio(), "Municipio should not be null after saving");
             System.out.println("Successfully saved Ocupacion with null municipio input. Default municipio ID used: " + ocupacion.getMunicipio().getId());

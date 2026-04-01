@@ -8,7 +8,6 @@
         <meta name="description" content=""/>
         <link rel="manifest" href="/manifest.json"/>
         <div th:replace="~{fragments/main-template :: header-css}"/>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 
     </head>
 
@@ -36,14 +35,14 @@
                         <!-- HERO -->
                         <div class="row mb-4">
                             <div class="col-12">
-                                <div class="dashboard-hero animate__animated animate__fadeIn">
-                                    <img src="https://res.cloudinary.com/hseoceuyz/image/upload/v1760835633/landing-festia_epbr7a.png"
-                                         alt="Concierto multitudinario"
-                                         class="dashboard-hero__img"/>
-                                    <div class="dashboard-hero__overlay"></div>
+                                <div class="dashboard-hero js-gsap-hero">
+                                     <img src="https://res.cloudinary.com/hseoceuyz/image/upload/v1760835633/landing-festia_epbr7a.png"
+                                          alt="Concierto multitudinario"
+                                         class="dashboard-hero__img js-gsap-hero-image"/>
+                                    <div class="dashboard-hero__overlay js-gsap-hero-overlay"></div>
                                     <img src="/logo/logo-name-transparente-alt-color.png"
                                          alt="festia.es"
-                                         class="dashboard-hero__logo animate__animated animate__zoomIn animate__delay-1s"/>
+                                         class="dashboard-hero__logo js-gsap-hero-logo"/>
                                 </div>
                             </div>
                         </div>
@@ -51,11 +50,11 @@
                         <!-- ACCESO RÁPIDO -->
                         <div class="row mb-4">
                             <div class="col-12 mb-2">
-                                <p class="text-muted small text-uppercase fw-semibold mb-0" style="letter-spacing:.07em;">Acceso rápido</p>
+                                <p class="text-muted small text-uppercase fw-semibold mb-0 js-gsap-section-header" style="letter-spacing:.07em;">Acceso rápido</p>
                             </div>
 
                             <div class="col-12 col-sm-6 col-xl-3 mb-2" th:if="${#sets.size(misAgencias)==1}">
-                                <a th:href="@{'/agencia/{id}'(id=${misAgencias[0]})}" class="quick-card quick-card--agency">
+                                <a th:href="@{'/agencia/{id}'(id=${misAgencias[0]})}" class="quick-card quick-card--agency js-gsap-quick-card">
                                     <div class="quick-card__icon"><i class="fas fa-suitcase"></i></div>
                                     <div class="quick-card__body">
                                         <span class="quick-card__title">Mi agencia</span>
@@ -65,7 +64,7 @@
                                 </a>
                             </div>
                             <div class="col-12 col-sm-6 col-xl-3 mb-2" th:if="${#sets.size(misAgencias)>1}">
-                                <a th:href="@{/agencia/mis-agencias}" class="quick-card quick-card--agency">
+                                <a th:href="@{/agencia/mis-agencias}" class="quick-card quick-card--agency js-gsap-quick-card">
                                     <div class="quick-card__icon"><i class="fas fa-suitcase"></i></div>
                                     <div class="quick-card__body">
                                         <span class="quick-card__title">Mis agencias</span>
@@ -76,7 +75,7 @@
                             </div>
 
                             <div class="col-12 col-sm-6 col-xl-3 mb-2" th:if="${#sets.size(misArtistas)==1}">
-                                <a th:href="@{'/artista/{id}'(id=${misArtistas[0]})}" class="quick-card quick-card--artist">
+                                <a th:href="@{'/artista/{id}'(id=${misArtistas[0]})}" class="quick-card quick-card--artist js-gsap-quick-card">
                                     <div class="quick-card__icon"><i class="fas fa-music"></i></div>
                                     <div class="quick-card__body">
                                         <span class="quick-card__title">Mi artista</span>
@@ -86,7 +85,7 @@
                                 </a>
                             </div>
                             <div class="col-12 col-sm-6 col-xl-3 mb-2" th:if="${#sets.size(misArtistas)>1}">
-                                <a th:href="@{/artista/mis-artistas}" class="quick-card quick-card--artist">
+                                <a th:href="@{/artista/mis-artistas}" class="quick-card quick-card--artist js-gsap-quick-card">
                                     <div class="quick-card__icon"><i class="fas fa-music"></i></div>
                                     <div class="quick-card__body">
                                         <span class="quick-card__title">Mis artistas</span>
@@ -97,7 +96,7 @@
                             </div>
 
                             <div class="col-12 col-sm-6 col-xl-3 mb-2" th:if="${hasPermisoOcupaciones != null and hasPermisoOcupaciones}">
-                                <a th:href="@{/ocupacion/list}" class="quick-card quick-card--occupations">
+                                <a th:href="@{/ocupacion/list}" class="quick-card quick-card--occupations js-gsap-quick-card">
                                     <div class="quick-card__icon"><i class="fas fa-calendar-plus"></i></div>
                                     <div class="quick-card__body">
                                         <span class="quick-card__title">Ocupaciones</span>
@@ -108,7 +107,7 @@
                             </div>
 
                             <div class="col-12 col-sm-6 col-xl-3 mb-2" sec:authorize="hasAuthority('MENU_LISTADOS')">
-                                <a href="/listado" class="quick-card quick-card--budgets">
+                                <a href="/listado" class="quick-card quick-card--budgets js-gsap-quick-card">
                                     <div class="quick-card__icon"><i class="fas fa-calendar-alt"></i></div>
                                     <div class="quick-card__body">
                                         <span class="quick-card__title">Presupuestos</span>
@@ -119,7 +118,7 @@
                             </div>
 
                             <div class="col-12 col-sm-6 col-xl-3 mb-2" th:if="${misAgencias != null and #sets.size(misAgencias) == 0}">
-                                <a th:href="@{/ajustes}" class="quick-card quick-card--settings">
+                                <a th:href="@{/ajustes}" class="quick-card quick-card--settings js-gsap-quick-card">
                                     <div class="quick-card__icon"><i class="fas fa-cog"></i></div>
                                     <div class="quick-card__body">
                                         <span class="quick-card__title">Configuración presupuestos</span>
@@ -130,7 +129,7 @@
                             </div>
 
                             <div class="col-12 col-sm-6 col-xl-3 mb-2" th:if="${misAgencias != null and #sets.size(misAgencias) == 0}">
-                                <a th:href="@{/usuarios/mi-perfil}" class="quick-card quick-card--profile">
+                                <a th:href="@{/usuarios/mi-perfil}" class="quick-card quick-card--profile js-gsap-quick-card">
                                     <div class="quick-card__icon"><i class="fas fa-user"></i></div>
                                     <div class="quick-card__body">
                                         <span class="quick-card__title">Mi perfil</span>
@@ -144,7 +143,7 @@
                         <!-- ONBOARDING BANNER -->
                         <div class="row mb-4" th:if="${mostrarBannerOnboardingAgencia}">
                             <div class="col-12">
-                                <div class="onboarding-banner">
+                                <div class="onboarding-banner js-gsap-onboarding-banner">
                                     <div class="onboarding-banner__icon">
                                         <i class="fas fa-building"></i>
                                     </div>
@@ -162,22 +161,22 @@
                         </div>
 
                         <!-- OCUPACIONES PENDIENTES -->
-                        <div class="row mb-4" th:if="${listaOcupacionPendiente != null && not #lists.isEmpty(listaOcupacionPendiente)}">
+                        <div class="row mb-4 main-pending-occupations-block" th:if="${!isAdminHome && listaOcupacionPendiente != null && not #lists.isEmpty(listaOcupacionPendiente)}">
                             <div class="col-12">
-                                <div class="section-header mb-3">
+                                <div class="section-header mb-3 js-gsap-section-header">
                                     <h3 class="section-header__title">Ocupaciones pendientes</h3>
                                     <span class="section-header__badge" th:text="${#lists.size(listaOcupacionPendiente)}">0</span>
                                     <span class="section-header__sub text-muted small">de confirmación</span>
                                 </div>
 
-                                <div id="carrousel-lista-ocupaciones-pendientes" class="carousel slide" data-bs-ride="carousel">
+                                <div id="carrousel-lista-ocupaciones-pendientes" class="carousel" data-bs-ride="carousel">
                                     <div class="carousel-inner">
                                         <div class="carousel-item active">
                                             <div class="row g-">
                                                 <div th:each="ocupacion, iterStat : ${listaOcupacionPendiente}"
                                                      th:if="${iterStat.index < 4}"
                                                      class="col-12 col-md-6 col-lg-3">
-                                                    <div th:replace="~{fragments/ocupaciones-pendientes :: ocupaciones-pendientes}" class="animate__animated animate__fadeIn w-100"/>
+                                                    <div th:replace="~{fragments/ocupaciones-pendientes :: ocupaciones-pendientes}" class="w-100 js-gsap-pending-card"/>
                                                 </div>
                                             </div>
                                         </div>
@@ -188,7 +187,7 @@
                                                 <div th:each="ocupacion, iterStat : ${listaOcupacionPendiente}"
                                                      th:if="${iterStat.index >= batch && iterStat.index < batch + 4}"
                                                      class="col-12 col-md-6 col-lg-3">
-                                                    <div th:replace="~{fragments/ocupaciones-pendientes :: ocupaciones-pendientes}" class="animate__animated animate__fadeIn w-100"/>
+                                                    <div th:replace="~{fragments/ocupaciones-pendientes :: ocupaciones-pendientes}" class="w-100 js-gsap-pending-card"/>
                                                 </div>
                                             </div>
                                         </div>
@@ -222,6 +221,8 @@
     <div id="swipeArea" style="position: fixed; left: 0; top: 0; bottom: 0; width: 20px; z-index: 1000;"></div>
 
     <script type="text/javascript" th:src="@{/js/comun.js}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/ScrollTrigger.min.js"></script>
     <script type="text/javascript" th:src="@{/js/main.js}"></script>
     <script type="text/javascript" th:src="@{/js/release-notes-startup.js}"></script>
 

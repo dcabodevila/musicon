@@ -23,6 +23,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
+import jakarta.servlet.DispatcherType;
 
 
 @Configuration
@@ -87,6 +88,8 @@ public class WebSecurityConfig {
                     permissions.policy("geolocation=(), camera=(), microphone=(), payment=(), usb=()"))
             )
             .authorizeHttpRequests(authz -> authz
+                .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
+                .requestMatchers("/error", "/403").permitAll()
                 .anyRequest().permitAll()
             )
             .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class);
@@ -100,6 +103,8 @@ public class WebSecurityConfig {
 	        http
 	            .csrf(Customizer.withDefaults())
 	            .authorizeHttpRequests(authz -> authz
+	                .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
+	                .requestMatchers("/error", "/403").permitAll()
 	                .requestMatchers("/auth/**").permitAll()
                     .requestMatchers("/info**","/info").permitAll()
 					.requestMatchers("/manifest.json").permitAll()
@@ -121,12 +126,15 @@ public class WebSecurityConfig {
 					.maximumSessions(1)
 					.expiredUrl("/auth/login?expired").sessionRegistry(sessionRegistry())
 			)
-            .formLogin(form -> form
+	            .formLogin(form -> form
                 .loginPage("/auth/login")
                 .loginProcessingUrl("/auth/login")
                 .permitAll()
                 .defaultSuccessUrl("/", true)
             )
+	            .exceptionHandling(exceptionHandling -> exceptionHandling
+	                .accessDeniedPage("/403")
+	            )
 
 	            .logout(logout -> logout
 	                .logoutUrl("/logout")

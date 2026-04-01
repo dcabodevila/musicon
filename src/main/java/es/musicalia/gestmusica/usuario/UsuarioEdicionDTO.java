@@ -1,6 +1,7 @@
 package es.musicalia.gestmusica.usuario;
 
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,7 +21,8 @@ public class UsuarioEdicionDTO {
     @NotNull
     private String nombre;
     private String apellidos;
-    @NotNull
+    @NotBlank
+    @Email
     private String email;
     private String imagen;
     private String telefono;

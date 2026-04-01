@@ -44,7 +44,7 @@ public interface UserService {
 	UsuarioEdicionDTO getMiPerfil(Long idUsuario);
 
 	@Transactional(readOnly = false)
-	Usuario guardarUsuario(UsuarioEdicionDTO usuarioEdicionDTO, MultipartFile multipartFile);
+	Usuario guardarUsuario(UsuarioEdicionDTO usuarioEdicionDTO, MultipartFile multipartFile) throws EmailYaExisteException;
 
 	List<Usuario> findUsuariosAdmin();
 

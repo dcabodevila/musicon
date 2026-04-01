@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/main-template :: header-css}"></th:block>
+    <title>Error | Festia</title>
+</head>
+<body class="error-page">
+<main class="card error-page__card">
+    <section class="error-page__hero">
+        <span class="error-page__status" th:text="${status ?: 'Error'}">Error</span>
+        <h1 class="error-page__title">Ocurrió algo inesperado</h1>
+    </section>
+    <section class="error-page__body">
+        <p class="error-page__lead">
+            No pudimos completar la operación en este momento. Prueba nuevamente en unos minutos. Si sigues teniendo problemas escríbenos a info@festia.es
+        </p>
+
+        <div class="error-page__meta">
+            <div><strong>Error:</strong> <span th:text="${error ?: 'Unexpected error'}">Error inesperado</span></div>
+            <div><strong>Ruta:</strong> <span th:text="${path ?: '/'}">/</span></div>
+            <div><strong>Fecha:</strong> <span th:text="${timestamp ?: 'N/D'}">N/D</span></div>
+        </div>
+
+        <div class="error-page__actions">
+            <a href="/" class="btn btn-primary">Volver al inicio</a>
+        </div>
+    </section>
+</main>
+</body>
+</html>

@@ -11,9 +11,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.Collections;
+import java.util.List;
 
 @Slf4j
 @Controller
@@ -75,16 +79,31 @@ public class UsuarioController {
 
     @GetMapping("/editar/{id}")
     public String editarUsuario(@PathVariable Long id, ModelMap model) {
-        model.addAttribute("usuarioEdicionDTO", this.userService.getUsuarioEdicionDTO(id));
-        model.addAttribute("listaAccesos", this.accesoService.findAllAccesosDetailRecordByIdUsuario(id));
-        model.addAttribute("listaProvincias", this.localizacionService.findAllProvincias());
+        final UsuarioEdicionDTO usuarioEdicionDTO = this.userService.getUsuarioEdicionDTO(id);
+        cargarModeloFormularioEdicion(model, usuarioEdicionDTO, this.accesoService.findAllAccesosDetailRecordByIdUsuario(id));
 
         return "usuario-detail-edit";
     }
 
     @PostMapping("/guardar")
-    public String guardarUsuario(@Valid @ModelAttribute UsuarioEdicionDTO usuarioEdicionDTO, @RequestParam(value = "image", required = false) MultipartFile multipartFile, RedirectAttributes redirectAttributes) {
-        this.userService.guardarUsuario(usuarioEdicionDTO, multipartFile);
+    public String guardarUsuario(@Valid @ModelAttribute UsuarioEdicionDTO usuarioEdicionDTO,
+                                 BindingResult bindingResult,
+                                 @RequestParam(value = "image", required = false) MultipartFile multipartFile,
+                                 RedirectAttributes redirectAttributes,
+                                 ModelMap model) {
+        if (bindingResult.hasErrors()) {
+            cargarModeloFormularioEdicion(model, usuarioEdicionDTO, obtenerAccesosPorUsuario(usuarioEdicionDTO));
+            return "usuario-detail-edit";
+        }
+
+        try {
+            this.userService.guardarUsuario(usuarioEdicionDTO, multipartFile);
+        } catch (EmailYaExisteException e) {
+            bindingResult.rejectValue("email", "error.email", "El email ya está registrado por otro usuario");
+            cargarModeloFormularioEdicion(model, usuarioEdicionDTO, obtenerAccesosPorUsuario(usuarioEdicionDTO));
+            return "usuario-detail-edit";
+        }
+
         redirectAttributes.addFlashAttribute("alertClass", "success");
         redirectAttributes.addFlashAttribute("message", "Usuario actualizado correctamente");
         return "redirect:/usuarios/editar/" + usuarioEdicionDTO.getId();
@@ -93,10 +112,22 @@ public class UsuarioController {
     @GetMapping("/mi-perfil")
     public String miPerfil(@AuthenticationPrincipal CustomAuthenticatedUser user, ModelMap model) {
 
-        model.addAttribute("usuarioEdicionDTO", this.userService.getMiPerfil(user.getUserId()));
-        model.addAttribute("listaAccesos", this.accesoService.getMisAccesos(user.getUserId()));
-        model.addAttribute("listaProvincias", this.localizacionService.findAllProvincias());
+        final UsuarioEdicionDTO usuarioEdicionDTO = this.userService.getMiPerfil(user.getUserId());
+        cargarModeloFormularioEdicion(model, usuarioEdicionDTO, this.accesoService.getMisAccesos(user.getUserId()));
         return "usuario-detail-edit";
+    }
+
+    private List<?> obtenerAccesosPorUsuario(UsuarioEdicionDTO usuarioEdicionDTO) {
+        if (usuarioEdicionDTO.getId() == null) {
+            return Collections.emptyList();
+        }
+        return this.accesoService.findAllAccesosDetailRecordByIdUsuario(usuarioEdicionDTO.getId());
+    }
+
+    private void cargarModeloFormularioEdicion(ModelMap model, UsuarioEdicionDTO usuarioEdicionDTO, List<?> listaAccesos) {
+        model.addAttribute("usuarioEdicionDTO", usuarioEdicionDTO);
+        model.addAttribute("listaAccesos", listaAccesos);
+        model.addAttribute("listaProvincias", this.localizacionService.findAllProvincias());
     }
 
 }

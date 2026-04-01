@@ -35,31 +35,50 @@ public class ReleaseNotesServiceImpl implements ReleaseNotesService {
     private final ReleaseNotesReadRepository releaseNotesReadRepository;
     private final UserService userService;
     private final ResourceLoader resourceLoader;
+    private final ReleaseNotesVersionPolicy releaseNotesVersionPolicy;
 
     @Value("${project.version:1.0.9}")
     private String currentVersion;
 
     public ReleaseNotesServiceImpl(ReleaseNotesReadRepository releaseNotesReadRepository,
                                    UserService userService,
-                                   ResourceLoader resourceLoader) {
+                                   ResourceLoader resourceLoader,
+                                   ReleaseNotesVersionPolicy releaseNotesVersionPolicy) {
         this.releaseNotesReadRepository = releaseNotesReadRepository;
         this.userService = userService;
         this.resourceLoader = resourceLoader;
+        this.releaseNotesVersionPolicy = releaseNotesVersionPolicy;
     }
 
     @Override
     public boolean hasReadReleaseNotes(Long usuarioId, String version) {
-        return releaseNotesReadRepository.existsByUsuarioIdAndVersion(usuarioId, version);
+        Optional<String> effectiveVersion = getEffectiveVersion(version);
+        if (effectiveVersion.isEmpty()) {
+            log.warn("Versión inválida para hasReadReleaseNotes: {}", version);
+            return false;
+        }
+
+        String effective = effectiveVersion.get();
+        if (releaseNotesReadRepository.existsByUsuarioIdAndVersion(usuarioId, effective)) {
+            return true;
+        }
+
+        return releaseNotesVersionPolicy.toEffectivePrefix(effective)
+                .map(prefix -> releaseNotesReadRepository.existsByUsuarioIdAndVersionStartingWith(usuarioId, prefix))
+                .orElse(false);
     }
 
     @Override
     @Transactional
     public void markAsRead(Long usuarioId, String version) {
-        if (!hasReadReleaseNotes(usuarioId, version)) {
+        String effectiveVersion = getEffectiveVersion(version)
+                .orElseThrow(() -> new IllegalArgumentException("Versión inválida: " + version));
+
+        if (!hasReadReleaseNotes(usuarioId, effectiveVersion)) {
             Usuario usuario = userService.findById(usuarioId);
-            ReleaseNotesRead releaseNotesRead = new ReleaseNotesRead(usuario, version);
+            ReleaseNotesRead releaseNotesRead = new ReleaseNotesRead(usuario, effectiveVersion);
             releaseNotesReadRepository.save(releaseNotesRead);
-            log.info("Release notes {} marcadas como leídas para usuario {}", version, usuarioId);
+            log.info("Release notes {} marcadas como leídas para usuario {}", effectiveVersion, usuarioId);
         }
     }
 
@@ -69,25 +88,37 @@ public class ReleaseNotesServiceImpl implements ReleaseNotesService {
     }
 
     @Override
+    public Optional<String> getCurrentEffectiveVersion() {
+        return getEffectiveVersion(currentVersion);
+    }
+
+    @Override
+    public Optional<String> getEffectiveVersion(String version) {
+        return releaseNotesVersionPolicy.toEffectiveVersion(version);
+    }
+
+    @Override
     public String getReleaseNotesContent(String version) {
         return getReleaseNotesContent(version, null, false);
     }
 
     @Override
     public String getReleaseNotesContent(String version, Usuario usuario, boolean filterByRole) {
+        String effectiveVersion = getEffectiveVersion(version).orElse(version);
+
         try {
-            String filename = "classpath:release-notes/release-notes-" + version + ".md";
+            String filename = "classpath:release-notes/release-notes-" + effectiveVersion + ".md";
             Resource resource = resourceLoader.getResource(filename);
 
             if (!resource.exists()) {
-                log.warn("No se encontró el archivo de release notes para la versión {}", version);
+                log.warn("No se encontró el archivo de release notes para la versión {}", effectiveVersion);
                 return "<p>No hay release notes disponibles para esta versión.</p>";
             }
 
             String markdown = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
 
             // Extraer roles antes de remover el frontmatter
-            List<String> roles = extractRolesFromReleaseNotes(version);
+            List<String> roles = extractRolesFromReleaseNotes(effectiveVersion);
 
             // Remover frontmatter antes de convertir a HTML
             markdown = removeFrontmatter(markdown);
@@ -117,13 +148,19 @@ public class ReleaseNotesServiceImpl implements ReleaseNotesService {
             return html;
 
         } catch (IOException e) {
-            log.error("Error leyendo release notes para versión {}", version, e);
+            log.error("Error leyendo release notes para versión {}", effectiveVersion, e);
             return "<p>Error cargando las release notes.</p>";
         }
     }
 
     @Override
     public boolean shouldShowReleaseNotes(Usuario usuario, String version) {
+        Optional<String> effectiveVersion = getEffectiveVersion(version);
+        if (effectiveVersion.isEmpty()) {
+            log.warn("Versión inválida para shouldShowReleaseNotes: {}", version);
+            return false;
+        }
+
         try {
             // Los administradores ven todas las release notes
             if (usuario.getRolGeneral() != null &&
@@ -131,7 +168,7 @@ public class ReleaseNotesServiceImpl implements ReleaseNotesService {
                 return true;
             }
 
-            List<String> allowedRoles = extractRolesFromReleaseNotes(version);
+            List<String> allowedRoles = extractRolesFromReleaseNotes(effectiveVersion.get());
 
             // Si no hay roles especificados, mostrar a todos (retrocompatibilidad)
             if (allowedRoles == null || allowedRoles.isEmpty()) {
@@ -149,9 +186,8 @@ public class ReleaseNotesServiceImpl implements ReleaseNotesService {
 
         } catch (Exception e) {
             log.error("Error verificando si mostrar release notes para usuario {} y versión {}",
-                     usuario.getId(), version, e);
-            // En caso de error, mostrar las release notes (fail-safe)
-            return true;
+                     usuario.getId(), effectiveVersion.get(), e);
+            return false;
         }
     }
 
@@ -330,6 +366,12 @@ public class ReleaseNotesServiceImpl implements ReleaseNotesService {
 
     @Override
     public boolean hasApplicableContent(Usuario usuario, String version) {
+        Optional<String> effectiveVersion = getEffectiveVersion(version);
+        if (effectiveVersion.isEmpty()) {
+            log.warn("Versión inválida para hasApplicableContent: {}", version);
+            return false;
+        }
+
         try {
             // Los administradores siempre ven contenido
             if (usuario.getRolGeneral() != null &&
@@ -337,7 +379,7 @@ public class ReleaseNotesServiceImpl implements ReleaseNotesService {
                 return true;
             }
 
-            String filename = "classpath:release-notes/release-notes-" + version + ".md";
+            String filename = "classpath:release-notes/release-notes-" + effectiveVersion.get() + ".md";
             Resource resource = resourceLoader.getResource(filename);
 
             if (!resource.exists()) {
@@ -382,7 +424,7 @@ public class ReleaseNotesServiceImpl implements ReleaseNotesService {
 
         } catch (IOException e) {
             log.error("Error verificando contenido aplicable para usuario {} y versión {}",
-                     usuario.getId(), version, e);
+                     usuario.getId(), effectiveVersion.get(), e);
             return false;
         }
     }

@@ -61,6 +61,9 @@
                                         <div class="col-sm-9">
                                             <input type="email" id="email" class="form-control" th:field="*{email}"
                                                    placeholder="email" autocomplete="off" maxlength="250">
+                                            <small class="text-danger" th:if="${#fields.hasErrors('email')}">
+                                                <p th:each="error: ${#fields.errors('email')}" th:text="${error}" class="mb-0">Validation error</p>
+                                            </small>
                                         </div>
                                     </div>
                                     <div class="mb-3 row">

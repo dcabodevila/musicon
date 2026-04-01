@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/main-template :: header-css}"></th:block>
+    <title>Error interno | Festia</title>
+</head>
+<body class="error-page">
+<main class="card error-page__card">
+    <section class="error-page__hero">
+        <span class="error-page__status" th:text="${status ?: 500}">500</span>
+        <h1 class="error-page__title">Ups... tuvimos un problema inesperado</h1>
+    </section>
+    <section class="error-page__body">
+        <p class="error-page__lead">
+            Estamos trabajando para resolverlo cuanto antes. Puedes volver al inicio o iniciar sesión nuevamente.
+        </p>
+
+        <div class="error-page__meta">
+            <div><strong>Error:</strong> <span th:text="${error ?: 'Internal Server Error'}">Internal Server Error</span></div>
+            <div><strong>Ruta:</strong> <span th:text="${path ?: '/'}">/</span></div>
+            <div><strong>Fecha:</strong> <span th:text="${timestamp ?: 'N/D'}">N/D</span></div>
+        </div>
+
+        <div class="error-page__actions">
+            <a th:href="${#authorization.expression('isAuthenticated()') ? '/' : '/auth/login'}" class="btn btn-primary">
+                Continuar
+            </a>
+        </div>
+    </section>
+</main>
+</body>
+</html>

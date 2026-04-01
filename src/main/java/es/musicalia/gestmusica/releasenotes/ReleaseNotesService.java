@@ -2,6 +2,8 @@ package es.musicalia.gestmusica.releasenotes;
 
 import es.musicalia.gestmusica.usuario.Usuario;
 
+import java.util.Optional;
+
 public interface ReleaseNotesService {
 
     /**
@@ -18,6 +20,16 @@ public interface ReleaseNotesService {
      * Obtiene la versión actual de la aplicación desde el pom.xml
      */
     String getCurrentVersion();
+
+    /**
+     * Obtiene la versión efectiva actual (major.minor.0) para release notes.
+     */
+    Optional<String> getCurrentEffectiveVersion();
+
+    /**
+     * Normaliza una versión al formato efectivo (major.minor.0).
+     */
+    Optional<String> getEffectiveVersion(String version);
 
     /**
      * Obtiene el contenido HTML de las release notes de una versión específica
