@@ -249,6 +249,7 @@ function initializeChart() {
                 scales: {
                     y: {
                         beginAtZero: true,
+                        // Baseline mínimo explícito por consistencia con backend/email
                         min: 0,
                         grid: {
                             display: true

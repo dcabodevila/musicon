@@ -2,7 +2,14 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
-<div th:fragment="ocupaciones-pendientes" class="ocp-card">
+<div th:fragment="ocupaciones-pendientes"
+     class="ocp-card"
+     th:with="estadoNormalizado=${#strings.toLowerCase(#strings.defaultString(ocupacion.estado, ''))},
+              isPendiente=${estadoNormalizado == 'pendiente'},
+              isReservado=${estadoNormalizado == 'reservado'}"
+     th:classappend="${isPendiente} ? ' ocp-card--pendiente' : ''">
+
+    <!-- Contrato de estado: normalizar case-insensitive y sólo renderizar badge para Pendiente/Reservado -->
 
     <!-- Cabecera: nombre del artista + badge de estado -->
     <div class="ocp-card__header">
@@ -13,8 +20,9 @@
             <div class="ocp-card__artist-info">
                 <span class="ocp-card__artist-name" th:text="${ocupacion.artista}">Nombre artista</span>
                 <span class="ocp-card__estado badge"
-                      th:if="${ocupacion.estado == 'Reservado'}"
-                      th:text="${ocupacion.estado}">Reservado</span>
+                      th:if="${isPendiente}">Pendiente</span>
+                <span class="ocp-card__estado badge"
+                      th:if="${isReservado}">Reservado</span>
             </div>
         </div>
     </div>

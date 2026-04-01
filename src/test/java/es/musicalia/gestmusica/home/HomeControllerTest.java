@@ -118,6 +118,31 @@ class HomeControllerTest {
         verify(ocupacionService).findOcupacionesDtoByAgenciaPendientes(Set.of(7L));
     }
 
+    @Test
+    void home_noAdminRenderizaPendienteEnGrisYMantieneBadgeReservado() throws Exception {
+        CustomAuthenticatedUser nonAdminUser = authenticatedUser(
+                Set.of(new SimpleGrantedAuthority("USER")),
+                Map.of(7L, Set.of(PermisoAgenciaEnum.CONFIRMAR_OCUPACION.name()))
+        );
+
+        List<OcupacionRecord> pendientes = List.of(
+                ocupacion(11L, "PENDIENTE"),
+                ocupacion(12L, "Reservado"),
+                ocupacion(13L, "SIN_ESTADO")
+        );
+        when(ocupacionService.findOcupacionesDtoByAgenciaPendientes(Set.of(7L))).thenReturn(pendientes);
+
+        mockMvc.perform(get("/").with(user(nonAdminUser)))
+                .andExpect(status().isOk())
+                .andExpect(view().name("main.html"))
+                .andExpect(content().string(containsString("ocp-card--pendiente")))
+                .andExpect(content().string(containsString(">Pendiente<")))
+                .andExpect(content().string(containsString(">Reservado<")))
+                .andExpect(content().string(not(containsString(">SIN_ESTADO<"))));
+
+        verify(ocupacionService).findOcupacionesDtoByAgenciaPendientes(Set.of(7L));
+    }
+
     private CustomAuthenticatedUser authenticatedUser(Set<SimpleGrantedAuthority> authorities, Map<Long, Set<String>> mapPermisosAgencia) {
         Usuario usuario = new Usuario();
         usuario.setId(99L);
@@ -135,6 +160,26 @@ class HomeControllerTest {
                 authorities,
                 Map.of(),
                 mapPermisosAgencia
+        );
+    }
+
+    private OcupacionRecord ocupacion(Long id, String estado) {
+        return new OcupacionRecord(
+                id,
+                LocalDateTime.now(),
+                1L,
+                "Artista " + id,
+                "100",
+                false,
+                "BOLO",
+                "Pontevedra",
+                "Vigo",
+                "Centro",
+                false,
+                false,
+                estado,
+                2L,
+                "Usuario"
         );
     }
 }

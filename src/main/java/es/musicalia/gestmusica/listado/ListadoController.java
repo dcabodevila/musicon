@@ -35,7 +35,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
@@ -49,9 +48,11 @@ public class ListadoController {
     private final AjustesService ajustesService;
     private final PermisoService permisoService;
     private final ObjectMapper objectMapper;
+    private final ListadoChartDataFactory listadoChartDataFactory;
 
     public ListadoController(LocalizacionService localizacionService, ListadoService listadoService, ArtistaService artistaService,
-                             AgenciaService agenciaService, AjustesService ajustesService, PermisoService permisoService, ObjectMapper objectMapper){
+                             AgenciaService agenciaService, AjustesService ajustesService, PermisoService permisoService,
+                             ObjectMapper objectMapper, ListadoChartDataFactory listadoChartDataFactory){
 
         this.localizacionService = localizacionService;
         this.listadoService = listadoService;
@@ -60,6 +61,7 @@ public class ListadoController {
         this.ajustesService = ajustesService;
         this.permisoService = permisoService;
         this.objectMapper = objectMapper;
+        this.listadoChartDataFactory = listadoChartDataFactory;
     }
 
     @GetMapping
@@ -114,12 +116,7 @@ public class ListadoController {
                     listadosGenerados,
                     Boolean.TRUE.equals(listadoAudienciasDto.getPorDia())
             );
-            List<Map<String, Object>> chartDataList = convertirListadosPorMesAMap(listadosPorMes);
-            
-            // Si no hay datos, crear un elemento con valor 0
-            if (chartDataList.isEmpty()) {
-                chartDataList = crearDatosVaciosParaGrafico();
-            }
+            List<Map<String, Object>> chartDataList = listadoChartDataFactory.from(listadosPorMes);
             
             String chartDataJson = objectMapper.writeValueAsString(chartDataList);
             model.addAttribute("chartData", chartDataJson);
@@ -227,12 +224,7 @@ public class ListadoController {
                     listados,
                     Boolean.TRUE.equals(listadoAudienciasDto.getPorDia())
             );
-            List<Map<String, Object>> chartDataList = convertirListadosPorMesAMap(listadosPorMes);
-            
-            // Si no hay datos, crear un elemento con valor 0
-            if (chartDataList.isEmpty()) {
-                chartDataList = crearDatosVaciosParaGrafico();
-            }
+            List<Map<String, Object>> chartDataList = listadoChartDataFactory.from(listadosPorMes);
             
             String chartDataJson = objectMapper.writeValueAsString(chartDataList);
             model.addAttribute("chartData", chartDataJson);
@@ -360,12 +352,10 @@ public class ListadoController {
             List<ListadoRecord> listados = this.listadoService.obtenerListadoEntreFechas(filtros);
             
             // Generar datos del gráfico
-            List<Map<String, Object>> chartData = convertirListadosPorMesAMap(
+            List<Map<String, Object>> chartData = listadoChartDataFactory.from(
                     listadoService.obtenerListadosPorPeriodo(listados, porDia)
             );
-            if (chartData.isEmpty()) {
-                chartData = crearDatosVaciosParaGrafico();
-            }
+
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("chartData", chartData);
@@ -382,26 +372,6 @@ public class ListadoController {
             
             return errorResponse;
         }
-    }
-
-    private List<Map<String, Object>> crearDatosVaciosParaGrafico() {
-        List<Map<String, Object>> datosVacios = new ArrayList<>();
-        Map<String, Object> item = new HashMap<>();
-        item.put("mes", "Sin datos");
-        item.put("cantidad", 0);
-        datosVacios.add(item);
-        return datosVacios;
-    }
-
-    private List<Map<String, Object>> convertirListadosPorMesAMap(List<ListadosPorMesDto> listadosPorMes) {
-        return listadosPorMes.stream()
-                .map(dto -> {
-                    Map<String, Object> item = new HashMap<>();
-                    item.put("mes", dto.getMes());
-                    item.put("cantidad", dto.getCantidad());
-                    return item;
-                })
-                .collect(Collectors.toList());
     }
 
     private String getColumnName(int column) {

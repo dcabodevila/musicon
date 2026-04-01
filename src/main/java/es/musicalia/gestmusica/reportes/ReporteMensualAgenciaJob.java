@@ -4,6 +4,7 @@ import es.musicalia.gestmusica.acceso.Acceso;
 import es.musicalia.gestmusica.acceso.AccesoService;
 import es.musicalia.gestmusica.agencia.Agencia;
 import es.musicalia.gestmusica.listado.ListadoAudienciasDto;
+import es.musicalia.gestmusica.listado.ListadoChartDataFactory;
 import es.musicalia.gestmusica.listado.ListadoRecord;
 import es.musicalia.gestmusica.listado.ListadoService;
 import es.musicalia.gestmusica.listado.ListadosPorMesDto;
@@ -22,11 +23,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -35,6 +34,7 @@ public class ReporteMensualAgenciaJob {
 
     private final AccesoService accesoService;
     private final ListadoService listadoService;
+    private final ListadoChartDataFactory listadoChartDataFactory;
     private final EmailService emailService;
     private final MensajeService mensajeService;
 
@@ -116,7 +116,7 @@ public class ReporteMensualAgenciaJob {
 
         // Generar datos del gráfico con los últimos 3 meses
         List<ListadosPorMesDto> listadosPorMes = listadoService.obtenerListadosPorMes(listadosTresMeses);
-        List<Map<String, Object>> chartData = convertirListadosPorMesAMap(listadosPorMes);
+        List<Map<String, Object>> chartData = listadoChartDataFactory.from(listadosPorMes);
 
         log.info("Agencia: {} - Total listados: {} - Email: {}",
                 agencia.getNombre(), totalListados, emailUsuario);
@@ -134,17 +134,6 @@ public class ReporteMensualAgenciaJob {
 
         // Enviar notificación interna al usuario de la agencia
         enviarNotificacionInternaAgencia(acceso.getUsuario(), agencia.getNombre(), periodo, totalListados);
-    }
-
-    private List<Map<String, Object>> convertirListadosPorMesAMap(List<ListadosPorMesDto> listadosPorMes) {
-        return listadosPorMes.stream()
-                .map(dto -> {
-                    Map<String, Object> item = new HashMap<>();
-                    item.put("mes", dto.getMes());
-                    item.put("cantidad", dto.getCantidad());
-                    return item;
-                })
-                .collect(Collectors.toList());
     }
 
     private void enviarNotificacionInternaAgencia(Usuario usuario, String nombreAgencia, String periodo, Long totalListados) {

@@ -1323,6 +1323,21 @@ footer {
     letter-spacing: 0.04em;
 }
 
+/* Variante pendiente: cabecera, icono y badge en gris */
+.ocp-card--pendiente {
+    border-top-color: var(--color-pendiente);
+}
+
+.ocp-card--pendiente .ocp-card__header {
+    background: linear-gradient(135deg, #f2f4f6 0%, #e9edf1 100%);
+    border-bottom-color: #d6dde3;
+}
+
+.ocp-card--pendiente .ocp-card__artist-icon,
+.ocp-card--pendiente .ocp-card__estado {
+    background: var(--color-pendiente) !important;
+}
+
 /* Cuerpo */
 .ocp-card__body {
     padding: 14px 16px;

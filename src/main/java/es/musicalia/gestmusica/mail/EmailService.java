@@ -300,7 +300,7 @@ public class EmailService {
                     .collect(Collectors.joining(","));
 
             String chartConfig = String.format(
-                    "{type:'bar',data:{labels:[%s],datasets:[{label:'Número de listados',data:[%s],backgroundColor:'rgba(0,123,255,0.5)',borderColor:'rgba(0,123,255,1)',borderWidth:1}]},options:{responsive:true,scales:{y:{beginAtZero:true,ticks:{stepSize:1}}},plugins:{legend:{display:true,position:'top'},title:{display:true,text:'Listados generados por mes'}}}}",
+                    "{type:'bar',data:{labels:[%s],datasets:[{label:'Número de listados',data:[%s],backgroundColor:'rgba(0,123,255,0.5)',borderColor:'rgba(0,123,255,1)',borderWidth:1}]},options:{responsive:true,scales:{y:{beginAtZero:true,min:0,ticks:{stepSize:1}}},plugins:{legend:{display:true,position:'top'},title:{display:true,text:'Listados generados por mes'}}}}",
                     labelsJson, valuesJson
             );
 
