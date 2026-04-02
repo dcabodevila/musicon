@@ -1,5 +1,6 @@
 package es.musicalia.gestmusica.config;
 
+import es.musicalia.gestmusica.observabilidad.FunctionalEventTracker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,6 +39,8 @@ public class WebSecurityConfig {
 	private UserDetailsService userDetailsService;
     @Autowired
     private RateLimitingFilter rateLimitingFilter;
+    @Autowired
+    private FunctionalEventTracker functionalEventTracker;
 
 	@Bean
 	public AuthenticationProvider authProvider(){
@@ -130,7 +133,8 @@ public class WebSecurityConfig {
                 .loginPage("/auth/login")
                 .loginProcessingUrl("/auth/login")
                 .permitAll()
-                .defaultSuccessUrl("/", true)
+                .successHandler(new FunctionalLoginSuccessHandler(functionalEventTracker))
+                .failureHandler(new FunctionalLoginFailureHandler(functionalEventTracker))
             )
 	            .exceptionHandling(exceptionHandling -> exceptionHandling
 	                .accessDeniedPage("/403")
@@ -141,7 +145,7 @@ public class WebSecurityConfig {
 	                .invalidateHttpSession(true)
 	                .clearAuthentication(true)
 	                .deleteCookies("JSESSIONID")
-	                .logoutSuccessUrl("/auth/login?logout")
+	                .logoutSuccessHandler(new FunctionalLogoutSuccessHandler(functionalEventTracker))
 	                .permitAll()
 	            )
 	            .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class);

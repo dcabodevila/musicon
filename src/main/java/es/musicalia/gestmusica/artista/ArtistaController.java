@@ -8,6 +8,9 @@ import es.musicalia.gestmusica.incremento.IncrementoService;
 import es.musicalia.gestmusica.localizacion.LocalizacionService;
 import es.musicalia.gestmusica.ocupacion.OcupacionSaveDto;
 import es.musicalia.gestmusica.ocupacion.OcupacionService;
+import es.musicalia.gestmusica.observabilidad.FunctionalEventNames;
+import es.musicalia.gestmusica.observabilidad.FunctionalEventOutcome;
+import es.musicalia.gestmusica.observabilidad.FunctionalEventTracker;
 import es.musicalia.gestmusica.tarifa.TarifaAnualDto;
 import es.musicalia.gestmusica.tarifa.TarifaService;
 import es.musicalia.gestmusica.usuario.UserService;
@@ -49,11 +52,12 @@ public class ArtistaController {
     private final OcupacionService ocupacionService;
     private final SecurityService securityService;
     private final TarifaService tarifaService;
+    private final FunctionalEventTracker functionalEventTracker;
 
 
     public ArtistaController(UserService userService, ArtistaService artistaService, FileService fileService, AgenciaService agenciaService,
                              LocalizacionService localizacionService, IncrementoService incrementoService, OcupacionService ocupacionService,
-                             SecurityService securityService, TarifaService tarifaService){
+                             SecurityService securityService, TarifaService tarifaService, FunctionalEventTracker functionalEventTracker){
         this.userService = userService;
         this.artistaService = artistaService;
         this.fileService = fileService;
@@ -63,6 +67,7 @@ public class ArtistaController {
         this.ocupacionService = ocupacionService;
         this.securityService = securityService;
         this.tarifaService = tarifaService;
+        this.functionalEventTracker = functionalEventTracker;
     }
 
     @GetMapping
@@ -186,7 +191,17 @@ public class ArtistaController {
     public String guardarArtista(@AuthenticationPrincipal CustomAuthenticatedUser user, Model model, @ModelAttribute("artistaDto") @Valid ArtistaDto artistaDto, @RequestParam(value = "image", required = false) MultipartFile multipartFile,
                                  BindingResult bindingResult, RedirectAttributes redirectAttributes, Errors errors) {
 
+        final boolean isCreacion = artistaDto.getId() == null;
+        final String eventName = isCreacion ? FunctionalEventNames.ARTISTA_CREATED : FunctionalEventNames.ARTISTA_UPDATED;
+
         if (bindingResult.hasErrors()) {
+            functionalEventTracker.track(
+                    eventName,
+                    FunctionalEventOutcome.FAILURE,
+                    user != null ? user.getUserId() : null,
+                    user != null && user.getUsuario() != null ? user.getUsuario().getUsername() : null,
+                    Map.of("reason", "validation")
+            );
             getModelAttributeDetail(model, artistaDto);
 
             return "artista-detail";
@@ -202,6 +217,14 @@ public class ArtistaController {
                 this.artistaService.saveArtista(artistaDto);
             }
 
+            functionalEventTracker.track(
+                    eventName,
+                    FunctionalEventOutcome.SUCCESS,
+                    user != null ? user.getUserId() : null,
+                    user != null && user.getUsuario() != null ? user.getUsuario().getUsername() : null,
+                    Map.of("artista_id", artista.getId())
+            );
+
             redirectAttributes.addFlashAttribute("message", "Artista guardado correctamente");
             redirectAttributes.addFlashAttribute("alertClass", "success");
 
@@ -210,6 +233,13 @@ public class ArtistaController {
 
         } catch (Exception e){
             log.error("Error guardando artista", e);
+            functionalEventTracker.track(
+                    eventName,
+                    FunctionalEventOutcome.FAILURE,
+                    user != null ? user.getUserId() : null,
+                    user != null && user.getUsuario() != null ? user.getUsuario().getUsername() : null,
+                    Map.of("reason", "unexpected_error")
+            );
             model.addAttribute("message", "Error guardando artista");
             model.addAttribute("alertClass", "danger");
             addTarifaAnualModelAttribute(model, artistaDto.getId());

@@ -2,6 +2,9 @@ package es.musicalia.gestmusica.auth.model;
 
 import es.musicalia.gestmusica.localizacion.LocalizacionService;
 import es.musicalia.gestmusica.mail.EmailTemplateEnum;
+import es.musicalia.gestmusica.observabilidad.FunctionalEventNames;
+import es.musicalia.gestmusica.observabilidad.FunctionalEventOutcome;
+import es.musicalia.gestmusica.observabilidad.FunctionalEventTracker;
 import es.musicalia.gestmusica.usuario.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -25,12 +28,14 @@ public class AuthController {
     private final CodigoVerificacionService codigoVerificacionService;
     private final LocalizacionService localizacionService;
     private final SecurityService securityService;
+    private final FunctionalEventTracker functionalEventTracker;
 
-    public AuthController(UserService userService, CodigoVerificacionService codigoVerificacionService, LocalizacionService localizacionService, SecurityService securityService){
+    public AuthController(UserService userService, CodigoVerificacionService codigoVerificacionService, LocalizacionService localizacionService, SecurityService securityService, FunctionalEventTracker functionalEventTracker){
         this.userService = userService;
         this.codigoVerificacionService = codigoVerificacionService;
         this.localizacionService = localizacionService;
         this.securityService = securityService;
+        this.functionalEventTracker = functionalEventTracker;
     }
 
     @GetMapping(value = "/login")
@@ -72,20 +77,48 @@ public class AuthController {
         }
 
         if (bindingResult.hasErrors()) {
+            functionalEventTracker.track(
+                    FunctionalEventNames.AUTH_REGISTRATION_SUBMITTED,
+                    FunctionalEventOutcome.FAILURE,
+                    null,
+                    registrationForm.getUsername(),
+                    Map.of("reason", "validation")
+            );
             model.addAttribute("listaProvincias", this.localizacionService.findAllProvincias());
             return "registration";
         }
 
         try {
 
-            userService.saveRegistration(registrationForm);
+            Usuario usuarioRegistrado = userService.saveRegistration(registrationForm);
+            functionalEventTracker.track(
+                    FunctionalEventNames.AUTH_REGISTRATION_SUBMITTED,
+                    FunctionalEventOutcome.SUCCESS,
+                    usuarioRegistrado.getId(),
+                    usuarioRegistrado.getUsername(),
+                    Map.of("tipo_usuario", String.valueOf(registrationForm.getTipoUsuario()))
+            );
         }
         catch (EmailYaExisteException e){
+            functionalEventTracker.track(
+                    FunctionalEventNames.AUTH_REGISTRATION_SUBMITTED,
+                    FunctionalEventOutcome.FAILURE,
+                    null,
+                    registrationForm.getUsername(),
+                    Map.of("reason", "email_exists")
+            );
             bindingResult.rejectValue("email", "error.email", "El email ya está registrado por otro usuario");
             model.addAttribute("listaProvincias", this.localizacionService.findAllProvincias());
             return "registration";
         }
         catch (Exception e){
+            functionalEventTracker.track(
+                    FunctionalEventNames.AUTH_REGISTRATION_SUBMITTED,
+                    FunctionalEventOutcome.FAILURE,
+                    null,
+                    registrationForm.getUsername(),
+                    Map.of("reason", "unexpected_error")
+            );
             model.addAttribute("errors", errors);
             model.addAttribute("listaProvincias", this.localizacionService.findAllProvincias());
             log.error("Error en el guardado del registro", e);

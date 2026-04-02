@@ -9,6 +9,9 @@ import es.musicalia.gestmusica.artista.ArtistaService;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.generic.CodigoNombreRecord;
 import es.musicalia.gestmusica.localizacion.LocalizacionService;
+import es.musicalia.gestmusica.observabilidad.FunctionalEventNames;
+import es.musicalia.gestmusica.observabilidad.FunctionalEventOutcome;
+import es.musicalia.gestmusica.observabilidad.FunctionalEventTracker;
 import es.musicalia.gestmusica.usuario.UserService;
 import es.musicalia.gestmusica.util.DateUtils;
 import es.musicalia.gestmusica.util.DefaultResponseBody;
@@ -45,14 +48,16 @@ public class OcupacionController {
     private final ArtistaService artistaService;
     private final LocalizacionService localizacionService;
     private final UserService userService;
+    private final FunctionalEventTracker functionalEventTracker;
 
-    public OcupacionController(OcupacionService ocupacionService, AgenciaService agenciaService, ArtistaService artistaService, LocalizacionService localizacionService, UserService userService){
+    public OcupacionController(OcupacionService ocupacionService, AgenciaService agenciaService, ArtistaService artistaService, LocalizacionService localizacionService, UserService userService, FunctionalEventTracker functionalEventTracker){
         this.ocupacionService = ocupacionService;
 
         this.agenciaService = agenciaService;
         this.artistaService = artistaService;
         this.localizacionService = localizacionService;
         this.userService = userService;
+        this.functionalEventTracker = functionalEventTracker;
     }
 
 
@@ -134,35 +139,94 @@ public class OcupacionController {
     }
 
     @GetMapping("/anular/{id}")
-    public ResponseEntity<DefaultResponseBody> anularOcupacion(@PathVariable long id) {
+    public ResponseEntity<DefaultResponseBody> anularOcupacion(@AuthenticationPrincipal CustomAuthenticatedUser user, @PathVariable long id) {
 
-        return ResponseEntity.ok(this.ocupacionService.anularOcupacion(id));
+        DefaultResponseBody response = this.ocupacionService.anularOcupacion(id);
+
+        functionalEventTracker.track(
+                FunctionalEventNames.OCUPACION_CANCELLED,
+                response.isSuccess() ? FunctionalEventOutcome.SUCCESS : FunctionalEventOutcome.FAILURE,
+                user != null ? user.getUserId() : null,
+                user != null && user.getUsuario() != null ? user.getUsuario().getUsername() : null,
+                Map.of("ocupacion_id", id)
+        );
+
+        return ResponseEntity.ok(response);
 
     }
 
     @GetMapping("/confirmar/{id}")
-    public ResponseEntity<DefaultResponseBody> confirmarOcupacion(@PathVariable long id) {
+    public ResponseEntity<DefaultResponseBody> confirmarOcupacion(@AuthenticationPrincipal CustomAuthenticatedUser user, @PathVariable long id) {
 
-        return ResponseEntity.ok(this.ocupacionService.confirmarOcupacion(id));
+        DefaultResponseBody response = this.ocupacionService.confirmarOcupacion(id);
+
+        functionalEventTracker.track(
+                FunctionalEventNames.OCUPACION_CONFIRMED,
+                response.isSuccess() ? FunctionalEventOutcome.SUCCESS : FunctionalEventOutcome.FAILURE,
+                user != null ? user.getUserId() : null,
+                user != null && user.getUsuario() != null ? user.getUsuario().getUsername() : null,
+                Map.of("ocupacion_id", id)
+        );
+
+        return ResponseEntity.ok(response);
 
     }
 
     @PostMapping("/save")
     public ResponseEntity<?> saveOcupacion(
+            @AuthenticationPrincipal CustomAuthenticatedUser user,
             @RequestBody OcupacionSaveDto ocupacionSaveDto) {
 
+        final boolean isCreacion = ocupacionSaveDto.getId() == null;
 
         if (ocupacionService.existeOcupacionFecha(ocupacionSaveDto)) {
+            if (isCreacion) {
+                functionalEventTracker.track(
+                        FunctionalEventNames.OCUPACION_CREATED,
+                        FunctionalEventOutcome.FAILURE,
+                        user != null ? user.getUserId() : null,
+                        user != null && user.getUsuario() != null ? user.getUsuario().getUsername() : null,
+                        Map.of("reason", "ocupacion_duplicada")
+                );
+            }
             return ResponseEntity.ok(DefaultResponseBody.builder().success(false).message("Ya existe una ocupación en esa fecha").messageType("error").build());
         }
 
         try {
-            return ResponseEntity.ok(ocupacionService.saveOcupacion(ocupacionSaveDto));
+            DefaultResponseBody response = ocupacionService.saveOcupacion(ocupacionSaveDto);
+            if (isCreacion) {
+                functionalEventTracker.track(
+                        FunctionalEventNames.OCUPACION_CREATED,
+                        response.isSuccess() ? FunctionalEventOutcome.SUCCESS : FunctionalEventOutcome.FAILURE,
+                        user != null ? user.getUserId() : null,
+                        user != null && user.getUsuario() != null ? user.getUsuario().getUsername() : null,
+                        Map.of("ocupacion_id", response.getIdEntidad() != null ? response.getIdEntidad() : "")
+                );
+            }
+            return ResponseEntity.ok(response);
         }
         catch (ModificacionOcupacionException e) {
+            if (isCreacion) {
+                functionalEventTracker.track(
+                        FunctionalEventNames.OCUPACION_CREATED,
+                        FunctionalEventOutcome.FAILURE,
+                        user != null ? user.getUserId() : null,
+                        user != null && user.getUsuario() != null ? user.getUsuario().getUsername() : null,
+                        Map.of("reason", "sin_permisos")
+                );
+            }
             return ResponseEntity.ok(DefaultResponseBody.builder().success(false).message("No tiene permisos para modificar la ocupación de otros usuarios").messageType("error").build());
         }
         catch (Exception e) {
+            if (isCreacion) {
+                functionalEventTracker.track(
+                        FunctionalEventNames.OCUPACION_CREATED,
+                        FunctionalEventOutcome.FAILURE,
+                        user != null ? user.getUserId() : null,
+                        user != null && user.getUsuario() != null ? user.getUsuario().getUsername() : null,
+                        Map.of("reason", "unexpected_error")
+                );
+            }
             return ResponseEntity.ok(DefaultResponseBody.builder().success(false).message("Error inesperado al guardar").messageType("error").build());
         }
 

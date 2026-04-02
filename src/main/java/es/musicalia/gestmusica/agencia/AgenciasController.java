@@ -6,6 +6,9 @@ import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.auth.model.SecurityService;
 import es.musicalia.gestmusica.file.FileService;
 import es.musicalia.gestmusica.localizacion.LocalizacionService;
+import es.musicalia.gestmusica.observabilidad.FunctionalEventNames;
+import es.musicalia.gestmusica.observabilidad.FunctionalEventOutcome;
+import es.musicalia.gestmusica.observabilidad.FunctionalEventTracker;
 import es.musicalia.gestmusica.tarifa.TarifaService;
 import es.musicalia.gestmusica.usuario.TipoUsuarioEnum;
 import es.musicalia.gestmusica.usuario.UserService;
@@ -38,9 +41,10 @@ public class AgenciasController {
     private final ArtistaService artistaService;
     private final SecurityService securityService;
     private final TarifaService tarifaService;
+    private final FunctionalEventTracker functionalEventTracker;
 
     public AgenciasController(UserService userService, LocalizacionService localizacionService, AgenciaService agenciaService, FileService fileService,
-                              ArtistaService artistaService, SecurityService securityService, TarifaService tarifaService){
+                              ArtistaService artistaService, SecurityService securityService, TarifaService tarifaService, FunctionalEventTracker functionalEventTracker){
         this.userService = userService;
         this.localizacionService = localizacionService;
         this.agenciaService = agenciaService;
@@ -48,6 +52,7 @@ public class AgenciasController {
         this.artistaService = artistaService;
         this.securityService = securityService;
         this.tarifaService = tarifaService;
+        this.functionalEventTracker = functionalEventTracker;
     }
 
     @GetMapping
@@ -95,10 +100,21 @@ public class AgenciasController {
     }
 
     @PostMapping("/guardar")
-    public String guardarAgencia(Model model, @ModelAttribute("agenciaDto") @Valid AgenciaDto agenciaDto,  @RequestParam(value = "image", required = false) MultipartFile multipartFile,
+    public String guardarAgencia(@AuthenticationPrincipal CustomAuthenticatedUser user, Model model, @ModelAttribute("agenciaDto") @Valid AgenciaDto agenciaDto,  @RequestParam(value = "image", required = false) MultipartFile multipartFile,
                                  BindingResult bindingResult, RedirectAttributes redirectAttributes, Errors errors) {
 
+        boolean isCreacion = agenciaDto.getId() == null;
+
         if (bindingResult.hasErrors()) {
+            if (isCreacion) {
+                functionalEventTracker.track(
+                        FunctionalEventNames.AGENCIA_CREATED,
+                        FunctionalEventOutcome.FAILURE,
+                        user != null ? user.getUserId() : null,
+                        user != null && user.getUsuario() != null ? user.getUsuario().getUsername() : null,
+                        Map.of("reason", "validation")
+                );
+            }
             return "agencia-detail-edit";
         }
 
@@ -123,10 +139,29 @@ public class AgenciasController {
 
             redirectAttributes.addFlashAttribute("message", "Agencia guardada correctamente");
             redirectAttributes.addFlashAttribute("alertClass", "success");
+
+            if (isCreacion) {
+                functionalEventTracker.track(
+                        FunctionalEventNames.AGENCIA_CREATED,
+                        FunctionalEventOutcome.SUCCESS,
+                        user != null ? user.getUserId() : null,
+                        user != null && user.getUsuario() != null ? user.getUsuario().getUsername() : null,
+                        Map.of("agencia_id", agencia.getId())
+                );
+            }
             return "redirect:/agencia/"+ agencia.getId();
 
         } catch (Exception e){
             log.error("Error guardando agencia", e);
+            if (isCreacion) {
+                functionalEventTracker.track(
+                        FunctionalEventNames.AGENCIA_CREATED,
+                        FunctionalEventOutcome.FAILURE,
+                        user != null ? user.getUserId() : null,
+                        user != null && user.getUsuario() != null ? user.getUsuario().getUsername() : null,
+                        Map.of("reason", "unexpected_error")
+                );
+            }
             model.addAttribute("message", "Error guardando agencia");
             model.addAttribute("alertClass", "danger");
             return "agencia-detail-edit";
@@ -170,6 +205,14 @@ public class AgenciasController {
         try {
             Agencia agencia = this.agenciaService.crearAgenciaOnboarding(onboardingDto, user.getUsuario().getId());
 
+            functionalEventTracker.track(
+                    FunctionalEventNames.AGENCIA_CREATED,
+                    FunctionalEventOutcome.SUCCESS,
+                    user.getUserId(),
+                    user.getUsuario() != null ? user.getUsuario().getUsername() : null,
+                    Map.of("agencia_id", agencia.getId(), "flow", "onboarding")
+            );
+
             // Recarga permisos del usuario actual tras onboarding exitoso
             try {
                 securityService.reloadUserAuthorities();
@@ -182,6 +225,13 @@ public class AgenciasController {
             return "redirect:/agencia/" + agencia.getId();
         } catch (RuntimeException e) {
             log.error("Error creando agencia onboarding: {}", e.getMessage());
+            functionalEventTracker.track(
+                    FunctionalEventNames.AGENCIA_CREATED,
+                    FunctionalEventOutcome.FAILURE,
+                    user.getUserId(),
+                    user.getUsuario() != null ? user.getUsuario().getUsername() : null,
+                    Map.of("reason", "runtime_error", "flow", "onboarding")
+            );
             if (e.getMessage().contains("ya tiene una agencia")) {
                 redirectAttributes.addFlashAttribute("message", "Ya tienes una agencia creada.");
                 redirectAttributes.addFlashAttribute("alertClass", "warning");
@@ -193,6 +243,13 @@ public class AgenciasController {
             return "agencia-onboarding";
         } catch (Exception e) {
             log.error("Error inesperado creando agencia onboarding", e);
+            functionalEventTracker.track(
+                    FunctionalEventNames.AGENCIA_CREATED,
+                    FunctionalEventOutcome.FAILURE,
+                    user.getUserId(),
+                    user.getUsuario() != null ? user.getUsuario().getUsername() : null,
+                    Map.of("reason", "unexpected_error", "flow", "onboarding")
+            );
             model.addAttribute("listaProvincias", this.localizacionService.findAllProvincias());
             model.addAttribute("message", "Error inesperado al crear la agencia");
             model.addAttribute("alertClass", "danger");

@@ -9,6 +9,9 @@ import es.musicalia.gestmusica.ajustes.AjustesService;
 import es.musicalia.gestmusica.artista.ArtistaService;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.localizacion.LocalizacionService;
+import es.musicalia.gestmusica.observabilidad.FunctionalEventNames;
+import es.musicalia.gestmusica.observabilidad.FunctionalEventOutcome;
+import es.musicalia.gestmusica.observabilidad.FunctionalEventTracker;
 import es.musicalia.gestmusica.permiso.PermisoService;
 import es.musicalia.gestmusica.util.DateUtils;
 import jakarta.validation.Valid;
@@ -49,10 +52,11 @@ public class ListadoController {
     private final PermisoService permisoService;
     private final ObjectMapper objectMapper;
     private final ListadoChartDataFactory listadoChartDataFactory;
+    private final FunctionalEventTracker functionalEventTracker;
 
     public ListadoController(LocalizacionService localizacionService, ListadoService listadoService, ArtistaService artistaService,
                              AgenciaService agenciaService, AjustesService ajustesService, PermisoService permisoService,
-                             ObjectMapper objectMapper, ListadoChartDataFactory listadoChartDataFactory){
+                             ObjectMapper objectMapper, ListadoChartDataFactory listadoChartDataFactory, FunctionalEventTracker functionalEventTracker){
 
         this.localizacionService = localizacionService;
         this.listadoService = listadoService;
@@ -62,6 +66,7 @@ public class ListadoController {
         this.permisoService = permisoService;
         this.objectMapper = objectMapper;
         this.listadoChartDataFactory = listadoChartDataFactory;
+        this.functionalEventTracker = functionalEventTracker;
     }
 
     @GetMapping
@@ -144,6 +149,13 @@ public class ListadoController {
         try {
             // Validar errores de binding
             if (bindingResult.hasErrors()) {
+                functionalEventTracker.track(
+                        FunctionalEventNames.LISTADO_GENERATED,
+                        FunctionalEventOutcome.FAILURE,
+                        user.getUserId(),
+                        user.getUsuario() != null ? user.getUsuario().getUsername() : null,
+                        Map.of("reason", "validation")
+                );
                 Map<String, String> errorResponse = new HashMap<>();
                 errorResponse.put("message", "Datos del formulario inválidos");
                 return ResponseEntity.badRequest()
@@ -152,6 +164,14 @@ public class ListadoController {
             }
 
             byte[] informeGenerado = this.listadoService.generarInformeListado(listadoDto, user.getUserId());
+
+            functionalEventTracker.track(
+                    FunctionalEventNames.LISTADO_GENERATED,
+                    FunctionalEventOutcome.SUCCESS,
+                    user.getUserId(),
+                    user.getUsuario() != null ? user.getUsuario().getUsername() : null,
+                    Map.of("tipo_ocupacion", String.valueOf(listadoDto.getIdTipoOcupacion()))
+            );
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);
@@ -171,6 +191,13 @@ public class ListadoController {
 
         } catch (Exception e) {
             log.error("Error generando listado", e);
+            functionalEventTracker.track(
+                    FunctionalEventNames.LISTADO_GENERATED,
+                    FunctionalEventOutcome.FAILURE,
+                    user.getUserId(),
+                    user.getUsuario() != null ? user.getUsuario().getUsername() : null,
+                    Map.of("reason", "unexpected_error")
+            );
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("message", "Error al generar el presupuesto: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

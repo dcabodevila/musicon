@@ -17,8 +17,15 @@ RUN mvn package -DskipTests
 # Usar una imagen base de Java para ejecutar la aplicación
 FROM eclipse-temurin:17-jre
 
+# Versión del agente oficial de OpenTelemetry (no vendor-specific)
+ARG OTEL_JAVA_AGENT_VERSION=2.17.0
+
 # Crear el directorio para la aplicación en el contenedor
 WORKDIR /app
+
+# Descargar el agente oficial de OpenTelemetry en una ruta estable
+RUN mkdir -p /opt/opentelemetry
+ADD https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v${OTEL_JAVA_AGENT_VERSION}/opentelemetry-javaagent.jar /opt/opentelemetry/opentelemetry-javaagent.jar
 
 # Copiar el archivo WAR generado en la fase anterior
 COPY --from=build /app/target/gestmusica.war /app/gestmusica.war
@@ -33,4 +40,5 @@ CMD ["java", \
   "-XX:InitialRAMPercentage=50.0", \
   "-XX:+UseG1GC", \
   "-XX:+ExitOnOutOfMemoryError", \
+  "-javaagent:/opt/opentelemetry/opentelemetry-javaagent.jar", \
   "-jar", "/app/gestmusica.war"]
