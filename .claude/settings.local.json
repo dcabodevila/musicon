@@ -83,7 +83,9 @@
       "Bash(find 'C:\\\\Users\\\\Sir Nolimit\\\\IdeaProjects\\\\musicon' -name eventos*.html -type f)",
       "Bash(xargs -I {} taskkill //PID {} //F)",
       "Bash(PGPASSWORD=* \"/c/Program Files/*)",
-      "Bash(claude doctor:*)"
+      "Bash(claude doctor:*)",
+      "mcp__plugin_engram_engram__mem_get_observation",
+      "mcp__plugin_engram_engram__mem_update"
     ],
     "defaultMode": "acceptEdits"
   }
