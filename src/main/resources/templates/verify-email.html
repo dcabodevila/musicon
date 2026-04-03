@@ -136,8 +136,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const messageContainer = document.getElementById('message-container');
     const codigoInput = document.getElementById('codigo');
     const emailInput = document.getElementById('email');
-    const csrfToken = /*[[${_csrf.token}]]*/ '';
-    const csrfHeaderName = /*[[${_csrf.headerName}]]*/ 'X-CSRF-TOKEN';
+    const csrfToken = /*[[${_csrf?.token}]]*/ '';
+    const csrfHeaderName = /*[[${_csrf?.headerName}]]*/ 'X-CSRF-TOKEN';
 
     // Auto-focus en el input del código
     codigoInput.focus();
