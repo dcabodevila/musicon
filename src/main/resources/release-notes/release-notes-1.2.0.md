@@ -57,7 +57,7 @@ También puedes sincronizar automáticamente tus ocupaciones con OrquestasDeGali
 Solo se procesan ocupaciones que cumplan estas condiciones:
 
 - El artista tiene activada la opción **Sincronizar ocupaciones en OrquestasDeGalicia.es**.
-- La fecha del evento está dentro de los **próximos 3 meses**, está ocupada (no reserva) y tiene Localidad y Municipio asignado (No provisional).
+- La fecha del evento está dentro de los **próximos 45 días**, está ocupada (no reserva) y tiene Localidad y Municipio asignado (No provisional).
 - Las que no hayan sido eliminadas manualmente.
 
 

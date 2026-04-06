@@ -31,7 +31,7 @@ public class OdgSincronizacionService {
         final String idEjecucion = UUID.randomUUID().toString();
         final LocalDateTime fechaEjecucion = LocalDateTime.now();
         final LocalDateTime fechaDesde = LocalDate.now().atStartOfDay();
-        final LocalDateTime fechaHasta = LocalDate.now().plusMonths(3).atTime(23, 59, 59);
+        final LocalDateTime fechaHasta = LocalDate.now().plusDays(45).atTime(23, 59, 59);
 
         log.info("Iniciando sincronización ODG. Ejecución={}, desde={}, hasta={}", idEjecucion, fechaDesde, fechaHasta);
 
