@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      class="no-js">
 
 <head>
     <meta charset="UTF-8">
@@ -30,6 +31,38 @@
 
     <th:block th:replace="~{fragments/main-template :: header-css}"></th:block>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <style>
+        /* Hero content always visible immediately */
+        .hero-logo,
+        .gsap-title-line1,
+        .gsap-title-line2,
+        .hero-subtitle {
+            opacity: 1;
+        }
+
+        /* Event cards visible by default for SEO */
+        .gsap-event-card {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Animate only if GSAP loads successfully */
+        .gsap-loaded .gsap-event-card {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        /* Reduced motion support - disable scroll animations */
+        @media (prefers-reduced-motion: reduce) {
+            .gsap-event-card,
+            .gsap-loaded .gsap-event-card {
+                opacity: 1 !important;
+                transform: none !important;
+                transition: none !important;
+                animation: none !important;
+            }
+        }
+    </style>
 </head>
 
 <body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
@@ -46,6 +79,8 @@
         </div>
     </div>
 </nav>
+
+<script>document.documentElement.classList.remove('no-js');</script>
 
 <div class="wrapper">
     <div class="main">
@@ -75,21 +110,31 @@
                     </ol>
                 </nav>
 
-                <!-- Hero -->
-                <div class="eventos-hero animate__animated animate__fadeIn">
-                    <h1 class="eventos-hero__title"
-                        th:text="${nombreArtista != null
-                            ? 'Próximas actuaciones de ' + nombreArtista
-                            : (contextoPagina == 'municipio' and provincia != null and !#strings.isEmpty(provincia)
-                                ? 'Próximas actuaciones en ' + municipio + ' (' + provincia + ')'
-                                : (contextoPagina == 'municipio'
-                                    ? 'Próximas actuaciones en ' + municipio
-                                    : (contextoPagina == 'provincia'
-                                        ? 'Próximas actuaciones en ' + provincia
-                                        : 'Próximas actuaciones musicales en España')))}">
-                        Próximas actuaciones musicales en España
-                    </h1>
-                    <p class="eventos-hero__sub">Orquestas, discotecas móviles y grupos musicales · Verbenas y fiestas populares · Actualizado diariamente</p>
+                <!-- Hero v2 con GSAP -->
+                <div class="eventos-hero-v2 js-gsap-hero">
+                    <img src="https://res.cloudinary.com/hseoceuyz/image/upload/v1760835633/landing-festia_epbr7a.png"
+                         alt="Concierto multitudinario"
+                         class="eventos-hero-v2__img js-gsap-hero-image"/>
+                    <div class="eventos-hero-v2__overlay js-gsap-hero-overlay"></div>
+                    <div class="eventos-hero-v2__content">
+                        <div class="hero-left">
+                            <img src="/logo/logo-name-transparente-alt-color.png" alt="festia.es" class="hero-logo"/>
+                        </div>
+                        <div class="hero-center">
+                            <h1 class="hero-title">
+                                <span class="gsap-title-line1"
+                                      th:text="${nombreArtista != null ? 'Próximas actuaciones de' : (contextoPagina == 'municipio' ? 'Próximas actuaciones en' : (contextoPagina == 'provincia' ? 'Próximas actuaciones en' : 'Próximas actuaciones'))}">
+                                    Próximas actuaciones
+                                </span>
+                                <span class="gsap-title-line2"
+                                      th:text="${nombreArtista != null ? nombreArtista : (contextoPagina == 'municipio' and provincia != null and !#strings.isEmpty(provincia) ? municipio + ' (' + provincia + ')' : (contextoPagina == 'municipio' ? municipio : (contextoPagina == 'provincia' ? provincia : 'musicales en España')))}">
+                                    musicales en España
+                                </span>
+                            </h1>
+                            <p class="hero-subtitle">Orquestas, discotecas móviles y grupos musicales · Verbenas y fiestas populares · Actualizado diariamente</p>
+                        </div>
+                        <div class="hero-right"></div>
+                    </div>
                 </div>
 
                 <!-- CTA representantes (solo visitantes anónimos) -->
@@ -110,7 +155,7 @@
                 </div>
 
                 <!-- Filtros -->
-                <div class="px-3 pt-3 pb-0">
+                <div class="filter-section px-3 pt-3 pb-0 js-gsap-filter">
                     <div class="card border-0 shadow-sm">
                         <div class="card-body py-3">
                             <form method="get" th:action="@{/eventos}">
@@ -173,7 +218,7 @@
                 </div>
 
                 <!-- Grid de eventos agrupados por día -->
-                <div th:if="${eventos != null and !eventos.isEmpty()}" class="px-3 pt-3 pb-0 animate__animated animate__fadeIn">
+                <div th:if="${eventos != null and !eventos.isEmpty()}" class="eventos-grid px-3 pt-3 pb-0" data-animate="stagger">
                     <div th:each="entry : ${eventosPorDia}" class="mb-4">
                         <h2 class="h6 text-muted text-uppercase fw-semibold mb-2 border-bottom pb-1"
                             th:text="${#temporals.format(entry.key, 'EEEE, d MMMM yyyy', new java.util.Locale('es', 'ES'))}">
@@ -181,7 +226,7 @@
                         </h2>
                         <div class="row g-3">
                             <div th:each="evento : ${entry.value}" class="col-12 col-sm-6 col-lg-4 col-xl-3">
-                                <div class="event-card">
+                                <div class="event-card gsap-event-card">
                                     <div class="event-card__img-wrap">
                                         <img class="event-card__img"
                                              th:if="${evento.logoArtista != null and !#strings.isEmpty(evento.logoArtista)}"
@@ -334,6 +379,8 @@
 
 <script th:src="@{/adminkit/js/app.js}"></script>
 <script th:src="@{/adminkit/flatpickr/es.js}"></script>
+<script th:src="@{/js/gsap.min.js}"></script>
+<script th:src="@{/js/gsap-scrolltrigger.min.js}"></script>
 <script type="text/javascript" th:src="@{/js/eventos.js}"></script>
 
 </body>

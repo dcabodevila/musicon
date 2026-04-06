@@ -168,7 +168,7 @@
     margin-top: 5vh;
 }
 
-.hero-logo {
+.hero-section .hero-logo {
     max-width: 400px;
     width: 90%;
     height: auto;
@@ -801,6 +801,7 @@ footer {
     box-shadow: 0 1px 6px rgba(0, 0, 0, 0.07);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     position: relative;
+    z-index: 1;
 }
 
 .event-card:hover {
@@ -1551,5 +1552,214 @@ footer {
 
     .error-page__title {
         font-size: 1.45rem;
+    }
+}
+
+/* ===== EVENTOS HERO v2 - GSAP Enhanced ===== */
+.eventos-hero-v2 {
+    position: relative;
+    height: 30vh;
+    min-height: 200px;
+    max-height: 300px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.eventos-hero-v2__img {
+    position: absolute;
+    inset: -30px;
+    width: calc(100% + 60px);
+    height: calc(100% + 60px);
+    object-fit: cover;
+    filter: brightness(0.5) saturate(1.3);
+    will-change: transform;
+}
+
+.eventos-hero-v2__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        135deg,
+        rgba(26, 26, 46, 0.75) 0%,
+        rgba(15, 52, 96, 0.55) 50%,
+        rgba(26, 26, 46, 0.65) 100%
+    );
+    z-index: 1;
+}
+
+.eventos-hero-v2__content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 1200px;
+    padding: 1rem 3rem;
+    gap: 2rem;
+}
+
+.hero-left {
+    flex: 0 0 33.333%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    opacity: 1;
+}
+
+.hero-center {
+    flex: 0 0 33.333%;
+    text-align: center;
+    opacity: 1;
+}
+
+.hero-right {
+    flex: 0 0 33.333%;
+    opacity: 1;
+}
+
+.hero-logo {
+    width: auto;
+    height: 180px;
+    max-width: 480px;
+    object-fit: contain;
+}
+
+.hero-title {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    margin-bottom: 0.5rem;
+}
+
+.gsap-title-line1,
+.gsap-title-line2 {
+    display: block;
+    font-size: clamp(1.25rem, 3vw, 2rem);
+    font-weight: 700;
+    color: white;
+    line-height: 1.2;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+}
+
+.hero-subtitle {
+    font-size: clamp(0.8rem, 1.5vw, 0.95rem);
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0;
+    line-height: 1.5;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Filter Section - always visible */
+.filter-section {
+    opacity: 1;
+    transform: translateY(0);
+    position: relative;
+    z-index: 100;
+}
+
+/* Ensure filter selects are above event cards */
+.filter-section .form-select,
+.filter-section .choices {
+    position: relative;
+    z-index: 101;
+}
+
+.filter-section .choices__list--dropdown {
+    z-index: 102;
+}
+
+/* Eventos Grid for Stagger */
+.eventos-grid {
+    /* Container for staggered animations */
+    position: relative;
+    z-index: 1;
+}
+
+/* Enhanced Event Card for GSAP */
+.eventos-grid .event-card {
+    will-change: transform, opacity;
+}
+
+/* Event cards visible by default */
+.eventos-grid .gsap-event-card {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Only hide for animation if GSAP loaded successfully */
+.gsap-loaded .eventos-grid .gsap-event-card {
+    opacity: 0;
+    transform: translateY(30px);
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+    .eventos-hero-v2 {
+        height: 25vh;
+        min-height: 180px;
+    }
+
+    .eventos-hero-v2__content {
+        flex-direction: column;
+        justify-content: center;
+        padding: 0.75rem 1.5rem;
+        gap: 0.75rem;
+    }
+
+    .hero-left,
+    .hero-center,
+    .hero-right {
+        flex: none;
+        width: 100%;
+    }
+
+    .hero-left {
+        justify-content: center;
+    }
+
+    .hero-logo {
+        height: 80px;
+        max-width: 220px;
+        margin-bottom: 0.25rem;
+    }
+
+    .gsap-title-line1,
+    .gsap-title-line2 {
+        font-size: clamp(1.1rem, 5vw, 1.5rem);
+    }
+
+    .hero-subtitle {
+        font-size: 0.8rem;
+    }
+}
+
+/* Reduced Motion Support - only for scroll animations */
+@media (prefers-reduced-motion: reduce) {
+    .eventos-hero-v2__img {
+        transform: none !important;
+    }
+
+    .eventos-grid .gsap-event-card,
+    .gsap-loaded .eventos-grid .gsap-event-card {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+        animation: none !important;
+    }
+}
+
+/* Touch Device Optimizations */
+@media (pointer: coarse) {
+    .eventos-hero-v2__img {
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        transform: none !important;
+        transition: none !important;
     }
 }
