@@ -89,7 +89,7 @@
                                         : 'Próximas actuaciones musicales en España')))}">
                         Próximas actuaciones musicales en España
                     </h1>
-                    <p class="eventos-hero__sub">Orquestas y grupos · Actualizado diariamente</p>
+                    <p class="eventos-hero__sub">Orquestas, discotecas móviles y grupos musicales · Verbenas y fiestas populares · Actualizado diariamente</p>
                 </div>
 
                 <!-- CTA representantes (solo visitantes anónimos) -->
@@ -186,12 +186,12 @@
                                         <img class="event-card__img"
                                              th:if="${evento.logoArtista != null and !#strings.isEmpty(evento.logoArtista)}"
                                              th:src="${#strings.replace(evento.logoArtista, '/upload/', '/upload/f_auto,q_auto,w_400/')}"
-                                             th:alt="${'Logo de ' + evento.nombreArtista}"
+                                             th:alt="${evento.nombreArtista + ' - Orquesta o grupo musical en concierto'}"
                                              loading="lazy">
                                         <img class="event-card__img"
                                              th:if="${evento.logoArtista == null or #strings.isEmpty(evento.logoArtista)}"
                                              th:src="@{/logo/logo_transparente.png}"
-                                             th:alt="${'Logo de ' + evento.nombreArtista}">
+                                             th:alt="${evento.nombreArtista + ' - Artista musical en actuación'}">
                                         <div class="event-card__date">
                                             <span class="event-card__date-day"
                                                   th:text="${#temporals.format(evento.fecha, 'dd')}">15</span>
@@ -298,10 +298,32 @@
                     </div>
                 </div>
 
+                <!-- Contenido SEO -->
+                <div class="px-3 pb-4" th:if="${contextoPagina == 'catalogo' or contextoPagina == null}">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body">
+                            <h2 class="h5 text-primary mb-3">Orquestas y actuaciones musicales en España</h2>
+                            <p class="text-muted small mb-2">
+                                Descubre las mejores <strong>orquestas</strong>, <strong>discotecas móviles</strong>, <strong>grupos musicales</strong> 
+                                y <strong>artistas</strong> para tus <strong>verbenas</strong>, <strong>fiestas populares</strong>, 
+                                <strong>festivales</strong> y <strong>eventos culturales</strong>. En Festia encontrarás la agenda más 
+                                completa de <strong>actuaciones en vivo</strong>, <strong>conciertos</strong> y 
+                                <strong>espectáculos musicales</strong> en toda España.
+                            </p>
+                            <p class="text-muted small mb-0">
+                                Filtra por provincia, municipio o artista para encontrar la mejor música para tu fiesta. 
+                                Desde <strong>orquestas gallegas</strong> y <strong>discotecas móviles</strong> hasta 
+                                <strong>grupos de verbena</strong>, pasando por <strong>artistas locales</strong> y 
+                                <strong>bandas nacionales</strong>.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="text-center py-4">
                     <small class="text-muted">
                         <i class="fas fa-check-circle text-success me-1"></i>
-                        Información actualizada por <strong>festia.es</strong> · Plataforma profesional de gestión de eventos musicales
+                        Información actualizada por <strong>festia.es</strong> · Plataforma profesional de gestión de orquestas y eventos musicales
                     </small>
                 </div>
 

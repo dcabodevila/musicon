@@ -4,6 +4,7 @@ import es.musicalia.gestmusica.rol.RolEnum;
 import es.musicalia.gestmusica.usuario.Usuario;
 import es.musicalia.gestmusica.usuario.UserService;
 import lombok.extern.slf4j.Slf4j;
+import org.commonmark.ext.gfm.tables.TablesExtension;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 import org.springframework.beans.factory.annotation.Value;
@@ -132,9 +133,13 @@ public class ReleaseNotesServiceImpl implements ReleaseNotesService {
                                   .replaceAll("<!--\\s*END_FOR_ROLES\\s*-->", "");
             }
 
-            // Convertir Markdown a HTML
-            Parser parser = Parser.builder().build();
-            HtmlRenderer renderer = HtmlRenderer.builder().build();
+            // Convertir Markdown a HTML con soporte para tablas
+            Parser parser = Parser.builder()
+                    .extensions(java.util.List.of(TablesExtension.create()))
+                    .build();
+            HtmlRenderer renderer = HtmlRenderer.builder()
+                    .extensions(java.util.List.of(TablesExtension.create()))
+                    .build();
             String html = renderer.render(parser.parse(markdown));
 
             // Añadir badges de roles al inicio si existen

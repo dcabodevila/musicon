@@ -3,6 +3,7 @@ package es.musicalia.gestmusica.eventopublico;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.generic.CodigoNombreRecord;
 import es.musicalia.gestmusica.localizacion.LocalizacionService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -684,7 +686,7 @@ public class EventoPublicoController {
         if (provincia != null && !provincia.isBlank()) {
             return "Eventos musicales en " + provincia + " | Festia";
         }
-        return "Próximos eventos y actuaciones musicales | Festia";
+        return "Orquestas, discotecas móviles y actuaciones musicales | Festia";
     }
 
     private String construirDescripcionListado(String provincia, String municipio, Long idArtista) {
@@ -697,7 +699,7 @@ public class EventoPublicoController {
         if (provincia != null && !provincia.isBlank()) {
             return "Agenda de actuaciones en " + provincia + ". Filtra por artista, municipio y fecha para encontrar conciertos y eventos musicales.";
         }
-        return "Agenda de próximos conciertos y actuaciones musicales en Festia. Busca por artista, localidad y fecha.";
+        return "Agenda de orquestas, discotecas móviles, verbenas y fiestas populares en toda España. Descubre actuaciones musicales, conciertos y eventos por provincia, municipio y fecha.";
     }
 
     private record MunicipioFiltro(String nombre, String provincia) {

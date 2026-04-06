@@ -250,6 +250,20 @@
                                     </div>
                                 </div>
                             </div>
+                            <!-- Sección de eventos públicos -->
+                            <div class="col-12 col-lg-12 mt-3" th:if="${artistaDto.publicarEventos}">
+                                <div class="card">
+                                    <div class="card-body text-center">
+                                        <a th:href="@{/eventos/artista/__${artistaDto.id}__}"
+                                           target="_blank"
+                                           rel="noopener noreferrer"
+                                           class="btn btn-pill btn-primary">
+                                            <i class="fas fa-external-link-alt"></i>
+                                            Ver eventos de <span th:text="${artistaDto.nombre}"></span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                     </div>
