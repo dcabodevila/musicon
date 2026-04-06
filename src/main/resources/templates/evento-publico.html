@@ -153,43 +153,45 @@
 
                             <!-- Acciones -->
                             <div class="card-footer bg-white px-4 py-3">
-                                <!-- Primarias -->
-                                <div class="d-flex gap-2 mb-2 flex-wrap">
-                                    <a th:href="@{/eventos/artista/{id}(id=${evento.idArtista})}" class="btn btn-primary btn-sm">
-                                        Más de <span th:text="${evento.nombreArtista}">este artista</span>
-                                        <i class="fas fa-arrow-right ms-1"></i>
-                                    </a>
-                                    <a th:href="@{/eventos}" class="btn btn-outline-secondary btn-sm">
-                                        <i class="fas fa-arrow-left me-1"></i> Todos los eventos
-                                    </a>
-                                </div>
-                                <!-- Secundarias: compartir + calendario -->
-                                <div class="d-flex gap-2 flex-wrap">
-                                    <a href="#"
-                                       onclick="event.preventDefault(); window.open('https://wa.me/?text=' + encodeURIComponent(document.title.replace(' | Festia','') + '\n' + location.href), '_blank')"
-                                       class="btn btn-outline-success btn-sm">
-                                        <i class="fab fa-whatsapp me-1"></i> WhatsApp
-                                    </a>
-                                    <button class="btn btn-outline-secondary btn-sm"
-                                            onclick="navigator.clipboard.writeText(location.href).then(function(){var b=event.target.closest('button');var orig=b.innerHTML;b.innerHTML='<i class=\'fas fa-check me-1\'></i> Copiado';setTimeout(function(){b.innerHTML=orig},2000)})">
-                                        <i class="fas fa-link me-1"></i> Copiar enlace
-                                    </button>
-                                    <div class="dropdown">
-                                        <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <i class="fas fa-calendar-plus me-1"></i> Añadir al calendario
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <!-- Izquierda: Navegación -->
+                                    <div class="d-flex gap-2 flex-wrap">
+                                        <a th:href="@{/eventos}" class="btn btn-outline-secondary btn-sm">
+                                            <i class="fas fa-arrow-left me-1"></i> Todos los eventos
+                                        </a>
+                                        <a th:href="@{/eventos/artista/{id}(id=${evento.idArtista})}" class="btn btn-primary btn-sm">
+                                            Más de <span th:text="${evento.nombreArtista}">este artista</span>
+                                            <i class="fas fa-arrow-right ms-1"></i>
+                                        </a>
+                                    </div>
+                                    <!-- Derecha: Compartir + calendario -->
+                                    <div class="d-flex gap-2 flex-wrap">
+                                        <a href="#"
+                                           onclick="event.preventDefault(); window.open('https://wa.me/?text=' + encodeURIComponent(document.title.replace(' | Festia','') + '\n' + location.href), '_blank')"
+                                           class="btn btn-outline-success btn-sm">
+                                            <i class="fab fa-whatsapp me-1"></i> WhatsApp
+                                        </a>
+                                        <button class="btn btn-outline-secondary btn-sm"
+                                                onclick="navigator.clipboard.writeText(location.href).then(function(){var b=event.target.closest('button');var orig=b.innerHTML;b.innerHTML='<i class=\'fas fa-check me-1\'></i> Copiado';setTimeout(function(){b.innerHTML=orig},2000)})">
+                                            <i class="fas fa-link me-1"></i> Copiar enlace
                                         </button>
-                                        <ul class="dropdown-menu dropdown-menu-end">
-                                            <li>
-                                                <a class="dropdown-item" th:href="${googleCalendarUrl}" target="_blank" rel="noopener noreferrer">
-                                                    <i class="fab fa-google me-2"></i>Google Calendar
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a class="dropdown-item" th:href="@{/eventos/evento/{id}-{slug}/ical(id=${evento.id},slug=${evento.slug})}">
-                                                    <i class="fas fa-calendar me-2"></i>Apple / iCal / Outlook
-                                                </a>
-                                            </li>
-                                        </ul>
+                                        <div class="dropdown">
+                                            <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="fas fa-calendar-plus me-1"></i> Añadir al calendario
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end">
+                                                <li>
+                                                    <a class="dropdown-item" th:href="${googleCalendarUrl}" target="_blank" rel="noopener noreferrer">
+                                                        <i class="fab fa-google me-2"></i>Google Calendar
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item" th:href="@{/eventos/evento/{id}-{slug}/ical(id=${evento.id},slug=${evento.slug})}">
+                                                        <i class="fas fa-calendar me-2"></i>Apple / iCal / Outlook
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

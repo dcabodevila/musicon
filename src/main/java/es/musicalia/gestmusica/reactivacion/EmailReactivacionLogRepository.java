@@ -25,6 +25,7 @@ public interface EmailReactivacionLogRepository extends JpaRepository<EmailReact
             JOIN u.rolGeneral r
             WHERE u.activo = true
               AND u.emailVerified = true
+              AND u.validado = true
               AND u.emailBaja = false
               AND u.fechaUltimoAcceso IS NOT NULL
               AND u.fechaUltimoAcceso < :limite60dias

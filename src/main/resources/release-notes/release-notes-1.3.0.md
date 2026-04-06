@@ -12,7 +12,7 @@ Los visitantes podrán:
 - ✨ Buscar actuaciones por provincia, municipio, artista, fechas...
 - 📍 Ver la localización aproximada de la actuación
 - 🎤 Ver otros eventos del artista
-- Compartirla por Whatsapp y otras redes sociales
+- 📲 Compartir el evento por Whatsapp y otras redes sociales
 - 📅 Agendarla en su calendario personal
 
 
