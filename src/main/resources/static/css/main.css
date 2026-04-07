@@ -1662,15 +1662,44 @@ footer {
     z-index: 100;
 }
 
-/* Ensure filter selects are above event cards */
+/* Ensure filter selects stack properly */
 .filter-section .form-select,
 .filter-section .choices {
     position: relative;
+}
+
+/* Each select in the filter row needs proper z-index - descending order */
+.filter-section .row > div:nth-child(1) .choices,
+.filter-section .row > div:nth-child(1) .form-select {
+    z-index: 103;
+}
+
+.filter-section .row > div:nth-child(2) .choices,
+.filter-section .row > div:nth-child(2) .form-select {
+    z-index: 102;
+}
+
+.filter-section .row > div:nth-child(3) .choices,
+.filter-section .row > div:nth-child(3) .form-select {
     z-index: 101;
 }
 
-.filter-section .choices__list--dropdown {
-    z-index: 102;
+/* Dropdowns must be above everything when open */
+.filter-section .choices__list--dropdown,
+.filter-section .choices__list--dropdown.is-active {
+    z-index: 9999 !important;
+}
+
+.filter-section .choices.is-open {
+    z-index: 9998;
+}
+
+/* Mobile specific - ensure dropdowns work */
+@media (max-width: 768px) {
+    .filter-section .choices__list--dropdown {
+        position: absolute !important;
+        z-index: 9999 !important;
+    }
 }
 
 /* Eventos Grid for Stagger */

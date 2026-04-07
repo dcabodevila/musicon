@@ -301,7 +301,8 @@ function initCardStaggerAnimation(staggerDelay, duration, isTouch) {
     const shouldAnimate = !isTouch || eventCards.length <= 6;
 
     if (!shouldAnimate) {
-        // Cards already visible, no animation needed
+        // Make cards visible immediately without animation
+        gsap.set(eventCards, { opacity: 1, y: 0 });
         return;
     }
 
