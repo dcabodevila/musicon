@@ -13,10 +13,10 @@
     <div class="container">
         <div class="description-text" data-scroll-animate="animate__fadeInUp">
             <p>
-            Somos el punto de encuentro entre agencias, artistas y representantes donde conseguirás
-            al instante la disponibilidad, tarifas e información actualizada de los artistas.
+            Somos el punto de encuentro entre <strong>agencias</strong>, <strong>artistas</strong> y <strong>representantes</strong> donde conseguirás
+            al instante la disponibilidad, tarifas e información actualizada de orquestas, discotecas móviles y grupos musicales.
             </p>
-            <p><strong>Rápido, fácil, sin líos.</strong></p>
+            <p><strong>Rápido, fácil, sin líos.</strong> Consulta <a href="/eventos">la agenda de eventos y actuaciones</a> o gestiona tus artistas desde una misma plataforma.</p>
         </div>
     </div>
 </section>
@@ -171,9 +171,9 @@
                         <i class="fas fa-bullhorn"></i>
                     </div>
                     <div class="card-body text-center">
-                        <h3 class="feature-title">festia Eventos</h3>
-                        <p class="text-muted">Alcance extendido a través de nuestra red de eventos asociada</p>
-                        <a href="/eventos" class="btn btn-primary mt-3">Ver festia eventos</a>
+                        <h3 class="feature-title">Agenda de eventos en Festia</h3>
+                        <p class="text-muted">Tus actuaciones publicadas en nuestra agenda de orquestas, verbenas y fiestas populares, accesible por miles de personas</p>
+                        <a href="/eventos" class="btn btn-primary mt-3">Consultar agenda de eventos</a>
                     </div>
                 </div>
             </div>
@@ -456,12 +456,22 @@
         <h2 class="section-title">Sobre nosotros</h2>
         <div class="about-content" data-scroll-animate="animate__fadeInUp">
             <p>
-                <strong>festia.es</strong> nace como evolución de la plataforma Gestmusica, pionera en 1998 en la gestión de tarifas y ocupaciones.
+                <strong>festia.es</strong> nace como evolución de la plataforma Gestmusica, pionera en <strong>1998</strong> en la gestión
+                de tarifas y ocupaciones de orquestas y artistas en España. Con más de 25 años de trayectoria,
+                somos la referencia en software de gestión para el sector del espectáculo musical.
             </p>
             <p>
-                Combina el conocimiento del mundo del espectáculo de la agencia <strong>Musicalia</strong>, con más de 40 años en la organización de eventos en toda España
-                y la experiencia técnica de nuestro ingeniero de software con más de 15 años de experiencia en arquitectura, análisis y desarrollo de aplicaciones web en prestigiosas empresas del sector.
-
+                festia combina el conocimiento del mundo del espectáculo de la agencia <strong>Musicalia</strong>,
+                con más de <strong>40 años</strong> organizando eventos, verbenas y fiestas populares en toda España,
+                con la experiencia técnica de nuestro equipo de ingeniería de software, con más de
+                <strong>15 años</strong> en arquitectura y desarrollo de aplicaciones web de alto rendimiento.
+            </p>
+            <p>
+                Nuestra plataforma cubre todo el ciclo de vida de la contratación de artistas: desde la consulta de
+                <strong>tarifas actualizadas en tiempo real</strong> y la generación de <strong>presupuestos inmediatos</strong>,
+                hasta la gestión de <strong>ocupaciones y reservas</strong>, la <strong>publicación automática de actuaciones</strong>
+                en nuestro <a href="/eventos">portal de eventos</a> y en <strong>OrquestasDeGalicia.es</strong>,
+                y la <strong>gestión de accesos y permisos</strong> para equipos de agencia.
             </p>
         </div>
     </div>
@@ -470,7 +480,29 @@
 <!-- Footer -->
 <footer>
     <div class="container">
-        <p class="mb-0">&copy; 2025 festia.es</p>
+        <div class="row py-3">
+            <div class="col-12 col-md-4 mb-2">
+                <strong>festia.es</strong>
+                <p class="text-muted small mb-0">Plataforma profesional de gestión de orquestas y artistas para fiestas y eventos en España.</p>
+            </div>
+            <div class="col-12 col-md-4 mb-2">
+                <strong>Enlaces</strong>
+                <ul class="list-unstyled small mb-0">
+                    <li><a href="/eventos" class="text-muted">Agenda de orquestas y eventos</a></li>
+                    <li><a href="/eventos/provincia/Pontevedra" class="text-muted">Eventos en Pontevedra</a></li>
+                    <li><a href="/eventos/provincia/A%20Coru%C3%B1a" class="text-muted">Eventos en A Coruña</a></li>
+                </ul>
+            </div>
+            <div class="col-12 col-md-4 mb-2">
+                <strong>Contacto</strong>
+                <ul class="list-unstyled small mb-0">
+                    <li><a href="mailto:info@festia.es" class="text-muted">info@festia.es</a></li>
+                    <li><a href="https://wa.me/34609307470" class="text-muted" target="_blank">WhatsApp: 609 307 470</a></li>
+                </ul>
+            </div>
+        </div>
+        <hr class="my-2">
+        <p class="mb-0 text-center">&copy; <span th:text="${#temporals.format(#temporals.createNow(), 'yyyy')}">2026</span> festia.es</p>
     </div>
 </footer>
 

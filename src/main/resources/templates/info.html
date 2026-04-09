@@ -1,26 +1,60 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
+<html lang="es" xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
-    <title>festia.es - Gestión de artistas y eventos</title>
+    <title th:text="${titulo}">Gestión de orquestas y artistas para fiestas y eventos | festia.es</title>
     <meta charset="utf-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
-    <meta name="description" content="festia.es - El punto de encuentro entre agencias, artistas y representantes"/>
+    <meta name="description" th:content="${descripcion}"/>
+    <meta name="robots" th:content="${metaRobots}"/>
+    <link rel="canonical" th:href="${canonicalUrl}"/>
+
+    <!-- Open Graph -->
+    <meta property="og:title" th:content="${titulo}"/>
+    <meta property="og:description" th:content="${descripcion}"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:url" th:content="${canonicalUrl}"/>
+    <meta property="og:image" th:content="${ogImage}"/>
+    <meta property="og:locale" content="es_ES"/>
+    <meta property="og:site_name" content="Festia"/>
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image"/>
+    <meta name="twitter:title" th:content="${titulo}"/>
+    <meta name="twitter:description" th:content="${descripcion}"/>
+    <meta name="twitter:image" th:content="${ogImage}"/>
+
+    <!-- JSON-LD Structured Data -->
+    <script th:if="${jsonLd != null}" type="application/ld+json" th:utext="${jsonLd}"></script>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link th:href="@{/css/main.css}" rel="stylesheet"></link>
 
     <style>
-
-
+        /* H1 semántico para SEO, oculto visualmente */
+        .seo-h1 {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
     </style>
+    <th:block th:replace="~{fragments/google-analytics :: gtm-head}"/>
 
 </head>
 
 <body>
+<th:block th:replace="~{fragments/google-analytics :: gtm-body}"/>
+    <h1 class="seo-h1">Gestión de orquestas y artistas para fiestas y eventos en España | festia.es</h1>
     <div th:replace="~{info-content}"></div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>

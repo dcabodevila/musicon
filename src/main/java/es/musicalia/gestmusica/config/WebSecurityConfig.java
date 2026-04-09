@@ -68,7 +68,7 @@ public class WebSecurityConfig {
     @Order(1)
     public SecurityFilterChain eventosPublicChain(HttpSecurity http) throws Exception {
         http
-            .securityMatcher("/eventos/**", "/baja/**", "/robots.txt")
+            .securityMatcher("/eventos/**", "/info", "/baja/**", "/robots.txt")
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -77,9 +77,10 @@ public class WebSecurityConfig {
                     "default-src 'self'; " +
                         "img-src 'self' data: https: http://res.cloudinary.com; " +
                         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; " +
-                        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com; " +
+                        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://www.googletagmanager.com; " +
                         "font-src 'self' data: https://fonts.gstatic.com; " +
-                        "connect-src 'self'; " +
+                        "connect-src 'self' https://www.googletagmanager.com https://www.google-analytics.com; " +
+                        "frame-src https://www.googletagmanager.com; " +
                         "frame-ancestors 'none'; " +
                         "form-action 'self'; " +
                         "base-uri 'self'; " +
@@ -109,7 +110,6 @@ public class WebSecurityConfig {
 	                .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
 	                .requestMatchers("/error", "/403").permitAll()
 	                .requestMatchers("/auth/**").permitAll()
-                    .requestMatchers("/info**","/info").permitAll()
 					.requestMatchers("/manifest.json").permitAll()
 					.requestMatchers("/robots.txt").permitAll()
 					.requestMatchers("/release-notes/**").permitAll()

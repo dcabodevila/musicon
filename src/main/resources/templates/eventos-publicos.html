@@ -63,9 +63,11 @@
             }
         }
     </style>
+    <th:block th:replace="~{fragments/google-analytics :: gtm-head}"/>
 </head>
 
 <body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
+<th:block th:replace="~{fragments/google-analytics :: gtm-body}"/>
 
 <!-- Barra de navegación pública (solo para visitantes no autenticados) -->
 <nav class="navbar bg-white border-bottom py-2 sticky-top shadow-sm" sec:authorize="isAnonymous()">
@@ -148,7 +150,7 @@
                             <p class="eventos-cta__sub d-none d-md-block">Accede a tarifas, disponibilidad y gestión de contrataciones en tiempo real.</p>
                         </div>
                         <div class="eventos-cta__actions">
-                            <a href="/info" class="btn btn-outline-light btn-sm">Más info</a>
+                            <a href="/info" class="btn btn-outline-light btn-sm">Gestión de orquestas y tarifas</a>
                             <a th:href="@{/auth/registration}" class="btn btn-light btn-sm fw-semibold">Registrarse gratis</a>
                         </div>
                     </div>
@@ -347,19 +349,33 @@
                 <div class="px-3 pb-4" th:if="${contextoPagina == 'catalogo' or contextoPagina == null}">
                     <div class="card border-0 bg-light">
                         <div class="card-body">
-                            <h2 class="h5 text-primary mb-3">Orquestas y actuaciones musicales en España</h2>
+                            <h2 class="h5 text-primary mb-3">Agenda de orquestas, verbenas y fiestas en España</h2>
                             <p class="text-muted small mb-2">
-                                Descubre las mejores <strong>orquestas</strong>, <strong>discotecas móviles</strong>, <strong>grupos musicales</strong> 
-                                y <strong>artistas</strong> para tus <strong>verbenas</strong>, <strong>fiestas populares</strong>, 
-                                <strong>festivales</strong> y <strong>eventos culturales</strong>. En Festia encontrarás la agenda más 
-                                completa de <strong>actuaciones en vivo</strong>, <strong>conciertos</strong> y 
-                                <strong>espectáculos musicales</strong> en toda España.
+                                Festia es la <strong>agenda musical más completa de España</strong> con información actualizada diariamente.
+                                Aquí encontrarás <strong>orquestas</strong>, <strong>discotecas móviles</strong>,
+                                <strong>grupos musicales</strong> y <strong>artistas</strong> que actúan en
+                                <strong>verbenas</strong>, <strong>fiestas populares</strong>,
+                                <strong>festivales</strong> y <strong>eventos culturales</strong> por toda la geografía española.
+                            </p>
+                            <p class="text-muted small mb-2">
+                                Cada actuación incluye fecha, horario, municipio, provincia y lugar del evento, además de
+                                un enlace directo al detalle del <strong>concierto o espectáculo</strong>. Puedes filtrar fácilmente
+                                por <strong>provincia</strong>, <strong>municipio</strong> o <strong>artista</strong> para descubrir
+                                qué <strong>orquestas gallegas</strong>, <strong>bandas nacionales</strong> o
+                                <strong>artistas locales</strong> actúan cerca de ti.
+                            </p>
+                            <p class="text-muted small mb-2">
+                                Si organizas <strong>fiestas populares</strong> o <strong>verbenas</strong> y necesitas contratar artistas,
+                                en <a href="/info">Festia podrás consultar tarifas y disponibilidad en tiempo real</a>,
+                                generar <strong>presupuestos inmediatos</strong> y gestionar las <strong>ocupaciones y reservas</strong>
+                                de cada artista de forma profesional.
                             </p>
                             <p class="text-muted small mb-0">
-                                Filtra por provincia, municipio o artista para encontrar la mejor música para tu fiesta. 
-                                Desde <strong>orquestas gallegas</strong> y <strong>discotecas móviles</strong> hasta 
-                                <strong>grupos de verbena</strong>, pasando por <strong>artistas locales</strong> y 
-                                <strong>bandas nacionales</strong>.
+                                Desde <strong>orquestas tradicionales</strong> y <strong>discotecas móviles</strong> hasta
+                                <strong>grupos de verbena</strong> y <strong>artistas emergentes</strong>:
+                                la música en vivo de España, organizada y accesible para profesionales del sector y amantes
+                                de la fiesta. Los datos se actualizan <strong>cada día</strong> directamente desde las agencias
+                                y representantes que utilizan Festia como plataforma de gestión.
                             </p>
                         </div>
                     </div>
@@ -368,7 +384,7 @@
                 <div class="text-center py-4">
                     <small class="text-muted">
                         <i class="fas fa-check-circle text-success me-1"></i>
-                        Información actualizada por <strong>festia.es</strong> · Plataforma profesional de gestión de orquestas y eventos musicales
+                        Información actualizada por <a href="/info" class="text-muted"><strong>festia.es</strong></a> · Plataforma profesional de gestión de orquestas y eventos musicales
                     </small>
                 </div>
 

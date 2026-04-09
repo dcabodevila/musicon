@@ -237,6 +237,20 @@ public class EventoPublicoController {
         sitemap.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
         sitemap.append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n");
 
+        // Página de información (alta prioridad, cambia poco)
+        sitemap.append("  <url>\n");
+        sitemap.append("    <loc>").append(baseUrl).append("/info</loc>\n");
+        sitemap.append("    <changefreq>monthly</changefreq>\n");
+        sitemap.append("    <priority>0.9</priority>\n");
+        sitemap.append("  </url>\n");
+
+        // Página principal de eventos (alta prioridad, cambia diariamente)
+        sitemap.append("  <url>\n");
+        sitemap.append("    <loc>").append(baseUrl).append("/eventos</loc>\n");
+        sitemap.append("    <changefreq>daily</changefreq>\n");
+        sitemap.append("    <priority>0.9</priority>\n");
+        sitemap.append("  </url>\n");
+
         for (EventoPublicoDto evento : eventos) {
             sitemap.append("  <url>\n");
             sitemap.append("    <loc>").append(baseUrl).append(evento.getPathPublico()).append("</loc>\n");
@@ -681,25 +695,26 @@ public class EventoPublicoController {
             return "Eventos musicales por artista | Festia";
         }
         if (municipio != null && !municipio.isBlank() && provincia != null && !provincia.isBlank()) {
-            return "Eventos musicales en " + municipio + " (" + provincia + ") | Festia";
+            return "Orquestas y actuaciones en " + municipio + " (" + provincia + ") | Festia";
         }
         if (provincia != null && !provincia.isBlank()) {
-            return "Eventos musicales en " + provincia + " | Festia";
+            return "Orquestas y actuaciones en " + provincia + " | Festia";
         }
-        return "Orquestas, discotecas móviles y actuaciones musicales | Festia";
+        return "Agenda de orquestas, verbenas y fiestas en España | Festia";
     }
 
     private String construirDescripcionListado(String provincia, String municipio, Long idArtista) {
         if (idArtista != null) {
-            return "Consulta actuaciones por artista, municipio y fecha en Festia. Accede al detalle de cada concierto y evento musical.";
+            return "Consulta la agenda de actuaciones por artista. Fechas, municipios y detalles de cada concierto y evento musical en Festia.";
         }
         if (municipio != null && !municipio.isBlank() && provincia != null && !provincia.isBlank()) {
-            return "Agenda de actuaciones en " + municipio + " (" + provincia + "). Filtra por artista y fecha para encontrar conciertos y eventos musicales.";
+            return "Actuaciones y verbenas en " + municipio + " (" + provincia + "). Consulta orquestas, discotecas móviles y artistas con fechas y detalles en Festia.";
         }
         if (provincia != null && !provincia.isBlank()) {
-            return "Agenda de actuaciones en " + provincia + ". Filtra por artista, municipio y fecha para encontrar conciertos y eventos musicales.";
+            return "Agenda de orquestas y actuaciones en " + provincia + ". Filtra por municipio, artista y fecha para encontrar conciertos y fiestas populares.";
         }
-        return "Agenda de orquestas, discotecas móviles, verbenas y fiestas populares en toda España. Descubre actuaciones musicales, conciertos y eventos por provincia, municipio y fecha.";
+        return "Agenda completa de orquestas, discotecas móviles, verbenas y fiestas populares en España. " +
+            "Consulta fechas, artistas y municipios de cada actuación. Actualizado diariamente.";
     }
 
     private record MunicipioFiltro(String nombre, String provincia) {

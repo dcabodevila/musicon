@@ -31,9 +31,11 @@
 
     <th:block th:replace="~{fragments/main-template :: header-css-public}"></th:block>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <th:block th:replace="~{fragments/google-analytics :: gtm-head}"/>
 </head>
 
 <body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
+<th:block th:replace="~{fragments/google-analytics :: gtm-body}"/>
 
 <!-- Barra de navegación pública (solo para visitantes no autenticados) -->
 <nav class="navbar bg-white border-bottom py-2 sticky-top shadow-sm" sec:authorize="isAnonymous()">

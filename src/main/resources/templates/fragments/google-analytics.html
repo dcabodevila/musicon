@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!--
+  Fragmentos de Google Tag Manager para páginas públicas.
+  Se renderizan solo si la propiedad 'gtm.container-id' está configurada
+  en application.properties o application-prod.properties.
+
+  Uso en templates:
+  HEAD (antes de </head>):
+  <th:block th:replace="~{fragments/google-analytics :: gtm-head}"/>
+
+  BODY (después de <body>):
+  <th:block th:replace="~{fragments/google-analytics :: gtm-body}"/>
+
+  Configuración en application-prod.properties:
+  gtm.container-id=GTM-M6LST3P3
+-->
+<!-- Fragmento HEAD: script de GTM -->
+<th:block th:fragment="gtm-head">
+    <th:block th:if="${@environment.getProperty('gtm.container-id') != null and !@environment.getProperty('gtm.container-id').isBlank()}">
+        <!-- Google Tag Manager -->
+        <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer',/*[[${@environment.getProperty('gtm.container-id')}]]*/);</script>
+        <!-- End Google Tag Manager -->
+    </th:block>
+</th:block>
+
+<!-- Fragmento BODY: noscript de GTM -->
+<th:block th:fragment="gtm-body">
+    <th:block th:if="${@environment.getProperty('gtm.container-id') != null and !@environment.getProperty('gtm.container-id').isBlank()}">
+        <!-- Google Tag Manager (noscript) -->
+        <noscript><iframe th:src="'https://www.googletagmanager.com/ns.html?id=' + ${@environment.getProperty('gtm.container-id')}"
+        height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+        <!-- End Google Tag Manager (noscript) -->
+    </th:block>
+</th:block>
+</html>
