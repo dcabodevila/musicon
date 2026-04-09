@@ -68,7 +68,7 @@ public class WebSecurityConfig {
     @Order(1)
     public SecurityFilterChain eventosPublicChain(HttpSecurity http) throws Exception {
         http
-            .securityMatcher("/eventos/**", "/info", "/baja/**", "/robots.txt")
+            .securityMatcher("/eventos/**", "/info", "/sitemap.xml", "/baja/**", "/robots.txt")
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
