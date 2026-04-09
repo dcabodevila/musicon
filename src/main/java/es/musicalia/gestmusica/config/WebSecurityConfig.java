@@ -69,9 +69,9 @@ public class WebSecurityConfig {
     public SecurityFilterChain eventosPublicChain(HttpSecurity http) throws Exception {
         http
             .securityMatcher("/eventos/**", "/baja/**", "/robots.txt")
-            .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/eventos/**", "/baja/**")
-            )
+            .csrf(csrf -> csrf.disable())
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .headers(headers -> headers
                 .contentSecurityPolicy(csp -> csp.policyDirectives(
                     "default-src 'self'; " +
@@ -113,8 +113,6 @@ public class WebSecurityConfig {
 					.requestMatchers("/manifest.json").permitAll()
 					.requestMatchers("/robots.txt").permitAll()
 					.requestMatchers("/release-notes/**").permitAll()
-					// Permitir acceso público a eventos para indexación de Google
-					.requestMatchers("/eventos/**").permitAll()
 
 					.requestMatchers("/fragments/**", "/static/**", "/adminkit/**", "/img/**", "/logo/**", "/favicon.ico", "/js/**", "/css/**").permitAll()
 					.requestMatchers("/android-icon-*.png", "/apple-icon-*.png", "/ms-icon-*.png").permitAll()

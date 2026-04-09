@@ -33,6 +33,30 @@
 
 
 	</th:block>
+
+	<!-- Fragmento para páginas públicas (SEO, sin CSRF, sin sesiones) -->
+	<th:block th:fragment="header-css-public">
+
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta th:if="${descripcion == null}" name="description" content="Plataforma de profesionales del espectáculo">
+		<meta name="author" content="Festia">
+		<meta name="theme-color" content="#ffffff">
+	    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+		<link th:href="@{/adminkit/css/light.css}" rel="stylesheet"/>
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+		<script th:src="@{/adminkit/flatpickr/es.js}"></script>
+		<link th:href="@{/css/main.css}" rel="stylesheet"/>
+		<link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
+
+		<link rel="icon" type="image/png" sizes="192x192" th:href="@{/android-icon-192x192.png}">
+		<link rel="apple-touch-icon" sizes="180x180" th:href="@{/apple-icon-180x180.png}">
+
+
+	</th:block>
 	<style>
 		body {
 			opacity: 0;
