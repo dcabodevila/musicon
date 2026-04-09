@@ -2,10 +2,7 @@
 
 ## Project conventions
 
-- `CLAUDE.md` — minimal project instructions; delegates to global setup.
 - `arquitectura/contexto-global.md` — authoritative stack and architecture summary.
-- `doc/PIPELINE_AGENTES.md` — agent pipeline roles and flow.
-- `.claude/agents/*.md` — sub-agent definitions (bosco, susan, hackerman, travis, seymour, draymond).
 
 ## Active skills
 
@@ -33,5 +30,5 @@
 
 - SDD skills live at `~/.config/opencode/skills/sdd-*/SKILL.md` (canonical source, mirrored to `~/.claude/skills/`).
 - Project stack: Spring Boot 3.2.5 / Java 17 / Maven / Thymeleaf / JPA / PostgreSQL (+ optional MariaDB legacy).
-- Use `feature-pipeline` skill for full product-to-code flows. Use SDD phases for spec-driven technical changes.
-- Agent pipeline: bosco (Opus) → susan (Sonnet) → hackerman (Sonnet) → travis (Haiku) → seymour (Haiku).
+
+
