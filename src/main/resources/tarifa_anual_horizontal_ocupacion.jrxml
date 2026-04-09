@@ -92,6 +92,7 @@ SELECT
       CASE
         WHEN ip.tipo_incremento_id=1 AND t.importe>0 THEN to_char(t.importe + COALESCE(ip.incremento,0), 'FM999999')
         WHEN ip.tipo_incremento_id=2 AND t.importe>0 THEN to_char(t.importe + (t.importe*ip.incremento)/100.0, 'FM999999')
+        WHEN t.importe = 0 THEN '-'
         ELSE to_char(t.importe, 'FM999999')
       END
     END)
@@ -107,6 +108,7 @@ SELECT
       CASE
         WHEN ip.tipo_incremento_id=1 AND t.importe>0 THEN to_char(t.importe + COALESCE(ip.incremento,0), 'FM999999')
         WHEN ip.tipo_incremento_id=2 AND t.importe>0 THEN to_char(t.importe + (t.importe*ip.incremento)/100.0, 'FM999999')
+        WHEN t.importe = 0 THEN '-'
         ELSE to_char(t.importe, 'FM999999')
       END
     END)
@@ -122,6 +124,7 @@ SELECT
       CASE
         WHEN ip.tipo_incremento_id=1 AND t.importe>0 THEN to_char(t.importe + COALESCE(ip.incremento,0), 'FM999999')
         WHEN ip.tipo_incremento_id=2 AND t.importe>0 THEN to_char(t.importe + (t.importe*ip.incremento)/100.0, 'FM999999')
+        WHEN t.importe = 0 THEN '-'
         ELSE to_char(t.importe, 'FM999999')
       END
     END)
@@ -137,6 +140,7 @@ SELECT
       CASE
         WHEN ip.tipo_incremento_id=1 AND t.importe>0 THEN to_char(t.importe + COALESCE(ip.incremento,0), 'FM999999')
         WHEN ip.tipo_incremento_id=2 AND t.importe>0 THEN to_char(t.importe + (t.importe*ip.incremento)/100.0, 'FM999999')
+        WHEN t.importe = 0 THEN '-'
         ELSE to_char(t.importe, 'FM999999')
       END
     END)
@@ -152,6 +156,7 @@ SELECT
       CASE
         WHEN ip.tipo_incremento_id=1 AND t.importe>0 THEN to_char(t.importe + COALESCE(ip.incremento,0), 'FM999999')
         WHEN ip.tipo_incremento_id=2 AND t.importe>0 THEN to_char(t.importe + (t.importe*ip.incremento)/100.0, 'FM999999')
+        WHEN t.importe = 0 THEN '-'
         ELSE to_char(t.importe, 'FM999999')
       END
     END)
@@ -167,6 +172,7 @@ SELECT
       CASE
         WHEN ip.tipo_incremento_id=1 AND t.importe>0 THEN to_char(t.importe + COALESCE(ip.incremento,0), 'FM999999')
         WHEN ip.tipo_incremento_id=2 AND t.importe>0 THEN to_char(t.importe + (t.importe*ip.incremento)/100.0, 'FM999999')
+        WHEN t.importe = 0 THEN '-'
         ELSE to_char(t.importe, 'FM999999')
       END
     END)
@@ -182,6 +188,7 @@ SELECT
       CASE
         WHEN ip.tipo_incremento_id=1 AND t.importe>0 THEN to_char(t.importe + COALESCE(ip.incremento,0), 'FM999999')
         WHEN ip.tipo_incremento_id=2 AND t.importe>0 THEN to_char(t.importe + (t.importe*ip.incremento)/100.0, 'FM999999')
+        WHEN t.importe = 0 THEN '-'
         ELSE to_char(t.importe, 'FM999999')
       END
     END)
@@ -197,6 +204,7 @@ SELECT
       CASE
         WHEN ip.tipo_incremento_id=1 AND t.importe>0 THEN to_char(t.importe + COALESCE(ip.incremento,0), 'FM999999')
         WHEN ip.tipo_incremento_id=2 AND t.importe>0 THEN to_char(t.importe + (t.importe*ip.incremento)/100.0, 'FM999999')
+        WHEN t.importe = 0 THEN '-'
         ELSE to_char(t.importe, 'FM999999')
       END
     END)
@@ -212,6 +220,7 @@ SELECT
       CASE
         WHEN ip.tipo_incremento_id=1 AND t.importe>0 THEN to_char(t.importe + COALESCE(ip.incremento,0), 'FM999999')
         WHEN ip.tipo_incremento_id=2 AND t.importe>0 THEN to_char(t.importe + (t.importe*ip.incremento)/100.0, 'FM999999')
+        WHEN t.importe = 0 THEN '-'
         ELSE to_char(t.importe, 'FM999999')
       END
     END)
@@ -227,6 +236,7 @@ SELECT
       CASE
         WHEN ip.tipo_incremento_id=1 AND t.importe>0 THEN to_char(t.importe + COALESCE(ip.incremento,0), 'FM999999')
         WHEN ip.tipo_incremento_id=2 AND t.importe>0 THEN to_char(t.importe + (t.importe*ip.incremento)/100.0, 'FM999999')
+        WHEN t.importe = 0 THEN '-'
         ELSE to_char(t.importe, 'FM999999')
       END
     END)
@@ -242,6 +252,7 @@ SELECT
       CASE
         WHEN ip.tipo_incremento_id=1 AND t.importe>0 THEN to_char(t.importe + COALESCE(ip.incremento,0), 'FM999999')
         WHEN ip.tipo_incremento_id=2 AND t.importe>0 THEN to_char(t.importe + (t.importe*ip.incremento)/100.0, 'FM999999')
+        WHEN t.importe = 0 THEN '-'
         ELSE to_char(t.importe, 'FM999999')
       END
     END)
@@ -257,6 +268,7 @@ SELECT
       CASE
         WHEN ip.tipo_incremento_id=1 AND t.importe>0 THEN to_char(t.importe + COALESCE(ip.incremento,0), 'FM999999')
         WHEN ip.tipo_incremento_id=2 AND t.importe>0 THEN to_char(t.importe + (t.importe*ip.incremento)/100.0, 'FM999999')
+        WHEN t.importe = 0 THEN '-'
         ELSE to_char(t.importe, 'FM999999')
       END
     END)
