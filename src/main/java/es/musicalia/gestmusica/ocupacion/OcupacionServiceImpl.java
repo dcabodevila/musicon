@@ -141,12 +141,10 @@ public class OcupacionServiceImpl implements OcupacionService {
 	}
 
     private Tarifa actualizarTarifasAnularOcupacion(Tarifa oldTarifa) {
-        Tarifa nuevaTarifa = copiarTarifa(oldTarifa);
-
-        oldTarifa.setActivo(Boolean.FALSE);
-
-        this.tarifaRepository.save(oldTarifa);
-        return this.tarifaRepository.save(nuevaTarifa);
+        // Al anular una ocupación, no se crea ni se desactiva ninguna tarifa.
+        // La tarifa se mantiene activa para que el artista siga apareciendo en listados.
+        // Si otras ocupaciones comparten la tarifa, no se rompe nada.
+        return oldTarifa;
     }
 
     private static Tarifa copiarTarifa(Tarifa oldTarifa) {
@@ -155,8 +153,8 @@ public class OcupacionServiceImpl implements OcupacionService {
         nuevaTarifa.setImporte(oldTarifa.getImporte());
         nuevaTarifa.setActivo(Boolean.TRUE);
         nuevaTarifa.setFecha(oldTarifa.getFecha());
-        nuevaTarifa.setImporte(oldTarifa.getImporte());
         nuevaTarifa.setArtista(oldTarifa.getArtista());
+        nuevaTarifa.setMatinal(oldTarifa.isMatinal());
         nuevaTarifa.setUsuarioCreacion(oldTarifa.getUsuarioCreacion());
         nuevaTarifa.setFechaCreacion(oldTarifa.getFechaCreacion());
         return nuevaTarifa;
@@ -523,6 +521,13 @@ public class OcupacionServiceImpl implements OcupacionService {
 
         if (nuevaTarifa.getId()!=null && nuevaTarifa.getImporte()!=null){
             nuevaTarifa.setImporte(nuevaTarifa.getImporte());
+        } else if (nuevaTarifa.getImporte() != null) {
+            // Tarifa nueva (sin ID) que ya tiene importe copiado de otra tarifa existente
+            // Preservar el importe copiado en vez de sobrescribir con el de la ocupación
+            // Solo sobrescribir si la ocupación tiene un importe definido y diferente de cero
+            if (ocupacion.getImporte() != null && ocupacion.getImporte().compareTo(BigDecimal.ZERO) > 0) {
+                nuevaTarifa.setImporte(ocupacion.getImporte());
+            }
         } else {
             nuevaTarifa.setImporte(ocupacion.getImporte()!=null ? ocupacion.getImporte() : BigDecimal.ZERO);
         }

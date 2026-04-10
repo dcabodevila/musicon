@@ -7,6 +7,8 @@ import es.musicalia.gestmusica.localizacion.MunicipioRepository;
 import es.musicalia.gestmusica.localizacion.Provincia;
 import es.musicalia.gestmusica.localizacion.ProvinciaRepository;
 import es.musicalia.gestmusica.ocupacion.*;
+import es.musicalia.gestmusica.tarifa.Tarifa;
+import es.musicalia.gestmusica.tarifa.TarifaRepository;
 import es.musicalia.gestmusica.util.ConstantsGestmusica;
 import es.musicalia.gestmusica.util.DefaultResponseBody;
 import es.musicalia.gestmusicalegacy.ocupacion.OcupacionLegacy;
@@ -43,12 +45,13 @@ public class SincronizacionService {
     private final ProvinciaRepository provinciaRepository;
     private final MunicipioRepository municipioRepository;
     private final OcupacionRepository ocupacionRepository;
+    private final TarifaRepository tarifaRepository;
 
     @Autowired
     public SincronizacionService(
             OcupacionService ocupacionService,
             @Qualifier("ocupacionLegacyService")
-            OcupacionLegacyService ocupacionLegacyService, ArtistaRepository artistaRepository, SincronizacionRepository sincronizacionRepository, ProvinciaRepository provinciaRepository, MunicipioRepository municipioRepository, OcupacionRepository ocupacionRepository) {
+            OcupacionLegacyService ocupacionLegacyService, ArtistaRepository artistaRepository, SincronizacionRepository sincronizacionRepository, ProvinciaRepository provinciaRepository, MunicipioRepository municipioRepository, OcupacionRepository ocupacionRepository, TarifaRepository tarifaRepository) {
         this.ocupacionService = ocupacionService;
         this.ocupacionLegacyService = ocupacionLegacyService;
         this.artistaRepository = artistaRepository;
@@ -56,6 +59,7 @@ public class SincronizacionService {
         this.provinciaRepository = provinciaRepository;
         this.municipioRepository = municipioRepository;
         this.ocupacionRepository = ocupacionRepository;
+        this.tarifaRepository = tarifaRepository;
     }
 
 
@@ -144,10 +148,21 @@ public class SincronizacionService {
                 List<Ocupacion> listaOcupacionesEliminar = this.ocupacionRepository.findByIdOcupacionLegacyNotIn(fechaDesde.atStartOfDay(), listaIdsOcupaciones.get()).orElse(new ArrayList<>());
 
                 for (Ocupacion ocupacion : listaOcupacionesEliminar) {
+                    Tarifa tarifa = ocupacion.getTarifa();
                     ocupacion.setActivo(false);
                     ocupacion.setFechaModificacion(LocalDateTime.now());
                     ocupacion.setUsuarioModificacion("usuario_sincronizacion");
                     this.ocupacionRepository.save(ocupacion);
+
+                    // Bug 4 fix: desactivar tarifa huérfana si no hay otras ocupaciones activas usándola
+                    if (tarifa != null) {
+                        long ocupacionesUsandoTarifa = this.ocupacionRepository.countActivasByTarifaId(tarifa.getId());
+                        if (ocupacionesUsandoTarifa == 0) {
+                            tarifa.setActivo(false);
+                            this.tarifaRepository.save(tarifa);
+                        }
+                    }
+
                     eliminadas++;
                 }
 

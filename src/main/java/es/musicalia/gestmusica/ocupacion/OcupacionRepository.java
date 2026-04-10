@@ -100,4 +100,7 @@ public interface OcupacionRepository extends JpaRepository<Ocupacion, Long>, Jpa
 		   "group by o.artista.id, o.artista.agencia.nombre,  o.artista.nombre " +
 		   "order by GREATEST(max(o.fechaCreacion), max(o.fechaModificacion))")
 	List<ActividadRecord> findActividadOcupacionesConConteo(@Param("fechaLimite") LocalDateTime fechaLimite);
+
+	@Query("SELECT COUNT(o) FROM Ocupacion o WHERE o.tarifa.id = :tarifaId AND o.activo = true")
+	long countActivasByTarifaId(@Param("tarifaId") Long tarifaId);
 }
