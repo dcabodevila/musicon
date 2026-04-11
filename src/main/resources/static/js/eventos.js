@@ -12,6 +12,10 @@ function initDatePickers() {
         return;
     }
 
+    // Calculate max date (today + 45 days)
+    const maxDate = new Date();
+    maxDate.setDate(maxDate.getDate() + 45);
+
     const fechaHastaPicker = flatpickr(hastaInput, {
         disableMobile: true,
         locale: "es",
@@ -20,7 +24,8 @@ function initDatePickers() {
         dateFormat: "Y-m-d",
         allowInput: false,
         defaultDate: hastaInput.value || null,
-        minDate: desdeInput.value || null
+        minDate: desdeInput.value || null,
+        maxDate: maxDate
     });
 
     const fechaDesdePicker = flatpickr(desdeInput, {
@@ -31,6 +36,7 @@ function initDatePickers() {
         dateFormat: "Y-m-d",
         allowInput: false,
         defaultDate: desdeInput.value || null,
+        maxDate: maxDate,
         onChange: function (selectedDates) {
             if (!selectedDates || selectedDates.length === 0) {
                 fechaHastaPicker.set("minDate", null);
@@ -38,6 +44,12 @@ function initDatePickers() {
             }
             const desdeDate = selectedDates[0];
             fechaHastaPicker.set("minDate", desdeDate);
+            // Also update maxDate of hasta picker to not exceed 45 days from today
+            if (desdeDate > maxDate) {
+                fechaHastaPicker.set("maxDate", maxDate);
+            } else {
+                fechaHastaPicker.set("maxDate", maxDate);
+            }
         }
     });
 }
