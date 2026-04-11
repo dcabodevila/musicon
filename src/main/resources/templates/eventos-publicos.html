@@ -232,7 +232,7 @@
                                     <div class="event-card__img-wrap">
                                         <img class="event-card__img"
                                              th:if="${evento.logoArtista != null and !#strings.isEmpty(evento.logoArtista)}"
-                                             th:src="${#strings.replace(evento.logoArtista, '/upload/', '/upload/f_auto,q_auto,w_400/')}"
+                                             th:src="${#strings.replace(evento.logoArtista, '/upload/', '/upload/f_auto,q_auto,w_500,h_500,c_limit/')}"
                                              th:alt="${evento.nombreArtista + ' - Orquesta o grupo musical en concierto'}"
                                              loading="lazy">
                                         <img class="event-card__img"

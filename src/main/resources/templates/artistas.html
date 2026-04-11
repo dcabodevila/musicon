@@ -67,7 +67,7 @@
                                 <a th:href="@{/artista/__${artista.id}__}" class="artista-card__main-link">
                                     <img class="artista-card__img"
                                          th:if="${artista.logo != null}"
-                                         th:src="@{${artista.logo}}"
+                                         th:src="${#strings.replace(artista.logo, '/upload/', '/upload/f_auto,q_auto,w_500,h_500,c_limit/')}"
                                          th:alt="${artista.nombre}"
                                          loading="lazy">
                                     <img class="artista-card__img"
