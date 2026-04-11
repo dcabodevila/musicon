@@ -1,3 +1,14 @@
+// Initialize Notyf with custom types before anything else
+window.notyf = window.notyf || new Notyf({
+    types: [
+        {
+            type: 'secondary',
+            background: '#6c757d',
+            icon: false
+        }
+    ]
+});
+
 (() => {
     'use strict';
 

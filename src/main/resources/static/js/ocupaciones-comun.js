@@ -219,7 +219,7 @@ function obtenerOcupacionDto(idOcupacion) {
 
     if (idOcupacion){
 
-        $.ajax({
+        return $.ajax({
             url: '/ocupacion/get/' + idOcupacion,
             method: 'GET',
             dataType: 'json',
@@ -281,14 +281,27 @@ function obtenerOcupacionDto(idOcupacion) {
                     $('#btn-actualizar-orquestas').show();
                     $('#btn-eliminar-orquestas').show();
 
-                }
-                else{
+                } else {
                     $('#btn-publicar-orquestas').show();
 
                     if (ocupacionDto.id != null){
                         $('#btn-actualizar-orquestas').hide();
                         $('#btn-eliminar-orquestas').hide();
                     }
+                }
+
+                // Gestionar visibilidad del botón toggle visibilidad
+                $('#btn-toggle-visibilidad').data('id-ocupacion', ocupacionDto.id);
+                if (ocupacionDto.eventoVisible) {
+                    // Evento visible → botón gris (secondary) con ojo tachado (ocultar)
+                    $('#btn-toggle-visibilidad').removeClass('btn-success').addClass('btn-secondary');
+                    $('#btn-toggle-visibilidad').find('i').removeClass('fa-eye').addClass('fa-eye-slash');
+                    $('#btn-toggle-visibilidad').attr('title', 'Ocultar en festia eventos');
+                } else {
+                    // Evento oculto → botón verde (success) con ojo (mostrar)
+                    $('#btn-toggle-visibilidad').removeClass('btn-secondary').addClass('btn-success');
+                    $('#btn-toggle-visibilidad').find('i').removeClass('fa-eye-slash').addClass('fa-eye');
+                    $('#btn-toggle-visibilidad').attr('title', 'Mostrar en festia eventos');
                 }
 
             },
@@ -299,6 +312,7 @@ function obtenerOcupacionDto(idOcupacion) {
         });
     } else {
         mostrarOcultarBotonesModalOcupacion(null);
+        return null;
     }
 }
 
@@ -486,3 +500,46 @@ function eliminarDeOrquestasDeGalicia() {
 
 
 
+function toggleVisibilidadEvento(idOcupacion) {
+    $.ajax({
+        url: '/ocupacion/visibilidad/' + idOcupacion,
+        type: 'POST',
+        success: function(response) {
+            if (response.success) {
+                // Toggle button state
+                const btn = $('#btn-toggle-visibilidad');
+                const isCurrentlyVisible = btn.find('i').hasClass('fa-eye');
+                let newTitle;
+
+                // isCurrentlyVisible = true means fa-eye (event was visible, clicking HIDE it)
+                // isCurrentlyVisible = false means fa-eye-slash (event was hidden, clicking SHOW it)
+                if (isCurrentlyVisible) {
+                    // Was visible (green+eye), will become hidden (gray+eye-slash)
+                    btn.removeClass('btn-success').addClass('btn-secondary');
+                    btn.find('i').removeClass('fa-eye').addClass('fa-eye-slash');
+                    newTitle = 'Ocultar en festia eventos';
+                } else {
+                    // Was hidden (gray+eye-slash), will become visible (green+eye)
+                    btn.removeClass('btn-secondary').addClass('btn-success');
+                    btn.find('i').removeClass('fa-eye-slash').addClass('fa-eye');
+                    newTitle = 'Mostrar en festia eventos';
+                }
+
+                // Destroy existing tooltip and update title for next hover
+                const tooltip = bootstrap.Tooltip.getInstance(btn[0]);
+                if (tooltip) {
+                    tooltip.dispose();
+                }
+                btn.attr('title', newTitle);
+                new bootstrap.Tooltip(btn[0]);
+
+                notif(response.messageType, response.message);
+            } else {
+                notif('error', response.message);
+            }
+        },
+        error: function() {
+            notif('error', 'Error al cambiar la visibilidad del evento');
+        }
+    });
+}

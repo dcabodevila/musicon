@@ -198,12 +198,12 @@
                                     <div class="col-6 col-md-4">
                                         <label for="idFechaDesde" class="form-label small text-muted mb-1">Desde</label>
                                         <input id="idFechaDesde" type="date" class="form-control form-control-sm" name="desde"
-                                               th:value="${fechaDesde}" th:max="${fechaHasta}">
+                                               th:value="${fechaDesde}" th:max="${fechaMaxFiltro}">
                                     </div>
                                     <div class="col-6 col-md-4">
                                         <label for="idFechaHasta" class="form-label small text-muted mb-1">Hasta</label>
                                         <input id="idFechaHasta" type="date" class="form-control form-control-sm" name="hasta"
-                                               th:value="${fechaHasta}" th:min="${fechaDesde}">
+                                               th:value="${fechaHasta}" th:min="${fechaDesde}" th:max="${fechaMaxFiltro}">
                                     </div>
                                     <div class="col-12 col-md-4 d-flex align-items-end gap-2">
                                         <button type="submit" class="btn btn-primary btn-sm flex-grow-1">

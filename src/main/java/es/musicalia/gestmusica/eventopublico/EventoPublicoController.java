@@ -341,7 +341,7 @@ public class EventoPublicoController {
         log.info("Listando todos los eventos publicos");
 
         LocalDate fechaDesde = LocalDate.now();
-        LocalDate fechaHasta = null;
+        LocalDate fechaHasta = LocalDate.now().plusDays(45);
 
         try {
             if (desde != null && !desde.isBlank()) {
@@ -395,6 +395,7 @@ public class EventoPublicoController {
         model.addAttribute("descripcion", descripcion);
         model.addAttribute("fechaDesde", fechaDesde.toString());
         model.addAttribute("fechaHasta", fechaHasta != null ? fechaHasta.toString() : null);
+        model.addAttribute("fechaMaxFiltro", LocalDate.now().plusDays(45).toString());
         model.addAttribute("canonicalUrl", canonicalUrl);
         model.addAttribute("metaRobots", noIndex ? "noindex,follow" : "index,follow");
         model.addAttribute("provincia", provincia);

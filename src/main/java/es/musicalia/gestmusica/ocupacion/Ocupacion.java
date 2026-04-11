@@ -137,5 +137,8 @@ public class Ocupacion {
     @Column(name = "hora_actuacion_hasta")
     private LocalTime horaActuacionHasta;
 
+    @Column(name = "evento_visible")
+    private boolean eventoVisible = true;
+
 }
 

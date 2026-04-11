@@ -54,4 +54,6 @@ public class OcupacionSaveDto {
 
     private LocalTime horaActuacionHasta;
 
+    private Boolean eventoVisible = Boolean.TRUE;
+
 }

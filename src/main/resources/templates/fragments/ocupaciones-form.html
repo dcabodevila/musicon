@@ -188,6 +188,14 @@
                           <i class="fas fa-trash-alt"></i>
                         </button>
                       </div>
+                      <div th:if="${isArtistaPublicarEventos == true}" class="d-flex flex-column gap-2">
+                        <button type="button" id="btn-toggle-visibilidad"
+                                th:classappend="${ocupacionDto.eventoVisible} ? 'btn btn-secondary' : 'btn btn-success'"
+                                th:title="${ocupacionDto.eventoVisible} ? 'Ocultar en festia eventos' : 'Mostrar en festia eventos'"
+                                th:attr="data-id-ocupacion=${ocupacionDto.id}">
+                          <i class="fas" th:classappend="${ocupacionDto.eventoVisible} ? 'fa-eye-slash' : 'fa-eye'"></i>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

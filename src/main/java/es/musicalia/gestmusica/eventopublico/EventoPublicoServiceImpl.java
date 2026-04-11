@@ -41,6 +41,7 @@ public class EventoPublicoServiceImpl implements EventoPublicoService {
         return ocupacion
             .filter(o -> OcupacionEstadoEnum.OCUPADO.getId().equals(o.getOcupacionEstado().getId()))
             .filter(Ocupacion::isActivo)
+            .filter(Ocupacion::isEventoVisible)
             .filter(o -> o.getArtista() != null && o.getArtista().isActivo())
             .filter(o -> o.getArtista() != null && o.getArtista().isPublicarEventos())
             .map(this::convertirAEventoPublico);
@@ -94,6 +95,7 @@ public class EventoPublicoServiceImpl implements EventoPublicoService {
         spec = spec.and((root, query, cb) ->
             cb.equal(root.get("ocupacionEstado").get("id"), OcupacionEstadoEnum.OCUPADO.getId()));
         spec = spec.and((root, query, cb) -> cb.isTrue(root.get("activo")));
+        spec = spec.and((root, query, cb) -> cb.isTrue(root.get("eventoVisible")));
         spec = spec.and((root, query, cb) -> cb.isTrue(root.get("artista").get("activo")));
         spec = spec.and((root, query, cb) -> cb.isTrue(root.get("artista").get("publicarEventos")));
         spec = spec.and((root, query, cb) -> cb.isNotNull(root.get("municipio")));
@@ -162,6 +164,7 @@ public class EventoPublicoServiceImpl implements EventoPublicoService {
         spec = spec.and((root, query, cb) ->
             cb.equal(root.get("ocupacionEstado").get("id"), OcupacionEstadoEnum.OCUPADO.getId()));
         spec = spec.and((root, query, cb) -> cb.isTrue(root.get("activo")));
+        spec = spec.and((root, query, cb) -> cb.isTrue(root.get("eventoVisible")));
         spec = spec.and((root, query, cb) -> cb.isTrue(root.get("artista").get("activo")));
         spec = spec.and((root, query, cb) -> cb.isTrue(root.get("artista").get("publicarEventos")));
         spec = spec.and((root, query, cb) -> cb.isNotNull(root.get("municipio")));

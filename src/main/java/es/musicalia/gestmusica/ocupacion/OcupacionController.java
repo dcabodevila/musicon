@@ -359,6 +359,19 @@ public class OcupacionController {
         }
     }
 
+    @PostMapping("/visibilidad/{idOcupacion}")
+    public ResponseEntity<DefaultResponseBody> toggleVisibilidadEvento(@PathVariable long idOcupacion) {
+        try {
+            return ResponseEntity.ok(this.ocupacionService.toggleVisibilidadEvento(idOcupacion));
+        } catch (Exception e) {
+            return ResponseEntity.ok(DefaultResponseBody.builder()
+                    .success(false)
+                    .message("Error al cambiar visibilidad del evento: " + e.getMessage())
+                    .messageType("error")
+                    .build());
+        }
+    }
+
     @PostMapping("/ocupaciones-excel")
     public ResponseEntity<byte[]> exportarOcupacionesExcel(@AuthenticationPrincipal CustomAuthenticatedUser user,
                                                             @ModelAttribute OcupacionListFilterDto ocupacionListFilterDto) {

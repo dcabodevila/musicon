@@ -58,4 +58,11 @@ function inicializarForm(){
     });
     obtenerOcupacionDto($('#id-ocupacion').val());
 
+    $("#btn-toggle-visibilidad").click(function (event) {
+        const idOcupacion = $(this).data('id-ocupacion');
+        if (!idOcupacion) {
+            return;
+        }
+        toggleVisibilidadEvento(idOcupacion);
+    });
 }

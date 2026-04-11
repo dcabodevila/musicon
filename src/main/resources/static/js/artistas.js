@@ -117,8 +117,9 @@ $(document).ready(function(){
                             const id = info.event.id;
                             pickerFechaOcupacion.setDate(moment(info.event.start).format('DD-MM-YYYY'));
 
-                            let ocupacionDto = obtenerOcupacionDto(info.event.id);
-                            $('#modalNuevaOcupacion').modal('toggle');
+                            obtenerOcupacionDto(info.event.id).done(function() {
+                                $('#modalNuevaOcupacion').modal('toggle');
+                            });
 
                           }
                       })
@@ -239,6 +240,14 @@ $(document).ready(function(){
             }
 
         });
+    });
+
+    $(document).on('click', '#btn-toggle-visibilidad', function (event) {
+        const idOcupacion = $(event.currentTarget).data('id-ocupacion');
+        if (!idOcupacion) {
+            return;
+        }
+        toggleVisibilidadEvento(idOcupacion);
     });
 
     $("#btnModalNuevaOcupacion").click(function (event) {
@@ -792,13 +801,13 @@ function cargarTarifaFecha(idArtista, fecha){
     });
 }
 
-    function resaltarBotonNuevaTarifa(isResaltar) {
+function resaltarBotonNuevaTarifa(isResaltar) {
 
-        if (isResaltar){
-            $('#btnNuevaTarifa').addClass('tutorial-focus');
-        }
-        else {
-            $('#btnNuevaTarifa').removeClass('tutorial-focus');
-        }
-
+    if (isResaltar){
+        $('#btnNuevaTarifa').addClass('tutorial-focus');
     }
+    else {
+        $('#btnNuevaTarifa').removeClass('tutorial-focus');
+    }
+
+}

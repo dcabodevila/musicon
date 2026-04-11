@@ -314,6 +314,9 @@ public class OcupacionServiceImpl implements OcupacionService {
 		if (ocupacion.getIdOcupacionLegacy()==null) {
 			ocupacion.setIdOcupacionLegacy(ocupacionSaveDto.getIdOcupacionLegacy());
 		}
+		if (ocupacionSaveDto.getEventoVisible() != null) {
+			ocupacion.setEventoVisible(ocupacionSaveDto.getEventoVisible());
+		}
 		ocupacion.setActivo(true);
 
 		return this.ocupacionRepository.save(ocupacion);
@@ -805,6 +808,24 @@ public class OcupacionServiceImpl implements OcupacionService {
 
 
         return response ;
+    }
+
+    @Transactional
+    @Override
+    public DefaultResponseBody toggleVisibilidadEvento(Long idOcupacion) {
+        final Ocupacion ocupacion = this.ocupacionRepository.findById(idOcupacion).orElseThrow();
+
+        boolean nuevaVisibilidad = !ocupacion.isEventoVisible();
+        ocupacion.setEventoVisible(nuevaVisibilidad);
+        this.ocupacionRepository.save(ocupacion);
+
+        String mensaje = nuevaVisibilidad ? "Evento visible en /eventos" : "Evento oculto de /eventos";
+        return DefaultResponseBody.builder()
+                .success(true)
+                .message(mensaje)
+                .messageType(nuevaVisibilidad ? "success" : "warning")
+                .idEntidad(idOcupacion)
+                .build();
     }
 
 	@Override

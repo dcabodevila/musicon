@@ -47,6 +47,9 @@ public interface OcupacionService {
     @Transactional
     DefaultResponseBody eliminarOcupacionOrquestasDeGalicia(Long idOcupacion);
 
+    @Transactional
+    DefaultResponseBody toggleVisibilidadEvento(Long idOcupacion);
+
     ByteArrayOutputStream exportOcupacionesToExcel(CustomAuthenticatedUser user, OcupacionListFilterDto ocupacionListFilterDto);
 
     byte[] exportOcupacionesToPDF(CustomAuthenticatedUser user, OcupacionListFilterDto ocupacionListFilterDto);
