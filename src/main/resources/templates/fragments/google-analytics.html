@@ -16,23 +16,23 @@
   gtm.container-id=GTM-M6LST3P3
 -->
 <!-- Fragmento HEAD: script de GTM -->
-<th:block th:fragment="gtm-head">
-    <th:block th:if="${@environment.getProperty('gtm.container-id') != null and !@environment.getProperty('gtm.container-id').isBlank()}">
+<th:block th:fragment="gtm-head" th:with="gtmId=${@environment.getProperty('gtm.container-id')}">
+    <th:block th:if="${gtmId != null and !gtmId.isBlank() and gtmId != 'undefined'}">
         <!-- Google Tag Manager -->
         <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
         new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
         j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-        })(window,document,'script','dataLayer',/*[[${@environment.getProperty('gtm.container-id')}]]*/);</script>
+        })(window,document,'script','dataLayer','[[${gtmId}]]');</script>
         <!-- End Google Tag Manager -->
     </th:block>
 </th:block>
 
 <!-- Fragmento BODY: noscript de GTM -->
-<th:block th:fragment="gtm-body">
-    <th:block th:if="${@environment.getProperty('gtm.container-id') != null and !@environment.getProperty('gtm.container-id').isBlank()}">
+<th:block th:fragment="gtm-body" th:with="gtmId=${@environment.getProperty('gtm.container-id')}">
+    <th:block th:if="${gtmId != null and !gtmId.isBlank() and gtmId != 'undefined'}">
         <!-- Google Tag Manager (noscript) -->
-        <noscript><iframe th:src="'https://www.googletagmanager.com/ns.html?id=' + ${@environment.getProperty('gtm.container-id')}"
+        <noscript><iframe th:src="'https://www.googletagmanager.com/ns.html?id=[[${gtmId}]]'"
         height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <!-- End Google Tag Manager (noscript) -->
     </th:block>
