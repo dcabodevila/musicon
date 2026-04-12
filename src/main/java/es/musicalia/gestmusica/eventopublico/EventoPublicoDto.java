@@ -75,7 +75,7 @@ public class EventoPublicoDto {
 
         Map<String, Object> location = new LinkedHashMap<>();
         location.put("@type", "Place");
-        location.put("name", lugar);
+        location.put("name", getLugarDisplay() != null ? getLugarDisplay() : lugar);
 
         Map<String, Object> address = new LinkedHashMap<>();
         address.put("@type", "PostalAddress");
