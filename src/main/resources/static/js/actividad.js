@@ -64,14 +64,8 @@ $(document).ready(function() {
             language: {
                 url: "https://cdn.datatables.net/plug-ins/1.13.1/i18n/es-ES.json"
             },
-            columnDefs: [
-                {
-                    targets: 2,
-                    type: 'date-eu'
-                }
-            ],
             order: [
-                [3, 'asc']  // Ordenar por "Nº actualizaciones último mes" ascendente por defecto
+                [2, 'desc']  // Ordenar por "Última actualización" descendente por defecto
             ]
         });
 
@@ -85,14 +79,8 @@ $(document).ready(function() {
             language: {
                 url: "https://cdn.datatables.net/plug-ins/1.13.1/i18n/es-ES.json"
             },
-            columnDefs: [
-                {
-                    targets: 2,
-                    type: 'date-eu'
-                }
-            ],
             order: [
-                [3, 'asc']  // Ordenar por "Nº actualizaciones último mes" ascendente por defecto
+                [2, 'desc']  // Ordenar por "Última actualización" descendente por defecto
             ]
         });
 });

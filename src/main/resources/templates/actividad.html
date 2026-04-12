@@ -190,10 +190,11 @@
                                                     <tr th:each="actividad : ${actividadTarifas}">
                                                         <td th:text="${actividad.nombreAgencia}"></td>
                                                         <td th:text="${actividad.nombreArtista}"></td>
-                                                        <td th:text="${actividad.fecha != null ? #temporals.format(actividad.fecha, 'dd/MM/yyyy HH:mm') : 'Sin fecha'}"></td>
-                                                        <td th:text="${actividad.numeroActualizacionesMes}"></td>
-                                                    </tr>
-                                                    <tr th:if="${#lists.isEmpty(actividadTarifas)}">
+<td th:text="${actividad.fecha != null ? #temporals.format(actividad.fecha, 'dd/MM/yyyy HH:mm') : 'Sin fecha'}"
+                                th:data-order="${actividad.fecha != null ? #temporals.format(actividad.fecha, 'yyyy-MM-ddHH:mm:ss') : '0'}"></td>
+                            <td th:text="${actividad.numeroActualizacionesMes}"></td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(actividadTarifas)}">
                                                         <td colspan="4" class="text-center text-muted">No hay datos de actividad de tarifas disponibles</td>
                                                     </tr>
                                                 </tbody>
@@ -228,10 +229,11 @@
                                                     <tr th:each="actividad : ${actividadOcupaciones}">
                                                         <td th:text="${actividad.nombreAgencia}"></td>
                                                         <td th:text="${actividad.nombreArtista}"></td>
-                                                        <td th:text="${actividad.fecha != null ? #temporals.format(actividad.fecha, 'dd/MM/yyyy HH:mm') : 'Sin fecha'}"></td>
-                                                        <td th:text="${actividad.numeroActualizacionesMes}"></td>
-                                                    </tr>
-                                                    <tr th:if="${#lists.isEmpty(actividadOcupaciones)}">
+<td th:text="${actividad.fecha != null ? #temporals.format(actividad.fecha, 'dd/MM/yyyy HH:mm') : 'Sin fecha'}"
+                                th:data-order="${actividad.fecha != null ? #temporals.format(actividad.fecha, 'yyyy-MM-ddHH:mm:ss') : '0'}"></td>
+                            <td th:text="${actividad.numeroActualizacionesMes}"></td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(actividadOcupaciones)}">
                                                         <td colspan="4" class="text-center text-muted">No hay datos de actividad de ocupaciones disponibles</td>
                                                     </tr>
                                                 </tbody>
