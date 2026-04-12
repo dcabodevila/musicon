@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.generic.CodigoNombreRecord;
+import es.musicalia.gestmusica.localizacion.Provincia;
 import es.musicalia.gestmusica.localizacion.LocalizacionService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -29,13 +30,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -46,6 +41,98 @@ public class EventoPublicoController {
     private static final String EVENT_IMAGE_URL =
         "https://res.cloudinary.com/hseoceuyz/image/upload/v1760835633/landing-festia_epbr7a.png";
     private static final String ORGANIZER_NAME_FALLBACK = "festia.es";
+
+    // Textos SEO únicos por provincia
+    private static final Map<String, String> TEXTOS_PROVINCIA = new HashMap<>();
+    static {
+        // Galicia
+        TEXTOS_PROVINCIA.put("Coruña", "Consulta las próximas fiestas y verbenas en A Coruña. Encuentra orquestas gallegas, discotecas móviles y grupos musicales con fechas confirmadas en los municipios de la provincia.");
+        TEXTOS_PROVINCIA.put("Lugo", "Descubre las actuaciones musicales programadas en Lugo. Orquestas gallegas, bandas de verbena y artistas en fiestas populares de los municipios de la provincia.");
+        TEXTOS_PROVINCIA.put("Ourense", "Agenda de conciertos y actuaciones en Ourense. Consulta las fechas de orquestas, grupos musicales y discotecas móviles en los municipios de la provincia para las fiestas.");
+        TEXTOS_PROVINCIA.put("Pontevedra", "Consulta las próximas fiestas y verbenas en Pontevedra. Encuentra orquestas gallegas, discotecas móviles y grupos musicales con fechas confirmadas  en los municipios de la provincia.");
+
+        // Principado de Asturias
+        TEXTOS_PROVINCIA.put("Asturias", "Programación de orquestas y grupos musicales en Asturias. Fiestas populares, verbenas y eventos culturales con artistas confirmados en los concejos del principado.");
+
+        // Cantabria
+        TEXTOS_PROVINCIA.put("Cantabria", "Actuaciones musicales en Cantabria. Consulta la agenda de orquestas, grupos y artistas para fiestas populares y verbenas en los municipios de la comunidad.");
+
+        // País Vasco
+        TEXTOS_PROVINCIA.put("Álava", "Fiestas y verbenas en Álava con orquestas y grupos musicales. Consulta fechas, municipios y artistas confirmados para las celebraciones de la provincia.");
+        TEXTOS_PROVINCIA.put("Bizkaia", "Agenda musical de Bizkaia. Orquestas, grupos y artistas en las fiestas populares y verbenas de los municipios de la provincia.");
+        TEXTOS_PROVINCIA.put("Gipuzkoa", "Programación de fiestas en Gipuzkoa. Descubre las orquestas, bandas y grupos musicales en los municipios de la provincia para las celebraciones.");
+
+        // Navarra
+        TEXTOS_PROVINCIA.put("Navarra", "Verbenas y fiestas populares en Navarra. Consulta las actuaciones de orquestas y grupos musicales programadas en los municipios de la comunidad.");
+
+        // La Rioja
+        TEXTOS_PROVINCIA.put("La Rioja", "Agenda de conciertos y verbenas en La Rioja. Orquestas, artistas y grupos musicales en las fiestas populares de los municipios de la comunidad.");
+
+        // Castilla y León
+        TEXTOS_PROVINCIA.put("León", "Fiestas y verbenas en León con orquestas y grupos musicales. Consulta fechas, municipios y artistas confirmados para las celebraciones de la provincia.");
+        TEXTOS_PROVINCIA.put("Zamora", "Agenda musical de Zamora. Orquestas, grupos folklóricos y artistas en las fiestas populares y verbenas de los municipios de la provincia.");
+        TEXTOS_PROVINCIA.put("Salamanca", "Conciertos y actuaciones en Salamanca. Descubre las orquestas, bandas y grupos musicales programados en las fiestas de los municipios de la provincia.");
+        TEXTOS_PROVINCIA.put("Burgos", "Programación de fiestas en Burgos. Orquestas, discotecas móviles y grupos musicales con fechas confirmadas en los municipios de la provincia.");
+        TEXTOS_PROVINCIA.put("Palencia", "Verbenas y fiestas populares en Palencia. Consulta las actuaciones de orquestas y grupos musicales programadas en los municipios de la provincia.");
+        TEXTOS_PROVINCIA.put("Valladolid", "Agenda de conciertos y verbenas en Valladolid. Orquestas, artistas y grupos musicales en las fiestas populares de los municipios de la provincia.");
+        TEXTOS_PROVINCIA.put("Soria", "Fiestas y actuaciones musicales en Soria. Descubre las orquestas, grupos y artistas programados en los municipios de la provincia.");
+        TEXTOS_PROVINCIA.put("Segovia", "Programación musical en Segovia. Orquestas, bandas y grupos en las fiestas populares y verbenas de los municipios de la provincia.");
+        TEXTOS_PROVINCIA.put("Ávila", "Consulta las verbenas y fiestas de Ávila. Actuaciones de orquestas, grupos musicales y artistas en los municipios de la provincia.");
+
+        // Madrid
+        TEXTOS_PROVINCIA.put("Madrid", "Agenda de eventos musicales en Madrid. Conciertos, fiestas populares y verbenas con orquestas y artistas en los municipios de la comunidad.");
+
+        // Castilla-La Mancha
+        TEXTOS_PROVINCIA.put("Toledo", "Fiestas y actuaciones en Toledo. Programación de orquestas, grupos musicales y discotecas móviles en los municipios de la provincia.");
+        TEXTOS_PROVINCIA.put("Ciudad Real", "Verbenas populares en Ciudad Real. Consulta las orquestas y grupos musicales programados en las fiestas de los municipios de la provincia.");
+        TEXTOS_PROVINCIA.put("Albacete", "Actuaciones musicales en Albacete. Orquestas, grupos y artistas en las fiestas populares de los municipios de la provincia.");
+        TEXTOS_PROVINCIA.put("Cuenca", "Programación de fiestas en Cuenca. Descubre las orquestas, bandas y grupos musicales en los municipios de la provincia para las celebraciones.");
+        TEXTOS_PROVINCIA.put("Guadalajara", "Fiestas y verbenas en Guadalajara. Agenda de orquestas y grupos musicales programados en los municipios de la provincia.");
+
+        // Extremadura
+        TEXTOS_PROVINCIA.put("Badajoz", "Consulta las próximas fiestas y verbenas en Badajoz. Encuentra orquestas, discotecas móviles y grupos musicales con fechas confirmadas en los municipios de la provincia.");
+        TEXTOS_PROVINCIA.put("Cáceres", "Descubre las actuaciones musicales programadas en Cáceres. Orquestas, bandas y artistas en verbenas y fiestas populares de los municipios de la provincia.");
+
+        // Cataluña
+        TEXTOS_PROVINCIA.put("Barcelona", "Agenda de conciertos y actuaciones en Barcelona. Consulta las fechas de orquestas, grupos musicales y discotecas móviles en los municipios de la provincia.");
+        TEXTOS_PROVINCIA.put("Girona", "Programación de fiestas en Girona. Orquestas, discotecas móviles y grupos musicales con fechas confirmadas en los municipios de la provincia.");
+        TEXTOS_PROVINCIA.put("Lleida", "Verbenas y fiestas populares en Lleida. Consulta las actuaciones de orquestas y grupos musicales programadas en los municipios de la provincia.");
+        TEXTOS_PROVINCIA.put("Tarragona", "Actuaciones musicales en Tarragona. Orquestas, grupos y artistas en las fiestas populares de los municipios de la provincia.");
+
+        // Comunidad Valenciana
+        TEXTOS_PROVINCIA.put("Valencia", "Fiestas y verbenas en Valencia con orquestas y grupos musicales. Consulta fechas, municipios y artistas confirmados para las celebraciones de la provincia.");
+        TEXTOS_PROVINCIA.put("Alicante", "Agenda musical de Alicante. Orquestas, grupos y artistas en las fiestas populares y verbenas de la Costa Blanca.");
+        TEXTOS_PROVINCIA.put("Castellón", "Conciertos y actuaciones en Castellón. Descubre las orquestas, bandas y grupos musicales programados en las fiestas de los municipios de la provincia.");
+
+        // Islas Baleares
+        TEXTOS_PROVINCIA.put("Baleares", "Programación de orquestas y grupos musicales en Baleares. Fiestas populares, verbenas y eventos en Mallorca, Menorca, Ibiza y Formentera.");
+
+        // Islas Canarias
+        TEXTOS_PROVINCIA.put("Las Palmas", "Consulta las próximas fiestas y verbenas en Las Palmas. Encuentra orquestas, grupos y artistas con fechas confirmadas en Gran Canaria, Lanzarote y Fuerteventura.");
+        TEXTOS_PROVINCIA.put("Tenerife", "Agenda de eventos musicales en Santa Cruz de Tenerife. Conciertos, fiestas populares y verbenas en Tenerife, La Gomera, La Palma y El Hierro.");
+
+        // Andalucía
+        TEXTOS_PROVINCIA.put("Sevilla", "Fiestas y actuaciones en Sevilla. Programación de orquestas, grupos musicales y discotecas móviles en los municipios de la provincia.");
+        TEXTOS_PROVINCIA.put("Málaga", "Verbenas populares en Málaga. Consulta las orquestas y grupos musicales programados en las fiestas de la Costa del Sol.");
+        TEXTOS_PROVINCIA.put("Cádiz", "Actuaciones musicales en Cádiz. Orquestas, grupos y artistas en las fiestas populares de los municipios de la provincia.");
+        TEXTOS_PROVINCIA.put("Córdoba", "Programación de fiestas en Córdoba. Descubre las orquestas, bandas y grupos musicales en los municipios de la provincia para las celebraciones.");
+        TEXTOS_PROVINCIA.put("Granada", "Agenda de conciertos y verbenas en Granada. Orquestas, artistas y grupos musicales en las fiestas populares de los municipios de la provincia.");
+        TEXTOS_PROVINCIA.put("Jaén", "Fiestas y actuaciones musicales en Jaén. Descubre las orquestas, grupos y artistas programados en los municipios de la provincia.");
+        TEXTOS_PROVINCIA.put("Almería", "Consulta las verbenas y fiestas de Almería. Actuaciones de orquestas, grupos musicales y artistas en los municipios de la provincia.");
+        TEXTOS_PROVINCIA.put("Huelva", "Agenda de eventos musicales en Huelva. Conciertos, fiestas populares y verbenas con orquestas y artistas en los municipios de la provincia.");
+
+        // Aragón
+        TEXTOS_PROVINCIA.put("Zaragoza", "Fiestas y verbenas en Zaragoza con orquestas y grupos musicales. Consulta fechas, municipios y artistas confirmados para las celebraciones de la provincia.");
+        TEXTOS_PROVINCIA.put("Huesca", "Agenda musical de Huesca. Orquestas, grupos y artistas en las fiestas populares y verbenas de los municipios de la provincia.");
+        TEXTOS_PROVINCIA.put("Teruel", "Conciertos y actuaciones en Teruel. Descubre las orquestas, bandas y grupos musicales programados en las fiestas de los municipios de la provincia.");
+
+        // Murcia
+        TEXTOS_PROVINCIA.put("Murcia", "Programación de fiestas en Murcia. Orquestas, discotecas móviles y grupos musicales con fechas confirmadas en los municipios de la región.");
+
+        // Ceuta y Melilla
+        TEXTOS_PROVINCIA.put("Ceuta", "Actuaciones musicales en Ceuta. Consulta la agenda de orquestas, grupos y artistas para fiestas populares y verbenas en la ciudad autónoma.");
+        TEXTOS_PROVINCIA.put("Melilla", "Fiestas y actuaciones musicales en Melilla. Descubre las orquestas, grupos y artistas programados en la ciudad autónoma.");
+    }
 
     private final EventoPublicoService eventoPublicoService;
     private final LocalizacionService localizacionService;
@@ -151,7 +238,8 @@ public class EventoPublicoController {
         List<EventoPublicoDto> eventosCatalogo = eventoPublicoService.obtenerEventosPublicosFiltrados(
             null, null, null, LocalDate.now(), null);
         model.addAttribute("provincias", obtenerProvinciasOrdenadas());
-        model.addAttribute("municipiosFiltro", obtenerMunicipiosParaFiltro());
+        // Municipio select starts empty (AJAX loaded)
+        model.addAttribute("municipiosProvincia", List.of());
         model.addAttribute("artistasDisponibles", obtenerArtistasOrdenados(eventosCatalogo));
         model.addAttribute("contextoPagina", "artista");
 
@@ -402,7 +490,13 @@ public class EventoPublicoController {
         model.addAttribute("municipio", municipio);
         model.addAttribute("idArtistaSeleccionado", idArtista);
         model.addAttribute("provincias", obtenerProvinciasOrdenadas());
-        model.addAttribute("municipiosFiltro", obtenerMunicipiosParaFiltro());
+        // Pre-cargar municipios cuando provincia está seleccionada (preservar estado del filtro)
+        if (provincia != null && !provincia.isBlank()) {
+            model.addAttribute("municipiosProvincia",
+                localizacionService.findMunicipiosByProvinciaNombre(provincia));
+        } else {
+            model.addAttribute("municipiosProvincia", List.of());
+        }
         model.addAttribute("artistasDisponibles", obtenerArtistasOrdenados(eventosCatalogo));
         model.addAttribute("ogImage", EVENT_IMAGE_URL);
         model.addAttribute("contextoPagina", "catalogo");
@@ -430,9 +524,10 @@ public class EventoPublicoController {
 
     /**
      * Página indexable de eventos por provincia con JSON-LD Schema.org.
+     * Incluye redirección 301 para normalización de casing en URLs.
      */
     @GetMapping("/provincia/{provincia}")
-    public String listarEventosPorProvincia(
+    public Object listarEventosPorProvincia(
         @PathVariable String provincia,
         @RequestParam(required = false, defaultValue = "1") int page,
         Model model,
@@ -441,16 +536,40 @@ public class EventoPublicoController {
         String provinciaTrim = provincia.trim();
         log.info("Listando eventos publicos para provincia: {}", provinciaTrim);
 
+        // Buscar provincia para obtener nombre canónico y validar existencia
+        Optional<Provincia> provinciaOpt = localizacionService.findProvinciaByNombreUpperCase(provinciaTrim);
+
+        if (provinciaOpt.isEmpty()) {
+            // Provincia no existe - dejar que el flujo normal continúe (mostrará vacío)
+            // o podríamos devolver 404. Por ahora mantenemos compatibilidad.
+            log.warn("Provincia no encontrada: {}", provinciaTrim);
+        } else {
+            String nombreCanonico = provinciaOpt.get().getNombre();
+
+            // 301 Redirect si el casing de la URL no coincide con el nombre canónico de la DB
+            if (!nombreCanonico.equals(provinciaTrim)) {
+                StringBuilder redirectUrl = new StringBuilder("/eventos/provincia/" + UriUtils.encodePath(nombreCanonico, StandardCharsets.UTF_8));
+                if (page > 1) {
+                    redirectUrl.append("?page=").append(page);
+                }
+                log.info("Redirigiendo 301: {} -> {}", provinciaTrim, nombreCanonico);
+                return "redirect:" + redirectUrl.toString();
+            }
+        }
+
+        // Usar nombre canónico de la DB para SEO
+        String nombreProvinciaCanonico = provinciaOpt.map(Provincia::getNombre).orElse(provinciaTrim);
+
         LocalDate fechaDesde = LocalDate.now();
         int pageIndex = Math.max(0, page - 1);
-        Pageable pageable = PageRequest.of(pageIndex, 10, Sort.by("fecha").ascending().and(Sort.by("artista.nombre").ascending()));
+        Pageable pageable = PageRequest.of(pageIndex, 20, Sort.by("fecha").ascending().and(Sort.by("artista.nombre").ascending()));
 
         Page<EventoPublicoDto> paginaEventos = eventoPublicoService.obtenerEventosPublicosFiltradosPaginados(
-            provinciaTrim, null, null, fechaDesde, null, pageable);
+            nombreProvinciaCanonico, null, null, fechaDesde, null, pageable);
 
         int totalPaginas = paginaEventos.getTotalPages();
         if (totalPaginas > 0 && page > totalPaginas) {
-            String urlBase = "/eventos/provincia/" + UriUtils.encodePath(provinciaTrim, StandardCharsets.UTF_8);
+            String urlBase = "/eventos/provincia/" + UriUtils.encodePath(nombreProvinciaCanonico, StandardCharsets.UTF_8);
             return "redirect:" + urlBase + "?page=" + totalPaginas;
         }
 
@@ -459,19 +578,22 @@ public class EventoPublicoController {
             .collect(Collectors.groupingBy(e -> e.getFecha().toLocalDate(), TreeMap::new, Collectors.toList()));
 
         String baseUrl = construirBaseUrl(request);
-        String pathProvincia = "/eventos/provincia/" + UriUtils.encodePath(provinciaTrim, StandardCharsets.UTF_8);
+        String pathProvincia = "/eventos/provincia/" + UriUtils.encodePath(nombreProvinciaCanonico, StandardCharsets.UTF_8);
         String canonicalUrl = construirUrlAbsoluta(request, pathProvincia);
         boolean indexable = paginaEventos.getTotalElements() > 0;
 
-        String titulo = "Eventos y actuaciones en " + provinciaTrim + " | Festia";
-        String descripcion = "Agenda de próximos conciertos y actuaciones en " + provinciaTrim
+        String titulo = "Eventos y actuaciones en " + nombreProvinciaCanonico + " | Festia";
+        String descripcion = "Agenda de próximos conciertos y actuaciones en " + nombreProvinciaCanonico
             + ". Consulta artistas, fechas y municipios en Festia.";
 
         model.addAttribute("eventosPorDia", eventosPorDia);
         model.addAttribute("eventos", eventos);
-        model.addAttribute("provincia", provinciaTrim);
+        model.addAttribute("provincia", nombreProvinciaCanonico);
         model.addAttribute("titulo", titulo);
         model.addAttribute("descripcion", descripcion);
+        model.addAttribute("textoProvincia", TEXTOS_PROVINCIA.getOrDefault(nombreProvinciaCanonico,
+            "Consulta las próximas fiestas y verbenas en " + nombreProvinciaCanonico +
+            ". Encuentra orquestas, discotecas móviles y grupos musicales con fechas confirmadas."));
         model.addAttribute("canonicalUrl", canonicalUrl);
         model.addAttribute("metaRobots", indexable ? "index,follow" : "noindex,follow");
         model.addAttribute("ogImage", EVENT_IMAGE_URL);
@@ -479,18 +601,19 @@ public class EventoPublicoController {
         if (indexable && !eventos.isEmpty()) {
             List<EventoPublicoDto> eventosJsonLd = eventos.subList(0, Math.min(eventos.size(), 50));
             model.addAttribute("jsonLd", buildItemListJsonLd(eventosJsonLd, baseUrl, titulo, canonicalUrl));
-            model.addAttribute("breadcrumbJsonLd", buildBreadcrumbProvinciaJsonLd(baseUrl, provinciaTrim));
+            model.addAttribute("breadcrumbJsonLd", buildBreadcrumbProvinciaJsonLd(baseUrl, nombreProvinciaCanonico));
         }
 
         model.addAttribute("provincias", obtenerProvinciasOrdenadas());
-        model.addAttribute("municipiosFiltro", obtenerMunicipiosParaFiltro());
+        // Pre-cargar municipios de esta provincia (no todos los 8000)
+        model.addAttribute("municipiosProvincia", localizacionService.findMunicipiosByProvinciaNombre(nombreProvinciaCanonico));
         model.addAttribute("artistasDisponibles", obtenerArtistasOrdenados(eventos));
         model.addAttribute("fechaDesde", fechaDesde.toString());
         model.addAttribute("fechaHasta", null);
         model.addAttribute("idArtistaSeleccionado", null);
         model.addAttribute("municipio", null);
         model.addAttribute("contextoPagina", "provincia");
-        model.addAttribute("urlBase", "/eventos/provincia/" + UriUtils.encodePath(provinciaTrim, StandardCharsets.UTF_8));
+        model.addAttribute("urlBase", "/eventos/provincia/" + UriUtils.encodePath(nombreProvinciaCanonico, StandardCharsets.UTF_8));
         model.addAttribute("paginaActual", page);
         model.addAttribute("totalPaginas", totalPaginas);
         model.addAttribute("totalEventos", paginaEventos.getTotalElements());
@@ -508,9 +631,10 @@ public class EventoPublicoController {
 
     /**
      * Página indexable de eventos por municipio con JSON-LD Schema.org.
+     * Incluye redirección 301 para normalización de casing en URLs.
      */
     @GetMapping("/municipio/{municipio}")
-    public String listarEventosPorMunicipio(
+    public Object listarEventosPorMunicipio(
         @PathVariable String municipio,
         @RequestParam(required = false, defaultValue = "1") int page,
         Model model,
@@ -536,11 +660,6 @@ public class EventoPublicoController {
         Map<LocalDate, List<EventoPublicoDto>> eventosPorDia = eventos.stream()
             .collect(Collectors.groupingBy(e -> e.getFecha().toLocalDate(), TreeMap::new, Collectors.toList()));
 
-        String baseUrl = construirBaseUrl(request);
-        String pathMunicipio = "/eventos/municipio/" + UriUtils.encodePath(municipioTrim, StandardCharsets.UTF_8);
-        String canonicalUrl = construirUrlAbsoluta(request, pathMunicipio);
-        boolean indexable = paginaEventos.getTotalElements() > 0;
-
         // Para los metadatos SEO y breadcrumb, necesitamos la provincia del municipio.
         // Como la página está paginada, consultamos el primer evento sin paginar para obtener la provincia.
         String provinciaDelMunicipio = eventos.stream()
@@ -548,16 +667,34 @@ public class EventoPublicoController {
             .map(EventoPublicoDto::getProvincia)
             .orElse("");
 
-        String tituloConProvincia = provinciaDelMunicipio.isBlank()
+        // Buscar provincia canónica y verificar redirección 301
+        String nombreProvinciaCanonico = provinciaDelMunicipio;
+        if (!provinciaDelMunicipio.isBlank()) {
+            Optional<Provincia> provinciaOpt = localizacionService.findProvinciaByNombreUpperCase(provinciaDelMunicipio);
+            if (provinciaOpt.isPresent()) {
+                nombreProvinciaCanonico = provinciaOpt.get().getNombre();
+            }
+        }
+
+        // Nota: Para municipios no implementamos redirección 301 de casing porque
+        // no tenemos tabla de municipios canónicos en este momento.
+        // La provincia sí se normaliza mediante findProvinciaByNombreUpperCase.
+
+        String baseUrl = construirBaseUrl(request);
+        String pathMunicipio = "/eventos/municipio/" + UriUtils.encodePath(municipioTrim, StandardCharsets.UTF_8);
+        String canonicalUrl = construirUrlAbsoluta(request, pathMunicipio);
+        boolean indexable = paginaEventos.getTotalElements() > 0;
+
+        String tituloConProvincia = nombreProvinciaCanonico.isBlank()
             ? "Eventos y actuaciones en " + municipioTrim + " | Festia"
-            : "Eventos y actuaciones en " + municipioTrim + " (" + provinciaDelMunicipio + ") | Festia";
+            : "Eventos y actuaciones en " + municipioTrim + " (" + nombreProvinciaCanonico + ") | Festia";
         String descripcion = "Agenda de próximos conciertos y actuaciones en " + municipioTrim
             + ". Consulta artistas, fechas y detalles de cada evento en Festia.";
 
         model.addAttribute("eventosPorDia", eventosPorDia);
         model.addAttribute("eventos", eventos);
         model.addAttribute("municipio", municipioTrim);
-        model.addAttribute("provincia", provinciaDelMunicipio);
+        model.addAttribute("provincia", nombreProvinciaCanonico);
         model.addAttribute("titulo", tituloConProvincia);
         model.addAttribute("descripcion", descripcion);
         model.addAttribute("canonicalUrl", canonicalUrl);
@@ -568,11 +705,13 @@ public class EventoPublicoController {
             List<EventoPublicoDto> eventosJsonLd = eventos.subList(0, Math.min(eventos.size(), 50));
             model.addAttribute("jsonLd", buildItemListJsonLd(eventosJsonLd, baseUrl, tituloConProvincia, canonicalUrl));
             model.addAttribute("breadcrumbJsonLd",
-                buildBreadcrumbMunicipioJsonLd(baseUrl, municipioTrim, provinciaDelMunicipio));
+                buildBreadcrumbMunicipioJsonLd(baseUrl, municipioTrim, nombreProvinciaCanonico));
         }
 
         model.addAttribute("provincias", obtenerProvinciasOrdenadas());
-        model.addAttribute("municipiosFiltro", obtenerMunicipiosParaFiltro());
+        // Pre-cargar municipios de la provincia de este municipio
+        model.addAttribute("municipiosProvincia",
+            nombreProvinciaCanonico.isBlank() ? List.of() : localizacionService.findMunicipiosByProvinciaNombre(nombreProvinciaCanonico));
         model.addAttribute("artistasDisponibles", obtenerArtistasOrdenados(eventos));
         model.addAttribute("fechaDesde", fechaDesde.toString());
         model.addAttribute("fechaHasta", null);
@@ -626,6 +765,45 @@ public class EventoPublicoController {
         return ResponseEntity.ok(eventos);
     }
 
+    /**
+     * API REST: Obtener municipios por provincia (para filtros AJAX).
+     * Province name resolution is case-insensitive.
+     */
+    @GetMapping(value = "/api/municipios", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<?> obtenerMunicipiosPorProvincia(
+        @RequestParam(required = false) String provincia) {
+
+        // 400: Missing parameter
+        if (provincia == null || provincia.isBlank()) {
+            return ResponseEntity.badRequest()
+                .body(Map.of("error", "Parámetro 'provincia' obligatorio"));
+        }
+
+        String provinciaTrim = provincia.trim();
+        log.info("API: Obteniendo municipios para provincia: {}", provinciaTrim);
+
+        // Verify province exists (404 if not found)
+        Optional<Provincia> provinciaOpt = localizacionService.findProvinciaByNombreUpperCase(provinciaTrim);
+        if (provinciaOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error", "Provincia no encontrada"));
+        }
+
+        // Get canonical province name from DB
+        String nombreCanonico = provinciaOpt.get().getNombre();
+
+        // Get municipalities
+        List<CodigoNombreRecord> municipios = localizacionService.findMunicipiosByProvinciaNombre(provinciaTrim);
+
+        // Map to response DTO with canonical province name
+        List<MunicipioResponse> response = municipios.stream()
+            .map(m -> new MunicipioResponse(m.nombre(), nombreCanonico))
+            .toList();
+
+        return ResponseEntity.ok(response);
+    }
+
     private EventoPublicoDto obtenerEventoONotFound(Long id) {
         Optional<EventoPublicoDto> eventoOpt = eventoPublicoService.obtenerEventoPublico(id);
         if (eventoOpt.isEmpty()) {
@@ -668,16 +846,6 @@ public class EventoPublicoController {
             .collect(Collectors.toList());
     }
 
-    private List<MunicipioFiltro> obtenerMunicipiosParaFiltro() {
-        return localizacionService.findAllProvincias().stream()
-            .flatMap(provincia -> localizacionService.findAllMunicipiosByIdProvincia(provincia.id()).stream()
-                .map(municipio -> new MunicipioFiltro(municipio.nombre(), provincia.nombre())))
-            .distinct()
-            .sorted(Comparator.comparing(MunicipioFiltro::provincia, String.CASE_INSENSITIVE_ORDER)
-                .thenComparing(MunicipioFiltro::nombre, String.CASE_INSENSITIVE_ORDER))
-            .collect(Collectors.toList());
-    }
-
     private List<EventoPublicoDto> obtenerArtistasOrdenados(List<EventoPublicoDto> eventos) {
         Map<Long, EventoPublicoDto> artistasUnicos = eventos.stream()
             .collect(Collectors.toMap(
@@ -716,9 +884,6 @@ public class EventoPublicoController {
         }
         return "Agenda completa de orquestas, discotecas móviles, verbenas y fiestas populares en España. " +
             "Consulta fechas, artistas y municipios de cada actuación. Actualizado diariamente.";
-    }
-
-    private record MunicipioFiltro(String nombre, String provincia) {
     }
 
     // ── Calendario helpers ──────────────────────────────────────────────────────

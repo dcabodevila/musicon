@@ -1,6 +1,6 @@
 $(document).ready(function () {
     initDatePickers();
-    initFiltrosChoices();
+    initArtistaChoices();
     initializeGsapEventosAnimations();
 });
 
@@ -54,82 +54,23 @@ function initDatePickers() {
     });
 }
 
-function initFiltrosChoices() {
-    const provinciaEl = document.querySelector("#idProvincia");
-    const municipioEl = document.querySelector("#idMunicipio");
+/**
+ * Inicializa Choices.js solo para el selector de artista.
+ * Los filtros de provincia/municipio se manejan en eventos-publicos-filter.js
+ */
+function initArtistaChoices() {
     const artistaEl = document.querySelector("#idArtista");
 
-    if (!provinciaEl || !municipioEl || typeof Choices === "undefined") {
+    if (!artistaEl || typeof Choices === "undefined") {
         return;
     }
 
-    const municipioOpcionesOriginales = Array.from(municipioEl.options).map(function (option) {
-        return {
-            value: option.value,
-            label: option.textContent,
-            provincia: option.dataset.provincia || "",
-            selected: option.selected
-        };
-    });
-
-    const provinciaChoice = new Choices(provinciaEl, {
+    new Choices(artistaEl, {
         searchEnabled: true,
-        shouldSort: false
+        shouldSort: false,
+        placeholder: true,
+        placeholderValue: 'Todos los artistas'
     });
-    const provinciaSeleccionada = provinciaEl.dataset.valorSeleccionado || "";
-    if (provinciaSeleccionada) {
-        provinciaChoice.setChoiceByValue(provinciaSeleccionada);
-    }
-    if (artistaEl) {
-        new Choices(artistaEl, {
-            searchEnabled: true,
-            shouldSort: false
-        });
-    }
-    const municipioChoice = new Choices(municipioEl, {
-        searchEnabled: true,
-        shouldSort: false
-    });
-    const municipioSeleccionado = municipioEl.dataset.valorSeleccionado || "";
-    if (municipioSeleccionado) {
-        municipioChoice.setChoiceByValue(municipioSeleccionado);
-    }
-
-    function refrescarMunicipios() {
-        const provinciaSeleccionada = provinciaChoice.getValue(true) || "";
-        const municipioSeleccionado = municipioChoice.getValue(true) || "";
-
-        const opcionesFiltradas = municipioOpcionesOriginales.filter(function (item) {
-            if (item.value === "") {
-                return true;
-            }
-            if (!provinciaSeleccionada) {
-                return true;
-            }
-            return item.provincia.toLowerCase() === provinciaSeleccionada.toLowerCase();
-        }).map(function (item) {
-            return {
-                value: item.value,
-                label: item.label,
-                selected: item.value === municipioSeleccionado
-            };
-        });
-
-        municipioChoice.clearStore();
-        municipioChoice.setChoices(opcionesFiltradas, "value", "label", true);
-
-        const existeSeleccionado = opcionesFiltradas.some(function (item) {
-            return item.value === municipioSeleccionado;
-        });
-        if (existeSeleccionado && municipioSeleccionado) {
-            municipioChoice.setChoiceByValue(municipioSeleccionado);
-        } else {
-            municipioChoice.setChoiceByValue("");
-        }
-    }
-
-    provinciaEl.addEventListener("change", refrescarMunicipios);
-    refrescarMunicipios();
 }
 
 /**

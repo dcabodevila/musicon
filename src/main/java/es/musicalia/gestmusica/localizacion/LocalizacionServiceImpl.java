@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -65,11 +66,29 @@ public class LocalizacionServiceImpl implements LocalizacionService {
 		return this.ccaaRepository.findAllCcaaOrderedByName();
 	}
 
-	@Cacheable(cacheNames = "localidadesPorMunicipio", key = "#idMunicipio")
-	@Override
-	public List<CodigoNombreRecord> findLocalidadByIdMunicipio(long idMunicipio){
-		return this.localidadRepository.findLocalidadByIdMunicipio(idMunicipio);
-	}
+    @Cacheable(cacheNames = "localidadesPorMunicipio", key = "#idMunicipio")
+    @Override
+    public List<CodigoNombreRecord> findLocalidadByIdMunicipio(long idMunicipio){
+        return this.localidadRepository.findLocalidadByIdMunicipio(idMunicipio);
+    }
 
+    @Override
+    public List<CodigoNombreRecord> findMunicipiosByProvinciaNombre(String nombreProvincia) {
+        if (nombreProvincia == null || nombreProvincia.isBlank()) {
+            return List.of();
+        }
+
+        return this.provinciaRepository.findProvinciaByNombreUpperCase(nombreProvincia)
+            .map(provincia -> this.municipioRepository.findMunicipioByProvinciaId(provincia.getId()))
+            .orElse(List.of());
+    }
+
+    @Override
+    public Optional<Provincia> findProvinciaByNombreUpperCase(String nombre) {
+        if (nombre == null || nombre.isBlank()) {
+            return Optional.empty();
+        }
+        return this.provinciaRepository.findProvinciaByNombreUpperCase(nombre);
+    }
 
 }

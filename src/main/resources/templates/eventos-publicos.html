@@ -66,7 +66,8 @@
     <th:block th:replace="~{fragments/google-analytics :: gtm-head}"/>
 </head>
 
-<body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
+<body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default"
+      th:attr="data-contexto-pagina=${contextoPagina}">
 <th:block th:replace="~{fragments/google-analytics :: gtm-body}"/>
 
 <!-- Barra de navegación pública (solo para visitantes no autenticados) -->
@@ -133,7 +134,7 @@
                                     musicales en España
                                 </span>
                             </h1>
-                            <p class="hero-subtitle">Orquestas, discotecas móviles y grupos musicales · Verbenas y fiestas populares · Actualizado diariamente</p>
+                            <p class="hero-subtitle" th:text="${textoProvincia != null} ? ${textoProvincia} : 'Orquestas, discotecas móviles y grupos musicales · Verbenas y fiestas populares · Actualizado diariamente'"></p>
                         </div>
                         <div class="hero-right"></div>
                     </div>
@@ -177,12 +178,23 @@
                                         <label class="form-label small text-muted mb-1" for="idMunicipio">Municipio</label>
                                         <select id="idMunicipio" class="form-select form-select-sm" name="municipio"
                                                 th:attr="data-valor-seleccionado=${municipio != null ? municipio : ''}">
-                                            <option value="">Todos los municipios</option>
-                                            <option th:each="mun : ${municipiosFiltro}"
-                                                    th:value="${mun.nombre}"
-                                                    th:text="${mun.nombre}"
-                                                    th:attr="data-provincia=${mun.provincia}"
-                                                    th:selected="${mun.nombre == municipio}">Municipio</option>
+                                            <!-- Página por defecto sin provincia seleccionada: placeholder, municipios vía AJAX -->
+                                            <option value=""
+                                                    th:if="${(contextoPagina == 'catalogo' or contextoPagina == 'artista' or contextoPagina == null) and (municipiosProvincia == null or #lists.isEmpty(municipiosProvincia))}">
+                                                Selecciona provincia
+                                            </option>
+                                            <!-- Provincia/municipio o filtro activo: placeholder + municipios precargados -->
+                                            <option value=""
+                                                    th:if="${contextoPagina == 'provincia' or contextoPagina == 'municipio' or (municipiosProvincia != null and !#lists.isEmpty(municipiosProvincia))}">
+                                                Todos los municipios
+                                            </option>
+                                            <option th:each="mun : ${municipiosProvincia}"
+                                                    th:value="${mun.nombre()}"
+                                                    th:text="${mun.nombre()}"
+                                                    th:selected="${mun.nombre() == municipio}"
+                                                    th:if="${contextoPagina == 'provincia' or contextoPagina == 'municipio' or (municipiosProvincia != null and !#lists.isEmpty(municipiosProvincia))}">
+                                                Municipio
+                                            </option>
                                         </select>
                                     </div>
                                     <div class="col-12 col-md-4">
@@ -219,8 +231,16 @@
                     </div>
                 </div>
 
+                <!-- Info text before results -->
+                <div th:if="${eventos != null and !eventos.isEmpty()}" class="px-3 pt-3 pb-0">
+                    <p class="text-muted small mb-2">
+                        <i class="fas fa-info-circle text-primary me-1"></i>
+                        Actuaciones musicales confirmadas en los próximos 45 días
+                    </p>
+                </div>
+
                 <!-- Grid de eventos agrupados por día -->
-                <div th:if="${eventos != null and !eventos.isEmpty()}" class="eventos-grid px-3 pt-3 pb-0" data-animate="stagger">
+                <div th:if="${eventos != null and !eventos.isEmpty()}" class="eventos-grid px-3 pt-2 pb-0" data-animate="stagger">
                     <div th:each="entry : ${eventosPorDia}" class="mb-4">
                         <h2 class="h6 text-muted text-uppercase fw-semibold mb-2 border-bottom pb-1"
                             th:text="${#temporals.format(entry.key, 'EEEE, d MMMM yyyy', new java.util.Locale('es', 'ES'))}">
@@ -398,6 +418,7 @@
 <script th:src="@{/js/gsap.min.js}"></script>
 <script th:src="@{/js/gsap-scrolltrigger.min.js}"></script>
 <script type="text/javascript" th:src="@{/js/eventos.js}"></script>
+<script type="text/javascript" th:src="@{/js/eventos-publicos-filter.js}"></script>
 
 </body>
 
