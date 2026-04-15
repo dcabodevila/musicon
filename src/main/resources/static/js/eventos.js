@@ -240,7 +240,14 @@ function initTextRevealTimeline(delay1, delay2, subtitleDelay) {
 }
 
 /**
- * Initialize staggered card animation with ScrollTrigger
+ * Initialize staggered card animation with ScrollTrigger.
+ *
+ * SEO-safe approach: cards are always visible (opacity:1) in CSS.
+ * When ScrollTrigger fires, gsap.fromTo() briefly transitions from a
+ * slightly-offset state (opacity 0.15, y 30) to fully visible (opacity 1, y 0).
+ * This means content is NEVER hidden from crawlers — even if JS fails,
+ * cards remain at opacity:1 in the DOM.
+ *
  * @param {number} staggerDelay - Delay between each card
  * @param {number} duration - Animation duration
  * @param {boolean} isTouch - Whether device is touch
@@ -254,8 +261,7 @@ function initCardStaggerAnimation(staggerDelay, duration, isTouch) {
     const shouldAnimate = !isTouch || eventCards.length <= 6;
 
     if (!shouldAnimate) {
-        // Make cards visible immediately without animation
-        gsap.set(eventCards, { opacity: 1, y: 0 });
+        // Cards are already visible in CSS — nothing to do
         return;
     }
 
@@ -269,13 +275,10 @@ function initCardStaggerAnimation(staggerDelay, duration, isTouch) {
             start: "top 85%",
             once: true,
             onEnter: () => {
-                gsap.to(eventCards, {
-                    opacity: 1,
-                    y: 0,
-                    duration: duration,
-                    stagger: staggerDelay,
-                    ease: "power2.out"
-                });
+                gsap.fromTo(eventCards,
+                    { opacity: 0.15, y: 30 },
+                    { opacity: 1, y: 0, duration: duration, stagger: staggerDelay, ease: "power2.out" }
+                );
             }
         });
         return;
@@ -291,13 +294,10 @@ function initCardStaggerAnimation(staggerDelay, duration, isTouch) {
             start: "top 85%",
             once: true,
             onEnter: () => {
-                gsap.to(cards, {
-                    opacity: 1,
-                    y: 0,
-                    duration: duration,
-                    stagger: staggerDelay,
-                    ease: "power2.out"
-                });
+                gsap.fromTo(cards,
+                    { opacity: 0.15, y: 30 },
+                    { opacity: 1, y: 0, duration: duration, stagger: staggerDelay, ease: "power2.out" }
+                );
             }
         });
     });

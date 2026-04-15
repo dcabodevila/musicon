@@ -32,7 +32,7 @@
 <th:block th:fragment="gtm-body" th:with="gtmId=${@environment.getProperty('gtm.container-id')}">
     <th:block th:if="${gtmId != null and !gtmId.isBlank() and gtmId != 'undefined'}">
         <!-- Google Tag Manager (noscript) -->
-        <noscript><iframe th:src="'https://www.googletagmanager.com/ns.html?id=[[${gtmId}]]'"
+        <noscript><iframe th:src="'https://www.googletagmanager.com/ns.html?id=' + ${gtmId}"
         height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <!-- End Google Tag Manager (noscript) -->
     </th:block>

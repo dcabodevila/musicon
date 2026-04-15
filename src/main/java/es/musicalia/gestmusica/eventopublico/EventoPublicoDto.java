@@ -103,7 +103,7 @@ public class EventoPublicoDto {
         root.put("description", getDescripcionJsonLd());
 
         if (imageUrl != null && !imageUrl.isBlank()) {
-            root.put("image", imageUrl);
+            root.put("image", normalizeImageUrl(imageUrl));
         }
 
         return root;
@@ -185,6 +185,31 @@ public class EventoPublicoDto {
     public String getMunicipioDisplay() {
         String localidad = getLugarParaMapa();
         return localidad != null ? localidad + ", " + municipio : municipio;
+    }
+
+    /**
+     * Normaliza una URL de imagen para usar siempre HTTPS.
+     * Cloudinary y otros CDNs sirven el mismo contenido por HTTPS.
+     */
+    public static String normalizeImageUrl(String url) {
+        if (url == null || url.isBlank()) return url;
+        if (url.startsWith("http://")) return url.replace("http://", "https://");
+        return url;
+    }
+
+    /**
+     * Un evento es indexable para JSON-LD si tiene datos geográficos reales.
+     * Eventos con provincia o municipio "Provisional"/"Otras" producen
+     * structured data sin sentido para Google y deben excluirse.
+     */
+    public boolean isIndexableForJsonLd() {
+        if (provincia == null || provincia.isBlank()) return false;
+        if (municipio == null || municipio.isBlank()) return false;
+        String provLower = provincia.toLowerCase(Locale.ROOT);
+        String munLower = municipio.toLowerCase(Locale.ROOT);
+        if (provLower.contains("provisional") || provLower.equals("otras")) return false;
+        if (munLower.contains("provisional")) return false;
+        return true;
     }
 
     public String getLugarDisplay() {

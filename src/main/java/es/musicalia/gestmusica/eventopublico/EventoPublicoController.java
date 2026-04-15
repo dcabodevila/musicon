@@ -171,7 +171,7 @@ public class EventoPublicoController {
             : ORGANIZER_NAME_FALLBACK;
         mv.addObject("evento", evento);
         String imageUrl = (evento.getLogoArtista() != null && !evento.getLogoArtista().isBlank())
-            ? evento.getLogoArtista()
+            ? EventoPublicoDto.normalizeImageUrl(evento.getLogoArtista())
             : EVENT_IMAGE_URL;
         mv.addObject("jsonLd", evento.toJsonLd(baseUrl, organizerName, evento.getUrlOrganizador(), imageUrl));
         mv.addObject("breadcrumbJsonLd", buildBreadcrumbJsonLd(baseUrl, evento));
@@ -250,7 +250,7 @@ public class EventoPublicoController {
             String descripcion = "Agenda de conciertos y actuaciones de " + nombreArtista
                 + ". Consulta fechas, municipios y detalles de cada evento en Festia.";
             String ogImage = (primerEvento.getLogoArtista() != null && !primerEvento.getLogoArtista().isBlank())
-                ? primerEvento.getLogoArtista() : EVENT_IMAGE_URL;
+                ? EventoPublicoDto.normalizeImageUrl(primerEvento.getLogoArtista()) : EVENT_IMAGE_URL;
             String baseUrl = construirBaseUrl(request);
 
             model.addAttribute("nombreArtista", nombreArtista);
@@ -443,7 +443,7 @@ public class EventoPublicoController {
         }
 
         int pageIndex = Math.max(0, page - 1);
-        Pageable pageable = PageRequest.of(pageIndex, 10, Sort.by("fecha").ascending().and(Sort.by("artista.nombre").ascending()));
+        Pageable pageable = PageRequest.of(pageIndex, 20, Sort.by("fecha").ascending().and(Sort.by("artista.nombre").ascending()));
 
         List<EventoPublicoDto> eventosCatalogo = eventoPublicoService.obtenerEventosPublicosFiltrados(
             null, null, null, LocalDate.now(), null);
@@ -473,7 +473,7 @@ public class EventoPublicoController {
             (hasta != null && !hasta.isBlank());
         boolean noIndex = filtrosAplicados || paginaEventos.getTotalElements() == 0;
 
-        String titulo = construirTituloListado(provincia, municipio, idArtista);
+        String titulo = construirTituloListado(provincia, municipio, idArtista, (int) paginaEventos.getTotalElements());
         String descripcion = construirDescripcionListado(provincia, municipio, idArtista);
         String canonicalUrl = construirUrlAbsoluta(request, "/eventos");
 
@@ -515,8 +515,13 @@ public class EventoPublicoController {
 
         if (!noIndex && !eventos.isEmpty()) {
             String baseUrl = construirBaseUrl(request);
-            List<EventoPublicoDto> eventosParaJsonLd = eventos.subList(0, Math.min(eventos.size(), 50));
-            model.addAttribute("jsonLd", buildItemListJsonLd(eventosParaJsonLd, baseUrl, titulo, canonicalUrl));
+            List<EventoPublicoDto> eventosParaJsonLd = eventos.stream()
+                .filter(EventoPublicoDto::isIndexableForJsonLd)
+                .limit(50)
+                .collect(Collectors.toList());
+            if (!eventosParaJsonLd.isEmpty()) {
+                model.addAttribute("jsonLd", buildItemListJsonLd(eventosParaJsonLd, baseUrl, titulo, canonicalUrl));
+            }
         }
 
         return "eventos-publicos";
@@ -599,9 +604,14 @@ public class EventoPublicoController {
         model.addAttribute("ogImage", EVENT_IMAGE_URL);
 
         if (indexable && !eventos.isEmpty()) {
-            List<EventoPublicoDto> eventosJsonLd = eventos.subList(0, Math.min(eventos.size(), 50));
-            model.addAttribute("jsonLd", buildItemListJsonLd(eventosJsonLd, baseUrl, titulo, canonicalUrl));
-            model.addAttribute("breadcrumbJsonLd", buildBreadcrumbProvinciaJsonLd(baseUrl, nombreProvinciaCanonico));
+            List<EventoPublicoDto> eventosJsonLd = eventos.stream()
+                .filter(EventoPublicoDto::isIndexableForJsonLd)
+                .limit(50)
+                .collect(Collectors.toList());
+            if (!eventosJsonLd.isEmpty()) {
+                model.addAttribute("jsonLd", buildItemListJsonLd(eventosJsonLd, baseUrl, titulo, canonicalUrl));
+                model.addAttribute("breadcrumbJsonLd", buildBreadcrumbProvinciaJsonLd(baseUrl, nombreProvinciaCanonico));
+            }
         }
 
         model.addAttribute("provincias", obtenerProvinciasOrdenadas());
@@ -702,10 +712,15 @@ public class EventoPublicoController {
         model.addAttribute("ogImage", EVENT_IMAGE_URL);
 
         if (indexable && !eventos.isEmpty()) {
-            List<EventoPublicoDto> eventosJsonLd = eventos.subList(0, Math.min(eventos.size(), 50));
-            model.addAttribute("jsonLd", buildItemListJsonLd(eventosJsonLd, baseUrl, tituloConProvincia, canonicalUrl));
-            model.addAttribute("breadcrumbJsonLd",
-                buildBreadcrumbMunicipioJsonLd(baseUrl, municipioTrim, nombreProvinciaCanonico));
+            List<EventoPublicoDto> eventosJsonLd = eventos.stream()
+                .filter(EventoPublicoDto::isIndexableForJsonLd)
+                .limit(50)
+                .collect(Collectors.toList());
+            if (!eventosJsonLd.isEmpty()) {
+                model.addAttribute("jsonLd", buildItemListJsonLd(eventosJsonLd, baseUrl, tituloConProvincia, canonicalUrl));
+                model.addAttribute("breadcrumbJsonLd",
+                    buildBreadcrumbMunicipioJsonLd(baseUrl, municipioTrim, nombreProvinciaCanonico));
+            }
         }
 
         model.addAttribute("provincias", obtenerProvinciasOrdenadas());
@@ -860,6 +875,10 @@ public class EventoPublicoController {
     }
 
     private String construirTituloListado(String provincia, String municipio, Long idArtista) {
+        return construirTituloListado(provincia, municipio, idArtista, 0);
+    }
+
+    private String construirTituloListado(String provincia, String municipio, Long idArtista, int totalEventos) {
         if (idArtista != null) {
             return "Eventos musicales por artista | Festia";
         }
@@ -868,6 +887,9 @@ public class EventoPublicoController {
         }
         if (provincia != null && !provincia.isBlank()) {
             return "Orquestas y actuaciones en " + provincia + " | Festia";
+        }
+        if (totalEventos > 0) {
+            return totalEventos + " actuaciones musicales en España — esta semana | Festia";
         }
         return "Agenda de orquestas, verbenas y fiestas en España | Festia";
     }
@@ -951,8 +973,8 @@ public class EventoPublicoController {
         for (EventoPublicoDto evento : eventos) {
             String organizerName = (evento.getNombreAgencia() != null && !evento.getNombreAgencia().isBlank())
                 ? evento.getNombreAgencia() : ORGANIZER_NAME_FALLBACK;
-            String imageUrl = (evento.getLogoArtista() != null && !evento.getLogoArtista().isBlank())
-                ? evento.getLogoArtista() : EVENT_IMAGE_URL;
+String imageUrl = (evento.getLogoArtista() != null && !evento.getLogoArtista().isBlank())
+                ? EventoPublicoDto.normalizeImageUrl(evento.getLogoArtista()) : EVENT_IMAGE_URL;
             Map<String, Object> listItem = new LinkedHashMap<>();
             listItem.put("@type", "ListItem");
             listItem.put("position", position++);
@@ -994,7 +1016,7 @@ public class EventoPublicoController {
             String organizerName = (evento.getNombreAgencia() != null && !evento.getNombreAgencia().isBlank())
                 ? evento.getNombreAgencia() : ORGANIZER_NAME_FALLBACK;
             String evtImage = (evento.getLogoArtista() != null && !evento.getLogoArtista().isBlank())
-                ? evento.getLogoArtista() : EVENT_IMAGE_URL;
+                ? EventoPublicoDto.normalizeImageUrl(evento.getLogoArtista()) : EVENT_IMAGE_URL;
             Map<String, Object> listItem = new LinkedHashMap<>();
             listItem.put("@type", "ListItem");
             listItem.put("position", position++);

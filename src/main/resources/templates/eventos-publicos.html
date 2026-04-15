@@ -40,27 +40,62 @@
             opacity: 1;
         }
 
-        /* Event cards visible by default for SEO */
+        /* Event cards are ALWAYS visible for SEO and crawlers.
+           GSAP adds a subtle entrance animation via fromTo() only when
+           ScrollTrigger fires — content is never set to opacity:0. */
         .gsap-event-card {
             opacity: 1;
             transform: translateY(0);
         }
-        
-        /* Animate only if GSAP loads successfully */
-        .gsap-loaded .gsap-event-card {
-            opacity: 0;
-            transform: translateY(30px);
-        }
 
         /* Reduced motion support - disable scroll animations */
         @media (prefers-reduced-motion: reduce) {
-            .gsap-event-card,
-            .gsap-loaded .gsap-event-card {
+            .gsap-event-card {
                 opacity: 1 !important;
                 transform: none !important;
                 transition: none !important;
                 animation: none !important;
             }
+        }
+
+        /* SEO intro block - above the fold */
+        .eventos-seo-intro {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 0.5rem;
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+        .eventos-seo-intro__title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.4rem;
+        }
+        .eventos-seo-intro__text {
+            font-size: 0.82rem;
+            color: #6c757d;
+            margin-bottom: 0.6rem;
+            line-height: 1.5;
+        }
+        .eventos-seo-intro__links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem 0.5rem;
+        }
+        .eventos-seo-intro__links a {
+            font-size: 0.78rem;
+            color: #0d6efd;
+            text-decoration: none;
+            padding: 0.15rem 0.5rem;
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            background: #fff;
+            transition: background-color 0.15s, border-color 0.15s;
+        }
+        .eventos-seo-intro__links a:hover {
+            background: #e7f1ff;
+            border-color: #0d6efd;
+            text-decoration: none;
         }
     </style>
     <th:block th:replace="~{fragments/google-analytics :: gtm-head}"/>
@@ -137,6 +172,29 @@
                             <p class="hero-subtitle" th:text="${textoProvincia != null} ? ${textoProvincia} : 'Orquestas, discotecas móviles y grupos musicales · Verbenas y fiestas populares · Actualizado diariamente'"></p>
                         </div>
                         <div class="hero-right"></div>
+                    </div>
+                </div>
+
+                <!-- Intro SEO Above the Fold -->
+                <div th:if="${contextoPagina == 'catalogo' or contextoPagina == null}" class="px-3 pt-3">
+                    <div class="eventos-seo-intro">
+                        <h2 class="eventos-seo-intro__title">
+                            Orquestas, verbenas y fiestas populares en España
+                        </h2>
+                        <p class="eventos-seo-intro__text">
+                            Consulta la <strong>agenda musical actualizada al momento</strong>: orquestas, discotecas móviles y grupos en actuación.
+                            Filtra por provincia para descubrir qué <strong>grupos musicales</strong> actúan cerca de ti.
+                        </p>
+                        <nav class="eventos-seo-intro__links" aria-label="Provincias con más actuaciones">
+                            <a th:href="@{/eventos/provincia/Coruña}">Orquestas en A Coruña</a>
+                            <a th:href="@{/eventos/provincia/Pontevedra}">Verbenas en Pontevedra</a>
+                            <a th:href="@{/eventos/provincia/León}">Fiestas en León</a>
+                            <a th:href="@{/eventos/provincia/Lugo}">Actuaciones en Lugo</a>
+                            <a th:href="@{/eventos/provincia/Ourense}">Conciertos en Ourense</a>
+                            <a th:href="@{/eventos/provincia/Bizkaia}">Orquestas en Bizkaia</a>
+                            <a th:href="@{/eventos/provincia/Zamora}">Verbenas en Zamora</a>
+                            <a th:href="@{/eventos/provincia/Burgos}">Fiestas en Burgos</a>
+                        </nav>
                     </div>
                 </div>
 
@@ -371,7 +429,7 @@
                         <div class="card-body">
                             <h2 class="h5 text-primary mb-3">Agenda de orquestas, verbenas y fiestas en España</h2>
                             <p class="text-muted small mb-2">
-                                Festia es la <strong>agenda musical más completa de España</strong> con información actualizada diariamente.
+                                Festia es la <strong>agenda musical actualizada al momento</strong> con información actualizada diariamente.
                                 Aquí encontrarás <strong>orquestas</strong>, <strong>discotecas móviles</strong>,
                                 <strong>grupos musicales</strong> y <strong>artistas</strong> que actúan en
                                 <strong>verbenas</strong>, <strong>fiestas populares</strong>,
