@@ -889,7 +889,7 @@ public class EventoPublicoController {
             return "Orquestas y actuaciones en " + provincia + " | Festia";
         }
         if (totalEventos > 0) {
-            return totalEventos + " actuaciones musicales en España — esta semana | Festia";
+            return totalEventos + " próximas actuaciones musicales en España | Festia";
         }
         return "Agenda de orquestas, verbenas y fiestas en España | Festia";
     }
