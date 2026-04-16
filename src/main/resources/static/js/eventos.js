@@ -86,9 +86,6 @@ function initializeGsapEventosAnimations() {
 
     // Register ScrollTrigger plugin
     gsap.registerPlugin(ScrollTrigger);
-    
-    // Mark GSAP as loaded - this will enable scroll animations
-    document.body.classList.add('gsap-loaded');
 
     // Detect touch devices
     const isTouch = window.matchMedia('(pointer: coarse)').matches;
@@ -103,7 +100,13 @@ function initializeGsapEventosAnimations() {
     }
 
     // ScrollTrigger for Event Cards only
-    initCardStaggerAnimation(STAGGER_DELAY, CARD_DURATION, isTouch);
+    const shouldAnimateCards = initCardStaggerAnimation(STAGGER_DELAY, CARD_DURATION, isTouch);
+
+    // Only mark GSAP as loaded when card animations will actually run
+    // Otherwise CSS rule .gsap-loaded hides cards at opacity:0 forever
+    if (shouldAnimateCards) {
+        document.body.classList.add('gsap-loaded');
+    }
 
     // Cleanup on page unload
     window.addEventListener('beforeunload', cleanupGsapAnimations);
@@ -255,14 +258,14 @@ function initTextRevealTimeline(delay1, delay2, subtitleDelay) {
 function initCardStaggerAnimation(staggerDelay, duration, isTouch) {
     const eventCards = document.querySelectorAll('.gsap-event-card');
 
-    if (!eventCards.length) return;
+    if (!eventCards.length) return false;
 
     // Skip stagger on mobile if too many cards (performance)
     const shouldAnimate = !isTouch || eventCards.length <= 6;
 
     if (!shouldAnimate) {
         // Cards are already visible in CSS — nothing to do
-        return;
+        return false;
     }
 
     // Create ScrollTrigger for each day's group
@@ -281,7 +284,7 @@ function initCardStaggerAnimation(staggerDelay, duration, isTouch) {
                 );
             }
         });
-        return;
+        return true;
     }
     
     dayGroups.forEach((group, groupIndex) => {
@@ -301,6 +304,8 @@ function initCardStaggerAnimation(staggerDelay, duration, isTouch) {
             }
         });
     });
+
+    return true;
 }
 
 /**
