@@ -120,7 +120,7 @@ public class InfoController {
                 "name", "¿Hay período de prueba?",
                 "acceptedAnswer", Map.of(
                     "@type", "Answer",
-                    "text", "Sí, todos nuestros planes tienen un período de prueba de 2 meses. Te consultaremos si quieres continuar en la plataforma antes de formalizar el pago."
+                    "text", "Sí, todos nuestros planes tienen un período de prueba de 1 mes. No se te cobrará nada hasta que nos confirmes que quieres continuar con nosotros."
                 )
             ),
             Map.of(
