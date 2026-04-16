@@ -33,10 +33,9 @@ public class InfoController {
         String canonicalUrl = baseUrl + "/info";
 
         // SEO meta
-        model.addAttribute("titulo", "Gestión de orquestas y artistas para fiestas y eventos | festia.es");
+        model.addAttribute("titulo", "Festia — Gestión de Orquestas y Artistas para Fiestas");
         model.addAttribute("descripcion",
-            "festia.es es la plataforma líder en gestión de orquestas, discotecas móviles y artistas para fiestas, " +
-            "verbenas y eventos en España. Tarifas, disponibilidad y presupuestos en tiempo real. Pruébalo gratis.");
+            "Plataforma profesional para agencias, músicos y representantes. Tarifas, disponibilidad y presupuestos en tiempo real. Prueba gratis 1 mes.");
         model.addAttribute("canonicalUrl", canonicalUrl);
         model.addAttribute("metaRobots", "index,follow");
         model.addAttribute("ogImage", OG_IMAGE);

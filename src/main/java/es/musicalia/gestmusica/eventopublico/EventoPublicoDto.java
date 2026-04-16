@@ -124,27 +124,41 @@ public class EventoPublicoDto {
 
     /**
      * Titulo SEO para la pagina del evento.
+     * Optimizado para no exceder ~60 caracteres y coincidir con queries de intención local.
+     * Formato: "Artista — Orquesta en Municipio (Provincia) | Festia"
      */
     public String getTituloSeo() {
-        return nombreArtista + " en " + getMunicipioDisplay() + " (" + provincia + ") | " +
-            fecha.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + " | Festia";
+        String municipio = getMunicipioDisplay();
+        // Formato compacto: "Artista en Municipio (Provincia) | Festia"
+        // Ej: "Suavecito en Pontevedra | Festia" (37 chars)
+        // Ej: "Costa Dorada en Carballeda de Valdeorras (Ourense) | Festia" (60 chars)
+        String base = nombreArtista + " en " + municipio;
+        if (base.length() <= 45) {
+            return base + " (" + provincia + ") | Festia";
+        }
+        // Si es muy largo, omitir provincia del title (ya está en la description)
+        return base + " | Festia";
     }
 
     /**
      * Descripcion SEO para la pagina del evento.
+     * Optimizada para ~150 caracteres maximo, con keywords de intención y CTA.
      */
     public String getDescripcionSeo() {
         StringBuilder desc = new StringBuilder();
-        desc.append("Actuación de ").append(nombreArtista);
-        desc.append(" en ").append(getMunicipioDisplay()).append(" (").append(provincia).append(")");
-        desc.append(" el ").append(fecha.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        String fechaFormateada = fecha.format(DateTimeFormatter.ofPattern("dd 'de' MMMM 'de' yyyy",
+            new java.util.Locale("es", "ES")));
+
+        desc.append(nombreArtista).append(" actúa en ").append(getMunicipioDisplay());
+        desc.append(" (").append(provincia).append(") el ").append(fechaFormateada);
+
         if (horaActuacion != null) {
             desc.append(" a las ").append(horaActuacion.format(DateTimeFormatter.ofPattern("HH:mm"))).append(" h");
         }
         if (lugar != null && !lugar.isBlank()) {
-            desc.append(", en ").append(lugar);
+            desc.append(" en ").append(lugar);
         }
-        desc.append(". Consulta todos los detalles en https://festia.es/eventos");
+        desc.append(". Toda la información en Festia.");
         return desc.toString();
     }
 

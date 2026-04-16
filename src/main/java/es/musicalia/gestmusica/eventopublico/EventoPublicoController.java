@@ -889,9 +889,9 @@ public class EventoPublicoController {
             return "Orquestas y actuaciones en " + provincia + " | Festia";
         }
         if (totalEventos > 0) {
-            return totalEventos + " próximas actuaciones musicales en España | Festia";
+            return "Agenda de Orquestas y Fiestas en España " + java.time.Year.now().getValue() + " | Festia";
         }
-        return "Agenda de orquestas, verbenas y fiestas en España | Festia";
+        return "Agenda de Orquestas, Verbenas y Fiestas en España | Festia";
     }
 
     private String construirDescripcionListado(String provincia, String municipio, Long idArtista) {
@@ -904,8 +904,8 @@ public class EventoPublicoController {
         if (provincia != null && !provincia.isBlank()) {
             return "Agenda de orquestas y actuaciones en " + provincia + ". Filtra por municipio, artista y fecha para encontrar conciertos y fiestas populares.";
         }
-        return "Agenda completa de orquestas, discotecas móviles, verbenas y fiestas populares en España. " +
-            "Consulta fechas, artistas y municipios de cada actuación. Actualizado diariamente.";
+        return "Consulta la agenda de orquestas, verbenas y fiestas en España. " +
+            "Filtra por provincia, municipio, artista y fecha. Actualizado cada día.";
     }
 
     // ── Calendario helpers ──────────────────────────────────────────────────────
