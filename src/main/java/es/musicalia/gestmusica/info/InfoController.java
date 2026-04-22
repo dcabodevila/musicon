@@ -133,10 +133,10 @@ public class InfoController {
             ),
             Map.of(
                 "@type", "Question",
-                "name", "Soy un particular, ¿puedo consultar tarifas?",
+                "name", "¿Puedo consultar la agenda de fiestas si soy un particular?",
                 "acceptedAnswer", Map.of(
                     "@type", "Answer",
-                    "text", "Festia.es es una plataforma para profesionales del sector. De momento no está abierta a particulares, pero en un futuro es posible que podamos ofrecer cierta información que las agencias y artistas deseen compartir."
+                    "text", "Sí, la agenda de fiestas, verbenas y conciertos en Festia es pública y gratuita para todo el mundo. Si eres profesional del sector (agencia, representante o ayuntamiento), descubre también cómo gestionamos la programación, tarifas y contrataciones en tiempo real."
                 )
             ),
             Map.of(

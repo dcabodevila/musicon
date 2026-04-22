@@ -37,4 +37,19 @@
         <!-- End Google Tag Manager (noscript) -->
     </th:block>
 </th:block>
+
+<!-- Fragmento HEAD: Google Analytics 4 (gtag.js) -->
+<!-- Se usa como alternativa/complemento a GTM. Requiere 'ga.measurement-id' en properties. -->
+<th:block th:fragment="ga4-head" th:with="gaId=${@environment.getProperty('ga.measurement-id')}">
+    <th:block th:if="${gaId != null and !gaId.isBlank() and gaId != 'undefined'}">
+        <!-- Google tag (gtag.js) -->
+        <script async th:src="'https://www.googletagmanager.com/gtag/js?id=' + ${gaId}"></script>
+        <script th:inline="javascript">
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', /*[[${gaId}]]*/ 'G-XXXXXXXXXX');
+        </script>
+    </th:block>
+</th:block>
 </html>

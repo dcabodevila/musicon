@@ -246,9 +246,9 @@ public class EventoPublicoController {
         if (!eventos.isEmpty()) {
             EventoPublicoDto primerEvento = eventos.get(0);
             String nombreArtista = primerEvento.getNombreArtista();
-            String titulo = "Próximas actuaciones de " + nombreArtista + " | Festia";
-            String descripcion = "Agenda de conciertos y actuaciones de " + nombreArtista
-                + ". Consulta fechas, municipios y detalles de cada evento en Festia.";
+            String titulo = "Conciertos y Fechas de " + nombreArtista + " | Festia";
+            String descripcion = "Descubre todas las fechas confirmadas de " + nombreArtista
+                + ". Fiestas, verbenas y actuaciones con horarios y ubicaciones en Festia.";
             String ogImage = (primerEvento.getLogoArtista() != null && !primerEvento.getLogoArtista().isBlank())
                 ? EventoPublicoDto.normalizeImageUrl(primerEvento.getLogoArtista()) : EVENT_IMAGE_URL;
             String baseUrl = construirBaseUrl(request);
@@ -587,9 +587,10 @@ public class EventoPublicoController {
         String canonicalUrl = construirUrlAbsoluta(request, pathProvincia);
         boolean indexable = paginaEventos.getTotalElements() > 0;
 
-        String titulo = "Eventos y actuaciones en " + nombreProvinciaCanonico + " | Festia";
-        String descripcion = "Agenda de próximos conciertos y actuaciones en " + nombreProvinciaCanonico
-            + ". Consulta artistas, fechas y municipios en Festia.";
+        String year = String.valueOf(java.time.Year.now().getValue());
+        String titulo = "Fiestas y Orquestas en " + nombreProvinciaCanonico + " " + year + " | Festia";
+        String descripcion = "Descubre las fiestas populares y verbenas de " + nombreProvinciaCanonico
+            + ". Orquestas, grupos musicales y discotecas móviles con fechas y horarios confirmados.";
 
         model.addAttribute("eventosPorDia", eventosPorDia);
         model.addAttribute("eventos", eventos);
@@ -695,11 +696,12 @@ public class EventoPublicoController {
         String canonicalUrl = construirUrlAbsoluta(request, pathMunicipio);
         boolean indexable = paginaEventos.getTotalElements() > 0;
 
+        String year = String.valueOf(java.time.Year.now().getValue());
         String tituloConProvincia = nombreProvinciaCanonico.isBlank()
-            ? "Eventos y actuaciones en " + municipioTrim + " | Festia"
-            : "Eventos y actuaciones en " + municipioTrim + " (" + nombreProvinciaCanonico + ") | Festia";
-        String descripcion = "Agenda de próximos conciertos y actuaciones en " + municipioTrim
-            + ". Consulta artistas, fechas y detalles de cada evento en Festia.";
+            ? "Fiestas y Orquestas en " + municipioTrim + " " + year + " | Festia"
+            : "Fiestas y Orquestas en " + municipioTrim + ", " + nombreProvinciaCanonico + " " + year + " | Festia";
+        String descripcion = "Consulta las fiestas y verbenas de " + municipioTrim
+            + ". Orquestas, grupos musicales y discotecas móviles con fechas, horarios y lugares confirmados.";
 
         model.addAttribute("eventosPorDia", eventosPorDia);
         model.addAttribute("eventos", eventos);
@@ -879,33 +881,34 @@ public class EventoPublicoController {
     }
 
     private String construirTituloListado(String provincia, String municipio, Long idArtista, int totalEventos) {
+        String year = String.valueOf(java.time.Year.now().getValue());
         if (idArtista != null) {
-            return "Eventos musicales por artista | Festia";
+            return "Conciertos y Fechas del Artista | Festia";
         }
         if (municipio != null && !municipio.isBlank() && provincia != null && !provincia.isBlank()) {
-            return "Orquestas y actuaciones en " + municipio + " (" + provincia + ") | Festia";
+            return "Fiestas y Orquestas en " + municipio + ", " + provincia + " " + year + " | Festia";
         }
         if (provincia != null && !provincia.isBlank()) {
-            return "Orquestas y actuaciones en " + provincia + " | Festia";
+            return "Fiestas y Orquestas en " + provincia + " " + year + " | Festia";
         }
         if (totalEventos > 0) {
-            return "Agenda de Orquestas y Fiestas en España " + java.time.Year.now().getValue() + " | Festia";
+            return "Fiestas, Verbenas y Orquestas en España " + year + " | Festia";
         }
-        return "Agenda de Orquestas, Verbenas y Fiestas en España | Festia";
+        return "Fiestas, Verbenas y Orquestas en España | Festia";
     }
 
     private String construirDescripcionListado(String provincia, String municipio, Long idArtista) {
         if (idArtista != null) {
-            return "Consulta la agenda de actuaciones por artista. Fechas, municipios y detalles de cada concierto y evento musical en Festia.";
+            return "Descubre todas las fechas confirmadas del artista. Consulta conciertos, verbenas y fiestas populares con horarios y ubicaciones en Festia.";
         }
         if (municipio != null && !municipio.isBlank() && provincia != null && !provincia.isBlank()) {
-            return "Actuaciones y verbenas en " + municipio + " (" + provincia + "). Consulta orquestas, discotecas móviles y artistas con fechas y detalles en Festia.";
+            return "Consulta las fiestas y verbenas de " + municipio + " (" + provincia + "). Orquestas, discotecas móviles y grupos musicales con fechas y horarios confirmados.";
         }
         if (provincia != null && !provincia.isBlank()) {
-            return "Agenda de orquestas y actuaciones en " + provincia + ". Filtra por municipio, artista y fecha para encontrar conciertos y fiestas populares.";
+            return "Agenda de fiestas populares y verbenas en " + provincia + ". Encuentra orquestas, grupos musicales y discotecas móviles filtrando por municipio y fecha.";
         }
-        return "Consulta la agenda de orquestas, verbenas y fiestas en España. " +
-            "Filtra por provincia, municipio, artista y fecha. Actualizado cada día.";
+        return "Consulta la agenda de fiestas, verbenas y orquestas en España. " +
+            "Descubre conciertos y actuaciones cerca de ti filtrando por provincia, municipio, artista y fecha.";
     }
 
     // ── Calendario helpers ──────────────────────────────────────────────────────
