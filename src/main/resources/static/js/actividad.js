@@ -222,41 +222,38 @@ function initializeChartAccesos() {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'bottom'
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                if (context.parsed.y === 0 && context.label === 'Sin datos') {
-                                    return 'No hay accesos en el período seleccionado';
-                                }
-                                return context.dataset.label + ': ' + context.parsed.y + ' acceso' + (context.parsed.y !== 1 ? 's' : '');
+                legend: {
+                    display: true,
+                    position: 'bottom'
+                },
+                tooltips: {
+                    callbacks: {
+                        label: function(tooltipItem, data) {
+                            if (tooltipItem.yLabel === 0 && data.labels[tooltipItem.index] === 'Sin datos') {
+                                return 'No hay accesos en el período seleccionado';
                             }
+                            return data.datasets[tooltipItem.datasetIndex].label + ': ' + tooltipItem.yLabel + ' acceso' + (tooltipItem.yLabel !== 1 ? 's' : '');
                         }
                     }
                 },
                 scales: {
-                    y: {
-                        beginAtZero: true,
-                        min: 0,
-                        grid: {
-                            display: true
-                        },
+                    yAxes: [{
                         ticks: {
-                            stepSize: 1,
+                            beginAtZero: true,
+                            min: 0,
                             callback: function(value) {
                                 return Number.isInteger(value) ? value : '';
                             }
+                        },
+                        gridLines: {
+                            display: true
                         }
-                    },
-                    x: {
-                        grid: {
+                    }],
+                    xAxes: [{
+                        gridLines: {
                             display: false
                         }
-                    }
+                    }]
                 }
             }
         });
