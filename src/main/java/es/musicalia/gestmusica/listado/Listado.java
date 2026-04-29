@@ -3,6 +3,7 @@ package es.musicalia.gestmusica.listado;
 import es.musicalia.gestmusica.agencia.Agencia;
 import es.musicalia.gestmusica.artista.Artista;
 import es.musicalia.gestmusica.localizacion.Municipio;
+import es.musicalia.gestmusica.localizacion.Provincia;
 import es.musicalia.gestmusica.ocupacion.TipoOcupacion;
 import es.musicalia.gestmusica.usuario.Usuario;
 import jakarta.persistence.*;
@@ -36,6 +37,10 @@ public class Listado {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "municipio_id")
     private Municipio municipio;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "provincia_id")
+    private Provincia provincia;
 
     @Column(name = "localidad")
     private String localidad;

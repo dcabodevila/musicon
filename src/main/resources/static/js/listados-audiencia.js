@@ -37,7 +37,12 @@ $(document).ready(function () {
                 }
             },
             { data: 'nombreRepresentante' },
-            { data: 'solicitadoPara' },
+            {
+                data: 'provincia',
+                render: function(data, type, row) {
+                    return data || '-';
+                }
+            },
             {
                 data: null,
                 render: function(data, type, row) {

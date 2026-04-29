@@ -221,6 +221,8 @@ public class ListadoServiceImpl implements ListadoService {
                 listado.getUsuario().getNombreComercial() != null ? listado.getUsuario().getNombreComercial() : listado.getUsuario().getNombre() + " " + listado.getUsuario().getApellidos(),
                 listado.getLocalidad(),
                 listado.getMunicipio()!=null ? listado.getMunicipio().getNombre(): "",
+                listado.getMunicipio()!=null && listado.getMunicipio().getProvincia()!=null && listado.getMunicipio().getProvincia().getCcaa()!=null ? listado.getMunicipio().getProvincia().getCcaa().getNombre() : "",
+                listado.getProvincia()!=null ? listado.getProvincia().getNombre() : "",
 
                 listado.getUsuario().getNombre(),
                 listado.getUsuario().getApellidos(),
@@ -251,6 +253,12 @@ public class ListadoServiceImpl implements ListadoService {
             Municipio municipio = municipioRepository.findById(listadoDto.getIdMunicipio())
                     .orElseThrow(() -> new IllegalArgumentException("Municipio no encontrado con ID: " + listadoDto.getIdMunicipio()));
             listadoEntity.setMunicipio(municipio);
+        }
+
+        // Cargar provincia
+        if (listadoDto.getIdProvincia() != null) {
+            listadoEntity.setProvincia(provinciaRepository.findById(listadoDto.getIdProvincia())
+                    .orElseThrow(() -> new IllegalArgumentException("Provincia no encontrada con ID: " + listadoDto.getIdProvincia())));
         }
 
         // Cargar agencias si existen

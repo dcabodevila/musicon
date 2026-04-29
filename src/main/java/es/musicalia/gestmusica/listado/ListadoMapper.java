@@ -23,7 +23,7 @@ public interface ListadoMapper {
     @Mapping(target = "idsTipoArtista", source = "idsTipoArtista", qualifiedByName = "stringToSetLong")
     @Mapping(target = "idsComunidades", source = "idsComunidades", qualifiedByName = "stringToSetLong")
     @Mapping(target = "idCcaa", ignore = true)
-    @Mapping(target = "idProvincia", ignore = true)
+    @Mapping(target = "idProvincia", source = "provincia.id")
     ListadoDto toDto(Listado listado);
 
     @Mapping(target = "id", ignore = true)
