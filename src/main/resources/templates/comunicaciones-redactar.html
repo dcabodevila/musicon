@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>festia.es - Redactar Comunicación</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <div th:replace="~{fragments/main-template :: header-css}"/>
+    <!-- Quill CSS desde CDN ya que viene incluido en AdminKit -->
+    <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+    <script th:src="@{/js/jquery.min.js}"></script>
+</head>
+
+<body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
+<div class="wrapper">
+
+    <div th:replace="~{fragments/main-template :: sidebar}"/>
+    <div class="main">
+        <div th:replace="~{fragments/main-template :: navbar}"/>
+
+        <main class="content">
+            <div class="container-fluid p-0">
+
+                <div class="mb-3">
+                    <h1 class="h3 d-inline align-middle">Redactar comunicación</h1>
+                </div>
+
+                <div th:if="${message}" th:class="${'alert alert-' + alertClass+ ' alert-dismissible fade show'}" role="alert">
+                    <div class="alert-message">
+                        <strong th:text="${message}">Mensaje</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+
+                <!-- Resumen de destinatarios -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">
+                                    <i class="fas fa-users me-2"></i>Destinatarios seleccionados
+                                    <span class="badge bg-primary ms-2" th:text="${totalUsuarios}">0</span>
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div th:if="${usuariosSeleccionados != null && !usuariosSeleccionados.isEmpty()}">
+                                    <p class="text-muted mb-2">Se enviará la comunicación a los siguientes usuarios:</p>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Nombre</th>
+                                                    <th>Email</th>
+                                                    <th>Rol</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr th:each="usuario : ${usuariosSeleccionados}">
+                                                    <td th:text="${usuario.nombreCompleto}">Nombre</td>
+                                                    <td th:text="${usuario.email}">Email</td>
+                                                    <td th:text="${usuario.rolGeneral != null ? usuario.rolGeneral.nombre : '-'}">Rol</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div th:if="${usuariosSeleccionados == null || usuariosSeleccionados.isEmpty()}" class="alert alert-warning">
+                                    No hay usuarios seleccionados. <a th:href="@{/comunicaciones}">Volver a la selección</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Formulario de redacción -->
+                <div class="row mt-4" th:if="${usuariosSeleccionados != null && !usuariosSeleccionados.isEmpty()}">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">Mensaje</h5>
+                            </div>
+                            <div class="card-body">
+                                <form th:action="@{/comunicaciones/enviar}" method="post" id="formComunicacion">
+                                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                    
+                                    <!-- IDs de usuarios seleccionados -->
+                                    <input type="hidden" name="ids" th:value="${ids}">
+                                    
+                                    <div class="mb-3">
+                                        <label for="asunto" class="form-label">Asunto <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="asunto" name="asunto" required
+                                               placeholder="Introduce el asunto del mensaje" maxlength="200" autocomplete="off">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="quill-editor" class="form-label">Mensaje <span class="text-danger">*</span></label>
+                                        <div id="quill-editor" style="height: 300px;">
+                                        </div>
+                                        <!-- Campo oculto para capturar el HTML de Quill -->
+                                        <input type="hidden" name="htmlBody" id="htmlBody">
+                                        <!-- Campo oculto para capturar el texto plano de Quill -->
+                                        <input type="hidden" name="textoPlano" id="textoPlano">
+                                    </div>
+
+                                    <div class="d-flex justify-content-between align-items-center mt-4">
+                                        <a th:href="@{/comunicaciones}" class="btn btn-secondary">
+                                            <i class="fas fa-arrow-left me-2"></i>Volver a la selección
+                                        </a>
+                                        <button type="submit" class="btn btn-success btn-lg" id="btnEnviar">
+                                            <i class="fas fa-paper-plane me-2"></i>Enviar comunicación
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+        <div th:replace="~{fragments/main-template :: footer}"/>
+    </div>
+</div>
+
+<!-- Quill JS desde CDN -->
+<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializar Quill editor
+        var quill = new Quill('#quill-editor', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    ['bold', 'italic', 'underline', 'strike'],
+                    ['blockquote', 'code-block'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    [{ 'indent': '-1'}, { 'indent': '+1' }],
+                    ['link'],
+                    ['clean']
+                ]
+            }
+        });
+
+        // Capturar el HTML de Quill al enviar el formulario
+        document.getElementById('formComunicacion').addEventListener('submit', function(e) {
+            var htmlContent = quill.root.innerHTML;
+            document.getElementById('htmlBody').value = htmlContent;
+
+            // Capturar el texto plano de Quill
+            var textoPlano = quill.getText().trim();
+            document.getElementById('textoPlano').value = textoPlano;
+
+            // Validar que el contenido no esté vacío
+            if (textoPlano.length === 0) {
+                e.preventDefault();
+                alert('Por favor, escribe un mensaje antes de enviar.');
+                return false;
+            }
+
+            // Validar que haya asunto
+            var asunto = document.getElementById('asunto').value.trim();
+            if (asunto.length === 0) {
+                e.preventDefault();
+                alert('Por favor, introduce un asunto antes de enviar.');
+                document.getElementById('asunto').focus();
+                return false;
+            }
+
+            // Mostrar estado de envío y deshabilitar botón
+            e.preventDefault();
+            var btn = document.getElementById('btnEnviar');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Enviando...';
+
+            // Forzar el submit nativo después de que el DOM se repinte
+            requestAnimationFrame(function() {
+                document.getElementById('formComunicacion').submit();
+            });
+        });
+    });
+    /*]]>*/
+</script>
+
+<script type="text/javascript" th:src="@{/js/comun.js}"></script>
+
+</body>
+</html>

@@ -12,6 +12,7 @@ public enum PermisoGeneralEnum {
     GESTION_AGENCIAS,
     GESTION_AGRUPACION,
     AGENCIA_CREAR,
-    USUARIOS;
+    USUARIOS,
+    COMUNICACIONES;
 
 }

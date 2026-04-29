@@ -17,4 +17,7 @@ public interface RolRepository extends JpaRepository<Rol, Long> {
 
     @Query("select u from Rol u where u.codigo=?1")
     Rol findRolByCodigo(String codigo);
+
+    @Query("select new es.musicalia.gestmusica.rol.RolRecord(u.id, u.nombre, u.descripcion, u.codigo) from Rol u where u.codigo in ?1 order by u.id")
+    List<RolRecord> findAllByCodigos(List<String> codigos);
 }

@@ -270,6 +270,11 @@
                                 <i class="align-middle me-2 fas fa-fw fa-user-check"></i> <span class="align-middle">Actividad</span>
                             </a>
                         </li>
+                        <li class="sidebar-item" sec:authorize="hasAuthority('COMUNICACIONES')">
+                            <a class="sidebar-link" th:href="@{/comunicaciones}">
+                                <i class="align-middle me-2 fas fa-fw fa-envelope"></i> <span class="align-middle">Comunicaciones</span>
+                            </a>
+                        </li>
 					</div>
 				</div>
                 <li class="sidebar-item">

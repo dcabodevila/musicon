@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>festia.es - Comunicaciones</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <div th:replace="~{fragments/main-template :: header-css}"/>
+    <script th:src="@{/js/jquery.min.js}"></script>
+    <script th:src="@{/adminkit/js/datatables.js}"></script>
+</head>
+
+<body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
+<div class="wrapper">
+
+    <div th:replace="~{fragments/main-template :: sidebar}"/>
+    <div class="main">
+        <div th:replace="~{fragments/main-template :: navbar}"/>
+
+        <main class="content">
+            <div class="container-fluid p-0">
+
+                <div class="mb-3">
+                    <h1 class="h3 d-inline align-middle">Comunicaciones</h1>
+                </div>
+
+                <div th:if="${message}" th:class="${'alert alert-' + alertClass+ ' alert-dismissible fade show'}" role="alert">
+                    <div class="alert-message">
+                        <strong th:text="${message}">Mensaje</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+
+                <!-- Formulario de filtros -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">Filtrar usuarios</h5>
+                            </div>
+                            <div class="card-body">
+                                <form th:action="@{/comunicaciones/filtrar}" method="post" id="filtroForm">
+                                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                    <div class="row">
+                                        <div class="col-md-3 mb-3">
+                                            <label for="ccaaId" class="form-label">Comunidad Autónoma</label>
+                                            <select class="form-select" id="ccaaId" name="ccaaId">
+                                                <option value="">Todas las CCAA</option>
+                                                <option th:each="ccaa : ${listaCcaa}"
+                                                        th:value="${ccaa.id}"
+                                                        th:text="${ccaa.nombre}"
+                                                        th:selected="${ccaaIdSeleccionada != null && ccaaIdSeleccionada == ccaa.id}">
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <label for="provinciaId" class="form-label">Provincia</label>
+                                            <select class="form-select" id="provinciaId" name="provinciaId">
+                                                <option value="">Seleccione CCAA primero</option>
+                                                <option th:each="prov : ${listaProvincias}"
+                                                        th:value="${prov.id}"
+                                                        th:text="${prov.nombre}"
+                                                        th:selected="${provinciaIdSeleccionada != null && provinciaIdSeleccionada == prov.id}">
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <label for="rolCodigo" class="form-label">Rol principal</label>
+                                            <select class="form-select" id="rolCodigo" name="rolCodigo">
+                                                <option value="">Todos los roles</option>
+                                                <option th:each="rol : ${listaRoles}"
+                                                        th:value="${rol.codigo}"
+                                                        th:text="${rol.nombre}"
+                                                        th:selected="${rolCodigoSeleccionado != null && rolCodigoSeleccionado == rol.codigo}">
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3 mb-3 d-flex align-items-end">
+                                            <button type="submit" class="btn btn-primary w-100">
+                                                <i class="fas fa-filter me-2"></i>Filtrar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabla de usuarios (solo se muestra si hay usuarios filtrados) -->
+                <div class="row mt-4" th:if="${listaUsuarios != null}">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="card-title mb-0">
+                                    Usuarios filtrados
+                                    <span class="badge bg-primary ms-2" th:text="${totalUsuarios}">0</span>
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <form th:action="@{/comunicaciones/redactar}" method="get" id="usuariosForm">
+                                    <div class="mb-3">
+                                        <button type="submit" class="btn btn-success" id="btnRedactar" disabled>
+                                            <i class="fas fa-envelope me-2"></i>Redactar mensaje
+                                        </button>
+                                    </div>
+
+                                    <div th:if="${listaUsuarios.isEmpty()}" class="alert alert-info">
+                                        No se encontraron usuarios con los filtros seleccionados.
+                                    </div>
+
+                                    <div th:if="${!listaUsuarios.isEmpty()}" class="table-responsive">
+                                        <table id="datatables-comunicaciones" class="table table-striped dataTable no-footer dtr-inline collapsed" style="width: 100%;">
+                                            <thead>
+                                            <tr>
+                                                <th style="width: 40px;">
+                                                    <input type="checkbox" class="form-check-input" id="selectAll">
+                                                </th>
+                                                <th>Nombre</th>
+                                                <th>Nombre comercial</th>
+                                                <th>Rol</th>
+                                                <th>Provincia</th>
+                                                <th>CCAA</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr th:each="usuario : ${listaUsuarios}">
+                                                <td>
+                                                    <input type="checkbox" class="form-check-input user-checkbox" 
+                                                           name="ids" 
+                                                           th:value="${usuario.id}">
+                                                </td>
+                                                <td th:text="${usuario.nombreCompleto}">Nombre</td>
+                                                <td th:text="${usuario.nombreComercial != null ? usuario.nombreComercial : '-'}">Nombre comercial</td>
+                                                <td th:text="${usuario.rolGeneral != null ? usuario.rolGeneral.nombre : '-'}">Rol</td>
+                                                <td th:text="${usuario.provincia != null ? usuario.provincia.nombre : '-'}">Provincia</td>
+                                                <td th:text="${usuario.provincia != null && usuario.provincia.ccaa != null ? usuario.provincia.ccaa.nombre : '-'}">CCAA</td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+        <div th:replace="~{fragments/main-template :: footer}"/>
+    </div>
+</div>
+
+<script type="text/javascript" th:src="@{/js/comun.js}"></script>
+<script type="text/javascript" th:src="@{/js/comunicaciones.js}"></script>
+
+</body>
+</html>

@@ -53,6 +53,33 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 	@Query("select u from Usuario u where u.emailBajaToken = ?1")
 	Optional<Usuario> findByEmailBajaToken(String token);
 
+	@Query("""
+		SELECT DISTINCT u FROM Usuario u
+		LEFT JOIN FETCH u.provincia p
+		LEFT JOIN FETCH p.ccaa c
+		LEFT JOIN FETCH u.rolGeneral r
+		WHERE u.id IN :ids
+		ORDER BY u.nombre, u.apellidos
+		""")
+	List<Usuario> findAllByIdWithRelaciones(@Param("ids") List<Long> ids);
+
 	@Query("SELECT COUNT(u) FROM Usuario u WHERE u.rolGeneral.codigo IN :codigos")
 	long countByRolGeneralCodigoIn(@Param("codigos") List<String> codigos);
+
+	@Query("""
+		SELECT u FROM Usuario u
+		LEFT JOIN FETCH u.provincia p
+		LEFT JOIN FETCH p.ccaa c
+		LEFT JOIN FETCH u.rolGeneral r
+		WHERE u.activo = true
+		AND (:ccaaId IS NULL OR c.id = :ccaaId)
+		AND (:provinciaId IS NULL OR p.id = :provinciaId)
+		AND (:rolCodigo IS NULL OR r.codigo = :rolCodigo)
+		ORDER BY u.nombre, u.apellidos
+		""")
+	List<Usuario> findUsuariosParaComunicacion(
+			@Param("ccaaId") Long ccaaId,
+			@Param("provinciaId") Long provinciaId,
+			@Param("rolCodigo") String rolCodigo
+	);
 }
