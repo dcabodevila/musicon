@@ -1,4 +1,5 @@
 <!-- FOR_ROLES: AGENCIA -->
+# Novedades — Mapas de ocupaciones y listados
 
 ## 📍 Nuevo: Mapa de ocupaciones
 
@@ -17,7 +18,7 @@ Hemos añadido un **mapa interactivo** en el listado de **Ocupaciones**. Ahora p
 
 ---
 
-# Novedades — Mejoras en Audiencias de Listados
+
 
 ## 🗺️ Nuevo: Mapa de listados por provincia
 
