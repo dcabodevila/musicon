@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,4 +17,8 @@ public interface MunicipioRepository extends JpaRepository<Municipio, Long> {
 
     @Query("select m from Municipio m where translate(upper(m.nombre), 'ÁÉÍÓÚÜ', 'AEIOUU') like translate(upper(concat('%', ?1, '%')), 'ÁÉÍÓÚÜ', 'AEIOUU') and m.provincia.id = ?2")
     Optional<List<Municipio>> findMunicipioByNombreLike(String nombre, Long provinciaId);
+
+    List<Municipio> findByLatitudIsNullAndLongitudIsNull(Pageable pageable);
+
+    List<Municipio> findByProvinciaIdAndLatitudIsNullAndLongitudIsNull(Long provinciaId, Pageable pageable);
 }

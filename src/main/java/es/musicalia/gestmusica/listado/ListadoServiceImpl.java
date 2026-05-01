@@ -16,6 +16,13 @@ import es.musicalia.gestmusica.permiso.PermisoArtistaEnum;
 import es.musicalia.gestmusica.permiso.PermisoRecord;
 import es.musicalia.gestmusica.permiso.PermisoRepository;
 import es.musicalia.gestmusica.util.DateUtils;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Tuple;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -46,8 +53,9 @@ public class ListadoServiceImpl implements ListadoService {
     private final ArtistaRepository artistaRepository;
     private final AccesoArtistaRepository accesoArtistaRepository;
     private final PermisoRepository permisoRepository;
+    private final EntityManager entityManager;
 
-    public ListadoServiceImpl(InformeService informeService, ProvinciaRepository provinciaRepository, MunicipioRepository municipioRepository, ListadoMapper listadoMapper, ListadoRepository listadoRepository, AgenciaRepository agenciaRepository, ArtistaRepository artistaRepository, AccesoArtistaRepository accesoArtistaRepository, PermisoRepository permisoRepository) {
+    public ListadoServiceImpl(InformeService informeService, ProvinciaRepository provinciaRepository, MunicipioRepository municipioRepository, ListadoMapper listadoMapper, ListadoRepository listadoRepository, AgenciaRepository agenciaRepository, ArtistaRepository artistaRepository, AccesoArtistaRepository accesoArtistaRepository, PermisoRepository permisoRepository, EntityManager entityManager) {
         this.informeService = informeService;
         this.provinciaRepository = provinciaRepository;
         this.municipioRepository = municipioRepository;
@@ -57,6 +65,7 @@ public class ListadoServiceImpl implements ListadoService {
         this.artistaRepository = artistaRepository;
         this.accesoArtistaRepository = accesoArtistaRepository;
         this.permisoRepository = permisoRepository;
+        this.entityManager = entityManager;
     }
 
     @Override
@@ -566,43 +575,102 @@ public class ListadoServiceImpl implements ListadoService {
             Pageable pageable,
             Long idUsuario) {
 
-        log.info("Ejecutando findAll y paginando manualmente - Página: {}, Tamaño: {}",
+        log.info("Ejecutando paginación por IDs - Página: {}, Tamaño: {}",
                 pageable.getPageNumber(), pageable.getPageSize());
 
-        // Usar la MISMA specification que funciona sin paginación
         Specification<Listado> spec = crearSpecificationListados(filtros);
+        Sort sort = pageable.getSort().isSorted() ? pageable.getSort()
+                : Sort.by(Sort.Direction.DESC, "fechaCreacion");
 
-        // Obtener TODOS los registros con ordenamiento
-        List<Listado> todosLosListados = listadoRepository.findAll(spec,
-                Sort.by(Sort.Direction.DESC, "fechaCreacion"));
+        // PASO 1: Obtener IDs distintos paginados.
+        // Esto evita el problema de LIMIT/OFFSET sobre filas duplicadas por joins ManyToMany.
+        List<Long> idsPaginados = obtenerIdsPaginados(spec, sort, pageable);
 
-        log.info("Total de registros obtenidos: {}", todosLosListados.size());
+        // PASO 2: Contar IDs distintos totales para el PageImpl
+        long total = contarIdsDistintos(spec);
 
-        // Convertir TODOS a ListadoRecord
-        List<ListadoRecord> todosLosRecords = todosLosListados.stream()
+        if (idsPaginados.isEmpty()) {
+            return new PageImpl<>(Collections.emptyList(), pageable, total);
+        }
+
+        // PASO 3: Cargar entidades completas solo para los IDs de esta página,
+        // manteniendo el orden con el Sort.
+        Specification<Listado> idSpec = (root, query, cb) -> root.get("id").in(idsPaginados);
+        List<Listado> listados = listadoRepository.findAll(idSpec, sort);
+
+        log.info("Resultado - Total IDs distintos: {}, IDs en página: {}, Entidades cargadas: {}",
+                total, idsPaginados.size(), listados.size());
+
+        List<ListadoRecord> records = listados.stream()
                 .map(this::mapToListadoRecord)
                 .collect(Collectors.toList());
 
-        // Calcular el subset para la página solicitada
-        int pageNumber = pageable.getPageNumber();
-        int pageSize = pageable.getPageSize();
-        int start = pageNumber * pageSize;
-        int end = Math.min(start + pageSize, todosLosRecords.size());
+        return new PageImpl<>(records, pageable, total);
+    }
 
-        log.info("Calculando subset - Página: {}, Inicio: {}, Fin: {}, Total: {}",
-                pageNumber, start, end, todosLosRecords.size());
+    /**
+     * Obtiene los IDs distintos de Listado que cumplen la specification, aplicando
+     * paginación y ordenamiento a nivel de IDs. Esto garantiza que LIMIT/OFFSET
+     * operen sobre entidades únicas, no sobre filas duplicadas por joins ManyToMany.
+     *
+     * Usa Tuple para incluir las columnas de ordenamiento en el SELECT, evitando
+     * el error de PostgreSQL: "expressions in ORDER BY must appear in SELECT list".
+     */
+    private List<Long> obtenerIdsPaginados(Specification<Listado> spec, Sort sort, Pageable pageable) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Tuple> query = cb.createQuery(Tuple.class);
+        Root<Listado> root = query.from(Listado.class);
 
-        // Extraer el subset correspondiente a esta página
-        List<ListadoRecord> subsetPagina = new ArrayList<>();
-        if (start < todosLosRecords.size()) {
-            subsetPagina = todosLosRecords.subList(start, end);
+        Predicate predicate = spec.toPredicate(root, query, cb);
+        if (predicate != null) {
+            query.where(predicate);
         }
 
-        log.info("Devolviendo subset - Elementos en esta página: {}, Total elementos: {}",
-                subsetPagina.size(), todosLosRecords.size());
+        // Construir la lista de selección: id + columnas de ordenamiento
+        List<jakarta.persistence.criteria.Selection<?>> selections = new ArrayList<>();
+        selections.add(root.get("id"));
 
-        // Crear Page con el subset pero manteniendo el total real
-        return new PageImpl<>(subsetPagina, pageable, todosLosRecords.size());
+        List<jakarta.persistence.criteria.Order> orders = new ArrayList<>();
+        for (Sort.Order order : sort) {
+            selections.add(root.get(order.getProperty()));
+            if (order.isAscending()) {
+                orders.add(cb.asc(root.get(order.getProperty())));
+            } else {
+                orders.add(cb.desc(root.get(order.getProperty())));
+            }
+        }
+        query.multiselect(selections).distinct(true);
+
+        if (!orders.isEmpty()) {
+            query.orderBy(orders);
+        }
+
+        TypedQuery<Tuple> typedQuery = entityManager.createQuery(query);
+        typedQuery.setFirstResult((int) pageable.getOffset());
+        typedQuery.setMaxResults(pageable.getPageSize());
+
+        return typedQuery.getResultList().stream()
+                .map(tuple -> tuple.get(0, Long.class))
+                .toList();
+    }
+
+    /**
+     * Cuenta IDs distintos que cumplen la specification.
+     * Necesario porque los joins ManyToMany generan filas duplicadas.
+     */
+    private long contarIdsDistintos(Specification<Listado> spec) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Long> query = cb.createQuery(Long.class);
+        Root<Listado> root = query.from(Listado.class);
+
+        Predicate predicate = spec.toPredicate(root, query, cb);
+        if (predicate != null) {
+            query.where(predicate);
+        }
+
+        query.select(cb.countDistinct(root.get("id")));
+
+        return entityManager.createQuery(query).getSingleResult();
     }
 
 

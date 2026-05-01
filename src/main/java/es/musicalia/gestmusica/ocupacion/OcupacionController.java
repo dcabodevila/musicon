@@ -461,6 +461,10 @@ public class OcupacionController {
         row.put("estado", ocupacion.estado());
         row.put("matinal", ocupacion.matinal());
         row.put("soloMatinal", ocupacion.soloMatinal());
+        row.put("latitud", ocupacion.latitud());
+        row.put("longitud", ocupacion.longitud());
+        row.put("latitudProvincia", ocupacion.latitudProvincia());
+        row.put("longitudProvincia", ocupacion.longitudProvincia());
         return row;
     }
 

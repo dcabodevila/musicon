@@ -1,5 +1,93 @@
 $(document).ready(function () {
     const $form = $("#formListadoOcupaciones");
+
+    // Inicializar mapa Leaflet
+    L.Icon.Default.imagePath = "/leaflet/images/";
+    const mapaOcupaciones = L.map("mapaOcupaciones").setView([40.4168, -3.7038], 6);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(mapaOcupaciones);
+    const markersLayer = L.layerGroup().addTo(mapaOcupaciones);
+
+    function actualizarMarcadores(api) {
+        markersLayer.clearLayers();
+        const datos = api.rows({ page: "current" }).data();
+        const bounds = [];
+
+        datos.each(function (d) {
+            // Extraer municipio de "municipioProvincia" (formato: "Municipio, Provincia")
+            const munProvParts = (d.municipioProvincia || "").split(",");
+            const municipioRaw = (munProvParts[0] || "").trim().toLowerCase();
+
+            // Si el municipio es "Provisional" o "Sin municipio", no pintar nada
+            if (municipioRaw === "provisional" || municipioRaw === "sin municipio") {
+                return;
+            }
+
+            let lat = NaN;
+            let lng = NaN;
+            let esAproximada = false;
+
+            // Prioridad 1: coordenadas exactas del municipio
+            if (d.latitud != null && d.longitud != null) {
+                lat = parseFloat(d.latitud);
+                lng = parseFloat(d.longitud);
+            }
+            // Prioridad 2: coordenadas de la capital de provincia (fallback)
+            else if (d.latitudProvincia != null && d.longitudProvincia != null) {
+                lat = parseFloat(d.latitudProvincia);
+                lng = parseFloat(d.longitudProvincia);
+                esAproximada = true;
+            }
+
+            if (!isNaN(lat) && !isNaN(lng)) {
+                const ubicacionLabel = esAproximada
+                    ? `<span class="badge bg-info">Ubicación aproximada (capital de provincia)</span>`
+                    : `<span class="badge bg-success">Ubicación exacta</span>`;
+
+                const popupContent = `<strong>${escapeHtml(d.artista)}</strong><br>` +
+                    `<small>${escapeHtml(d.start || "")}</small><br>` +
+                    `<span class="text-muted">${escapeHtml(d.municipioProvincia || "")}</span><br>` +
+                    ubicacionLabel;
+
+                let marker;
+                if (esAproximada) {
+                    // Círculo azul para ubicaciones aproximadas (capital de provincia)
+                    marker = L.circleMarker([lat, lng], {
+                        radius: 8,
+                        fillColor: "#3b82f6",
+                        color: "#1d4ed8",
+                        weight: 2,
+                        opacity: 1,
+                        fillOpacity: 0.7
+                    }).bindPopup(popupContent);
+                } else {
+                    // Marker normal para ubicaciones exactas
+                    marker = L.marker([lat, lng]).bindPopup(popupContent);
+                }
+
+                markersLayer.addLayer(marker);
+                bounds.push([lat, lng]);
+            }
+        });
+
+        if (bounds.length > 0) {
+            mapaOcupaciones.fitBounds(bounds, { padding: [30, 30], maxZoom: 12 });
+        } else {
+            mapaOcupaciones.setView([40.4168, -3.7038], 6);
+        }
+    }
+
+    function escapeHtml(text) {
+        if (!text) return "";
+        return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
     const table = $("#datatables-reponsive_ocupaciones").DataTable({
         responsive: true,
         searching: true,
@@ -20,6 +108,9 @@ $(document).ready(function () {
                     d[field.name] = field.value;
                 });
             }
+        },
+        drawCallback: function (settings) {
+            actualizarMarcadores(this.api());
         },
         columns: [
             { data: "artista", defaultContent: "" },
@@ -122,6 +213,9 @@ $(document).ready(function () {
             });
         }
     });
+
+    // Ejecutar búsqueda automáticamente al cargar la página
+    $form.trigger("submit");
 });
 
 function crearNuevaOcupacion() {

@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <div th:replace="~{fragments/main-template :: header-css}"/>
+    <link rel="stylesheet" th:href="@{/leaflet/leaflet.css}" />
     <script th:src="@{/js/jquery.min.js}"></script>
     <script th:src="@{/adminkit/js/datatables.js}"></script>
 </head>
@@ -204,6 +205,19 @@
 
                     </div>
                 </div>
+
+                <div class="row">
+                    <div class="col-12 col-sm-12 col-md-12 col-lg-12 mb-3">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Mapa de ocupaciones</h5>
+                            </div>
+                            <div class="card-body p-0">
+                                <div id="mapaOcupaciones" style="height: 800px; width: 100%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
         <div th:replace="~{fragments/main-template :: footer}"/>
@@ -278,6 +292,7 @@
 </body>
 <script type="text/javascript" th:src="@{/js/comun.js}"></script>
 <script th:src="@{/js/date-eu.js}"></script>
+<script th:src="@{/leaflet/leaflet.js}"></script>
 <script type="text/javascript" th:src="@{/js/ocupaciones-list.js}"></script>
 
 

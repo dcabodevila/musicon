@@ -124,13 +124,12 @@ $(document).ready(function () {
         allowInput: false
     });
 
-    // Esperar a que AdminKit esté completamente cargado
-    setTimeout(function() {
-        $('#formListadoAudiencias').trigger('submit');
-    }, 500);
-
     // Inicializar el mapa
     initMapa();
+
+    // Cargar chart y datos del mapa con UNA sola petición.
+    // El mapa se renderizará cuando el GeoJSON llegue, usando los datos guardados.
+    updateAggregatedData();
 
     // Interceptar el envío del formulario para recargar la tabla
     $('#formListadoAudiencias').on('submit', function(e) {
@@ -138,28 +137,23 @@ $(document).ready(function () {
         
         // Recargar la tabla con los nuevos filtros
         $('#datatables-reponsive_listados-generados').DataTable().ajax.reload();
-        
-        // Actualizar el gráfico con los nuevos filtros
-        updateChartWithFilters();
-        
-        // Actualizar el mapa con los nuevos filtros
-        updateMapa();
+
+        // Actualizar gráfico y mapa con UNA sola petición
+        updateAggregatedData();
         
         return false;
     });
 });
 
-    // Función para actualizar el gráfico con filtros
-    function updateChartWithFilters() {
-        // Obtener valores de los filtros
+    // Función unificada que actualiza gráfico y mapa con UNA sola petición a BD
+    function updateAggregatedData() {
         const idAgencia = $('#agencia').val();
         const fechaDesde = $('#idFechaDesde').val();
         const fechaHasta = $('#idFechaHasta').val();
         const porDia = $('#modoAgrupacion').val() === 'true';
-        
-        // Realizar petición AJAX para obtener nuevos datos del gráfico
+
         $.ajax({
-            url: '/listado/audiencias/chart-data',
+            url: '/listado/audiencias/aggregated-data',
             type: 'POST',
             data: {
                 idAgencia: idAgencia,
@@ -168,18 +162,26 @@ $(document).ready(function () {
                 porDia: porDia
             },
             success: function(response) {
-                if (response.success && response.chartData) {
-                    // Actualizar el elemento hidden con los nuevos datos
-                    $('#chartData').val(JSON.stringify(response.chartData));
-                    
-                    // Reinicializar el gráfico con los nuevos datos
-                    reinitializeChart();
+                if (response.success) {
+                    // Actualizar gráfico
+                    if (response.chartData) {
+                        $('#chartData').val(JSON.stringify(response.chartData));
+                        reinitializeChart();
+                    }
+                    // Guardar datos del mapa para renderizar cuando el GeoJSON esté listo
+                    if (response.mapData) {
+                        window.lastMapData = response.mapData;
+                        // Renderizar solo si el GeoJSON ya cargó
+                        if (window.geoJsonData) {
+                            renderizarMapa(response.mapData);
+                        }
+                    }
                 } else {
-                    console.error('Error en la respuesta del gráfico:', response.error);
+                    console.error('Error en la respuesta agregada:', response.error);
                 }
             },
             error: function(xhr, status, error) {
-                console.error('Error actualizando datos del gráfico:', error);
+                console.error('Error actualizando datos agregados:', error);
             }
         });
     }
@@ -389,8 +391,12 @@ function cargarGeoJSON() {
         .done(function(data) {
             // Guardar referencia a los datos para uso posterior
             window.geoJsonData = data;
-            // Cargar datos del mapa
-            updateMapa();
+            // Si ya tenemos datos del mapa cargados, renderizar directamente.
+            // Si no, la petición de updateAggregatedData() ya se habrá hecho
+            // o se hará cuando el usuario cambie filtros.
+            if (window.lastMapData) {
+                renderizarMapa(window.lastMapData);
+            }
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
             console.error('Error cargando GeoJSON:', textStatus, errorThrown);
