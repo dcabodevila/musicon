@@ -31,7 +31,6 @@ public interface ListadoMapper {
     @Mapping(target = "usuario", ignore = true)
     @Mapping(target = "tipoOcupacion", source = "idTipoOcupacion", qualifiedByName = "longToTipoOcupacionEnum")
     @Mapping(target = "agencias", ignore = true)
-    @Mapping(target = "artistas", ignore = true)
     @Mapping(target = "idsTipoArtista", source = "idsTipoArtista", qualifiedByName = "setLongToString")
     @Mapping(target = "idsComunidades", source = "idsComunidades", qualifiedByName = "setLongToString")
     @Mapping(target = "fechaCreacion", ignore = true)
