@@ -5,6 +5,8 @@ import jdk.jfr.DataAmount;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "municipio", schema="gestmusica")
 @Getter
@@ -24,5 +26,10 @@ public class Municipio {
     @JoinColumn(name = "id_provincia")
     private Provincia provincia;
 
+    @Column(name = "latitud", precision = 10, scale = 8)
+    private BigDecimal latitud;
+
+    @Column(name = "longitud", precision = 11, scale = 8)
+    private BigDecimal longitud;
 
 }

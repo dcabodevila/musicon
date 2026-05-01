@@ -104,9 +104,9 @@ public class WebSecurityConfig {
     @Bean
     @Order(2)
     public SecurityFilterChain appChain(HttpSecurity http) throws Exception {
-	        http
-	            .csrf(Customizer.withDefaults())
-	            .authorizeHttpRequests(authz -> authz
+        http
+            .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))
+            .authorizeHttpRequests(authz -> authz
 	                .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
 	                .requestMatchers("/error", "/403").permitAll()
 	                .requestMatchers("/auth/**").permitAll()

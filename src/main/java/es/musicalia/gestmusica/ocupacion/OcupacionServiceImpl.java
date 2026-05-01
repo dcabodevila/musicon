@@ -677,7 +677,11 @@ public class OcupacionServiceImpl implements OcupacionService {
 				ocupacion.getUsuario().getNombre() + " " + ocupacion.getUsuario().getApellidos(),
 				ocupacion.getUsuarioConfirmacion() != null ? ocupacion.getUsuarioConfirmacion().getId() : null,
 				ocupacion.getUsuarioConfirmacion() != null ? ocupacion.getUsuarioConfirmacion().getNombre() + " " + ocupacion.getUsuarioConfirmacion().getApellidos() : null,
-				ocupacion.getFechaCreacion()
+				ocupacion.getFechaCreacion(),
+				ocupacion.getMunicipio() != null ? ocupacion.getMunicipio().getLatitud() : null,
+				ocupacion.getMunicipio() != null ? ocupacion.getMunicipio().getLongitud() : null,
+				ocupacion.getProvincia() != null ? ocupacion.getProvincia().getLatitudCapital() : null,
+				ocupacion.getProvincia() != null ? ocupacion.getProvincia().getLongitudCapital() : null
 		);
 	}
 

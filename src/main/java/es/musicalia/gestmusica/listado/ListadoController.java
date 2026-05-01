@@ -401,6 +401,150 @@ public class ListadoController {
         }
     }
 
+    @PostMapping("/audiencias/map-data")
+    @ResponseBody
+    public Map<String, Object> getMapData(
+            @AuthenticationPrincipal CustomAuthenticatedUser user,
+            @RequestParam(value = "idAgencia", required = false) Long idAgencia,
+            @RequestParam(value = "fechaDesde", required = false) String fechaDesdeStr,
+            @RequestParam(value = "fechaHasta", required = false) String fechaHastaStr) {
+        
+        try {
+            // Parsear fechas
+            LocalDate fechaDesde = null;
+            LocalDate fechaHasta = null;
+            
+            if (fechaDesdeStr != null && !fechaDesdeStr.trim().isEmpty()) {
+                fechaDesde = DateUtils.parseLocalDate(fechaDesdeStr, "dd-MM-yyyy");
+            }
+            
+            if (fechaHastaStr != null && !fechaHastaStr.trim().isEmpty()) {
+                fechaHasta = DateUtils.parseLocalDate(fechaHastaStr, "dd-MM-yyyy");
+            }
+            
+            // Crear filtros
+            ListadoAudienciasDto filtros = ListadoAudienciasDto.builder()
+                    .idAgencia(idAgencia)
+                    .fechaDesde(fechaDesde)
+                    .fechaHasta(fechaHasta)
+                    .build();
+                    
+            // Obtener listados
+            List<ListadoRecord> listados = this.listadoService.obtenerListadoEntreFechas(filtros);
+            
+            // Agregar por provincia
+            Map<String, Long> provinciaCount = new HashMap<>();
+            for (ListadoRecord listado : listados) {
+                String provincia = listado.provincia();
+                if (provincia != null && !provincia.trim().isEmpty()) {
+                    provinciaCount.merge(provincia, 1L, Long::sum);
+                }
+            }
+            
+            // Convertir a lista de objetos
+            List<Map<String, Object>> mapData = new ArrayList<>();
+            for (Map.Entry<String, Long> entry : provinciaCount.entrySet()) {
+                Map<String, Object> item = new HashMap<>();
+                item.put("provincia", entry.getKey());
+                item.put("cantidad", entry.getValue());
+                mapData.add(item);
+            }
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("mapData", mapData);
+            
+            return response;
+            
+        } catch (Exception e) {
+            log.error("Error obteniendo datos del mapa", e);
+            
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", "Error al obtener datos del mapa: " + e.getMessage());
+            errorResponse.put("mapData", new ArrayList<>());
+            
+            return errorResponse;
+        }
+    }
+
+    /**
+     * Endpoint unificado que devuelve chartData y mapData en una sola petición.
+     * Ejecuta UNA query a BD para ambos, evitando duplicar la carga de datos.
+     */
+    @PostMapping("/audiencias/aggregated-data")
+    @ResponseBody
+    public Map<String, Object> getAggregatedData(
+            @AuthenticationPrincipal CustomAuthenticatedUser user,
+            @RequestParam(value = "idAgencia", required = false) Long idAgencia,
+            @RequestParam(value = "fechaDesde", required = false) String fechaDesdeStr,
+            @RequestParam(value = "fechaHasta", required = false) String fechaHastaStr,
+            @RequestParam(value = "porDia", defaultValue = "false") boolean porDia) {
+
+        try {
+            LocalDate fechaDesde = null;
+            LocalDate fechaHasta = null;
+
+            if (fechaDesdeStr != null && !fechaDesdeStr.trim().isEmpty()) {
+                fechaDesde = DateUtils.parseLocalDate(fechaDesdeStr, "dd-MM-yyyy");
+            }
+
+            if (fechaHastaStr != null && !fechaHastaStr.trim().isEmpty()) {
+                fechaHasta = DateUtils.parseLocalDate(fechaHastaStr, "dd-MM-yyyy");
+            }
+
+            ListadoAudienciasDto filtros = ListadoAudienciasDto.builder()
+                    .idAgencia(idAgencia)
+                    .fechaDesde(fechaDesde)
+                    .fechaHasta(fechaHasta)
+                    .porDia(porDia)
+                    .build();
+
+            // UNA sola query para chart + mapa
+            List<ListadoRecord> listados = this.listadoService.obtenerListadoEntreFechas(filtros);
+
+            // Chart data
+            List<Map<String, Object>> chartData = listadoChartDataFactory.from(
+                    listadoService.obtenerListadosPorPeriodo(listados, porDia)
+            );
+
+            // Map data
+            Map<String, Long> provinciaCount = new HashMap<>();
+            for (ListadoRecord listado : listados) {
+                String provincia = listado.provincia();
+                if (provincia != null && !provincia.trim().isEmpty()) {
+                    provinciaCount.merge(provincia, 1L, Long::sum);
+                }
+            }
+
+            List<Map<String, Object>> mapData = new ArrayList<>();
+            for (Map.Entry<String, Long> entry : provinciaCount.entrySet()) {
+                Map<String, Object> item = new HashMap<>();
+                item.put("provincia", entry.getKey());
+                item.put("cantidad", entry.getValue());
+                mapData.add(item);
+            }
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("chartData", chartData);
+            response.put("mapData", mapData);
+
+            return response;
+
+        } catch (Exception e) {
+            log.error("Error obteniendo datos agregados", e);
+
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", "Error al obtener datos: " + e.getMessage());
+            errorResponse.put("chartData", new ArrayList<>());
+            errorResponse.put("mapData", new ArrayList<>());
+
+            return errorResponse;
+        }
+    }
+
     private String getColumnName(int column) {
         switch (column) {
             case 0: return "fechaCreacion";
