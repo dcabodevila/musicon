@@ -1,7 +1,6 @@
 package es.musicalia.gestmusica.listado;
 
 import es.musicalia.gestmusica.agencia.Agencia;
-import es.musicalia.gestmusica.artista.Artista;
 import es.musicalia.gestmusica.localizacion.Municipio;
 import es.musicalia.gestmusica.localizacion.Provincia;
 import es.musicalia.gestmusica.ocupacion.TipoOcupacion;
@@ -99,15 +98,6 @@ public class Listado {
             inverseJoinColumns = @JoinColumn(name = "agencia_id")
     )
     private Set<Agencia> agencias;
-
-    @ManyToMany
-    @JoinTable(
-            name = "listado_artista",
-            schema = "gestmusica",
-            joinColumns = @JoinColumn(name = "listado_id"),
-            inverseJoinColumns = @JoinColumn(name = "artista_id")
-    )
-    private Set<Artista> artistas;
 
     @PrePersist
     protected void onCreate() {

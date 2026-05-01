@@ -4,7 +4,6 @@ import es.musicalia.gestmusica.accesoartista.AccesoArtista;
 import es.musicalia.gestmusica.accesoartista.AccesoArtistaRepository;
 import es.musicalia.gestmusica.agencia.Agencia;
 import es.musicalia.gestmusica.agencia.AgenciaRepository;
-import es.musicalia.gestmusica.artista.ArtistaRecord;
 import es.musicalia.gestmusica.artista.ArtistaRepository;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.informe.InformeService;
@@ -276,7 +275,6 @@ public class ListadoServiceImpl implements ListadoService {
             listadoEntity.setAgencias(agencias);
         }
 
-        listadoEntity.setArtistas(this.artistaRepository.findArtistasByComunidadesAndTipos(listadoDto.getIdsComunidades(), listadoDto.getIdsTipoArtista()));
         listadoEntity.setActivo(true);
         this.listadoRepository.save(listadoEntity);
     }
@@ -533,28 +531,11 @@ public class ListadoServiceImpl implements ListadoService {
 
     // Método base que contiene la lógica correcta
     private Specification<Listado> crearSpecificationListados(ListadoAudienciasDto filtros) {
-        Specification<Listado> spec = null;
-        if (filtros.getIdAgencia() == null) {
-            spec = ListadoSpecifications.findListadosByAgenciaAndFechas(
-                    null,
-                    filtros.getFechaDesde().atStartOfDay(),
-                    filtros.getFechaHasta().plusDays(1).atStartOfDay().minusNanos(1)
-            );
-
-        } else {
-
-            Set<Long> idsArtistaAgencia = this.artistaRepository.findAllArtistasRecordByIdAgencia(filtros.getIdAgencia()).stream()
-                    .map(ArtistaRecord::id)
-                    .collect(Collectors.toSet());
-
-            spec = ListadoSpecifications.findListadosByAgenciaAndFechasAndComunidades(
-                    filtros.getIdAgencia(),
-                    filtros.getFechaDesde().atStartOfDay(),
-                    filtros.getFechaHasta().plusDays(1).atStartOfDay().minusNanos(1), idsArtistaAgencia
-            );
-
-        }
-        return spec;
+        return ListadoSpecifications.findListadosByAgenciaAndFechas(
+                filtros.getIdAgencia(),
+                filtros.getFechaDesde().atStartOfDay(),
+                filtros.getFechaHasta().plusDays(1).atStartOfDay().minusNanos(1)
+        );
     }
 
     // Actualizar obtenerListadoEntreFechas para usar el método base
