@@ -13,14 +13,16 @@ $(document).ready(function () {
         markersLayer.clearLayers();
         const datos = api.rows({ page: "current" }).data();
         const bounds = [];
+        const coordenadasUsadas = new Map(); // clave: "lat,lng", valor: cantidad de usos
 
         datos.each(function (d) {
-            // Extraer municipio de "municipioProvincia" (formato: "Municipio, Provincia")
+            // Extraer municipio y provincia de "municipioProvincia" (formato: "Municipio, Provincia")
             const munProvParts = (d.municipioProvincia || "").split(",");
             const municipioRaw = (munProvParts[0] || "").trim().toLowerCase();
+            const provinciaRaw = (munProvParts[1] || "").trim().toLowerCase();
 
-            // Si el municipio es "Provisional" o "Sin municipio", no pintar nada
-            if (municipioRaw === "provisional" || municipioRaw === "sin municipio") {
+            // Si la provincia es "Provisional", no mostrar nada en el mapa
+            if (provinciaRaw === "provisional") {
                 return;
             }
 
@@ -28,19 +30,44 @@ $(document).ready(function () {
             let lng = NaN;
             let esAproximada = false;
 
-            // Prioridad 1: coordenadas exactas del municipio
-            if (d.latitud != null && d.longitud != null) {
-                lat = parseFloat(d.latitud);
-                lng = parseFloat(d.longitud);
-            }
-            // Prioridad 2: coordenadas de la capital de provincia (fallback)
-            else if (d.latitudProvincia != null && d.longitudProvincia != null) {
-                lat = parseFloat(d.latitudProvincia);
-                lng = parseFloat(d.longitudProvincia);
-                esAproximada = true;
+            const sinMunicipio = municipioRaw === "sin municipio" || municipioRaw === "provisional";
+
+            if (sinMunicipio) {
+                // Sin municipio o provisional con provincia conocida: mostrar en capital de provincia
+                if (d.latitudProvincia != null && d.longitudProvincia != null) {
+                    lat = parseFloat(d.latitudProvincia);
+                    lng = parseFloat(d.longitudProvincia);
+                    esAproximada = true;
+                }
+            } else {
+                // Prioridad 1: coordenadas exactas del municipio
+                if (d.latitud != null && d.longitud != null) {
+                    lat = parseFloat(d.latitud);
+                    lng = parseFloat(d.longitud);
+                }
+                // Prioridad 2: coordenadas de la capital de provincia (fallback)
+                else if (d.latitudProvincia != null && d.longitudProvincia != null) {
+                    lat = parseFloat(d.latitudProvincia);
+                    lng = parseFloat(d.longitudProvincia);
+                    esAproximada = true;
+                }
             }
 
             if (!isNaN(lat) && !isNaN(lng)) {
+                // Si la ubicación es aproximada y ya fue usada, aplicar un pequeño desplazamiento
+                // para evitar que múltiples marcas queden exactamente superpuestas
+                if (esAproximada) {
+                    const clave = `${lat.toFixed(4)},${lng.toFixed(4)}`;
+                    const usos = coordenadasUsadas.get(clave) || 0;
+                    if (usos > 0) {
+                        // Desplazar en espiral simple: ~300m por paso
+                        const offset = 0.003 * usos;
+                        lat += Math.cos(usos) * offset;
+                        lng += Math.sin(usos) * offset;
+                    }
+                    coordenadasUsadas.set(clave, usos + 1);
+                }
+
                 const ubicacionLabel = esAproximada
                     ? `<span class="badge bg-info">Ubicación aproximada (capital de provincia)</span>`
                     : `<span class="badge bg-success">Ubicación exacta</span>`;
