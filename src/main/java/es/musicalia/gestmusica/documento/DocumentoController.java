@@ -1,5 +1,6 @@
 package es.musicalia.gestmusica.documento;
 
+import es.musicalia.gestmusica.cloudinary.CloudinaryException;
 import es.musicalia.gestmusica.file.FileService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -137,7 +138,10 @@ private String determinarContentType(String nombreArchivo) {
 
         } catch (Exception e) {
             log.error("Error al subir un documento", e);
-            redirectAttributes.addFlashAttribute("message", "Error al subir el documento.");
+            String mensaje = (e instanceof CloudinaryException) 
+                    ? e.getMessage() 
+                    : "Error al subir el documento.";
+            redirectAttributes.addFlashAttribute("message", mensaje);
             redirectAttributes.addFlashAttribute("alertClass", "danger");
         }
         return "redirect:/documentos/" + documentoDto.getIdArtista();

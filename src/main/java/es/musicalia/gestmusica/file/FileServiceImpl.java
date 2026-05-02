@@ -21,6 +21,9 @@ public class FileServiceImpl implements FileService {
 
     private final CloudinaryService cloudinaryService;
     
+    // Límite de Cloudinary (plan gratuito): 10 MB
+    private static final long MAX_FILE_SIZE_BYTES = 10_485_760L; // 10 MB
+
     // Extensiones válidas para archivos ZIP
     private static final List<String> ZIP_EXTENSIONS = Arrays.asList(".zip", ".rar", ".7z");
 
@@ -259,10 +262,40 @@ public class FileServiceImpl implements FileService {
     }
 
     /**
+     * Formatea un tamaño en bytes a una representación legible (KB, MB)
+     */
+    private String formatFileSize(long bytes) {
+        if (bytes < 1024) {
+            return bytes + " bytes";
+        }
+        double kb = bytes / 1024.0;
+        if (kb < 1024) {
+            return String.format("%.1f KB", kb);
+        }
+        double mb = kb / 1024.0;
+        return String.format("%.1f MB", mb);
+    }
+
+    /**
      * Ejecuta una operación con un archivo temporal, garantizando su limpieza
      */
     private CloudinaryUploadResponse executeWithTempFile(MultipartFile multipartFile, 
-                                                         TempFileOperation operation) {
+                                                          TempFileOperation operation) {
+        // Validar tamaño antes de crear archivo temporal y llamar a Cloudinary
+        long fileSize = multipartFile.getSize();
+        if (fileSize > MAX_FILE_SIZE_BYTES) {
+            String sizeReadable = formatFileSize(fileSize);
+            String maxReadable = formatFileSize(MAX_FILE_SIZE_BYTES);
+            String errorMsg = String.format(
+                    "El archivo supera el límite de %s. El archivo enviado pesa %s. "
+                    + "Por favor, reducí el tamaño del archivo antes de subirlo.",
+                    maxReadable, sizeReadable);
+            log.warn("Archivo rechazado por tamaño: {} ({} bytes). Límite: {} bytes. Archivo: {}",
+                    sizeReadable, fileSize, MAX_FILE_SIZE_BYTES, 
+                    multipartFile.getOriginalFilename());
+            throw new CloudinaryException(errorMsg);
+        }
+
         File tempFile = null;
         try {
             // Crear archivo temporal

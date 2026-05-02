@@ -138,13 +138,24 @@ $(document).ready(function () {
         });
     }
 
-    // Preview de imagen de artista
+    // Preview de imagen de artista con validación de tamaño
     const logoInputArtista = document.getElementById('logo-input-artista');
     const logoPreviewArtista = document.getElementById('logo-preview-artista');
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB — límite de Cloudinary
+
     if (logoInputArtista && logoPreviewArtista) {
         logoInputArtista.addEventListener('change', function () {
             const file = this.files[0];
             if (file) {
+                if (file.size > MAX_FILE_SIZE) {
+                    notif('error', 'El archivo es demasiado grande. El tamaño máximo permitido es 10 MB. '
+                        + 'El archivo seleccionado pesa ' + (file.size / 1024 / 1024).toFixed(1) + ' MB.');
+                    this.value = ''; // Limpiar el input
+                    if (!logoPreviewArtista.dataset.hasExisting) {
+                        logoPreviewArtista.style.display = 'none';
+                    }
+                    return;
+                }
                 const reader = new FileReader();
                 reader.onload = function (e) {
                     logoPreviewArtista.src = e.target.result;
@@ -158,4 +169,15 @@ $(document).ready(function () {
             }
         });
     }
+
+    // Validar tamaño del archivo también al enviar el formulario
+    document.querySelector('#artista-detail-edit-form').addEventListener('submit', function (event) {
+        const fileInput = document.getElementById('logo-input-artista');
+        if (fileInput && fileInput.files[0] && fileInput.files[0].size > MAX_FILE_SIZE) {
+            notif('error', 'El archivo es demasiado grande. El tamaño máximo permitido es 10 MB. '
+                + 'El archivo seleccionado pesa ' + (fileInput.files[0].size / 1024 / 1024).toFixed(1) + ' MB.');
+            event.preventDefault();
+            return false;
+        }
+    });
 });

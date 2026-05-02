@@ -1,4 +1,32 @@
 $(document).ready(function() {
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB — límite de Cloudinary
+
+    // Validar tamaño del archivo de documento al seleccionarlo
+    const documentoInput = document.querySelector('input[name="documento"]');
+    if (documentoInput) {
+        documentoInput.addEventListener('change', function () {
+            const file = this.files[0];
+            if (file && file.size > MAX_FILE_SIZE) {
+                notif('error', 'El archivo es demasiado grande. El tamaño máximo permitido es 10 MB. '
+                    + 'El archivo seleccionado pesa ' + (file.size / 1024 / 1024).toFixed(1) + ' MB.');
+                this.value = ''; // Limpiar el input
+            }
+        });
+
+        // Validar al enviar el formulario de subida de documento
+        const documentoForm = documentoInput.closest('form');
+        if (documentoForm) {
+            documentoForm.addEventListener('submit', function (event) {
+                if (documentoInput.files[0] && documentoInput.files[0].size > MAX_FILE_SIZE) {
+                    notif('error', 'El archivo es demasiado grande. El tamaño máximo permitido es 10 MB. '
+                        + 'El archivo seleccionado pesa ' + (documentoInput.files[0].size / 1024 / 1024).toFixed(1) + ' MB.');
+                    event.preventDefault();
+                    return false;
+                }
+            });
+        }
+    }
+
     // Manejar clic en botones de descarga
     $('.btn-descargar').on('click', function(e) {
         e.preventDefault();

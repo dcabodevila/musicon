@@ -18,13 +18,24 @@ $(document).ready(function(){
     new Choices(document.querySelector("#usuario"));
     new Choices(document.querySelector("#provincia"));
 
-    // Preview de logo de agencia
+    // Preview de logo de agencia con validación de tamaño
     const logoInputAgencia = document.getElementById('logo-input-agencia');
     const logoPreviewAgencia = document.getElementById('logo-preview-agencia');
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB — límite de Cloudinary
+
     if (logoInputAgencia && logoPreviewAgencia) {
         logoInputAgencia.addEventListener('change', function () {
             const file = this.files[0];
             if (file) {
+                if (file.size > MAX_FILE_SIZE) {
+                    notif('error', 'El archivo es demasiado grande. El tamaño máximo permitido es 10 MB. '
+                        + 'El archivo seleccionado pesa ' + (file.size / 1024 / 1024).toFixed(1) + ' MB.');
+                    this.value = ''; // Limpiar el input
+                    if (!logoPreviewAgencia.dataset.hasExisting) {
+                        logoPreviewAgencia.style.display = 'none';
+                    }
+                    return;
+                }
                 const reader = new FileReader();
                 reader.onload = function (e) {
                     logoPreviewAgencia.src = e.target.result;
@@ -37,6 +48,22 @@ $(document).ready(function(){
                 }
             }
         });
+    }
+
+    // Validar tamaño del archivo al enviar el formulario de agencia
+    if (logoInputAgencia) {
+        const agenciaForm = logoInputAgencia.closest('form');
+        if (agenciaForm) {
+            agenciaForm.addEventListener('submit', function (event) {
+                const fileInput = document.getElementById('logo-input-agencia');
+                if (fileInput && fileInput.files[0] && fileInput.files[0].size > MAX_FILE_SIZE) {
+                    notif('error', 'El archivo es demasiado grande. El tamaño máximo permitido es 10 MB. '
+                        + 'El archivo seleccionado pesa ' + (fileInput.files[0].size / 1024 / 1024).toFixed(1) + ' MB.');
+                    event.preventDefault();
+                    return false;
+                }
+            });
+        }
     }
 
 });
