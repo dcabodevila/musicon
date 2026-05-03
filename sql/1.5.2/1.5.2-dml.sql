@@ -1,4 +1,6 @@
--- =============================================================================-- v1.5.0 — Agregar permiso COMUNICACIONES para el módulo de comunicaciones masivas-- =============================================================================
+-- =============================================================================
+-- v1.5.2 — Agregar permiso COMUNICACIONES para el módulo de comunicaciones masivas
+-- =============================================================================
 -- Insertar el nuevo permiso si no existe (evita duplicados en re-ejecuciones)
 INSERT INTO gestmusica.permiso (codigo, descripcion, tipo_permiso)
 SELECT 'COMUNICACIONES', 'Acceso al módulo de comunicaciones masivas', 1
