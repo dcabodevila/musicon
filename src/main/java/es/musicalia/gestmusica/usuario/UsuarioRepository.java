@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import es.musicalia.gestmusica.info.InfoCcaaMetricRecord;
+
 @Repository
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 	@Query("select u from Usuario u where u.username = ?1 and u.activo")
@@ -66,6 +68,8 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 	@Query("SELECT COUNT(u) FROM Usuario u WHERE u.rolGeneral.codigo IN :codigos")
 	long countByRolGeneralCodigoIn(@Param("codigos") List<String> codigos);
 
+	long countByRolGeneralCodigoInAndActivoTrue(List<String> codigos);
+
 	@Query("""
 		SELECT u FROM Usuario u
 		LEFT JOIN FETCH u.provincia p
@@ -82,4 +86,14 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 			@Param("provinciaId") Long provinciaId,
 			@Param("rolCodigo") String rolCodigo
 	);
+
+	@Query("""
+		SELECT new es.musicalia.gestmusica.info.InfoCcaaMetricRecord(c.nombre, COUNT(u), 0)
+		FROM Usuario u
+		JOIN u.provincia p
+		JOIN p.ccaa c
+		WHERE u.activo = true
+		GROUP BY c.nombre
+		""")
+	List<InfoCcaaMetricRecord> countUsuariosActivosValidosPorCcaa();
 }

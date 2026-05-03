@@ -68,7 +68,7 @@ public class WebSecurityConfig {
     @Order(1)
     public SecurityFilterChain eventosPublicChain(HttpSecurity http) throws Exception {
         http
-            .securityMatcher("/eventos/**", "/info", "/sitemap.xml", "/baja/**", "/robots.txt")
+            .securityMatcher("/eventos/**", "/info", "/info/**", "/sitemap.xml", "/baja/**", "/robots.txt")
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -114,7 +114,7 @@ public class WebSecurityConfig {
 					.requestMatchers("/robots.txt").permitAll()
 					.requestMatchers("/release-notes/**").permitAll()
 
-					.requestMatchers("/fragments/**", "/static/**", "/adminkit/**", "/img/**", "/logo/**", "/favicon.ico", "/js/**", "/css/**").permitAll()
+					.requestMatchers("/fragments/**", "/static/**", "/adminkit/**", "/img/**", "/logo/**", "/favicon.ico", "/js/**", "/css/**", "/leaflet/**", "/geojson/**").permitAll()
 					.requestMatchers("/android-icon-*.png", "/apple-icon-*.png", "/ms-icon-*.png").permitAll()
 
 					.requestMatchers("/service-worker.js", "/sw-register.js").permitAll()

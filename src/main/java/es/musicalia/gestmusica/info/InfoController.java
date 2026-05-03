@@ -2,6 +2,11 @@ package es.musicalia.gestmusica.info;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import es.musicalia.gestmusica.agencia.AgenciaRepository;
+import es.musicalia.gestmusica.artista.ArtistaRepository;
+import es.musicalia.gestmusica.listado.ListadoRepository;
+import es.musicalia.gestmusica.ocupacion.OcupacionRepository;
+import es.musicalia.gestmusica.usuario.UsuarioRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,7 +14,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +34,11 @@ public class InfoController {
     private static final String SITE_URL = "https://festia.es";
 
     private final ObjectMapper objectMapper;
+    private final AgenciaRepository agenciaRepository;
+    private final ArtistaRepository artistaRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final ListadoRepository listadoRepository;
+    private final OcupacionRepository ocupacionRepository;
 
     @GetMapping
     public String info(Model model, HttpServletRequest request) {
@@ -33,17 +47,51 @@ public class InfoController {
         String canonicalUrl = baseUrl + "/info";
 
         // SEO meta
-        model.addAttribute("titulo", "Festia — Gestión de Orquestas y Artistas para Fiestas");
+        model.addAttribute("titulo", "Software de gestión de orquestas, artistas y presupuestos para eventos en España | Festia");
         model.addAttribute("descripcion",
-            "Plataforma profesional para agencias, músicos y representantes. Tarifas, disponibilidad y presupuestos en tiempo real. Prueba gratis 1 mes.");
+            "Gestión profesional de orquestas y artistas para fiestas y eventos en España: tarifas, disponibilidad, ocupaciones, presupuestos y contratación en tiempo real. Prueba gratis 1 mes.");
         model.addAttribute("canonicalUrl", canonicalUrl);
         model.addAttribute("metaRobots", "index,follow");
         model.addAttribute("ogImage", OG_IMAGE);
+
+        LocalDateTime hace30Dias = LocalDateTime.now().minusDays(30);
+        model.addAttribute("actividadAgenciasActivas", agenciaRepository.countByActivoTrue());
+        model.addAttribute("actividadArtistasActivos", artistaRepository.countByActivoTrue());
+        model.addAttribute("actividadRepresentantes", usuarioRepository.countByRolGeneralCodigoInAndActivoTrue(List.of("REPRE", "AGENTE")));
+        model.addAttribute("actividadPresupuestosMes", listadoRepository.countByActivoTrueAndFechaCreacionGreaterThanEqual(hace30Dias));
+        model.addAttribute("actividadOcupacionesMes", ocupacionRepository.countByActivoTrueAndFechaCreacionGreaterThanEqual(hace30Dias));
 
         // JSON-LD: Organization + SoftwareApplication + FAQPage + BreadcrumbList
         model.addAttribute("jsonLd", buildJsonLd(baseUrl, canonicalUrl));
 
         return "info";
+    }
+
+    @GetMapping("/metricas-ccaa")
+    @ResponseBody
+    public List<InfoCcaaMetricRecord> metricasCcaa() {
+        Map<String, Long> usuariosPorCcaa = new HashMap<>();
+        usuarioRepository.countUsuariosActivosValidosPorCcaa().forEach(metrica ->
+            usuariosPorCcaa.put(metrica.ccaaNombre(), metrica.usuariosActivos())
+        );
+
+        Map<String, Long> presupuestosPorCcaa = new HashMap<>();
+        LocalDateTime desde = LocalDateTime.now().minusDays(30);
+        listadoRepository.countPresupuestosActivosPorCcaaDesde(desde).forEach(metrica ->
+            presupuestosPorCcaa.put(metrica.ccaaNombre(), metrica.presupuestosUltimos30Dias())
+        );
+
+        HashSet<String> ccaas = new HashSet<>(usuariosPorCcaa.keySet());
+        ccaas.addAll(presupuestosPorCcaa.keySet());
+
+        return ccaas.stream()
+            .sorted()
+            .map(ccaa -> new InfoCcaaMetricRecord(
+                ccaa,
+                usuariosPorCcaa.getOrDefault(ccaa, 0L),
+                presupuestosPorCcaa.getOrDefault(ccaa, 0L)
+            ))
+            .toList();
     }
 
     private String construirBaseUrl(HttpServletRequest request) {

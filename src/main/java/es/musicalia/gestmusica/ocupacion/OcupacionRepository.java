@@ -16,6 +16,8 @@ import java.util.Set;
 public interface OcupacionRepository extends JpaRepository<Ocupacion, Long>, JpaSpecificationExecutor<Ocupacion>
 {
 
+    long countByActivoTrueAndFechaCreacionGreaterThanEqual(LocalDateTime desde);
+
     @Query(value ="select new es.musicalia.gestmusica.ocupacion.OcupacionRecord(t.id, t.fecha, t.artista.id, t.artista.nombre, cast(TRUNC(t.importe,0) as string), true, t.tipoOcupacion.nombre, t.provincia.nombre, COALESCE(t.municipio.nombre, 'Sin municipio'), t.poblacion, t.matinal, t.soloMatinal,t.ocupacionEstado.nombre, t.usuario.id, t.usuario.nombre || ' ' || t.usuario.apellidos) FROM Ocupacion t WHERE t.artista.id= ?1 AND t.fecha >= ?2 AND t.fecha<= ?3 and t.activo and t.ocupacionEstado.id!=4")
     List<OcupacionRecord> findOcupacionesDtoByArtistaIdAndDates(long idArtista, LocalDateTime start, LocalDateTime end);
 
