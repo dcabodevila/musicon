@@ -79,7 +79,7 @@ public class WebSecurityConfig {
                         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; " +
                         "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://www.googletagmanager.com; " +
                         "font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; " +
-                        "connect-src 'self' https://www.googletagmanager.com https://www.google-analytics.com https://cdn.jsdelivr.net; " +
+                        "connect-src 'self' https://www.googletagmanager.com https://www.google-analytics.com https://region1.google-analytics.com https://cdn.jsdelivr.net; " +
                         "frame-src https://www.googletagmanager.com; " +
                         "frame-ancestors 'none'; " +
                         "form-action 'self'; " +
