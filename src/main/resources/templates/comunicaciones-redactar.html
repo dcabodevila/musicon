@@ -138,10 +138,105 @@
                     ['blockquote', 'code-block'],
                     [{ 'list': 'ordered'}, { 'list': 'bullet' }],
                     [{ 'indent': '-1'}, { 'indent': '+1' }],
-                    ['link'],
-                    ['clean']
+                    [{ 'color': [] }],
+                    ['link', 'image']
                 ]
             }
+        });
+
+        var toolbar = quill.getModule('toolbar');
+        toolbar.addHandler('image', function() {
+            var input = document.createElement('input');
+            input.setAttribute('type', 'file');
+            input.setAttribute('accept', 'image/*');
+            input.click();
+
+            input.onchange = function() {
+                var file = input.files[0];
+                if (!file) {
+                    return;
+                }
+
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var range = quill.getSelection(true);
+                    var index = range ? range.index : quill.getLength();
+                    quill.insertEmbed(index, 'image', e.target.result, 'user');
+                    quill.setSelection(index + 1, 0, 'silent');
+                };
+                reader.readAsDataURL(file);
+            };
+        });
+
+        var editor = document.querySelector('#quill-editor .ql-editor');
+        editor.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+        });
+
+        editor.addEventListener('drop', function(e) {
+            e.preventDefault();
+
+            var files = e.dataTransfer.files;
+            if (!files || files.length === 0) {
+                return;
+            }
+
+            var imageFiles = Array.prototype.filter.call(files, function(file) {
+                return file.type && file.type.indexOf('image/') === 0;
+            });
+
+            if (imageFiles.length === 0) {
+                return;
+            }
+
+            var range = quill.getSelection(true);
+            var index = range ? range.index : quill.getLength();
+
+            imageFiles.forEach(function(file) {
+                var reader = new FileReader();
+                reader.onload = function(ev) {
+                    quill.insertEmbed(index, 'image', ev.target.result, 'user');
+                    index += 1;
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        editor.addEventListener('paste', function(e) {
+            var items = (e.clipboardData || window.clipboardData).items;
+            if (!items || items.length === 0) {
+                return;
+            }
+
+            var imageFiles = [];
+            for (var i = 0; i < items.length; i++) {
+                var item = items[i];
+                if (item.kind === 'file' && item.type.indexOf('image/') === 0) {
+                    var file = item.getAsFile();
+                    if (file) {
+                        imageFiles.push(file);
+                    }
+                }
+            }
+
+            if (imageFiles.length === 0) {
+                return;
+            }
+
+            e.preventDefault();
+
+            var range = quill.getSelection(true);
+            var index = range ? range.index : quill.getLength();
+
+            imageFiles.forEach(function(file) {
+                var reader = new FileReader();
+                reader.onload = function(ev) {
+                    quill.insertEmbed(index, 'image', ev.target.result, 'user');
+                    index += 1;
+                };
+                reader.readAsDataURL(file);
+            });
         });
 
         // Capturar el HTML de Quill al enviar el formulario
