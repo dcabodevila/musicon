@@ -18,7 +18,7 @@ class ListadosAudienciaChartJsConfigTest {
         String script = Files.readString(SCRIPT_PATH);
 
         Pattern baselinePattern = Pattern.compile(
-                "scales\\s*:\\s*\\{[\\s\\S]*?y\\s*:\\s*\\{[\\s\\S]*?beginAtZero\\s*:\\s*true[\\s\\S]*?min\\s*:\\s*0",
+                "scales\\s*:\\s*\\{[\\s\\S]*?yAxes\\s*:\\s*\\[[\\s\\S]*?beginAtZero\\s*:\\s*true[\\s\\S]*?min\\s*:\\s*0",
                 Pattern.MULTILINE
         );
 
@@ -32,7 +32,7 @@ class ListadosAudienciaChartJsConfigTest {
         String script = Files.readString(SCRIPT_PATH);
 
         assertThat(script)
-                .contains("url: '/listado/audiencias/chart-data'")
+                .contains("url: '/listado/audiencias/aggregated-data'")
                 .contains("reinitializeChart();");
     }
 }

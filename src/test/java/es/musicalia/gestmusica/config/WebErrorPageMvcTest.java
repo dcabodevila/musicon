@@ -2,6 +2,7 @@ package es.musicalia.gestmusica.config;
 
 import es.musicalia.gestmusica.home.HomeController;
 import es.musicalia.gestmusica.mensaje.MensajeService;
+import es.musicalia.gestmusica.observabilidad.FunctionalEventTracker;
 import es.musicalia.gestmusica.ocupacion.OcupacionService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.RequestDispatcher;
@@ -56,6 +57,8 @@ public class WebErrorPageMvcTest {
 
     @MockBean
     private MensajeService mensajeService;
+    @MockBean
+    private FunctionalEventTracker functionalEventTracker;
 
     @BeforeEach
     void setup() throws Exception {

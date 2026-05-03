@@ -9,6 +9,7 @@ import es.musicalia.gestmusica.ocupacion.OcupacionRecord;
 import es.musicalia.gestmusica.ocupacion.OcupacionService;
 import es.musicalia.gestmusica.permiso.PermisoAgenciaEnum;
 import es.musicalia.gestmusica.mensaje.MensajeService;
+import es.musicalia.gestmusica.observabilidad.FunctionalEventTracker;
 import es.musicalia.gestmusica.usuario.Usuario;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,6 +62,8 @@ class HomeControllerTest {
     private CustomPermissionEvaluator customPermissionEvaluator;
     @MockBean
     private MensajeService mensajeService;
+    @MockBean
+    private FunctionalEventTracker functionalEventTracker;
 
     @BeforeEach
     void setUp() throws Exception {

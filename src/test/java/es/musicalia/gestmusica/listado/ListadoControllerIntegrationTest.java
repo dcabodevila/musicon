@@ -7,6 +7,7 @@ import es.musicalia.gestmusica.config.CustomPermissionEvaluator;
 import es.musicalia.gestmusica.config.RateLimitingFilter;
 import es.musicalia.gestmusica.config.WebSecurityConfig;
 import es.musicalia.gestmusica.localizacion.LocalizacionService;
+import es.musicalia.gestmusica.observabilidad.FunctionalEventTracker;
 import es.musicalia.gestmusica.mensaje.MensajeService;
 import es.musicalia.gestmusica.permiso.PermisoService;
 import jakarta.servlet.FilterChain;
@@ -44,6 +45,8 @@ class ListadoControllerIntegrationTest {
     private LocalizacionService localizacionService;
     @MockBean
     private ListadoService listadoService;
+    @MockBean
+    private FunctionalEventTracker functionalEventTracker;
     @MockBean
     private ArtistaService artistaService;
     @MockBean

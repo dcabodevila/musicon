@@ -4,6 +4,7 @@ import es.musicalia.gestmusica.config.CustomPermissionEvaluator;
 import es.musicalia.gestmusica.config.RateLimitingFilter;
 import es.musicalia.gestmusica.config.WebSecurityConfig;
 import es.musicalia.gestmusica.mensaje.MensajeService;
+import es.musicalia.gestmusica.observabilidad.FunctionalEventTracker;
 import es.musicalia.gestmusica.usuario.UserService;
 import es.musicalia.gestmusica.usuario.Usuario;
 import jakarta.servlet.FilterChain;
@@ -51,6 +52,8 @@ class ReleaseNotesControllerTest {
     private CustomPermissionEvaluator customPermissionEvaluator;
     @MockBean
     private MensajeService mensajeService;
+    @MockBean
+    private FunctionalEventTracker functionalEventTracker;
 
     private Usuario usuario;
 

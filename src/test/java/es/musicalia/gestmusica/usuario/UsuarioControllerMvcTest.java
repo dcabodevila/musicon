@@ -7,6 +7,7 @@ import es.musicalia.gestmusica.config.WebSecurityConfig;
 import es.musicalia.gestmusica.localizacion.LocalizacionService;
 import es.musicalia.gestmusica.mail.EmailService;
 import es.musicalia.gestmusica.mensaje.MensajeService;
+import es.musicalia.gestmusica.observabilidad.FunctionalEventTracker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +60,8 @@ class UsuarioControllerMvcTest {
     private CustomPermissionEvaluator customPermissionEvaluator;
     @MockBean
     private MensajeService mensajeService;
+    @MockBean
+    private FunctionalEventTracker functionalEventTracker;
 
     @BeforeEach
     void setUp() throws Exception {
