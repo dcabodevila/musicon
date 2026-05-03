@@ -34,6 +34,7 @@
     const panelAyuda = document.getElementById('info-ccaa-help');
     const panelUsuarios = document.getElementById('info-ccaa-usuarios');
     const panelPresupuestos = document.getElementById('info-ccaa-presupuestos');
+    const panelContenedor = document.getElementById('info-ccaa-panel');
 
     const mapa = L.map('info-ccaa-map', {
         zoomControl: true,
@@ -120,6 +121,11 @@
             acc.presupuestosUltimos30Dias += Number(item.presupuestosUltimos30Dias || 0);
             return acc;
         }, { usuariosActivos: 0, presupuestosUltimos30Dias: 0 });
+
+        const totalPresupuestosGlobal = Number(panelContenedor?.dataset?.totalPresupuestosGlobal);
+        if (Number.isFinite(totalPresupuestosGlobal) && totalPresupuestosGlobal >= 0) {
+            totales.presupuestosUltimos30Dias = totalPresupuestosGlobal;
+        }
 
         panelNombre.textContent = 'Total nacional';
         panelAyuda.textContent = 'Resumen global de actividad. Haz clic en una comunidad para ver su detalle.';
