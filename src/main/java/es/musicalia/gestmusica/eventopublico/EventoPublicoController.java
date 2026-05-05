@@ -137,6 +137,7 @@ public class EventoPublicoController {
     private final EventoPublicoService eventoPublicoService;
     private final LocalizacionService localizacionService;
     private final ObjectMapper objectMapper;
+    private final EventoPublicStructuredDataBuilder eventoPublicStructuredDataBuilder;
 
     /**
      * URL legada: /eventos/evento/{id}
@@ -163,17 +164,13 @@ public class EventoPublicoController {
             return new ModelAndView(crearRedireccionPermanente(urlCanonica));
         }
 
-        String baseUrl = construirBaseUrl(request);
-
         ModelAndView mv = new ModelAndView("evento-publico");
-        String organizerName = (evento.getNombreAgencia() != null && !evento.getNombreAgencia().isBlank())
-            ? evento.getNombreAgencia()
-            : ORGANIZER_NAME_FALLBACK;
         mv.addObject("evento", evento);
         String imageUrl = (evento.getLogoArtista() != null && !evento.getLogoArtista().isBlank())
             ? EventoPublicoDto.normalizeImageUrl(evento.getLogoArtista())
             : EVENT_IMAGE_URL;
-        mv.addObject("jsonLd", evento.toJsonLd(baseUrl, organizerName, evento.getUrlOrganizador(), imageUrl));
+        mv.addObject("jsonLd", eventoPublicStructuredDataBuilder.buildEventJsonLd(evento, urlCanonica, imageUrl));
+        String baseUrl = construirBaseUrl(request);
         mv.addObject("breadcrumbJsonLd", buildBreadcrumbJsonLd(baseUrl, evento));
         mv.addObject("titulo", evento.getTituloSeo());
         mv.addObject("descripcion", evento.getDescripcionSeo());

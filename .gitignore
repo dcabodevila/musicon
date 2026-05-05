@@ -50,6 +50,7 @@ build/
 /.claude/skills/sector-musical-galicia/SKILL.md
 /.claude/worktrees**
 /.claude/**
+/.atl/
 /.playwright-mcp
 /doc
 /product

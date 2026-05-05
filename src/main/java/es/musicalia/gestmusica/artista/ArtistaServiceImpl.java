@@ -328,7 +328,7 @@ public class ArtistaServiceImpl implements ArtistaService {
         StringBuilder sb = new StringBuilder();
         sb.append("<p>Se solicita la creación de una nueva formación y asociación a festia para su sincronización.</p>");
         sb.append("<table border=\"1\" cellpadding=\"6\" cellspacing=\"0\" style=\"border-collapse:collapse\">");
-
+        appendFila(sb, "ID Festia", artista.getId().toString());
         appendFila(sb, "Tipo Formación", tiposArtista);
         appendFila(sb, "Nombre formación", artista.getNombre());
         appendFila(sb, "Email formación", contacto != null ? contacto.getEmail() : null);
