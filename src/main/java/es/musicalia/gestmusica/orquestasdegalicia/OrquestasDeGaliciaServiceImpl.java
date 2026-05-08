@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
@@ -17,7 +18,6 @@ import java.util.Optional;
 
 @Slf4j
 @Service
-@Transactional
 public class OrquestasDeGaliciaServiceImpl implements OrquestasDeGaliciaService {
 
     private final RestTemplate restTemplate;
@@ -42,7 +42,7 @@ public class OrquestasDeGaliciaServiceImpl implements OrquestasDeGaliciaService 
 
     private String cachedToken;
 
-    private String getToken() {
+    private String getToken() throws OrquestasDeGaliciaException {
         if (isTokenValido()) {
             return cachedToken;
         }
@@ -59,13 +59,13 @@ public class OrquestasDeGaliciaServiceImpl implements OrquestasDeGaliciaService 
             }
         } catch (RestClientResponseException e) {
             log.error("Error de autenticación con Orquestas de Galicia: [{}] {}", e.getStatusCode(), e.getResponseBodyAsString());
-            throw new RuntimeException("Fallo al autenticar: " + e.getMessage());
+            throw new OrquestasDeGaliciaException("Fallo de autenticación con Orquestas de Galicia", e);
         }
 
-        throw new RuntimeException("No se pudo obtener el token de Orquestas de Galicia");
+        throw new OrquestasDeGaliciaException("No se pudo obtener el token de Orquestas de Galicia");
     }
 
-    private HttpHeaders getHeaders() {
+    private HttpHeaders getHeaders() throws OrquestasDeGaliciaException {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(getToken());
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -97,12 +97,12 @@ public class OrquestasDeGaliciaServiceImpl implements OrquestasDeGaliciaService 
         return false;
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     @Override
     public Optional<ActuacionExterna> obtenerActuacion(Integer idActuacionExterno) throws OrquestasDeGaliciaException {
         if (!apiEnabled) {
             log.warn("La API de Orquestas de Galicia está deshabilitada. No se realizó la llamada para obtener la actuación con ID: {}", idActuacionExterno);
-            return Optional.empty();
+            throw new OrquestasDeGaliciaException("La API de Orquestas de Galicia está deshabilitada");
         }
 
         // Construir la URL del endpoint
@@ -127,8 +127,11 @@ public class OrquestasDeGaliciaServiceImpl implements OrquestasDeGaliciaService 
 
             // Registrar y devolver la respuesta
             ActuacionExterna actuacionExterna = response.getBody();
+            if (actuacionExterna == null) {
+                throw new OrquestasDeGaliciaException("La actuación recibida desde Orquestas de Galicia no contiene datos");
+            }
             log.info("Actuación obtenida correctamente: {}", actuacionExterna);
-            return Optional.ofNullable(actuacionExterna);
+            return Optional.of(actuacionExterna);
         } catch (RestClientResponseException e) {
             if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
                 log.error("Actuación no encontrada con idActuacionExterno: {}", idActuacionExterno);
@@ -138,16 +141,18 @@ public class OrquestasDeGaliciaServiceImpl implements OrquestasDeGaliciaService 
             if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
                 cachedToken = null;
                 log.error("Consulta no autorizada para idActuacionExterno: {}", idActuacionExterno);
-                return Optional.empty();
+                throw new OrquestasDeGaliciaException("Consulta no autorizada a Orquestas de Galicia", e);
             }
+            throw new OrquestasDeGaliciaException("Error consultando la actuación en Orquestas de Galicia", e);
+        } catch (OrquestasDeGaliciaException e) {
             throw e;
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             log.error("Error inesperado al obtener actuación con ID {}: {}", idActuacionExterno, e.getMessage(), e);
-            throw e;
+            throw new OrquestasDeGaliciaException("Error inesperado consultando la actuación en Orquestas de Galicia", e);
         }
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     @Override
     public DefaultResponseBody crearActuacion(ActuacionExterna actuacion) {
         if (!apiEnabled) {
@@ -155,11 +160,10 @@ public class OrquestasDeGaliciaServiceImpl implements OrquestasDeGaliciaService 
             return DefaultResponseBody.builder().success(false).messageType("danger").message("API deshabilitada").build();
         }
 
-        HttpHeaders headers = getHeaders();
-        HttpEntity<ActuacionExterna> entity = new HttpEntity<>(actuacion, headers);
-
 
         try {
+            HttpHeaders headers = getHeaders();
+            HttpEntity<ActuacionExterna> entity = new HttpEntity<>(actuacion, headers);
             ResponseEntity<String> response = restTemplate.exchange(
                 apiUrl ,
                 HttpMethod.POST,
@@ -186,10 +190,16 @@ public class OrquestasDeGaliciaServiceImpl implements OrquestasDeGaliciaService 
 
             return DefaultResponseBody.builder().success(false).messageType("error").message("No se ha podido crear la actuación en OrquestasDeGalicia. Comprueba si ya existía anteriormente.").build();
 
+        } catch (OrquestasDeGaliciaException e) {
+            log.error("Error autenticando con Orquestas de Galicia al crear actuación {}", getIdActuacionExternoSafe(actuacion), e);
+            return DefaultResponseBody.builder().success(false).messageType("error").message("No se ha podido autenticar con OrquestasDeGalicia").build();
+        } catch (RuntimeException e) {
+            log.error("Error inesperado creando actuación {} en Orquestas de Galicia", getIdActuacionExternoSafe(actuacion), e);
+            return DefaultResponseBody.builder().success(false).messageType("error").message("No se ha podido crear la actuación en OrquestasDeGalicia").build();
         }
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     @Override
     public DefaultResponseBody modificarActuacion(Integer idActuacionExterno, ActuacionExterna actuacion) {
         if (!apiEnabled) {
@@ -197,11 +207,10 @@ public class OrquestasDeGaliciaServiceImpl implements OrquestasDeGaliciaService 
             return DefaultResponseBody.builder().success(false).messageType("danger").message("API deshabilitada").build();
         }
 
-        HttpHeaders headers = getHeaders();
-        HttpEntity<ActuacionExterna> entity = new HttpEntity<>(actuacion, headers);
-
         String url = apiUrl + "/"  + idActuacionExterno;
         try {
+            HttpHeaders headers = getHeaders();
+            HttpEntity<ActuacionExterna> entity = new HttpEntity<>(actuacion, headers);
             ResponseEntity<String> response = restTemplate.exchange(
                 url,
                 HttpMethod.PUT,
@@ -221,10 +230,16 @@ public class OrquestasDeGaliciaServiceImpl implements OrquestasDeGaliciaService 
             if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) { cachedToken = null; }
             return DefaultResponseBody.builder().success(false).messageType("error").message("Excepción al actualizar la actuación en OrquestasDeGalicia").build();
 
+        } catch (OrquestasDeGaliciaException e) {
+            log.error("Error autenticando con Orquestas de Galicia al modificar actuación {}", idActuacionExterno, e);
+            return DefaultResponseBody.builder().success(false).messageType("error").message("No se ha podido autenticar con OrquestasDeGalicia").build();
+        } catch (RuntimeException e) {
+            log.error("Error inesperado modificando actuación {} en Orquestas de Galicia", idActuacionExterno, e);
+            return DefaultResponseBody.builder().success(false).messageType("error").message("No se ha podido actualizar la actuación en OrquestasDeGalicia").build();
         }
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     @Override
     public DefaultResponseBody eliminarActuacion(Integer idActuacionExterno) {
         if (!apiEnabled) {
@@ -232,11 +247,10 @@ public class OrquestasDeGaliciaServiceImpl implements OrquestasDeGaliciaService 
             return DefaultResponseBody.builder().success(false).messageType("danger").message("API deshabilitada").build();
         }
 
-        HttpHeaders headers = getHeaders();
-        HttpEntity<?> entity = new HttpEntity<>(headers);
-
         String url = apiUrl + "/"  + idActuacionExterno;
         try {
+            HttpHeaders headers = getHeaders();
+            HttpEntity<?> entity = new HttpEntity<>(headers);
             ResponseEntity<String> response = restTemplate.exchange(
                 url,
                 HttpMethod.DELETE,
@@ -257,8 +271,18 @@ public class OrquestasDeGaliciaServiceImpl implements OrquestasDeGaliciaService 
         } catch (RestClientResponseException e) {
             log.error("Error al eliminar actuación: {}", e.getResponseBodyAsString());
             if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) { cachedToken = null; }
-            return DefaultResponseBody.builder().success(false).messageType("error").message("Excepción al actualizar la actuación de OrquestasDeGalicia").build();
+            return DefaultResponseBody.builder().success(false).messageType("error").message("Excepción al eliminar la actuación de OrquestasDeGalicia").build();
+        } catch (OrquestasDeGaliciaException e) {
+            log.error("Error autenticando con Orquestas de Galicia al eliminar actuación {}", idActuacionExterno, e);
+            return DefaultResponseBody.builder().success(false).messageType("error").message("No se ha podido autenticar con OrquestasDeGalicia").build();
+        } catch (RuntimeException e) {
+            log.error("Error inesperado eliminando actuación {} en Orquestas de Galicia", idActuacionExterno, e);
+            return DefaultResponseBody.builder().success(false).messageType("error").message("No se ha podido eliminar la actuación de OrquestasDeGalicia").build();
         }
+    }
+
+    private Integer getIdActuacionExternoSafe(ActuacionExterna actuacion) {
+        return actuacion != null ? actuacion.getIdActuacionExterno() : null;
     }
 
 //    @Transactional

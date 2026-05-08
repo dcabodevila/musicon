@@ -104,6 +104,8 @@ public class OcupacionServiceImpl implements OcupacionService {
 	@Override
 	@Transactional(readOnly = false)
 	public DefaultResponseBody anularOcupacion(long id){
+		boolean errorSincronizandoOdg = false;
+		boolean errorEmail = false;
 
 		Ocupacion ocupacion =  this.ocupacionRepository.findById(id).orElseThrow();
 
@@ -116,10 +118,16 @@ public class OcupacionServiceImpl implements OcupacionService {
 
         if (ocupacion.isPublicadoOdg()){
             try {
-                this.orquestasDeGaliciaService.eliminarActuacion(ocupacion.getId().intValue());
-				ocupacion.setPublicadoOdg(false);
-				this.ocupacionRepository.save(ocupacion);
+                final DefaultResponseBody responseOdg = this.orquestasDeGaliciaService.eliminarActuacion(ocupacion.getId().intValue());
+				if (responseOdg != null && responseOdg.isSuccess()) {
+					ocupacion.setPublicadoOdg(false);
+					this.ocupacionRepository.save(ocupacion);
+				} else {
+					errorSincronizandoOdg = true;
+					log.warn("La ocupación {} se anuló en Gestmusica, pero no se pudo anular en Orquestas de Galicia", ocupacion.getId());
+				}
             } catch (Exception e) {
+				errorSincronizandoOdg = true;
                 log.error("error inesperado eliminando actuacion de orquestas de galicia", e);
             }
         }
@@ -130,9 +138,21 @@ public class OcupacionServiceImpl implements OcupacionService {
 			this.emailService.enviarMensajePorEmail(ocupacion.getUsuario().getEmail(), EmailTemplateEnum.EMAIL_NOTIFICACION_ANULACION);
 
 		} catch (EnvioEmailException e) {
-			return DefaultResponseBody.builder().success(true).message("Ocupacion anulada correctamente, pero ha habido un error enviando la notificación por correo").messageType("warning").build();
+			errorEmail = true;
 		} catch (Exception e) {
 			log.error("error inesperado enviando notificacion de confirmación de ocupacion", e);
+			errorEmail = true;
+		}
+
+		if (errorSincronizandoOdg && errorEmail) {
+			return DefaultResponseBody.builder().success(true).message("Ocupacion anulada correctamente, pero no se ha podido actualizar en Orquestas de Galicia ni enviar la notificación por correo").messageType("warning").build();
+		}
+
+		if (errorSincronizandoOdg) {
+			return DefaultResponseBody.builder().success(true).message("Ocupacion anulada correctamente, pero no se ha podido actualizar en Orquestas de Galicia").messageType("warning").build();
+		}
+
+		if (errorEmail) {
 			return DefaultResponseBody.builder().success(true).message("Ocupacion anulada correctamente, pero ha habido un error enviando la notificación por correo").messageType("warning").build();
 		}
 
@@ -739,7 +759,7 @@ public class OcupacionServiceImpl implements OcupacionService {
     }
     @Transactional
     @Override
-    public DefaultResponseBody actualizarOcupacionOrquestasDeGalicia(Long idOcupacion) throws OrquestasDeGaliciaException {
+    public DefaultResponseBody actualizarOcupacionOrquestasDeGalicia(Long idOcupacion) {
 
         final Ocupacion ocupacion = this.ocupacionRepository.findById(idOcupacion).orElseThrow();
 
@@ -780,6 +800,9 @@ public class OcupacionServiceImpl implements OcupacionService {
 
             return response;
 
+        } catch (OrquestasDeGaliciaException e) {
+            log.error(e.getMessage(), e);
+            return DefaultResponseBody.builder().success(false).messageType("warning").message("No se ha podido consultar o actualizar la actuación en Orquestas de Galicia").build();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

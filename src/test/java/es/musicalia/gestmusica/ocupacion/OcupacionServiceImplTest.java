@@ -345,6 +345,59 @@ class OcupacionServiceImplTest {
             verify(orquestasDeGaliciaService).eliminarActuacion(idOcupacion.intValue());
             verify(ocupacionRepository, times(2)).save(ocupacion);
         }
+
+        @Test
+        @DisplayName("Si falla ODG la ocupación se anula igualmente y se devuelve warning")
+        void ocupacionPublicadaODG_falloEliminacion_devuelveWarningYSigue() {
+            // Given
+            Long idOcupacion = 1L;
+            Ocupacion ocupacion = crearOcupacion(idOcupacion, crearArtista(1L));
+            ocupacion.setPublicadoOdg(true);
+
+            when(ocupacionRepository.findById(idOcupacion)).thenReturn(Optional.of(ocupacion));
+            when(ocupacionEstadoRepository.findById(OcupacionEstadoEnum.ANULADO.getId()))
+                    .thenReturn(Optional.of(crearOcupacionEstado(OcupacionEstadoEnum.ANULADO.getId(), "Anulado")));
+            when(ocupacionRepository.save(any(Ocupacion.class))).thenReturn(ocupacion);
+            when(userService.obtenerUsuarioAutenticado()).thenReturn(Optional.of(crearUsuario(1L, "test", "test@test.com")));
+            when(orquestasDeGaliciaService.eliminarActuacion(idOcupacion.intValue()))
+                    .thenReturn(DefaultResponseBody.builder().success(false).messageType("error").message("401 Unauthorized").build());
+
+            // When
+            DefaultResponseBody response = ocupacionService.anularOcupacion(idOcupacion);
+
+            // Then
+            assertThat(response.isSuccess()).isTrue();
+            assertThat(response.getMessageType()).isEqualTo("warning");
+            assertThat(response.getMessage()).contains("no se ha podido actualizar en Orquestas de Galicia");
+            assertThat(ocupacion.isPublicadoOdg()).isTrue();
+            assertThat(ocupacion.getOcupacionEstado().getId()).isEqualTo(OcupacionEstadoEnum.ANULADO.getId());
+            verify(orquestasDeGaliciaService).eliminarActuacion(idOcupacion.intValue());
+            verify(ocupacionRepository, times(1)).save(ocupacion);
+        }
+
+        @Test
+        @DisplayName("Si ODG lanza excepción al anular se devuelve warning y se mantiene publicadoOdg")
+        void ocupacionPublicadaODG_excepcionEliminacion_devuelveWarningYSigue() {
+            Long idOcupacion = 1L;
+            Ocupacion ocupacion = crearOcupacion(idOcupacion, crearArtista(1L));
+            ocupacion.setPublicadoOdg(true);
+
+            when(ocupacionRepository.findById(idOcupacion)).thenReturn(Optional.of(ocupacion));
+            when(ocupacionEstadoRepository.findById(OcupacionEstadoEnum.ANULADO.getId()))
+                    .thenReturn(Optional.of(crearOcupacionEstado(OcupacionEstadoEnum.ANULADO.getId(), "Anulado")));
+            when(ocupacionRepository.save(any(Ocupacion.class))).thenReturn(ocupacion);
+            when(userService.obtenerUsuarioAutenticado()).thenReturn(Optional.of(crearUsuario(1L, "test", "test@test.com")));
+            when(orquestasDeGaliciaService.eliminarActuacion(idOcupacion.intValue()))
+                    .thenThrow(new RuntimeException("timeout ODG"));
+
+            DefaultResponseBody response = ocupacionService.anularOcupacion(idOcupacion);
+
+            assertThat(response.isSuccess()).isTrue();
+            assertThat(response.getMessageType()).isEqualTo("warning");
+            assertThat(response.getMessage()).contains("no se ha podido actualizar en Orquestas de Galicia");
+            assertThat(ocupacion.isPublicadoOdg()).isTrue();
+            verify(ocupacionRepository, times(1)).save(ocupacion);
+        }
     }
 
     // =========================================================================
@@ -975,6 +1028,28 @@ class OcupacionServiceImplTest {
             assertThat(ocupacion.isPublicadoOdg()).isTrue();
             verify(ocupacionRepository).save(ocupacion);
         }
+
+        @Test
+        @DisplayName("Si falla ODG al publicar no se actualiza el flag local")
+        void publicacionFalloOdg_noActualizaFlag() {
+            // Given
+            Long idOcupacion = 1L;
+            Ocupacion ocupacion = crearOcupacion(idOcupacion, crearArtista(1L));
+            ocupacion.setTipoOcupacion(crearTipoOcupacion(TipoOcupacionEnum.OCUPADO.getId(), "Ocupado"));
+            ocupacion.setPublicadoOdg(false);
+
+            when(ocupacionRepository.findById(idOcupacion)).thenReturn(Optional.of(ocupacion));
+            when(orquestasDeGaliciaService.crearActuacion(any(ActuacionExterna.class)))
+                    .thenReturn(DefaultResponseBody.builder().success(false).messageType("error").message("401 Unauthorized").build());
+
+            // When
+            DefaultResponseBody response = ocupacionService.publicarOcupacionOrquestasDeGalicia(idOcupacion);
+
+            // Then
+            assertThat(response.isSuccess()).isFalse();
+            assertThat(ocupacion.isPublicadoOdg()).isFalse();
+            verify(ocupacionRepository, never()).save(any(Ocupacion.class));
+        }
     }
 
     // =========================================================================
@@ -1051,6 +1126,56 @@ class OcupacionServiceImplTest {
             // Then
             assertThat(response.isSuccess()).isTrue();
             verify(ocupacionRepository, times(1)).save(ocupacion);
+        }
+
+        @Test
+        @DisplayName("Si falla ODG al actualizar devuelve error controlado y no rompe el estado local")
+        void actualizacionFalloOdg_devuelveErrorControlado() throws OrquestasDeGaliciaException {
+            // Given
+            Long idOcupacion = 1L;
+            Ocupacion ocupacion = crearOcupacion(idOcupacion, crearArtista(1L));
+            ocupacion.setTipoOcupacion(crearTipoOcupacion(TipoOcupacionEnum.OCUPADO.getId(), "Ocupado"));
+            ocupacion.setPublicadoOdg(true);
+
+            ActuacionExterna actuacion = new ActuacionExterna();
+            actuacion.setIdActuacionExterno(idOcupacion.intValue());
+
+            when(ocupacionRepository.findById(idOcupacion)).thenReturn(Optional.of(ocupacion));
+            when(orquestasDeGaliciaService.obtenerActuacion(idOcupacion.intValue()))
+                    .thenReturn(Optional.of(actuacion));
+            when(orquestasDeGaliciaService.modificarActuacion(anyInt(), any(ActuacionExterna.class)))
+                    .thenReturn(DefaultResponseBody.builder().success(false).messageType("error").message("401 Unauthorized").build());
+
+            // When
+            DefaultResponseBody response = ocupacionService.actualizarOcupacionOrquestasDeGalicia(idOcupacion);
+
+            // Then
+            assertThat(response.isSuccess()).isFalse();
+            assertThat(ocupacion.isPublicadoOdg()).isTrue();
+            verify(ocupacionRepository, never()).save(any(Ocupacion.class));
+        }
+
+        @Test
+        @DisplayName("Si ODG no está disponible al consultar no limpia el flag publicado")
+        void actualizacionSinDisponibilidadOdg_noLimpiaFlagPublicado() throws OrquestasDeGaliciaException {
+            // Given
+            Long idOcupacion = 1L;
+            Ocupacion ocupacion = crearOcupacion(idOcupacion, crearArtista(1L));
+            ocupacion.setTipoOcupacion(crearTipoOcupacion(TipoOcupacionEnum.OCUPADO.getId(), "Ocupado"));
+            ocupacion.setPublicadoOdg(true);
+
+            when(ocupacionRepository.findById(idOcupacion)).thenReturn(Optional.of(ocupacion));
+            when(orquestasDeGaliciaService.obtenerActuacion(idOcupacion.intValue()))
+                    .thenThrow(new OrquestasDeGaliciaException("API deshabilitada"));
+
+            // When
+            DefaultResponseBody response = ocupacionService.actualizarOcupacionOrquestasDeGalicia(idOcupacion);
+
+            // Then
+            assertThat(response.isSuccess()).isFalse();
+            assertThat(response.getMessageType()).isEqualTo("warning");
+            assertThat(ocupacion.isPublicadoOdg()).isTrue();
+            verify(ocupacionRepository, never()).save(any(Ocupacion.class));
         }
     }
 
