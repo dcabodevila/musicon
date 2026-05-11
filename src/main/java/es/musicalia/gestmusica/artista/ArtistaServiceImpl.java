@@ -249,10 +249,13 @@ public class ArtistaServiceImpl implements ArtistaService {
     }
 
     private void actualizarTiposArtista(Artista artista, List<Long> idsTipoArtista) {
+        if (artista.getTiposArtista() == null) {
+            artista.setTiposArtista(new HashSet<>());
+        } else {
+            artista.getTiposArtista().clear();
+        }
+
         if (CollectionUtils.isNotEmpty(idsTipoArtista)) {
-            if (artista.getTiposArtista() == null) {
-                artista.setTiposArtista(new HashSet<>());
-            }
             idsTipoArtista.forEach(id ->
                     artista.getTiposArtista().add(tipoArtistaRepository.findById(id).orElseThrow())
             );

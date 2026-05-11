@@ -43,17 +43,17 @@ public class AjustesServiceImpl implements AjustesService {
         ajustes.setUsuario(usuario);
         ajustes.setPredeterminado(ajustesDto.isPredeterminado());
 
-        if (CollectionUtils.isNotEmpty(ajustesDto.getIdsTipoArtista())){
-            ajustes.setTipoArtistas(new HashSet<>(this.tipoArtistaRepository.findAllById(ajustesDto.getIdsTipoArtista())));
-        }
+        ajustes.setTipoArtistas(CollectionUtils.isNotEmpty(ajustesDto.getIdsTipoArtista())
+                ? new HashSet<>(this.tipoArtistaRepository.findAllById(ajustesDto.getIdsTipoArtista()))
+                : new HashSet<>());
 
-        if (CollectionUtils.isNotEmpty(ajustesDto.getIdsAgencias())){
-            ajustes.setAgencias(new HashSet<>(this.agenciaRepository.findAllById(ajustesDto.getIdsAgencias())));
-        }
+        ajustes.setAgencias(CollectionUtils.isNotEmpty(ajustesDto.getIdsAgencias())
+                ? new HashSet<>(this.agenciaRepository.findAllById(ajustesDto.getIdsAgencias()))
+                : new HashSet<>());
 
-        if (CollectionUtils.isNotEmpty(ajustesDto.getIdsComunidades())){
-            ajustes.setCcaa(new HashSet<>(this.ccaaRepository.findAllById(ajustesDto.getIdsComunidades())));
-        }
+        ajustes.setCcaa(CollectionUtils.isNotEmpty(ajustesDto.getIdsComunidades())
+                ? new HashSet<>(this.ccaaRepository.findAllById(ajustesDto.getIdsComunidades()))
+                : new HashSet<>());
 
         return this.ajustesRepository.save(ajustes);
     }
