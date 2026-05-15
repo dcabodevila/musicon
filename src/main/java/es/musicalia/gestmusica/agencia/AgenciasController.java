@@ -2,6 +2,8 @@ package es.musicalia.gestmusica.agencia;
 
 
 import es.musicalia.gestmusica.artista.ArtistaService;
+import es.musicalia.gestmusica.agencia.publicacioneventos.AgenciaPublicacionEventosEstado;
+import es.musicalia.gestmusica.agencia.publicacioneventos.AgenciaPublicacionEventosService;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.auth.model.SecurityService;
 import es.musicalia.gestmusica.file.FileService;
@@ -41,10 +43,12 @@ public class AgenciasController {
     private final ArtistaService artistaService;
     private final SecurityService securityService;
     private final TarifaService tarifaService;
+    private final AgenciaPublicacionEventosService agenciaPublicacionEventosService;
     private final FunctionalEventTracker functionalEventTracker;
 
     public AgenciasController(UserService userService, LocalizacionService localizacionService, AgenciaService agenciaService, FileService fileService,
-                              ArtistaService artistaService, SecurityService securityService, TarifaService tarifaService, FunctionalEventTracker functionalEventTracker){
+                              ArtistaService artistaService, SecurityService securityService, TarifaService tarifaService,
+                              AgenciaPublicacionEventosService agenciaPublicacionEventosService, FunctionalEventTracker functionalEventTracker){
         this.userService = userService;
         this.localizacionService = localizacionService;
         this.agenciaService = agenciaService;
@@ -52,6 +56,7 @@ public class AgenciasController {
         this.artistaService = artistaService;
         this.securityService = securityService;
         this.tarifaService = tarifaService;
+        this.agenciaPublicacionEventosService = agenciaPublicacionEventosService;
         this.functionalEventTracker = functionalEventTracker;
     }
 
@@ -90,11 +95,20 @@ public class AgenciasController {
     }
     @GetMapping("/{id}")
     public String detalleAgencia(Model model, @PathVariable("id") Long idAgencia) {
-        model.addAttribute("agenciaDto", this.agenciaService.findAgenciaDtoById(idAgencia));
+        final AgenciaDto agenciaDto = this.agenciaService.findAgenciaDtoById(idAgencia);
+        model.addAttribute("agenciaDto", agenciaDto);
         final var listaArtistas = this.artistaService.findAllArtistasByAgenciaId(idAgencia);
         model.addAttribute("listaArtistas", listaArtistas);
         final boolean sinTarifasActivas = !listaArtistas.isEmpty() && !this.tarifaService.agenciaTieneTarifasActivas(idAgencia);
         model.addAttribute("sinTarifasActivas", sinTarifasActivas);
+
+        final Long idUsuarioAutenticado = userService.obtenerUsuarioAutenticado().map(usuario -> usuario.getId()).orElse(null);
+        final boolean puedeGestionarPublicacionEventos = idUsuarioAutenticado != null && idUsuarioAutenticado.equals(agenciaDto.getIdUsuario());
+        model.addAttribute("puedeGestionarPublicacionEventos", puedeGestionarPublicacionEventos);
+
+        final var decision = agenciaPublicacionEventosService.findDecisionByAgenciaId(idAgencia);
+        final boolean publicacionEventosActiva = decision != null && AgenciaPublicacionEventosEstado.ACTIVADO.equals(decision.getEstado());
+        model.addAttribute("publicacionEventosActiva", publicacionEventosActiva);
 
         return "agencia-detail";
     }

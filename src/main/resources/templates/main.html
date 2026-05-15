@@ -21,6 +21,7 @@
             <div th:replace="~{fragments/main-template :: navbar}"/>
             <div th:replace="~{fragments/modal-confirmacion :: modal-confirmacion}"/>
             <div th:replace="~{fragments/modal-release-notes :: modal-release-notes}"/>
+            <div th:replace="~{fragments/modal-publicacion-eventos-agencia :: modal-publicacion-eventos-agencia}"/>
 
             <main class="content">
                 <div th:if="${message}" th:class="${'alert alert-' + alertClass+ ' alert-dismissible fade show'}" role="alert"
@@ -225,6 +226,7 @@
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/ScrollTrigger.min.js"></script>
     <script type="text/javascript" th:src="@{/js/main.js}"></script>
     <script type="text/javascript" th:src="@{/js/release-notes-startup.js}"></script>
+    <script type="text/javascript" th:src="@{/js/publicacion-eventos-agencia-startup.js}"></script>
 
     </body>
 </html>

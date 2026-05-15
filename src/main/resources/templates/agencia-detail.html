@@ -99,6 +99,22 @@
                                 Gestión de accesos
                             </a>
 
+                            <div th:if="${puedeGestionarPublicacionEventos}" class="m-2">
+                                <div class="alert" th:classappend="${publicacionEventosActiva} ? 'alert-success' : 'alert-secondary'" role="alert">
+                                    <strong>Publicación en festia.es/eventos:</strong>
+                                    <span th:text="${publicacionEventosActiva} ? ' Activa' : ' Inactiva'">Inactiva</span>
+                                </div>
+
+                                <button th:if="${!publicacionEventosActiva}" id="btnActivarPublicacionEventosAgenciaDetalle"
+                                        type="button" class="btn btn-primary col-12 mb-2">
+                                    Activar publicar eventos
+                                </button>
+                                <button th:if="${publicacionEventosActiva}" id="btnDesactivarPublicacionEventosAgenciaDetalle"
+                                        type="button" class="btn btn-outline-danger col-12">
+                                    Desactivar publicación de eventos
+                                </button>
+                            </div>
+
 
                         </div>
                     </div>
@@ -215,6 +231,30 @@
 
 </body>
 <script type="text/javascript" th:src="@{/js/agencias.js}"></script>
+<script>
+    (function() {
+        const btnActivar = document.getElementById('btnActivarPublicacionEventosAgenciaDetalle');
+        const btnDesactivar = document.getElementById('btnDesactivarPublicacionEventosAgenciaDetalle');
+
+        function bindButton(button, url) {
+            if (!button) {
+                return;
+            }
+            button.addEventListener('click', function() {
+                fetch(url, {method: 'POST'})
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            window.location.reload();
+                        }
+                    });
+            });
+        }
+
+        bindButton(btnActivar, '/api/agencia/publicacion-eventos/activar');
+        bindButton(btnDesactivar, '/api/agencia/publicacion-eventos/desactivar');
+    })();
+</script>
 
 </html>
 

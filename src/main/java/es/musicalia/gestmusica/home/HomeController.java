@@ -1,6 +1,7 @@
 package es.musicalia.gestmusica.home;
 
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
+import es.musicalia.gestmusica.agencia.publicacioneventos.AgenciaPublicacionEventosService;
 import es.musicalia.gestmusica.ocupacion.OcupacionService;
 import es.musicalia.gestmusica.permiso.PermisoAgenciaEnum;
 import es.musicalia.gestmusica.usuario.TipoUsuarioEnum;
@@ -22,9 +23,12 @@ import java.util.stream.Collectors;
 public class HomeController {
 
     private final OcupacionService ocupacionService;
+    private final AgenciaPublicacionEventosService agenciaPublicacionEventosService;
 
-    public HomeController(OcupacionService ocupacionService){
+    public HomeController(OcupacionService ocupacionService,
+                          AgenciaPublicacionEventosService agenciaPublicacionEventosService){
         this.ocupacionService = ocupacionService;
+        this.agenciaPublicacionEventosService = agenciaPublicacionEventosService;
     }
 
     @GetMapping("/")
@@ -46,6 +50,8 @@ public class HomeController {
             && user.getUsuario().isValidado()
             && user.getMapPermisosAgencia().isEmpty();
         model.addAttribute("mostrarBannerOnboardingAgencia", mostrarBannerOnboardingAgencia);
+        model.addAttribute("mostrarModalPublicacionEventosAgencia",
+                agenciaPublicacionEventosService.debeMostrarModal(user.getUsuario().getId()));
 
         model.addAttribute("isUsuarioAutenticado", !SecurityContextHolder.getContext().getAuthentication().getName().equals("anonymousUser"));
         if (isAdminHome) {

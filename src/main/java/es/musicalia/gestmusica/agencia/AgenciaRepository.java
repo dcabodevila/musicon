@@ -6,6 +6,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Repository
@@ -27,5 +28,11 @@ public interface AgenciaRepository extends JpaRepository<Agencia, Long> {
 	List<AgenciaRecord> findAllAgenciasNotByIds(@Param("idsAgencias") Set<Long> idsAgencias);
 
 	boolean existsByUsuarioId(Long usuarioId);
+
+	Optional<Agencia> findByUsuarioId(Long usuarioId);
+
+	List<Agencia> findAllByUsuarioId(Long usuarioId);
+
+	List<Agencia> findAllByUsuarioIdAndActivoTrue(Long usuarioId);
 
 }

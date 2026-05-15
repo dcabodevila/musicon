@@ -5,6 +5,7 @@ import es.musicalia.gestmusica.config.CustomPermissionEvaluator;
 import es.musicalia.gestmusica.config.RateLimitingFilter;
 import es.musicalia.gestmusica.config.ThymeleafConfig;
 import es.musicalia.gestmusica.config.WebSecurityConfig;
+import es.musicalia.gestmusica.agencia.publicacioneventos.AgenciaPublicacionEventosService;
 import es.musicalia.gestmusica.ocupacion.OcupacionRecord;
 import es.musicalia.gestmusica.ocupacion.OcupacionService;
 import es.musicalia.gestmusica.permiso.PermisoAgenciaEnum;
@@ -53,6 +54,8 @@ class HomeControllerTest {
 
     @MockBean
     private OcupacionService ocupacionService;
+    @MockBean
+    private AgenciaPublicacionEventosService agenciaPublicacionEventosService;
 
     @MockBean
     private UserDetailsService userDetailsService;
@@ -80,6 +83,7 @@ class HomeControllerTest {
                         .build()
         );
         when(mensajeService.obtenerMensajesRecibidos(any())).thenReturn(Collections.emptyList());
+        when(agenciaPublicacionEventosService.debeMostrarModal(any())).thenReturn(false);
     }
 
     @Test
@@ -93,6 +97,7 @@ class HomeControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("main.html"))
                 .andExpect(model().attribute("isAdminHome", true))
+                .andExpect(model().attribute("mostrarModalPublicacionEventosAgencia", false))
                 .andExpect(model().attribute("listaOcupacionPendiente", List.of()))
                 .andExpect(content().string(not(containsString("carrousel-lista-ocupaciones-pendientes"))));
 
@@ -115,6 +120,7 @@ class HomeControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("main.html"))
                 .andExpect(model().attribute("isAdminHome", false))
+                .andExpect(model().attribute("mostrarModalPublicacionEventosAgencia", false))
                 .andExpect(model().attribute("listaOcupacionPendiente", pendientes))
                 .andExpect(content().string(containsString("carrousel-lista-ocupaciones-pendientes")));
 
@@ -138,12 +144,41 @@ class HomeControllerTest {
         mockMvc.perform(get("/").with(user(nonAdminUser)))
                 .andExpect(status().isOk())
                 .andExpect(view().name("main.html"))
+                .andExpect(model().attribute("mostrarModalPublicacionEventosAgencia", false))
                 .andExpect(content().string(containsString("ocp-card--pendiente")))
                 .andExpect(content().string(containsString(">Pendiente<")))
                 .andExpect(content().string(containsString(">Reservado<")))
                 .andExpect(content().string(not(containsString(">SIN_ESTADO<"))));
 
         verify(ocupacionService).findOcupacionesDtoByAgenciaPendientes(Set.of(7L));
+    }
+
+    @Test
+    void home_muestraModalPublicacionEventosCuandoCorresponde() throws Exception {
+        CustomAuthenticatedUser nonAdminUser = authenticatedUser(
+                Set.of(new SimpleGrantedAuthority("USER")),
+                Map.of()
+        );
+        when(agenciaPublicacionEventosService.debeMostrarModal(99L)).thenReturn(true);
+
+        mockMvc.perform(get("/").with(user(nonAdminUser)))
+                .andExpect(status().isOk())
+                .andExpect(view().name("main.html"))
+                .andExpect(model().attribute("mostrarModalPublicacionEventosAgencia", true));
+    }
+
+    @Test
+    void home_noMuestraModalPublicacionEventosSiServicioIndicaFalse() throws Exception {
+        CustomAuthenticatedUser nonAdminUser = authenticatedUser(
+                Set.of(new SimpleGrantedAuthority("USER")),
+                Map.of()
+        );
+        when(agenciaPublicacionEventosService.debeMostrarModal(99L)).thenReturn(false);
+
+        mockMvc.perform(get("/").with(user(nonAdminUser)))
+                .andExpect(status().isOk())
+                .andExpect(view().name("main.html"))
+                .andExpect(model().attribute("mostrarModalPublicacionEventosAgencia", false));
     }
 
     private CustomAuthenticatedUser authenticatedUser(Set<SimpleGrantedAuthority> authorities, Map<Long, Set<String>> mapPermisosAgencia) {

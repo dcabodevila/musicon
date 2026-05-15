@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+
+<div th:fragment="modal-publicacion-eventos-agencia">
+    <div class="modal fade" id="publicacionEventosAgenciaModal" tabindex="-1" aria-labelledby="publicacionEventosAgenciaModalLabel"
+         aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="publicacionEventosAgenciaModalLabel">Publicación automática de eventos</h5>
+                </div>
+                <div class="modal-body">
+                    <p>Si activas esta opción, publicaremos automáticamente en <strong>festia.es/eventos</strong> los eventos de todos los artistas de tus agencias seleccionadas.</p>
+                    <p class="mb-2"><strong>Agencias incluidas en esta activación:</strong></p>
+                    <ul id="listaAgenciasPublicacionEventos" class="mb-3"></ul>
+                    <p>Solo se publicarán los eventos para los que resten <strong>45 días</strong> para su inicio.</p>
+                    <p>Es una oportunidad para posicionar el nombre de tus artistas en internet y ganar visibilidad orgánica.</p>
+                    <p class="mb-0">Podrás activar o inactivar este servicio más adelante desde la ficha de cada artista.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" id="btnRechazarPublicacionEventosAgencia">Prefiero no publicar</button>
+                    <button type="button" class="btn btn-primary" id="btnActivarPublicacionEventosAgencia">Activar publicar eventos</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <input type="hidden" id="flagMostrarModalPublicacionEventosAgencia"
+           th:value="${mostrarModalPublicacionEventosAgencia}"/>
+</div>
+
+</body>
+</html>
