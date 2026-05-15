@@ -128,7 +128,7 @@
                                     </li>
                                     <li>
                                         <i class="fas fa-city"></i>
-                                        <span th:text="${evento.municipio + ', ' + evento.provincia}">Municipio, Provincia</span>
+                                        <span th:text="${evento.ubicacionPublicaDisplay}">Municipio, Provincia</span>
                                     </li>
                                 </ul>
 
@@ -196,7 +196,7 @@
                                 </div>
 
                                 <!-- Enlace a mapa -->
-                                <div th:if="${evento.municipio != null and !#strings.isEmpty(evento.municipio)}" class="mt-3 pb-1">
+                                <div th:if="${evento.municipio != null and !#strings.isEmpty(evento.municipio) and !evento.municipioProvisional}" class="mt-3 pb-1">
                                     <a th:href="${(evento.lugarParaMapa != null)
                                             ? 'https://www.google.com/maps?q=' + #strings.replace(evento.lugarParaMapa, ' ', '+') + ',+' + #strings.replace(evento.municipio, ' ', '+') + ',+' + #strings.replace(evento.provincia, ' ', '+') + ',+España'
                                             : 'https://www.google.com/maps?q=' + #strings.replace(evento.municipio, ' ', '+') + ',+' + #strings.replace(evento.provincia, ' ', '+') + ',+España'}"

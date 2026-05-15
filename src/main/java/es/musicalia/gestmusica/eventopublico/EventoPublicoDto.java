@@ -135,7 +135,7 @@ public class EventoPublicoDto {
      * Formato: "Artista — Orquesta en Municipio (Provincia) | Festia"
      */
     public String getTituloSeo() {
-        String municipio = getMunicipioDisplay();
+        String municipio = getMunicipioSeoDisplay();
         // Formato compacto: "Artista en Municipio (Provincia) | Festia"
         // Ej: "Suavecito en Pontevedra | Festia" (37 chars)
         // Ej: "Costa Dorada en Carballeda de Valdeorras (Ourense) | Festia" (60 chars)
@@ -156,7 +156,7 @@ public class EventoPublicoDto {
         String fechaFormateada = fecha.format(DateTimeFormatter.ofPattern("dd 'de' MMMM 'de' yyyy",
             new java.util.Locale("es", "ES")));
 
-        desc.append(nombreArtista).append(" actúa en ").append(getMunicipioDisplay());
+        desc.append(nombreArtista).append(" actúa en ").append(getMunicipioSeoDisplay());
         desc.append(" (").append(provincia).append(") el ").append(fechaFormateada);
 
         if (horaActuacion != null) {
@@ -188,11 +188,11 @@ public class EventoPublicoDto {
     }
 
     public String getTituloEvento() {
-        return "Actuación de " + nombreArtista + " en " + getMunicipioDisplay();
+        return "Actuación de " + nombreArtista + " en " + getMunicipioSeoDisplay();
     }
 
     public String getEncabezadoPrincipal() {
-        return nombreArtista + " en " + getMunicipioDisplay() + " - " +
+        return nombreArtista + " en " + getMunicipioSeoDisplay() + " - " +
             fecha.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
     }
 
@@ -206,6 +206,18 @@ public class EventoPublicoDto {
     public String getMunicipioDisplay() {
         String localidad = getLugarParaMapa();
         return localidad != null ? localidad + ", " + municipio : municipio;
+    }
+
+    public boolean isMunicipioProvisional() {
+        return municipio != null && municipio.toLowerCase(Locale.ROOT).contains("provisional");
+    }
+
+    public String getMunicipioSeoDisplay() {
+        return isMunicipioProvisional() ? provincia : getMunicipioDisplay();
+    }
+
+    public String getUbicacionPublicaDisplay() {
+        return isMunicipioProvisional() ? provincia : municipio + ", " + provincia;
     }
 
     /**

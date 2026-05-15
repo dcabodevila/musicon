@@ -379,7 +379,7 @@
                                         </div>
                                         <div class="event-card__meta">
                                             <i class="fas fa-city"></i>
-                                            <span th:text="${evento.municipio + ', ' + evento.provincia}">Ubicacion</span>
+                                            <span th:text="${evento.ubicacionPublicaDisplay}">Ubicacion</span>
                                         </div>
                                     </div>
                                     <a th:href="@{/eventos/evento/{id}-{slug}(id=${evento.id},slug=${evento.slug})}"
