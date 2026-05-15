@@ -126,8 +126,8 @@
         <main class="content">
             <div class="container-fluid p-0">
 
-                <!-- Breadcrumb visual (solo en contextos provincia y municipio) -->
-                <nav th:if="${contextoPagina == 'provincia' or contextoPagina == 'municipio'}" aria-label="breadcrumb" class="px-3 pt-3">
+                <!-- Breadcrumb visual (solo en contextos SEO concretos) -->
+                <nav th:if="${contextoPagina == 'provincia' or contextoPagina == 'municipio' or contextoPagina == 'hoy'}" aria-label="breadcrumb" class="px-3 pt-3">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a th:href="@{/eventos}">Eventos</a></li>
 
@@ -146,6 +146,12 @@
                         <li class="breadcrumb-item active" aria-current="page"
                             th:if="${contextoPagina == 'municipio'}"
                             th:text="${municipio}">Municipio</li>
+
+                        <!-- Item activo hoy -->
+                        <li class="breadcrumb-item active" aria-current="page"
+                            th:if="${contextoPagina == 'hoy'}">
+                            Eventos de hoy
+                        </li>
                     </ol>
                 </nav>
 
@@ -162,15 +168,15 @@
                         <div class="hero-center">
                             <h1 class="hero-title">
                                 <span class="gsap-title-line1"
-                                      th:text="${nombreArtista != null ? 'Próximas actuaciones de' : (contextoPagina == 'municipio' ? 'Próximas actuaciones en' : (contextoPagina == 'provincia' ? 'Próximas actuaciones en' : 'Próximas actuaciones'))}">
-                                    Próximas actuaciones
-                                </span>
+                                      th:text="${contextoPagina == 'hoy' ? 'Fiestas hoy, verbenas hoy y' : (nombreArtista != null ? 'Próximas actuaciones de' : (contextoPagina == 'municipio' ? 'Próximas actuaciones en' : (contextoPagina == 'provincia' ? 'Próximas actuaciones en' : 'Próximas orquestas, verbenas y actuaciones')))}">
+                                     Próximas actuaciones
+                                 </span>
                                 <span class="gsap-title-line2"
-                                      th:text="${nombreArtista != null ? nombreArtista : (contextoPagina == 'municipio' and provincia != null and !#strings.isEmpty(provincia) ? municipio + ' (' + provincia + ')' : (contextoPagina == 'municipio' ? municipio : (contextoPagina == 'provincia' ? provincia : 'musicales en España')))}">
-                                    musicales en España
-                                </span>
+                                      th:text="${contextoPagina == 'hoy' ? 'actuaciones musicales de hoy' : (nombreArtista != null ? nombreArtista : (contextoPagina == 'municipio' and provincia != null and !#strings.isEmpty(provincia) ? municipio + ' (' + provincia + ')' : (contextoPagina == 'municipio' ? municipio : (contextoPagina == 'provincia' ? provincia : 'musicales en España'))))}">
+                                     musicales en España
+                                 </span>
                             </h1>
-                            <p class="hero-subtitle" th:text="${textoProvincia != null} ? ${textoProvincia} : 'Orquestas, discotecas móviles y grupos musicales · Verbenas y fiestas populares · Actualizado diariamente'"></p>
+                            <p class="hero-subtitle" th:text="${textoHoy != null ? textoHoy : (textoProvincia != null ? textoProvincia : 'Orquestas, discotecas móviles y grupos musicales · Verbenas y fiestas populares · Actualizado diariamente')}"></p>
                         </div>
                         <div class="hero-right"></div>
                     </div>
@@ -180,21 +186,42 @@
                 <div th:if="${contextoPagina == 'catalogo' or contextoPagina == null}" class="px-3 pt-3">
                     <div class="eventos-seo-intro">
                         <h2 class="eventos-seo-intro__title">
-                            Orquestas, verbenas y fiestas populares en España
+                            Orquestas, verbenas y actuaciones musicales en España
                         </h2>
                         <p class="eventos-seo-intro__text">
-                            Consulta la <strong>agenda musical actualizada al momento</strong>: orquestas, discotecas móviles y grupos en actuación.
-                            Filtra por provincia para descubrir qué <strong>grupos musicales</strong> actúan cerca de ti.
+                            Descubre <strong>orquestas, verbenas, conciertos y grupos musicales</strong> programados en toda España.
+                            En Festia puedes consultar actuaciones musicales por <strong>provincia</strong>, <strong>municipio</strong>, <strong>artista</strong> y <strong>fecha</strong>.
                         </p>
                         <nav class="eventos-seo-intro__links" aria-label="Provincias con más actuaciones">
+                            <a th:href="@{/eventos/hoy}">Fiestas hoy</a>
                             <a th:href="@{/eventos/provincia/Coruña}">Orquestas en A Coruña</a>
                             <a th:href="@{/eventos/provincia/Pontevedra}">Verbenas en Pontevedra</a>
                             <a th:href="@{/eventos/provincia/León}">Fiestas en León</a>
                             <a th:href="@{/eventos/provincia/Lugo}">Actuaciones en Lugo</a>
-                            <a th:href="@{/eventos/provincia/Ourense}">Conciertos en Ourense</a>
+                            <a th:href="@{/eventos/provincia/Ourense}">Orquestas en Ourense</a>
                             <a th:href="@{/eventos/provincia/Bizkaia}">Orquestas en Bizkaia</a>
                             <a th:href="@{/eventos/provincia/Zamora}">Verbenas en Zamora</a>
                             <a th:href="@{/eventos/provincia/Burgos}">Fiestas en Burgos</a>
+                        </nav>
+                    </div>
+                </div>
+
+                <div th:if="${contextoPagina == 'hoy'}" class="px-3 pt-3">
+                    <div class="eventos-seo-intro">
+                        <h2 class="eventos-seo-intro__title">
+                            Fiestas hoy, verbenas hoy y música en directo
+                        </h2>
+                        <p class="eventos-seo-intro__text">
+                            Consulta las <strong>fiestas de hoy</strong>, <strong>verbenas de hoy</strong> y
+                            <strong>actuaciones musicales de hoy</strong> publicadas en Festia. Esta página muestra solo eventos
+                            programados para el día actual, con artistas, horarios, municipios y provincias cuando están disponibles.
+                        </p>
+                        <nav class="eventos-seo-intro__links" aria-label="Rutas principales de eventos">
+                            <a th:href="@{/eventos}">Todos los eventos</a>
+                            <a th:href="@{/eventos/provincia/Coruña}">Fiestas en A Coruña</a>
+                            <a th:href="@{/eventos/provincia/Pontevedra}">Verbenas en Pontevedra</a>
+                            <a th:href="@{/eventos/provincia/Ourense}">Orquestas en Ourense</a>
+                            <a th:href="@{/eventos/provincia/León}">Actuaciones en León</a>
                         </nav>
                     </div>
                 </div>
@@ -217,7 +244,7 @@
                 </div>
 
                 <!-- Filtros -->
-                <div class="filter-section px-3 pt-3 pb-0 js-gsap-filter">
+                <div class="filter-section px-3 pt-3 pb-0 js-gsap-filter" th:if="${contextoPagina != 'hoy'}">
                     <div class="card border-0 shadow-sm">
                         <div class="card-body py-3">
                             <form method="get" th:action="@{/eventos}">
@@ -294,7 +321,7 @@
                 <div th:if="${eventos != null and !eventos.isEmpty()}" class="px-3 pt-3 pb-0">
                     <p class="text-muted small mb-2">
                         <i class="fas fa-info-circle text-primary me-1"></i>
-                        Actuaciones musicales confirmadas en los próximos 45 días
+                        <span th:text="${contextoPagina == 'hoy' ? 'Actuaciones musicales confirmadas para hoy' : 'Actuaciones musicales confirmadas en los próximos 45 días'}">Actuaciones musicales confirmadas en los próximos 45 días</span>
                     </p>
                 </div>
 
@@ -413,10 +440,13 @@
                             <p class="text-muted small mb-3" th:if="${contextoPagina == 'provincia'}">
                                 No hay actuaciones disponibles en <span th:text="${provincia}">esta provincia</span> en este momento.
                             </p>
-                            <p class="text-muted small mb-3" th:if="${nombreArtista != null and contextoPagina != 'municipio' and contextoPagina != 'provincia'}">
+                            <p class="text-muted small mb-3" th:if="${contextoPagina == 'hoy'}">
+                                No hay fiestas, verbenas ni actuaciones musicales publicadas para hoy.
+                            </p>
+                            <p class="text-muted small mb-3" th:if="${nombreArtista != null and contextoPagina != 'municipio' and contextoPagina != 'provincia' and contextoPagina != 'hoy'}">
                                 <span th:text="${nombreArtista}">El artista</span> no tiene actuaciones programadas en este momento.
                             </p>
-                            <p class="text-muted small mb-3" th:if="${contextoPagina != 'municipio' and contextoPagina != 'provincia' and nombreArtista == null}">
+                            <p class="text-muted small mb-3" th:if="${contextoPagina != 'municipio' and contextoPagina != 'provincia' and contextoPagina != 'hoy' and nombreArtista == null}">
                                 No hay eventos disponibles con los filtros seleccionados.
                             </p>
                             <a th:href="@{/eventos}" class="btn btn-outline-primary btn-sm">Ver todos los eventos</a>
@@ -428,33 +458,66 @@
                 <div class="px-3 pb-4" th:if="${contextoPagina == 'catalogo' or contextoPagina == null}">
                     <div class="card border-0 bg-light">
                         <div class="card-body">
-                            <h2 class="h5 text-primary mb-3">Agenda de orquestas, verbenas y fiestas en España</h2>
+                            <h2 class="h5 text-primary mb-3">Agenda de orquestas, verbenas y actuaciones musicales en España</h2>
                             <p class="text-muted small mb-2">
-                                Festia es la <strong>agenda musical actualizada al momento</strong> con información actualizada diariamente.
-                                Aquí encontrarás <strong>orquestas</strong>, <strong>discotecas móviles</strong>,
-                                <strong>grupos musicales</strong> y <strong>artistas</strong> que actúan en
-                                <strong>verbenas</strong>, <strong>fiestas populares</strong>,
-                                <strong>festivales</strong> y <strong>eventos culturales</strong> por toda la geografía española.
+                                Festia es una agenda musical donde puedes consultar <strong>orquestas</strong>, <strong>verbenas</strong>,
+                                <strong>conciertos</strong>, <strong>dúos</strong>, <strong>discotecas móviles</strong> y
+                                <strong>grupos musicales</strong> programados en toda España. La información se actualiza diariamente
+                                para que encuentres actuaciones musicales confirmadas con la mayor rapidez posible.
                             </p>
                             <p class="text-muted small mb-2">
-                                Cada actuación incluye fecha, horario, municipio, provincia y lugar del evento, además de
-                                un enlace directo al detalle del <strong>concierto o espectáculo</strong>. Puedes filtrar fácilmente
-                                por <strong>provincia</strong>, <strong>municipio</strong> o <strong>artista</strong> para descubrir
-                                qué <strong>orquestas gallegas</strong>, <strong>bandas nacionales</strong> o
-                                <strong>artistas locales</strong> actúan cerca de ti.
+                                Cada actuación incluye fecha, horario, municipio, provincia y lugar del evento. Puedes filtrar por
+                                <strong>provincia</strong>, <strong>municipio</strong>, <strong>artista</strong> y <strong>fecha</strong>
+                                para descubrir qué orquestas, grupos de verbena o artistas actúan hoy, este fin de semana o en las
+                                próximas semanas cerca de ti.
                             </p>
                             <p class="text-muted small mb-2">
-                                Si organizas <strong>fiestas populares</strong> o <strong>verbenas</strong> y necesitas contratar artistas,
-                                en <a href="/info">Festia podrás consultar tarifas y disponibilidad en tiempo real</a>,
-                                generar <strong>presupuestos inmediatos</strong> y gestionar las <strong>ocupaciones y reservas</strong>
-                                de cada artista de forma profesional.
+                                Festia reúne actuaciones musicales confirmadas en diferentes provincias de España, con especial presencia
+                                de <strong>orquestas</strong>, <strong>grupos de verbena</strong>, <strong>dúos</strong>, <strong>artistas locales</strong>
+                                y <strong>discotecas móviles</strong>. Cada ficha ayuda a localizar fiestas, verbenas y conciertos de forma clara.
                             </p>
                             <p class="text-muted small mb-0">
-                                Desde <strong>orquestas tradicionales</strong> y <strong>discotecas móviles</strong> hasta
-                                <strong>grupos de verbena</strong> y <strong>artistas emergentes</strong>:
-                                la música en vivo de España, organizada y accesible para profesionales del sector y amantes
-                                de la fiesta. Los datos se actualizan <strong>cada día</strong> directamente desde las agencias
-                                y representantes que utilizan Festia como plataforma de gestión.
+                                Si buscas <strong>orquestas en Galicia</strong>, <strong>verbenas en Castilla y León</strong>,
+                                <strong>conciertos en Asturias</strong> o actuaciones musicales en Bizkaia, esta agenda te permite localizar
+                                eventos por zona y seguir la actividad de artistas y grupos en tiempo real.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="px-3 pb-4" th:if="${contextoPagina == 'hoy'}">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body">
+                            <h2 class="h5 text-primary mb-3">Agenda de fiestas, verbenas y actuaciones musicales de hoy</h2>
+                            <p class="text-muted small mb-2">
+                                Festia agrupa en esta página las <strong>fiestas de hoy</strong>, <strong>verbenas de hoy</strong>
+                                y actuaciones musicales programadas para el día actual. Es una ruta limpia y estable pensada para
+                                consultar rápidamente qué orquestas, grupos y artistas actúan hoy.
+                            </p>
+                            <p class="text-muted small mb-0">
+                                Cada evento enlaza con su ficha pública, donde puedes revisar artista, hora, lugar, municipio,
+                                provincia e información adicional disponible. Si no hay eventos para hoy, la página se marca como
+                                <strong>noindex,follow</strong> para evitar contenido vacío en buscadores.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="px-3 pb-4" th:if="${contextoPagina == 'provincia'}">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body">
+                            <h2 class="h5 text-primary mb-3" th:text="${seoProvinciaTitulo}">Orquestas, verbenas y actuaciones musicales en la provincia</h2>
+                            <p class="text-muted small mb-2" th:text="${seoProvinciaParrafo1}">
+                                Consulta la agenda de orquestas, verbenas y actuaciones musicales previstas en la provincia.
+                            </p>
+                            <p class="text-muted small mb-2" th:text="${seoProvinciaParrafo2}">
+                                Festia reúne actuaciones musicales confirmadas con información organizada por artista, localidad y día.
+                            </p>
+                            <p class="text-muted small mb-2" th:text="${seoProvinciaParrafo3}">
+                                La programación musical de esta provincia incluye orquestas, grupos de verbena y otros espectáculos.
+                            </p>
+                            <p class="text-muted small mb-0" th:text="${seoProvinciaParrafo4}">
+                                También puedes explorar artistas concretos y acceder al detalle de cada actuación musical.
                             </p>
                         </div>
                     </div>

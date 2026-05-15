@@ -30,6 +30,13 @@ public class EventoPublicoDto {
     private String nombreArtista;
     private String nombreAgencia;
     private String urlOrganizador;
+    private String instagram;
+    private String facebook;
+    private String youtube;
+    private String tiktok;
+    private String musica;
+    private String web;
+    private String google;
     private String logoArtista;
     private LocalDateTime fecha;
     private LocalTime horaActuacion;

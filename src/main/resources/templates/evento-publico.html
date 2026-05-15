@@ -140,6 +140,61 @@
                                     </div>
                                 </div>
 
+                                <div class="mt-3"
+                                     th:if="${(evento.instagram != null and !#strings.isEmpty(#strings.trim(evento.instagram)))
+                                        or (evento.facebook != null and !#strings.isEmpty(#strings.trim(evento.facebook)))
+                                        or (evento.youtube != null and !#strings.isEmpty(#strings.trim(evento.youtube)))
+                                        or (evento.tiktok != null and !#strings.isEmpty(#strings.trim(evento.tiktok)))
+                                        or (evento.musica != null and !#strings.isEmpty(#strings.trim(evento.musica)))
+                                        or (evento.web != null and !#strings.isEmpty(#strings.trim(evento.web)))
+                                        or (evento.google != null and !#strings.isEmpty(#strings.trim(evento.google)))}">
+                                    <div class="small text-muted fw-semibold mb-2">Redes y enlaces del artista</div>
+                                    <div class="social-links">
+                                        <a th:if="${evento.instagram != null and !#strings.isEmpty(#strings.trim(evento.instagram))}"
+                                           th:href="${#strings.startsWith(#strings.trim(evento.instagram),'http') ? #strings.trim(evento.instagram) : 'https://' + #strings.trim(evento.instagram)}"
+                                           target="_blank" rel="noopener noreferrer" title="Instagram"
+                                           class="social-btn social-btn--instagram">
+                                            <i class="fab fa-instagram"></i>
+                                        </a>
+                                        <a th:if="${evento.facebook != null and !#strings.isEmpty(#strings.trim(evento.facebook))}"
+                                           th:href="${#strings.startsWith(#strings.trim(evento.facebook),'http') ? #strings.trim(evento.facebook) : 'https://' + #strings.trim(evento.facebook)}"
+                                           target="_blank" rel="noopener noreferrer" title="Facebook"
+                                           class="social-btn social-btn--facebook">
+                                            <i class="fab fa-facebook-f"></i>
+                                        </a>
+                                        <a th:if="${evento.youtube != null and !#strings.isEmpty(#strings.trim(evento.youtube))}"
+                                           th:href="${#strings.startsWith(#strings.trim(evento.youtube),'http') ? #strings.trim(evento.youtube) : 'https://' + #strings.trim(evento.youtube)}"
+                                           target="_blank" rel="noopener noreferrer" title="YouTube"
+                                           class="social-btn social-btn--youtube">
+                                            <i class="fab fa-youtube"></i>
+                                        </a>
+                                        <a th:if="${evento.tiktok != null and !#strings.isEmpty(#strings.trim(evento.tiktok))}"
+                                           th:href="${#strings.startsWith(#strings.trim(evento.tiktok),'http') ? #strings.trim(evento.tiktok) : 'https://' + #strings.trim(evento.tiktok)}"
+                                           target="_blank" rel="noopener noreferrer" title="TikTok"
+                                           class="social-btn social-btn--tiktok">
+                                            <i class="fab fa-tiktok"></i>
+                                        </a>
+                                        <a th:if="${evento.musica != null and !#strings.isEmpty(#strings.trim(evento.musica))}"
+                                           th:href="${#strings.startsWith(#strings.trim(evento.musica),'http') ? #strings.trim(evento.musica) : 'https://' + #strings.trim(evento.musica)}"
+                                           target="_blank" rel="noopener noreferrer" title="Música"
+                                           class="social-btn social-btn--musica">
+                                            <i class="fas fa-music"></i>
+                                        </a>
+                                        <a th:if="${evento.web != null and !#strings.isEmpty(#strings.trim(evento.web))}"
+                                           th:href="${#strings.startsWith(#strings.trim(evento.web),'http') ? #strings.trim(evento.web) : 'https://' + #strings.trim(evento.web)}"
+                                           target="_blank" rel="noopener noreferrer" title="Web"
+                                           class="social-btn social-btn--web">
+                                            <i class="fas fa-globe"></i>
+                                        </a>
+                                        <a th:if="${evento.google != null and !#strings.isEmpty(#strings.trim(evento.google))}"
+                                           th:href="${#strings.startsWith(#strings.trim(evento.google),'http') ? #strings.trim(evento.google) : 'https://' + #strings.trim(evento.google)}"
+                                           target="_blank" rel="noopener noreferrer" title="Google"
+                                           class="social-btn social-btn--google">
+                                            <i class="fab fa-google"></i>
+                                        </a>
+                                    </div>
+                                </div>
+
                                 <!-- Enlace a mapa -->
                                 <div th:if="${evento.municipio != null and !#strings.isEmpty(evento.municipio)}" class="mt-3 pb-1">
                                     <a th:href="${(evento.lugarParaMapa != null)

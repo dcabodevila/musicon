@@ -1,39 +1,36 @@
 # Festia
 
-> Festia es una plataforma de información sobre eventos y actuaciones musicales en España. Publica las próximas fechas de actuación de orquestas, grupos y artistas de música en directo.
+> Festia is a public discovery site for live music events in Spain: fiestas, verbenas, orchestras, mobile discos, bands and artists with confirmed dates.
 
-## Información disponible
+## Key public routes
 
-- Próximos eventos musicales en toda España, organizados por fecha, provincia y municipio
-- Agenda completa de actuaciones por artista
-- Detalles de cada evento: fecha, hora, lugar, municipio, provincia y artista
+- /eventos — Main public listing of upcoming music events.
+- /eventos/hoy — Clean daily landing page with only today's fiestas, verbenas and live music events.
+- /eventos/provincia/{province} — Events by province, for example /eventos/provincia/Coruña, /eventos/provincia/Pontevedra, /eventos/provincia/Ourense and /eventos/provincia/León.
+- /eventos/municipio/{municipality} — Events by municipality.
+- /eventos/artista/{id} — Upcoming events for a specific artist.
+- /eventos/evento/{id}-{slug} — Canonical event detail page.
+- /eventos/sitemap.xml — XML sitemap with event, artist, province and municipality URLs.
+- /info — Information about Festia for artists, agencies and event managers.
 
-## Páginas principales
+## Public JSON endpoints
 
-- /eventos — Listado completo de próximos eventos musicales
-- /eventos/artista/{id} — Próximas actuaciones de un artista concreto
-- /eventos/evento/{id}-{slug} — Detalle de un evento específico
+- GET /eventos/api/artista/{id} — Events for one artist.
+- GET /eventos/api/provincia/{name}?desde=YYYY-MM-DD&hasta=YYYY-MM-DD — Events by province.
+- GET /eventos/api/municipio/{name}?desde=YYYY-MM-DD&hasta=YYYY-MM-DD — Events by municipality.
 
-## API pública
+## Event data
 
-- GET /eventos/api/artista/{id} — Eventos de un artista en JSON
-- GET /eventos/api/provincia/{nombre}?desde=YYYY-MM-DD&hasta=YYYY-MM-DD — Eventos por provincia en JSON
-- GET /eventos/sitemap.xml — Sitemap XML con todos los eventos y páginas de artistas
+- Artist or group name.
+- Date and time in Europe/Madrid.
+- Venue or place name when available.
+- Municipality and province.
+- Time slot: morning, afternoon or night.
+- Canonical public URL and Schema.org structured data.
 
-## Cobertura geográfica
+## Notes for AI agents
 
-España (todas las provincias y municipios) y Portugal.
-
-## Datos disponibles por evento
-
-- Nombre del artista
-- Fecha y hora de actuación (zona horaria: Europe/Madrid)
-- Lugar, municipio y provincia
-- Turno: matinal, tarde o noche
-- Información adicional del evento
-
-## Notas
-
-- Solo se publican eventos confirmados (estado: OCUPADO) con fecha futura
-- Los datos se actualizan en tiempo real
-- Marcado estructurado Schema.org MusicEvent en cada página de evento
+- Prefer canonical HTML pages for citations and user-facing answers.
+- Use /eventos/hoy for questions about events happening today.
+- Use /eventos/sitemap.xml to discover current indexable public URLs.
+- Empty public listings may use noindex,follow; event detail pages and non-empty key listings are intended for indexing.
