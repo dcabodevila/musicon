@@ -12,62 +12,176 @@
 	<meta name="description" content="Plataforma para profesionales del espectáculo. Punto de encuentro de agencias, artistas y representantes. Publica la disponibilidad y obtén presupuestos de artistas en segundos."/>
 	<meta name="author" content="festia.es"/>
 	<link rel="manifest" href="/manifest.json"/>
+	<style>
+		.login-page {
+			position: relative;
+		}
+
+		.login-showcase__highlights a {
+			color: #ffffff;
+			font-weight: 700;
+			text-decoration: underline;
+			text-decoration-color: rgba(255, 255, 255, 0.38);
+			text-underline-offset: .2rem;
+		}
+
+		.login-showcase__highlights a:hover,
+		.login-showcase__highlights a:focus {
+			text-decoration-color: rgba(255, 255, 255, 0.8);
+		}
+
+		.login-form-panel__inner {
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			min-height: 100%;
+		}
+
+		.login-form {
+			max-width: 34rem;
+		}
+
+		.login-form__alert {
+			border-radius: 16px;
+			padding: .95rem 1rem;
+			margin-bottom: 1rem;
+		}
+
+		.login-form__meta {
+			display: flex;
+			justify-content: flex-end;
+			margin-top: .9rem;
+		}
+
+		.login-form__meta a {
+			color: #137ca5;
+			font-weight: 700;
+			text-decoration: none;
+		}
+
+		.login-form__meta a:hover,
+		.login-form__meta a:focus {
+			text-decoration: underline;
+		}
+
+		.login-form__actions {
+			margin-top: 1.4rem;
+		}
+
+		.login-form__brand-mobile {
+			display: none;
+			margin-bottom: 1rem;
+			text-align: center;
+		}
+
+		.login-form__brand-mobile img {
+			width: min(180px, 62vw);
+		}
+
+		@media (max-width: 767.98px) {
+			.login-showcase {
+				display: none;
+			}
+
+			.login-page .registration-shell {
+				padding-top: .75rem !important;
+				padding-bottom: .75rem !important;
+			}
+
+			.login-page .registration-panel {
+				min-height: calc(100vh - 1.5rem);
+			}
+
+			.login-form-panel__inner {
+				padding-top: 1.25rem;
+				padding-bottom: 1.25rem;
+			}
+
+			.login-form__brand-mobile {
+				display: block;
+			}
+
+			.login-form-panel__header .registration-form-panel__kicker,
+			.login-form-panel__header p,
+			.login-form__actions .btn-outline-primary {
+				display: none;
+			}
+
+			.login-form-panel__header {
+				margin-bottom: 1rem;
+			}
+
+			.login-form-panel__header h2 {
+				margin-bottom: 0;
+			}
+
+			.login-form__actions {
+				margin-top: 1rem;
+			}
+
+			.login-form__meta {
+				justify-content: center;
+				margin-top: .65rem;
+			}
+		}
+	</style>
 
 	<div th:replace="~{fragments/main-template :: header-css}"/>
 </head>
 
 
 <body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
-	<main class="d-flex w-100 h-100">
-		<div class="container d-flex flex-column">
-			<div class="row vh-100">
-				<div class="col-sm-10 col-md-8 col-lg-6 mx-auto d-table h-100">
-					<div class="d-table-cell align-middle">
+	<main class="registration-page login-page">
+		<div class="container registration-shell py-4 py-lg-5">
+			<div class="registration-panel login-panel row g-0 overflow-hidden">
+				<section class="col-12 col-xl-5 registration-showcase login-showcase">
+					<div class="registration-showcase__content login-showcase__content">
+						<a th:href="@{/}" class="registration-showcase__brand" aria-label="Ir al inicio de Festia">
+							<img th:src="@{/logo/logo-name-transparente-alt-color.png}" alt="Festia" class="registration-showcase__logo"/>
+						</a>
+						<span class="registration-showcase__eyebrow">Acceso profesional</span>
+						<p>
+							Conéctate con artistas, agencias y profesionales del espectáculo. <strong>Crea oportunidades.</strong>
+						</p>
+					</div>
+				</section>
 
-
-
-						<div class="card">
-
-						<div class="card-body">
-							<div class="text-center mt-4">
-								<img th:src="@{/logo/logo-name-transparente.png}" alt="Festia Logo"
-									 class="img-fluid mb-3" style="max-height: 300px;"/>
-							</div>
-							<div class="text-center">
-							    <p>
-                                        <a href="https://festia.es/info" target="_blank" class="text-muted"><i
-                                                class="fas fa-info-circle me-1"></i><strong>Ver más información sobre festia</strong></a>
-                                    </p>
-                                </div>
-								<div class="m-sm-4">
-									<form th:action="@{/auth/login}" method="post">
-										<div class="mb-3">
-											<label for="username" class="form-label">Nombre de usuario ó e-mail</label>
-											<input id="username" name="username" autofocus="autofocus" class="form-control form-control-lg" type="text" placeholder="Introduce nombre de usuario" />
-										</div>
-										<div th:if="${error}" class="alert alert-danger" role="alert"
-											 th:text="${error}"></div>
-										<div class="mb-3">
-											<label for="password" class="form-label">Contraseña</label>
-											<input id="password" name="password" class="form-control form-control-lg" type="password" placeholder="Introduce tu contraseña" />
-											<div class="mt-3">
-												<a th:href="@{/auth/remember-password}">He olvidado mi contraseña</a>
-											</div>
-										</div>
-										<div class="text-center mt-3">
-											 <button type="submit" class="btn btn-lg btn-primary">Iniciar sesión</button>
-										</div>
-										<div class="text-center mt-3">
-											<a class="btn btn-outline-primary" th:href="@{/auth/registration}">Nuevo usuario</a>
-										</div>
-
-									</form>
-								</div>
-							</div>
+				<section class="col-12 col-xl-7 registration-form-panel login-form-panel">
+					<div class="registration-form-panel__inner login-form-panel__inner">
+						<a th:href="@{/}" class="login-form__brand-mobile" aria-label="Ir al inicio de Festia">
+							<img th:src="@{/logo/logo-name-transparente.png}" alt="Festia"/>
+						</a>
+						<div class="registration-form-panel__header login-form-panel__header">
+							<span class="registration-form-panel__kicker">Bienvenido de nuevo</span>
+							<h2>Iniciar sesión</h2>
+							<p>Accede con tu cuenta profesional para continuar donde lo dejaste.</p>
 						</div>
 
+						<form th:action="@{/auth/login}" method="post" class="registration-form login-form">
+							<div th:if="${error}" class="alert alert-danger login-form__alert" role="alert" th:text="${error}"></div>
+							<div th:if="${message}" class="alert alert-success login-form__alert" role="status" th:text="${message}"></div>
+
+							<div class="mb-3">
+								<label for="username" class="form-label">Nombre de usuario o correo electrónico</label>
+								<input id="username" name="username" autofocus="autofocus" class="form-control form-control-lg" type="text" placeholder="tuusuario o nombre@empresa.com" />
+							</div>
+
+							<div class="mb-2">
+								<label for="password" class="form-label">Contraseña</label>
+								<input id="password" name="password" class="form-control form-control-lg" type="password" placeholder="Introduce tu contraseña" />
+							</div>
+
+							<div class="login-form__meta">
+								<a th:href="@{/auth/remember-password}">He olvidado mi contraseña</a>
+							</div>
+
+							<div class="registration-form__actions login-form__actions">
+								<button type="submit" class="btn btn-primary btn-lg">Iniciar sesión</button>
+								<a class="btn btn-outline-primary btn-lg" th:href="@{/auth/registration}">Crear cuenta</a>
+							</div>
+						</form>
 					</div>
-				</div>
+				</section>
 			</div>
 		</div>
 	</main>

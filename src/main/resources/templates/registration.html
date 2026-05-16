@@ -1,172 +1,172 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org">
-  <head>
-    <title>festia.es</title>
-    <title>Registrarse</title>
-	<div th:replace="~{fragments/main-template :: header-css}"/>
-  </head>
+      xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <title>Festia | Crear cuenta profesional</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="description" content="Crea tu cuenta en Festia y accede a una plataforma profesional para agencias, artistas y representantes del espectáculo."/>
+    <div th:replace="~{fragments/main-template :: header-css}"/>
+</head>
 
+<body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
+<main class="registration-page">
+    <div class="container registration-shell py-4 py-lg-5">
+        <div class="registration-panel row g-0 overflow-hidden">
+            <section class="col-12 col-xl-5 registration-showcase">
+                <div class="registration-showcase__content">
+                    <a th:href="@{/auth/login}" class="registration-showcase__brand" aria-label="Ir al inicio de sesión de Festia">
+                        <img th:src="@{/logo/logo-name-transparente-alt-color.png}" alt="Festia" class="registration-showcase__logo"/>
+                    </a>
+                    <span class="registration-showcase__eyebrow">Acceso profesional</span>
+                    <h1>Conéctate con festia</h1>
+                    <p>
+                        Súmate a la plataforma donde agencias, artistas y representantes organizan su operativa,
+                        comparten disponibilidad y generan presupuestos con una imagen seria y actual.
+                    </p>
 
-  <body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
-  <main class="d-flex w-100 h-100">
-      <div class="container d-flex flex-column">
-          <div class="row vh-100">
-              <div class="col-sm-10 col-md-8 col-lg-6 mx-auto d-table h-100">
-                  <div class="d-table-cell align-middle">
+                    <div class="registration-showcase__highlights">
+                        <article>
+                            <i class="fas fa-bolt"></i>
+                            <div>
+                                <strong>Alta guiada</strong>
+                                <span>Completa el registro en pocos pasos y empieza con una base profesional.</span>
+                            </div>
+                        </article>
+                        <article>
+                            <i class="fas fa-shield-alt"></i>
+                            <div>
+                                <strong>Validación por el equipo</strong>
+                                <span>Revisamos cada cuenta para mantener la calidad y la confianza dentro de Festia.</span>
+                            </div>
+                        </article>
+                        <article>
+                            <i class="fas fa-calendar-check"></i>
+                            <div>
+                                <strong>Preparado para operar</strong>
+                                <span>Gestiona artistas, tarifas, ocupaciones y solicitudes desde un único lugar.</span>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </section>
 
-                      <div class="text-center mt-4">
-                          <h1 class="h2">Crear una nueva cuenta de usuario</h1>
-                      </div>
+            <section class="col-12 col-xl-7 registration-form-panel">
+                <div class="registration-form-panel__inner">
+                    <div class="registration-form-panel__header">
+                        <span class="registration-form-panel__kicker">Nuevo usuario</span>
+                        <h2>Crear una cuenta</h2>
+                        <p>Completa tus datos profesionales para empezar a trabajar dentro de la plataforma.</p>
+                    </div>
 
-                      <div class="card">
-                          <div class="card-body">
-                              <div class="m-sm-4">
-                                  <form method="POST" th:object="${registrationForm}" th:action=@{/auth/registration} class="form-signin">
-                                      <div class="mb-3">
-                                          <label class="form-label">Nombre de usuario</label>
-                                          <input class="form-control form-control-lg" type="text" th:field="*{username}" name="username" placeholder="Nombre de usuario con el que iniciar sesión" autofocus="true" required maxlength="50"/>
-                                          <div class="col-sm-12">
-                                              <small class="text-danger">
-                                                  <p th:each="error: ${#fields.errors('username')}"
-                                                     th:text="${error}">Validation error</p>
-                                              </small>
-                                          </div>
-                                      </div>
+                    <form method="POST" th:object="${registrationForm}" th:action="@{/auth/registration}" class="registration-form">
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">Nombre de usuario</label>
+                                <input class="form-control form-control-lg" type="text" th:field="*{username}" name="username" placeholder="Elige tu nombre de usuario" autofocus="true" required maxlength="50"/>
+                                <div class="registration-form__error">
+                                    <p th:each="error: ${#fields.errors('username')}" th:text="${error}">Validation error</p>
+                                </div>
+                            </div>
 
-                                      <div class="mb-3">
-                                          <label class="form-label">Contraseña</label>
-                                          <input type="password" th:field="*{password}" class="form-control form-control-lg" placeholder="Contraseña" required maxlength="200"/>
-                                          <div class="col-sm-12">
-                                              <small id="passwordHelp" class="text-danger">
-                                                  <p th:each="error: ${#fields.errors('password')}"
-                                                     th:text="${error}">Validation error</p>
-                                              </small>
-                                          </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">Correo electrónico</label>
+                                <input type="email" th:field="*{email}" class="form-control form-control-lg" placeholder="nombre@empresa.com" required maxlength="200"/>
+                                <div class="registration-form__error">
+                                    <p th:each="error: ${#fields.errors('email')}" th:text="${error}">Validation error</p>
+                                </div>
+                            </div>
 
-                                      </div>
-                                      <div class="mb-3">
-                                          <label class="form-label">Repetir contraseña</label>
-                                          <input type="password" th:field="*{retryPassword}" class="form-control form-control-lg" placeholder="Repite la contraseña" required maxlength="200"/>
-                                          <div class="col-sm-12">
-                                              <small class="text-danger">
-                                                  <p th:each="error: ${#fields.errors('retryPassword')}"
-                                                     th:text="${error}">Validation error</p>
-                                              </small>
-                                          </div>
-                                      </div>
-                                      <div class="mb-3">
-                                          <label class="form-label">e-mail</label>
-                                          <input type="email" th:field="*{email}" class="form-control form-control-lg" placeholder="e-mail" required maxlength="200"/>
-                                          <div class="col-sm-12">
-                                              <small class="text-danger">
-                                                  <p th:each="error: ${#fields.errors('email')}"
-                                                     th:text="${error}">Validation error</p>
-                                              </small>
-                                          </div>
-                                      </div>
-                                      <div class="mb-3">
-                                          <label class="form-label">Nombre</label>
-                                          <input type="text" th:field="*{nombre}" class="form-control form-control-lg" placeholder="Nombre"
-                                                 autofocus="true" required/>
-                                          <div class="alert alert-warning" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}" maxlength="200"></div>
-                                          <div class="col-sm-12">
-                                              <small class="text-danger">
-                                                  <p th:each="error: ${#fields.errors('nombre')}"
-                                                     th:text="${error}">Validation error</p>
-                                              </small>
-                                          </div>
-                                      </div>
-                                      <div class="mb-3">
-                                          <label class="form-label">Apellidos</label>
-                                          <input type="text" th:field="*{apellidos}" class="form-control form-control-lg" placeholder="Apellidos"
-                                                 autofocus="true" maxlength="200"/>
-                                          <div class="alert alert-warning" th:if="${#fields.hasErrors('apellidos')}" th:errors="*{apellidos}"></div>
-                                          <div class="col-sm-12">
-                                              <small class="text-danger">
-                                                  <p th:each="error: ${#fields.errors('apellidos')}"
-                                                     th:text="${error}">Validation error</p>
-                                              </small>
-                                          </div>
-                                      </div>
-                                      <div class="mb-3">
-                                          <label class="form-label">Nombre comercial</label>
-                                          <input class="form-control form-control-lg" type="text"
-                                                 th:field="*{nombreComercial}" name="nombreComercial" maxlength="120"
-                                                 placeholder="Nombre comercial por el que seas reconocido"
-                                                 autofocus="true" required/>
-                                          <div class="col-sm-12">
-                                              <small class="text-danger">
-                                                  <p th:each="error: ${#fields.errors('nombreComercial')}"
-                                                     th:text="${error}">Validation error</p>
-                                              </small>
-                                          </div>
-                                      </div>
-                                      <div class="mb-3">
-                                          <label class="form-label">Teléfono</label>
-                                          <input class="form-control form-control-lg" type="text" th:field="*{telefono}" name="telefono" placeholder="Número de teléfono" autofocus="true" maxlength="16" required/>
-                                          <div class="col-sm-12">
-                                              <small class="text-danger">
-                                                  <p th:each="error: ${#fields.errors('telefono')}"
-                                                     th:text="${error}">Validation error</p>
-                                              </small>
-                                          </div>
-                                      </div>
-                                      <div class="mb-3">
-                                          <label class="form-label">Provincia</label>
-                                          <select id="provincia" th:field="*{idProvincia}" class="form-control choices-single" required>
-                                              <option value="">Seleccione una provincia</option>
-                                              <option th:each="provincia : ${listaProvincias}" th:value="${provincia.id}" th:text="${provincia.nombre}"></option>
-                                          </select>
-                                          <div class="col-sm-12">
-                                              <small class="text-danger">
-                                                  <p th:each="error: ${#fields.errors('idProvincia')}"
-                                                     th:text="${error}">Validation error</p>
-                                              </small>
-                                          </div>
-                                      </div>
-                                      <div class="mb-3">
-                                          <label class="form-label">¿Cual es tu relación con el espectáculo?</label>
-                                          <select th:field="*{tipoUsuario}" class="form-control" required>
-                                              <option value="">Selecciona tu tipo de usuario</option>
-                                              <option value="AGENCIA">Agencia o responsable de un espectáculo</option>
-                                              <option value="REPRESENTANTE">Representante o agente</option>
-                                              <option value="ARTISTA">Artista</option>
-                                          </select>
-                                          <div class="col-sm-12">
-                                              <small class="text-danger">
-                                                  <p th:each="error: ${#fields.errors('tipoUsuario')}"
-                                                     th:text="${error}">Validation error</p>
-                                              </small>
-                                          </div>
-                                      </div>
-                                      <div class="mb-3 form-check">
-                                          <input type="checkbox" class="form-check-input" id="aceptaPolitica" required/>
-                                          <label class="form-check-label" for="aceptaPolitica">
-                                              He leído y acepto la
-                                              <a href="/legal/privacidad" target="_blank">Política de Privacidad</a>
-                                          </label>
-                                      </div>
-                                      <div class="text-center mt-3">
-                                           <button type="submit" class="btn btn-lg btn-primary">Crear nueva cuenta de usuario</button>
-                                      </div>
-                                      <div class="text-center mt-3">
-                                          <a class="btn btn-outline-primary" th:href="@{/auth/login}">Volver a Iniciar sesión</a>
-                                      </div>
-                                  </form>
-                              </div>
-                          </div>
-                      </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">Contraseña</label>
+                                <input type="password" th:field="*{password}" class="form-control form-control-lg" placeholder="Crea una contraseña segura" required maxlength="200"/>
+                                <div class="registration-form__error">
+                                    <p th:each="error: ${#fields.errors('password')}" th:text="${error}">Validation error</p>
+                                </div>
+                            </div>
 
-                  </div>
-              </div>
-          </div>
-      </div>
-  </main>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">Repetir contraseña</label>
+                                <input type="password" th:field="*{retryPassword}" class="form-control form-control-lg" placeholder="Repite la contraseña" required maxlength="200"/>
+                                <div class="registration-form__error">
+                                    <p th:each="error: ${#fields.errors('retryPassword')}" th:text="${error}">Validation error</p>
+                                </div>
+                            </div>
 
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">Nombre</label>
+                                <input type="text" th:field="*{nombre}" class="form-control form-control-lg" placeholder="Tu nombre" required maxlength="200"/>
+                                <div class="registration-form__error">
+                                    <p th:each="error: ${#fields.errors('nombre')}" th:text="${error}">Validation error</p>
+                                </div>
+                            </div>
 
-<!--    <div th:replace="~{fragments/main-template :: footer}"/>-->
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">Apellidos</label>
+                                <input type="text" th:field="*{apellidos}" class="form-control form-control-lg" placeholder="Tus apellidos" maxlength="200"/>
+                                <div class="registration-form__error">
+                                    <p th:each="error: ${#fields.errors('apellidos')}" th:text="${error}">Validation error</p>
+                                </div>
+                            </div>
 
-  </body>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">Nombre comercial</label>
+                                <input class="form-control form-control-lg" type="text" th:field="*{nombreComercial}" name="nombreComercial" maxlength="120" placeholder="Marca, agencia o nombre artístico" required/>
+                                <div class="registration-form__error">
+                                    <p th:each="error: ${#fields.errors('nombreComercial')}" th:text="${error}">Validation error</p>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">Teléfono</label>
+                                <input class="form-control form-control-lg" type="text" th:field="*{telefono}" name="telefono" placeholder="Número de contacto" maxlength="16" required/>
+                                <div class="registration-form__error">
+                                    <p th:each="error: ${#fields.errors('telefono')}" th:text="${error}">Validation error</p>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">Provincia</label>
+                                <select id="provincia" th:field="*{idProvincia}" class="form-control choices-single" required>
+                                    <option value="">Selecciona una provincia</option>
+                                    <option th:each="provincia : ${listaProvincias}" th:value="${provincia.id}" th:text="${provincia.nombre}"></option>
+                                </select>
+                                <div class="registration-form__error">
+                                    <p th:each="error: ${#fields.errors('idProvincia')}" th:text="${error}">Validation error</p>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">Relación con el espectáculo</label>
+                                <select th:field="*{tipoUsuario}" class="form-control" required>
+                                    <option value="">Selecciona tu perfil</option>
+                                    <option value="AGENCIA">Agencia o responsable de un espectáculo</option>
+                                    <option value="REPRESENTANTE">Representante o agente</option>
+                                    <option value="ARTISTA">Artista</option>
+                                </select>
+                                <div class="registration-form__error">
+                                    <p th:each="error: ${#fields.errors('tipoUsuario')}" th:text="${error}">Validation error</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="registration-form__legal form-check mt-4">
+                            <input type="checkbox" class="form-check-input" id="aceptaPolitica" required/>
+                            <label class="form-check-label" for="aceptaPolitica">
+                                He leído y acepto la <a href="/legal/privacidad" target="_blank">Política de Privacidad</a>
+                            </label>
+                        </div>
+
+                        <div class="registration-form__actions">
+                            <button type="submit" class="btn btn-primary btn-lg">Crear cuenta profesional</button>
+                            <a class="btn btn-outline-primary btn-lg" th:href="@{/auth/login}">Volver a iniciar sesión</a>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </div>
+    </div>
+</main>
+</body>
 </html>
 

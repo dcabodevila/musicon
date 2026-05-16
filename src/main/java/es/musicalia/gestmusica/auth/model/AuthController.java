@@ -44,10 +44,6 @@ public class AuthController {
             model.addAttribute("error", "Usuario o contraseña no válidos.");
         }
 
-        if (logout != null) {
-            model.addAttribute("message", "You have been logged out successfully.");
-
-        }
 //        SecurityContextHolder.clearContext();
         return "login";
     }
