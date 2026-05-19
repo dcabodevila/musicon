@@ -1696,9 +1696,22 @@ footer {
 
 /* Mobile specific - ensure dropdowns work */
 @media (max-width: 768px) {
+    .filter-section .row > div:nth-child(1) .choices,
+    .filter-section .row > div:nth-child(1) .form-select,
+    .filter-section .row > div:nth-child(2) .choices,
+    .filter-section .row > div:nth-child(2) .form-select,
+    .filter-section .row > div:nth-child(3) .choices,
+    .filter-section .row > div:nth-child(3) .form-select {
+        z-index: auto;
+    }
+
     .filter-section .choices__list--dropdown {
         position: absolute !important;
         z-index: 9999 !important;
+    }
+
+    .filter-section .choices.is-open {
+        z-index: 9998 !important;
     }
 }
 
