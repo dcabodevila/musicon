@@ -60,14 +60,6 @@
                                     <div class="mb-3">
 
                                             <div class="mb-3 row">
-                                                <label class="col-form-label col-sm-3 text-sm-end">Solicitado para</label>
-                                                <div class="col-sm-9">
-                                                    <input class="form-control" th:field="*{solicitadoPara}" placeholder="Solicitado para" id="solicitado-listado" required>
-
-                                                </div>
-                                            </div>
-
-                                            <div class="mb-3 row">
                                                 <label class="col-form-label col-sm-3 text-sm-end">Comunidad</label>
                                                 <div class="col-sm-9">
                                                     <select id="ccaa-listado" th:field="*{idCcaa}" class="form-control choices-single" required>
@@ -202,6 +194,12 @@
                                     <h5 class="card-title mb-0">Más información</h5>
                                 </div>
                                 <div class="card-body text-center">
+                                    <div class="mb-3 row">
+                                        <label class="col-form-label col-sm-3 text-sm-end">Solicitado para</label>
+                                        <div class="col-sm-9">
+                                            <input class="form-control" th:field="*{solicitadoPara}" placeholder="Solicitado para" id="solicitado-listado" required>
+                                        </div>
+                                    </div>
                                     <div class="mb-3 row">
                                         <label class="col-form-label col-sm-3 text-sm-end">Municipio</label>
                                         <div class="col-sm-9">
