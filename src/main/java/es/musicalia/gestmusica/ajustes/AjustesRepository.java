@@ -16,6 +16,8 @@ public interface AjustesRepository extends JpaRepository<Ajustes, Long> {
     @Query("select a from Ajustes a where a.usuario.id=?1 ")
     List<Ajustes> findAllAjustesByIdUsuario(Long idUsuario);
 
+    Optional<Ajustes> findByIdAndUsuarioId(Long id, Long idUsuario);
+
     @Query("select a from Ajustes a join a.ccaa c where c.id = ?1")
     List<Ajustes> findAjustesByCcaaId(Long idCcaa);
 

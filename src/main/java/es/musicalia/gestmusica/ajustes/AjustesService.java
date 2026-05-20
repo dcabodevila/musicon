@@ -12,6 +12,9 @@ public interface AjustesService {
     @Transactional(readOnly = false)
     Ajustes saveAjustesDto(AjustesDto ajustesDto, Usuario usuario);
 
+    @Transactional(readOnly = false)
+    Ajustes guardarOpcionesListado(Long idAjuste, AjustesDto ajustesDto, Usuario usuario);
+
     AjustesDto getAjustesByIdUsuario(Long idUsuario);
 
     List<AjustesDto> getAllAjustesByIdUsuario(Long idUsuario);

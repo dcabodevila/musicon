@@ -69,6 +69,49 @@ class AjustesServiceImplTest {
         assertThat(ajustesGuardados.getCcaa()).isEmpty();
     }
 
+    @Test
+    @DisplayName("guardarOpcionesListado conserva nombre y predeterminado y actualiza solo relaciones")
+    void guardarOpcionesListadoConservaMetadatosYActualizaColecciones() {
+        long ajusteId = 11L;
+        long usuarioId = 99L;
+
+        Ajustes ajustesExistentes = new Ajustes();
+        ajustesExistentes.setId(ajusteId);
+        ajustesExistentes.setNombre("Ajuste original");
+        ajustesExistentes.setPredeterminado(true);
+        ajustesExistentes.setTipoArtistas(new HashSet<>(Set.of(crearTipoArtista(1L))));
+        ajustesExistentes.setAgencias(new HashSet<>(Set.of(crearAgencia(2L))));
+        ajustesExistentes.setCcaa(new HashSet<>(Set.of(crearCcaa(3L))));
+
+        TipoArtista tipoArtistaNuevo = crearTipoArtista(10L);
+        Agencia agenciaNueva = crearAgencia(20L);
+        Ccaa ccaaNueva = crearCcaa(30L);
+
+        AjustesDto dto = new AjustesDto();
+        dto.setNombre("Nombre que no debe aplicarse");
+        dto.setPredeterminado(false);
+        dto.setIdsTipoArtista(List.of(tipoArtistaNuevo.getId()));
+        dto.setIdsAgencias(List.of(agenciaNueva.getId()));
+        dto.setIdsComunidades(List.of(ccaaNueva.getId()));
+
+        Usuario usuario = new Usuario();
+        usuario.setId(usuarioId);
+
+        when(ajustesRepository.findByIdAndUsuarioId(ajusteId, usuarioId)).thenReturn(Optional.of(ajustesExistentes));
+        when(tipoArtistaRepository.findAllById(dto.getIdsTipoArtista())).thenReturn(List.of(tipoArtistaNuevo));
+        when(agenciaRepository.findAllById(dto.getIdsAgencias())).thenReturn(List.of(agenciaNueva));
+        when(ccaaRepository.findAllById(dto.getIdsComunidades())).thenReturn(List.of(ccaaNueva));
+        when(ajustesRepository.save(any(Ajustes.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Ajustes ajustesGuardados = ajustesService.guardarOpcionesListado(ajusteId, dto, usuario);
+
+        assertThat(ajustesGuardados.getNombre()).isEqualTo("Ajuste original");
+        assertThat(ajustesGuardados.isPredeterminado()).isTrue();
+        assertThat(ajustesGuardados.getTipoArtistas()).extracting(TipoArtista::getId).containsExactly(tipoArtistaNuevo.getId());
+        assertThat(ajustesGuardados.getAgencias()).extracting(Agencia::getId).containsExactly(agenciaNueva.getId());
+        assertThat(ajustesGuardados.getCcaa()).extracting(Ccaa::getId).containsExactly(ccaaNueva.getId());
+    }
+
     private TipoArtista crearTipoArtista(Long id) {
         TipoArtista tipoArtista = new TipoArtista();
         tipoArtista.setId(id);

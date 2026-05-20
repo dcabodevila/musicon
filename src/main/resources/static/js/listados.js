@@ -122,50 +122,90 @@ $(document).ready(function(){
         });
     });
 
+    $('#btn-guardar-configuracion-listado').on('click', function() {
+        guardarConfiguracionListado();
+    });
+
     // Función para rellenar los campos con los datos del ajuste
     function rellenarCamposAjuste(ajuste) {
 
         // Rellenar selects múltiples (Agencias)
-        if (ajuste.idsAgencias && ajuste.idsAgencias.length > 0) {
-            const agenciasSelect = document.getElementById('agencias');
-            $(agenciasSelect).val(ajuste.idsAgencias);
+        const agenciasIds = ajuste.idsAgencias || [];
+        const agenciasSelect = document.getElementById('agencias');
+        $(agenciasSelect).val(agenciasIds);
 
-            // Actualizar instancia de Choices si existe
-            if (agenciaSelectChoice) {
-                agenciaSelectChoice.removeActiveItems();
-                ajuste.idsAgencias.forEach((id) => {
-                    agenciaSelectChoice.setChoiceByValue(String(id));
-                });
-            }
+        // Actualizar instancia de Choices si existe
+        if (agenciaSelectChoice) {
+            agenciaSelectChoice.removeActiveItems();
+            agenciasIds.forEach((id) => {
+                agenciaSelectChoice.setChoiceByValue(String(id));
+            });
         }
 
         // Rellenar Tipos de Artista
-        if (ajuste.idsTipoArtista && ajuste.idsTipoArtista.length > 0) {
-            const artistasSelect = document.getElementById('tiposArtista');
-            $(artistasSelect).val(ajuste.idsTipoArtista);
+        const tipoArtistaIds = ajuste.idsTipoArtista || [];
+        const artistasSelect = document.getElementById('tiposArtista');
+        $(artistasSelect).val(tipoArtistaIds);
 
-            if (tipoArtistaSelectChoice) {
-                tipoArtistaSelectChoice.removeActiveItems();
-                ajuste.idsTipoArtista.forEach((id) => {
-                    tipoArtistaSelectChoice.setChoiceByValue(String(id));
-                });
-            }
+        if (tipoArtistaSelectChoice) {
+            tipoArtistaSelectChoice.removeActiveItems();
+            tipoArtistaIds.forEach((id) => {
+                tipoArtistaSelectChoice.setChoiceByValue(String(id));
+            });
         }
 
         // Rellenar Comunidades
-        if (ajuste.idsComunidades && ajuste.idsComunidades.length > 0) {
-            const ccaaSelect = document.getElementById('ccaa');
-            $(ccaaSelect).val(ajuste.idsComunidades);
+        const comunidadesIds = ajuste.idsComunidades || [];
+        const ccaaSelect = document.getElementById('ccaa');
+        $(ccaaSelect).val(comunidadesIds);
 
-            if (ccaaaSelectChoice) {
-                ccaaaSelectChoice.removeActiveItems();
-                ajuste.idsComunidades.forEach((id) => {
-                    ccaaaSelectChoice.setChoiceByValue(String(id));
-                });
-            }
+        if (ccaaaSelectChoice) {
+            ccaaaSelectChoice.removeActiveItems();
+            comunidadesIds.forEach((id) => {
+                ccaaaSelectChoice.setChoiceByValue(String(id));
+            });
         }
 
         notif('success', 'Ajuste cargado correctamente');
+    }
+
+    function guardarConfiguracionListado() {
+        const ajusteId = $('#selectAjustes').val();
+
+        if (!ajusteId) {
+            notif('error', 'Selecciona una configuración para guardar');
+            return;
+        }
+
+        const $btn = $('#btn-guardar-configuracion-listado');
+        const textoOriginal = $btn.text();
+        const datos = $('#formGenerarListado input[type="hidden"]').serializeArray();
+
+        ($('#agencias').val() || []).forEach((id) => datos.push({name: 'idsAgencias', value: id}));
+        ($('#tiposArtista').val() || []).forEach((id) => datos.push({name: 'idsTipoArtista', value: id}));
+        ($('#ccaa').val() || []).forEach((id) => datos.push({name: 'idsComunidades', value: id}));
+
+        $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Guardando...');
+
+        $.ajax({
+            type: 'POST',
+            url: '/ajustes/' + ajusteId + '/opciones-listado',
+            data: $.param(datos),
+            success: function(response) {
+                if (response && response.success) {
+                    notif('success', response.message || 'Configuración guardada correctamente');
+                    return;
+                }
+
+                notif('error', response && response.message ? response.message : 'Error al guardar la configuración');
+            },
+            error: function() {
+                notif('error', 'Error al guardar la configuración');
+            },
+            complete: function() {
+                $btn.prop('disabled', false).text(textoOriginal);
+            }
+        });
     }
         $('#formGenerarListado').off('submit').on('submit', function(e) {
             e.preventDefault();

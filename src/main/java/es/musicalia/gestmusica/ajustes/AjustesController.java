@@ -5,8 +5,10 @@ import es.musicalia.gestmusica.agencia.AgenciaService;
 import es.musicalia.gestmusica.artista.ArtistaService;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.localizacion.LocalizacionService;
+import es.musicalia.gestmusica.util.DefaultResponseBody;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,7 +17,6 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.http.ResponseEntity;
 
 @Slf4j
 @Controller
@@ -104,13 +105,35 @@ public class AjustesController {
     @GetMapping("/{id}/json")
     @ResponseBody
     public ResponseEntity<AjustesDto> obtenerAjusteJson(@AuthenticationPrincipal CustomAuthenticatedUser user,
-                                                         @PathVariable Long id) {
+                                                          @PathVariable Long id) {
         try {
             AjustesDto ajustesDto = this.ajustesService.getAjustesByIdAjuste(id);
             return ResponseEntity.ok(ajustesDto);
         } catch (Exception e) {
             log.error("Error obteniendo ajuste", e);
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/{id}/opciones-listado")
+    @ResponseBody
+    public ResponseEntity<DefaultResponseBody> guardarOpcionesListado(@AuthenticationPrincipal CustomAuthenticatedUser user,
+                                                                       @PathVariable Long id,
+                                                                       @ModelAttribute AjustesDto ajustesDto) {
+        try {
+            this.ajustesService.guardarOpcionesListado(id, ajustesDto, user.getUsuario());
+            return ResponseEntity.ok(DefaultResponseBody.builder()
+                    .success(true)
+                    .messageType("success")
+                    .message("Configuración guardada correctamente")
+                    .build());
+        } catch (Exception e) {
+            log.error("Error guardando opciones del listado", e);
+            return ResponseEntity.ok(DefaultResponseBody.builder()
+                    .success(false)
+                    .messageType("error")
+                    .message("Error guardando configuración")
+                    .build());
         }
     }
 }

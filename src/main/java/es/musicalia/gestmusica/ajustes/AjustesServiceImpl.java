@@ -58,6 +58,26 @@ public class AjustesServiceImpl implements AjustesService {
         return this.ajustesRepository.save(ajustes);
     }
 
+    @Override
+    @Transactional(readOnly = false)
+    public Ajustes guardarOpcionesListado(Long idAjuste, AjustesDto ajustesDto, Usuario usuario) {
+        Ajustes ajustes = this.ajustesRepository.findByIdAndUsuarioId(idAjuste, usuario.getId()).orElseThrow();
+
+        ajustes.setTipoArtistas(CollectionUtils.isNotEmpty(ajustesDto.getIdsTipoArtista())
+                ? new HashSet<>(this.tipoArtistaRepository.findAllById(ajustesDto.getIdsTipoArtista()))
+                : new HashSet<>());
+
+        ajustes.setAgencias(CollectionUtils.isNotEmpty(ajustesDto.getIdsAgencias())
+                ? new HashSet<>(this.agenciaRepository.findAllById(ajustesDto.getIdsAgencias()))
+                : new HashSet<>());
+
+        ajustes.setCcaa(CollectionUtils.isNotEmpty(ajustesDto.getIdsComunidades())
+                ? new HashSet<>(this.ccaaRepository.findAllById(ajustesDto.getIdsComunidades()))
+                : new HashSet<>());
+
+        return this.ajustesRepository.save(ajustes);
+    }
+
     private void desmarcarAjustesPreviosPorDefecto(Long idUsuario) {
         List<Ajustes> ajustesPrevios = this.ajustesRepository.findAllAjustesByIdUsuario(idUsuario);
         ajustesPrevios.forEach(ajustes -> ajustes.setPredeterminado(false));
