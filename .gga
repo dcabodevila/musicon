@@ -15,7 +15,7 @@
 #   PROVIDER="lmstudio:qwen2.5-coder-7b-instruct"
 #   PROVIDER="github:gpt-4o"
 #   PROVIDER="github:deepseek-r1"
-PROVIDER="codex"
+PROVIDER="opencode:openai/gpt-5.5"
 
 # File patterns to include in review (comma-separated)
 # Default: * (all files)
@@ -23,14 +23,14 @@ PROVIDER="codex"
 #   FILE_PATTERNS="*.ts,*.tsx"
 #   FILE_PATTERNS="*.py"
 #   FILE_PATTERNS="*.go,*.mod"
-FILE_PATTERNS="*.ts,*.tsx,*.js,*.jsx"
+FILE_PATTERNS="*.ts,*.tsx,*.js,*.jsx,*.java, *.html, *.css"
 
 # File patterns to exclude from review (comma-separated)
 # Default: none
 # Examples:
 #   EXCLUDE_PATTERNS="*.test.ts,*.spec.ts"
 #   EXCLUDE_PATTERNS="*_test.go,*.mock.ts"
-EXCLUDE_PATTERNS="*.test.ts,*.spec.ts,*.test.tsx,*.spec.tsx,*.d.ts"
+EXCLUDE_PATTERNS="*.test.ts,*.spec.ts,*.test.tsx,*.spec.tsx,*.d.ts,*.env,*.min.js,*.map,src/main/resources/static/vendor/**"
 
 # File containing code review rules
 # Default: AGENTS.md

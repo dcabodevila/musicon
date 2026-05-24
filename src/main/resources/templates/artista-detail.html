@@ -9,7 +9,7 @@
     <div th:replace="~{fragments/main-template :: header-css}"/>
     
     <!-- Lightbox CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css">
+    <link rel="stylesheet" th:href="@{/vendor/lightbox2/css/lightbox.min.css}">
 </head>
 <body>
 <body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
@@ -300,7 +300,7 @@
 <script type="text/javascript" th:src="@{/js/comun.js}"></script>
 <script type="text/javascript" th:src="@{/js/ocupaciones-comun.js}"></script>
 <script type="text/javascript" th:src="@{/js/artistas.js}"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
+<script th:src="@{/vendor/lightbox2/js/lightbox.min.js}"></script>
 
 </body>
 </html>
