@@ -194,7 +194,19 @@ public class ListadoServiceImpl implements ListadoService {
         TipoReportEnum tipoReport = TipoOcupacionEnum.SIN_OCUPACION.getId().equals(listadoDto.getIdTipoOcupacion()) ? (isReportVertical ? TipoReportEnum.LISTADO_SIN_OCUPACION_VERTICAL : TipoReportEnum.LISTADO_SIN_OCUPACION_HORIZONTAL) : (isReportVertical ? TipoReportEnum.LISTADO_CON_OCUPACION_VERTICAL : TipoReportEnum.LISTADO_CON_OCUPACION_HORIZONTAL);
         parametros.put("titulo", tipoReport.getTitulo());
 
-        byte[] listado = this.informeService.imprimirInforme(parametros, fileNameToExport, tipoReport.getNombreFicheroReport());
+        log.info("Generando listado Jasper: {}", buildListadoDiagnosticContext(listadoDto, idUsuario, tipoReport, parametros, diaList.size(), dateList.size()));
+
+        if (hasEmptySqlInParameters(parametros)) {
+            log.error("Parámetros de listado con posible SQL IN vacío: {}", buildListadoDiagnosticContext(listadoDto, idUsuario, tipoReport, parametros, diaList.size(), dateList.size()));
+        }
+
+        byte[] listado;
+        try {
+            listado = this.informeService.imprimirInforme(parametros, fileNameToExport, tipoReport.getNombreFicheroReport());
+        } catch (RuntimeException e) {
+            log.error("Error imprimiendo listado Jasper. Contexto diagnóstico: {}", buildListadoDiagnosticContext(listadoDto, idUsuario, tipoReport, parametros, diaList.size(), dateList.size()), e);
+            throw e;
+        }
 
         guardarListadoEntity(listadoDto);
 
@@ -374,7 +386,7 @@ public class ListadoServiceImpl implements ListadoService {
     }
 
     private String getFechaListFechas(LocalDate fechaIni, LocalDate fechaFin, List<LocalDate> dateList) {
-        if (fechaFin != null && fechaFin != null) {
+        if (fechaIni != null && fechaFin != null) {
             return getFechaListIn(fechaIni, fechaFin);
         }
 
@@ -395,6 +407,37 @@ public class ListadoServiceImpl implements ListadoService {
 
         return dateListBuilder.toString();
 
+    }
+
+    private boolean hasEmptySqlInParameters(Map<String, Object> parametros) {
+        return isBlankParameter(parametros.get("fechaListIn"))
+                || isBlankParameter(parametros.get("idsTipoArtista"))
+                || isBlankParameter(parametros.get("idsAgencias"))
+                || isBlankParameter(parametros.get("idsComunidades"))
+                || isBlankParameter(parametros.get("idsArtistaRestringidos"));
+    }
+
+    private boolean isBlankParameter(Object value) {
+        return value == null || value.toString().isBlank();
+    }
+
+    private String buildListadoDiagnosticContext(ListadoDto listadoDto, Long idUsuario, TipoReportEnum tipoReport,
+                                                Map<String, Object> parametros, int diasGenerados, int fechasSueltas) {
+        return "idUsuario=" + idUsuario
+                + ", report=" + tipoReport.getNombreFicheroReport()
+                + ", idTipoOcupacion=" + listadoDto.getIdTipoOcupacion()
+                + ", idProvincia=" + listadoDto.getIdProvincia()
+                + ", idCcaa=" + listadoDto.getIdCcaa()
+                + ", idMunicipio=" + listadoDto.getIdMunicipio()
+                + ", fechaDesde=" + listadoDto.getFechaDesde()
+                + ", fechaHasta=" + listadoDto.getFechaHasta()
+                + ", fechasSueltas=" + fechasSueltas
+                + ", diasGenerados=" + diasGenerados
+                + ", fechaListIn=" + parametros.get("fechaListIn")
+                + ", idsTipoArtista=" + parametros.get("idsTipoArtista")
+                + ", idsAgencias=" + parametros.get("idsAgencias")
+                + ", idsComunidades=" + parametros.get("idsComunidades")
+                + ", idsArtistaRestringidos=" + parametros.get("idsArtistaRestringidos");
     }
 
     private String convertListLongToString(List<Long> listIds) {

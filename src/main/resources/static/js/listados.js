@@ -1,12 +1,16 @@
 
 
 $(document).ready(function(){
-    let pickerFechaHasta = flatpickr("#idFechaHastaListado", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
+    let pickerFechaHasta = flatpickr("#idFechaHastaListado", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false,
+        onChange: function() {
+            actualizarModoFechas();
+        }
     });
     let pickerFechaDesde = flatpickr("#idFechaDesdeListado", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
         ,
         onChange: function(selectedDates, dateStr, instance) {
             pickerFechaHasta.set("minDate", dateStr);
+            actualizarModoFechas();
         },
         onMonthChange: function(selectedDates, dateStr, instance) {
             pickerFechaHasta.clear();
@@ -14,30 +18,37 @@ $(document).ready(function(){
         }
     });
 
-    let pickerFecha7 = flatpickr("#idFecha7", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
+    let pickerFecha7 = flatpickr("#idFecha7", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false,
+        onChange: function() {
+            actualizarModoFechas();
+        }
     });
     let pickerFecha6 = flatpickr("#idFecha6", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
         ,
         onChange: function(selectedDates, dateStr, instance) {
             pickerFecha7.jumpToDate(new Date(instance.currentYear, instance.currentMonth, 1));
+            actualizarModoFechas();
         }
     });
     let pickerFecha5 = flatpickr("#idFecha5", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
         ,
         onChange: function(selectedDates, dateStr, instance) {
             pickerFecha6.jumpToDate(new Date(instance.currentYear, instance.currentMonth, 1));
+            actualizarModoFechas();
         }
     });
     let pickerFecha4 = flatpickr("#idFecha4", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
         ,
         onChange: function(selectedDates, dateStr, instance) {
             pickerFecha5.jumpToDate(new Date(instance.currentYear, instance.currentMonth, 1));
+            actualizarModoFechas();
         }
     });
     let pickerFecha3 = flatpickr("#idFecha3", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
         ,
         onChange: function(selectedDates, dateStr, instance) {
             pickerFecha4.jumpToDate(new Date(instance.currentYear, instance.currentMonth, 1));
+            actualizarModoFechas();
         }
 
     });
@@ -45,14 +56,47 @@ $(document).ready(function(){
         ,
         onChange: function(selectedDates, dateStr, instance) {
             pickerFecha3.jumpToDate(new Date(instance.currentYear, instance.currentMonth, 1));
+            actualizarModoFechas();
         }
     });
     let pickerFecha1 = flatpickr("#idFecha1", {disableMobile: true, "locale": "es", altInput: true, altFormat: "j F, Y",dateFormat: "d-m-Y",  allowInput: false
         ,
         onChange: function(selectedDates, dateStr, instance) {
             pickerFecha2.jumpToDate(new Date(instance.currentYear, instance.currentMonth, 1));
+            actualizarModoFechas();
         }
     });
+
+    const camposRango = ['#idFechaDesdeListado', '#idFechaHastaListado'];
+    const camposIndividuales = ['#idFecha1', '#idFecha2', '#idFecha3', '#idFecha4', '#idFecha5', '#idFecha6', '#idFecha7'];
+
+    function tieneValor(selector) {
+        return $(selector).val() !== '';
+    }
+
+    function setCamposFechasDisabled(selectores, disabled) {
+        selectores.forEach(function(selector) {
+            const input = document.querySelector(selector);
+            if (!input || !input._flatpickr) {
+                return;
+            }
+
+            input._flatpickr.set('clickOpens', !disabled);
+            $(input._flatpickr.altInput).prop('disabled', disabled);
+            $(input._flatpickr.altInput).toggleClass('bg-light', disabled);
+        });
+    }
+
+    function actualizarModoFechas() {
+        const hayRango = camposRango.some(tieneValor);
+        const hayFechasIndividuales = camposIndividuales.some(tieneValor);
+
+        setCamposFechasDisabled(camposIndividuales, hayRango);
+        setCamposFechasDisabled(camposRango, hayFechasIndividuales);
+    }
+
+    window.actualizarModoFechasListado = actualizarModoFechas;
+    actualizarModoFechas();
 
 
     const municipioChoice = new Choices('#municipio-listado');
@@ -178,7 +222,7 @@ $(document).ready(function(){
         }
 
         const $btn = $('#btn-guardar-configuracion-listado');
-        const textoOriginal = $btn.text();
+        const contenidoOriginal = $btn.html();
         const datos = $('#formGenerarListado input[type="hidden"]').serializeArray();
 
         ($('#agencias').val() || []).forEach((id) => datos.push({name: 'idsAgencias', value: id}));
@@ -203,7 +247,7 @@ $(document).ready(function(){
                 notif('error', 'Error al guardar la configuración');
             },
             complete: function() {
-                $btn.prop('disabled', false).text(textoOriginal);
+                $btn.prop('disabled', false).html(contenidoOriginal);
             }
         });
     }
@@ -229,13 +273,18 @@ $(document).ready(function(){
             const hayRangoDeFechas = fechaDesde !== '' && fechaHasta !== '';
             const hayFechasIndividuales = fechasIndividuales.some(fecha => fecha !== '');
 
+            if ((fechaDesde !== '' || fechaHasta !== '') && !hayRangoDeFechas) {
+                notif('error','Completa fecha inicial y fecha final, o borra el rango y usa fechas sueltas.');
+                return;
+            }
+
             if (!hayRangoDeFechas && !hayFechasIndividuales) {
-                notif('error','Introduce las fecha inicial y final o alguna fecha individual');
+                notif('error','Introduce fecha inicial y final, o al menos una fecha suelta.');
                 return;
             }
 
             if ((fechaDesde !== '' || fechaHasta !== '') && hayFechasIndividuales) {
-                notif('error','Si defines una fecha inicial o final, no puedes incluir fechas individuales. Por favor, corrige los campos.');
+                notif('error','No mezcles rango de fechas con fechas sueltas. Borra uno de los dos bloques.');
                 return;
             }
 
@@ -257,7 +306,7 @@ $(document).ready(function(){
     function generarPresupuestoAjax() {
         // Deshabilitar el botón
         const $btn = $('#btn-generar-listado');
-        const textoOriginal = $btn.text();
+        const contenidoOriginal = $btn.html();
         $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Generando...');
 
         const formData = $('#formGenerarListado').serialize();
@@ -272,7 +321,7 @@ $(document).ready(function(){
             },
             success: function (data, status, xhr) {
                 // Rehabilitar el botón
-                $btn.prop('disabled', false).text(textoOriginal);
+                $btn.prop('disabled', false).html(contenidoOriginal);
 
                 // Verificar si la respuesta es realmente un PDF
                 const contentType = xhr.getResponseHeader('Content-Type');
@@ -371,7 +420,7 @@ $(document).ready(function(){
             },
             error: function(xhr, status, error) {
                 // Rehabilitar el botón
-                $btn.prop('disabled', false).text(textoOriginal);
+                $btn.prop('disabled', false).html(contenidoOriginal);
 
                 console.error('Error al generar presupuesto:', error);
 
@@ -424,5 +473,8 @@ $(document).ready(function(){
         const input = document.getElementById(inputId);
         if (input && input._flatpickr) {
             input._flatpickr.clear(); // Limpia la fecha seleccionada
+        }
+        if (typeof window.actualizarModoFechasListado === 'function') {
+            window.actualizarModoFechasListado();
         }
     }
