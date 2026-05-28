@@ -107,6 +107,28 @@ class EventoPublicoControllerMvcTest {
     }
 
     @Test
+    void listadosPublicos_debenEnlazarACorunaConRutaCanonicaDeProvincia() throws Exception {
+        when(eventoPublicoService.obtenerEventosPublicosFiltrados(any(), any(), any(), any(), any()))
+            .thenReturn(List.of());
+        when(eventoPublicoService.obtenerEventosPublicosFiltradosPaginados(any(), any(), any(), any(), any(), any()))
+            .thenReturn(new PageImpl<>(List.of(), PageRequest.of(0, 20), 0));
+        when(eventoPublicoService.obtenerTodosEventosPublicos()).thenReturn(List.of());
+        when(localizacionService.findAllProvincias()).thenReturn(List.of());
+
+        mockMvc.perform(get("/eventos"))
+            .andExpect(status().isOk())
+            .andExpect(content().string(containsString("href=\"/eventos/provincia/Coruña\"")))
+            .andExpect(content().string(not(containsString("href=\"/eventos/provincia/A Coruña\""))));
+    }
+
+    @Test
+    void provinciaPublica_debeRedirigirAliasACorunaCanonica() throws Exception {
+        mockMvc.perform(get("/eventos/provincia/A%20Coru%C3%B1a"))
+            .andExpect(status().isMovedPermanently())
+            .andExpect(redirectedUrl("http://localhost/eventos/provincia/Coru%C3%B1a"));
+    }
+
+    @Test
     void provinciaPublica_debeMantenerContratoNoObjetivoSinEventPrincipal() throws Exception {
         EventoPublicoDto evento = crearEvento();
         when(eventoPublicoService.obtenerEventosPublicosFiltradosPaginados(any(), any(), any(), any(), any(), any()))

@@ -41,6 +41,8 @@ public class EventoPublicoController {
     private static final String EVENT_IMAGE_URL =
         "https://res.cloudinary.com/hseoceuyz/image/upload/v1760835633/landing-festia_epbr7a.png";
     private static final String ORGANIZER_NAME_FALLBACK = "festia.es";
+    private static final String PROVINCIA_CORUNA_CANONICA = "Coruña";
+    private static final String PROVINCIA_CORUNA_ALIAS = "A Coruña";
     private static final Map<String, ProvinciaSeoCopy> SEO_PROVINCIA_CLAVE = new HashMap<>();
 
     private record ProvinciaSeoCopy(
@@ -684,8 +686,17 @@ public class EventoPublicoController {
         Model model,
         HttpServletRequest request) {
 
-        String provinciaTrim = provincia.trim();
+        String provinciaTrim = UriUtils.decode(provincia.trim(), StandardCharsets.UTF_8);
         log.info("Listando eventos publicos para provincia: {}", provinciaTrim);
+
+        if (PROVINCIA_CORUNA_ALIAS.equalsIgnoreCase(provinciaTrim)) {
+            StringBuilder redirectUrl = new StringBuilder("/eventos/provincia/" + UriUtils.encodePath(PROVINCIA_CORUNA_CANONICA, StandardCharsets.UTF_8));
+            if (page > 1) {
+                redirectUrl.append("?page=").append(page);
+            }
+            log.info("Redirigiendo 301 alias provincia: {} -> {}", provinciaTrim, PROVINCIA_CORUNA_CANONICA);
+            return crearRedireccionPermanente(construirUrlAbsoluta(request, redirectUrl.toString()));
+        }
 
         // Buscar provincia para obtener nombre canónico y validar existencia
         Optional<Provincia> provinciaOpt = localizacionService.findProvinciaByNombreUpperCase(provinciaTrim);
