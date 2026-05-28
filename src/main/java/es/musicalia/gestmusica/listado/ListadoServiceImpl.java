@@ -163,6 +163,7 @@ public class ListadoServiceImpl implements ListadoService {
         String fileNameToExport = "Listado_".concat(TipoOcupacionEnum.getDescripcionById(listadoDto.getIdTipoOcupacion())).concat(DateUtils.getDateStr(new Date(), "ddMMyyyyHHmmss")).concat(".pdf");
 
         List<LocalDate> dateList = sortDates(listadoDto.getFecha1(), listadoDto.getFecha2(), listadoDto.getFecha3(), listadoDto.getFecha4(), listadoDto.getFecha5(), listadoDto.getFecha6(), listadoDto.getFecha7());
+        validateDateSelection(listadoDto, dateList);
 
         parametros.put("colNames", getColNamesListadoFechas());
         parametros.put("fechaListIn", getFechaListFechas(listadoDto.getFechaDesde(), listadoDto.getFechaHasta(), dateList));
@@ -407,6 +408,24 @@ public class ListadoServiceImpl implements ListadoService {
 
         return dateListBuilder.toString();
 
+    }
+
+    private void validateDateSelection(ListadoDto listadoDto, List<LocalDate> dateList) {
+        boolean hasStartDate = listadoDto.getFechaDesde() != null;
+        boolean hasEndDate = listadoDto.getFechaHasta() != null;
+        boolean hasDateRange = hasStartDate && hasEndDate;
+
+        if ((hasStartDate || hasEndDate) && !hasDateRange) {
+            throw new IllegalArgumentException("Completa fecha inicial y fecha final, o borra el rango y usa fechas sueltas.");
+        }
+
+        if (!hasDateRange && dateList.isEmpty()) {
+            throw new IllegalArgumentException("Introduce fecha inicial y final, o al menos una fecha suelta.");
+        }
+
+        if (hasDateRange && !dateList.isEmpty()) {
+            throw new IllegalArgumentException("No mezcles rango de fechas con fechas sueltas. Borra uno de los dos bloques.");
+        }
     }
 
     private boolean hasEmptySqlInParameters(Map<String, Object> parametros) {

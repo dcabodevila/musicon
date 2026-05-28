@@ -29,3 +29,6 @@ Estas instrucciones aplican a todo el repositorio `musicon`.
 - Haz cambios pequeños y acotados.
 - Evita tocar artefactos no relacionados.
 - Si hay dudas de alcance, verifica primero antes de asumir.
+
+## Skills del proyecto
+- `playwright-browser-testing`: úsala cuando haya que verificar flujos en navegador real con Playwright, capturar respuestas de red y confirmar lo que ve el usuario.

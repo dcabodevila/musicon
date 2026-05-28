@@ -3,6 +3,7 @@ package es.musicalia.gestmusica.listado;
 import es.musicalia.gestmusica.agencia.AgenciaService;
 import es.musicalia.gestmusica.ajustes.AjustesService;
 import es.musicalia.gestmusica.artista.ArtistaService;
+import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.config.CustomPermissionEvaluator;
 import es.musicalia.gestmusica.config.RateLimitingFilter;
 import es.musicalia.gestmusica.config.WebSecurityConfig;
@@ -10,6 +11,7 @@ import es.musicalia.gestmusica.localizacion.LocalizacionService;
 import es.musicalia.gestmusica.observabilidad.FunctionalEventTracker;
 import es.musicalia.gestmusica.mensaje.MensajeService;
 import es.musicalia.gestmusica.permiso.PermisoService;
+import es.musicalia.gestmusica.usuario.Usuario;
 import jakarta.servlet.FilterChain;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,16 +19,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -100,5 +106,31 @@ class ListadoControllerIntegrationTest {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.chartData[0].mes").value("Sin datos"))
                 .andExpect(jsonPath("$.chartData[0].cantidad").value(0));
+    }
+
+    @Test
+    void generarListado_sinRangoNiFechasSueltas_devuelveBadRequestSinInvocarServicio() throws Exception {
+        mockMvc.perform(post("/listado/generar")
+                        .with(csrf())
+                        .with(user(authenticatedUser()))
+                        .param("solicitadoPara", "Cliente")
+                        .param("idCcaa", "1")
+                        .param("idProvincia", "1")
+                        .param("idTipoOcupacion", "1"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Introduce fecha inicial y final, o al menos una fecha suelta."));
+
+        verify(listadoService, never()).generarInformeListado(any(), any());
+    }
+
+    private CustomAuthenticatedUser authenticatedUser() {
+        Usuario usuario = new Usuario();
+        usuario.setId(1L);
+        usuario.setNombre("Usuario");
+        usuario.setApellidos("Prueba");
+        usuario.setUsername("usuario.prueba");
+        usuario.setPassword("{noop}password");
+
+        return new CustomAuthenticatedUser(usuario, true, true, true, true, List.of(new SimpleGrantedAuthority("ROLE_USER")), Map.of(), Map.of());
     }
 }

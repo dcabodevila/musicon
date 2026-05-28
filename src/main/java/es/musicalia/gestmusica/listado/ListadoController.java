@@ -163,6 +163,22 @@ public class ListadoController {
                     .body(errorResponse);
             }
 
+            Optional<String> dateSelectionError = validateDateSelection(listadoDto);
+            if (dateSelectionError.isPresent()) {
+                functionalEventTracker.track(
+                        FunctionalEventNames.LISTADO_GENERATED,
+                        FunctionalEventOutcome.FAILURE,
+                        user.getUserId(),
+                        user.getUsuario() != null ? user.getUsuario().getUsername() : null,
+                        Map.of("reason", "invalid_date_selection")
+                );
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("message", dateSelectionError.get());
+                return ResponseEntity.badRequest()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(errorResponse);
+            }
+
             byte[] informeGenerado = this.listadoService.generarInformeListado(listadoDto, user.getUserId());
 
             functionalEventTracker.track(
@@ -204,6 +220,40 @@ public class ListadoController {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(errorResponse);
         }
+    }
+
+    private Optional<String> validateDateSelection(ListadoDto listadoDto) {
+        boolean hasStartDate = listadoDto.getFechaDesde() != null;
+        boolean hasEndDate = listadoDto.getFechaHasta() != null;
+        boolean hasDateRange = hasStartDate && hasEndDate;
+        boolean hasPartialDateRange = hasStartDate || hasEndDate;
+        boolean hasIndividualDates = getIndividualDates(listadoDto).stream().anyMatch(Objects::nonNull);
+
+        if (hasPartialDateRange && !hasDateRange) {
+            return Optional.of("Completa fecha inicial y fecha final, o borra el rango y usa fechas sueltas.");
+        }
+
+        if (!hasDateRange && !hasIndividualDates) {
+            return Optional.of("Introduce fecha inicial y final, o al menos una fecha suelta.");
+        }
+
+        if (hasDateRange && hasIndividualDates) {
+            return Optional.of("No mezcles rango de fechas con fechas sueltas. Borra uno de los dos bloques.");
+        }
+
+        return Optional.empty();
+    }
+
+    private List<LocalDate> getIndividualDates(ListadoDto listadoDto) {
+        return Arrays.asList(
+                listadoDto.getFecha1(),
+                listadoDto.getFecha2(),
+                listadoDto.getFecha3(),
+                listadoDto.getFecha4(),
+                listadoDto.getFecha5(),
+                listadoDto.getFecha6(),
+                listadoDto.getFecha7()
+        );
     }
 
     @PostMapping("/audiencias")

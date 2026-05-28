@@ -311,11 +311,16 @@ $(document).ready(function(){
 
         const formData = $('#formGenerarListado').serialize();
         const actionUrl = $('#formGenerarListado').attr('action');
+        let nativeXhr = null;
 
         $.ajax({
             type: 'POST',
             url: actionUrl,
             data: formData,
+            xhr: function() {
+                nativeXhr = new window.XMLHttpRequest();
+                return nativeXhr;
+            },
             xhrFields: {
                 responseType: 'blob'
             },
@@ -424,47 +429,72 @@ $(document).ready(function(){
 
                 console.error('Error al generar presupuesto:', error);
 
-                let errorMessage = 'Error al generar el presupuesto';
+                let errorMessage = 'Error al generar el listado';
 
-                // Si la respuesta es texto/JSON, intentar leerla
-                if (xhr.responseText) {
-                    try {
-                        const reader = new FileReader();
-                        reader.onload = function() {
-                            try {
-                                const errorData = JSON.parse(reader.result);
-                                if (errorData.message) {
-                                    notif('error', errorData.message);
-                                    return;
-                                }
-                            } catch (e) {
-                                // No es JSON, usar mensaje genérico
+                const notifyError = function(message) {
+                    notif('error', message || errorMessage);
+                };
+
+                const notifyResponseError = function(responseText) {
+                    if (responseText) {
+                        try {
+                            const errorData = JSON.parse(responseText);
+                            if (errorData.message) {
+                                notifyError(errorData.message);
+                                return;
                             }
-                            notif('error', errorMessage);
-                        };
-                        reader.readAsText(new Blob([xhr.response]));
-                        return;
-                    } catch (e) {
-                        // Error al leer la respuesta
+                        } catch (e) {
+                            // No es JSON, usar mensaje por código de estado
+                        }
                     }
+
+                    notifyError(getErrorMessageByStatus(xhr.status, errorMessage));
+                };
+
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    notifyError(xhr.responseJSON.message);
+                    return;
                 }
 
-                // Mensajes específicos por código de estado
-                switch (xhr.status) {
-                    case 400:
-                        errorMessage = 'Datos del formulario inválidos';
-                        break;
-                    case 500:
-                        errorMessage = 'Error interno del servidor';
-                        break;
-                    case 0:
-                        errorMessage = 'Error de conexión con el servidor';
-                        break;
+                const response = xhr.response || (nativeXhr ? nativeXhr.response : null);
+
+                // Con responseType='blob', los errores JSON llegan en la respuesta nativa, no en xhr.responseText.
+                if (response) {
+                    const responseBlob = response instanceof Blob ? response : new Blob([response]);
+                    const reader = new FileReader();
+                    reader.onload = function() {
+                        notifyResponseError(reader.result);
+                    };
+                    reader.onerror = function() {
+                        notifyError(getErrorMessageByStatus(xhr.status, errorMessage));
+                    };
+                    reader.readAsText(responseBlob);
+                    return;
                 }
 
-                notif('error', errorMessage);
+                // Si la respuesta es texto/JSON, intentar leerla.
+                if (xhr.responseText) {
+                    notifyResponseError(xhr.responseText);
+                    return;
+                }
+
+                notifyError(getErrorMessageByStatus(xhr.status, errorMessage));
             }
         });
+    }
+
+    function getErrorMessageByStatus(status, defaultMessage) {
+        // Mensajes específicos por código de estado
+        switch (status) {
+            case 400:
+                return 'Datos del formulario inválidos';
+            case 500:
+                return 'Error interno del servidor';
+            case 0:
+                return 'Error de conexión con el servidor';
+            default:
+                return defaultMessage;
+        }
     }
 
 
