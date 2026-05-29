@@ -112,31 +112,31 @@
         panelNombre.textContent = nombreCcaa;
         panelAyuda.textContent = 'Datos actualizados para esta comunidad autónoma.';
         panelUsuarios.textContent = new Intl.NumberFormat('es-ES').format(metricas.usuariosActivos || 0);
-        panelPresupuestos.textContent = new Intl.NumberFormat('es-ES').format(metricas.presupuestosUltimos30Dias || 0);
+        panelPresupuestos.textContent = new Intl.NumberFormat('es-ES').format(metricas.presupuestosUltimos100Dias || 0);
     }
 
     function pintarTotales(metricas) {
         const totales = metricas.reduce((acc, item) => {
             acc.usuariosActivos += Number(item.usuariosActivos || 0);
-            acc.presupuestosUltimos30Dias += Number(item.presupuestosUltimos30Dias || 0);
+            acc.presupuestosUltimos100Dias += Number(item.presupuestosUltimos100Dias || 0);
             return acc;
-        }, { usuariosActivos: 0, presupuestosUltimos30Dias: 0 });
+        }, { usuariosActivos: 0, presupuestosUltimos100Dias: 0 });
 
         const totalPresupuestosGlobal = Number(panelContenedor?.dataset?.totalPresupuestosGlobal);
         if (Number.isFinite(totalPresupuestosGlobal) && totalPresupuestosGlobal >= 0) {
-            totales.presupuestosUltimos30Dias = totalPresupuestosGlobal;
+            totales.presupuestosUltimos100Dias = totalPresupuestosGlobal;
         }
 
         panelNombre.textContent = 'Total nacional';
         panelAyuda.textContent = 'Resumen global de actividad. Haz clic en una comunidad para ver su detalle.';
         panelUsuarios.textContent = new Intl.NumberFormat('es-ES').format(totales.usuariosActivos);
-        panelPresupuestos.textContent = new Intl.NumberFormat('es-ES').format(totales.presupuestosUltimos30Dias);
+        panelPresupuestos.textContent = new Intl.NumberFormat('es-ES').format(totales.presupuestosUltimos100Dias);
     }
 
     function obtenerMetrica(nombreCcaa) {
         return metricasPorNombre.get(canonicalizarNombre(nombreCcaa)) || {
             usuariosActivos: 0,
-            presupuestosUltimos30Dias: 0
+            presupuestosUltimos100Dias: 0
         };
     }
 

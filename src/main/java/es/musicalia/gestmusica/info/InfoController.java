@@ -32,6 +32,8 @@ public class InfoController {
     private static final String SITE_NAME = "festia.es";
     private static final String OG_IMAGE = "https://res.cloudinary.com/hseoceuyz/image/upload/v1760835633/landing-festia_epbr7a.png";
     private static final String SITE_URL = "https://festia.es";
+    private static final long OCUPACIONES_RECIENTES_DIAS = 30;
+    private static final long PRESUPUESTOS_RECIENTES_DIAS = 100;
 
     private final ObjectMapper objectMapper;
     private final AgenciaRepository agenciaRepository;
@@ -54,12 +56,13 @@ public class InfoController {
         model.addAttribute("metaRobots", "index,follow");
         model.addAttribute("ogImage", OG_IMAGE);
 
-        LocalDateTime hace30Dias = LocalDateTime.now().minusDays(30);
+        LocalDateTime fechaCorteOcupacionesRecientes = LocalDateTime.now().minusDays(OCUPACIONES_RECIENTES_DIAS);
+        LocalDateTime fechaCortePresupuestosRecientes = LocalDateTime.now().minusDays(PRESUPUESTOS_RECIENTES_DIAS);
         model.addAttribute("actividadAgenciasActivas", agenciaRepository.countByActivoTrue());
         model.addAttribute("actividadArtistasActivos", artistaRepository.countByActivoTrue());
         model.addAttribute("actividadRepresentantes", usuarioRepository.countByRolGeneralCodigoInAndActivoTrue(List.of("REPRE", "AGENTE")));
-        model.addAttribute("actividadPresupuestosMes", listadoRepository.countByActivoTrueAndFechaCreacionGreaterThanEqual(hace30Dias));
-        model.addAttribute("actividadOcupacionesMes", ocupacionRepository.countByActivoTrueAndFechaCreacionGreaterThanEqual(hace30Dias));
+        model.addAttribute("actividadPresupuestosUltimos100Dias", listadoRepository.countByActivoTrueAndFechaCreacionGreaterThanEqual(fechaCortePresupuestosRecientes));
+        model.addAttribute("actividadOcupacionesMes", ocupacionRepository.countByActivoTrueAndFechaCreacionGreaterThanEqual(fechaCorteOcupacionesRecientes));
 
         // JSON-LD: Organization + SoftwareApplication + FAQPage + BreadcrumbList
         model.addAttribute("jsonLd", buildJsonLd(baseUrl, canonicalUrl));
@@ -76,9 +79,9 @@ public class InfoController {
         );
 
         Map<String, Long> presupuestosPorCcaa = new HashMap<>();
-        LocalDateTime desde = LocalDateTime.now().minusDays(30);
+        LocalDateTime desde = LocalDateTime.now().minusDays(PRESUPUESTOS_RECIENTES_DIAS);
         listadoRepository.countPresupuestosActivosPorCcaaDesde(desde).forEach(metrica ->
-            presupuestosPorCcaa.put(metrica.ccaaNombre(), metrica.presupuestosUltimos30Dias())
+            presupuestosPorCcaa.put(metrica.ccaaNombre(), metrica.presupuestosUltimos100Dias())
         );
 
         HashSet<String> ccaas = new HashSet<>(usuariosPorCcaa.keySet());
