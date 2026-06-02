@@ -43,184 +43,9 @@ public class EventoPublicoController {
     private static final String ORGANIZER_NAME_FALLBACK = "festia.es";
     private static final String PROVINCIA_CORUNA_CANONICA = "Coruña";
     private static final String PROVINCIA_CORUNA_ALIAS = "A Coruña";
-    private static final Map<String, ProvinciaSeoCopy> SEO_PROVINCIA_CLAVE = new HashMap<>();
-
-    private record ProvinciaSeoCopy(
-        String titulo,
-        String descripcion,
-        String bloqueTitulo,
-        String parrafo1,
-        String parrafo2,
-        String parrafo3,
-        String parrafo4
-    ) {}
-
-    // Textos SEO únicos por provincia
-    private static final Map<String, String> TEXTOS_PROVINCIA = new HashMap<>();
-    static {
-        // Galicia
-        TEXTOS_PROVINCIA.put("Coruña", "Consulta las próximas fiestas y verbenas en A Coruña. Encuentra orquestas gallegas, discotecas móviles y grupos musicales con fechas confirmadas en los municipios de la provincia.");
-        TEXTOS_PROVINCIA.put("Lugo", "Descubre las actuaciones musicales programadas en Lugo. Orquestas gallegas, bandas de verbena y artistas en fiestas populares de los municipios de la provincia.");
-        TEXTOS_PROVINCIA.put("Ourense", "Consulta la agenda de orquestas, verbenas, conciertos y actuaciones musicales previstas en la provincia de Ourense. Encuentra eventos por municipio, revisa qué artistas actúan en cada fecha y descubre fiestas populares con música en directo.");
-        TEXTOS_PROVINCIA.put("Pontevedra", "Consulta las próximas fiestas y verbenas en Pontevedra. Encuentra orquestas gallegas, discotecas móviles y grupos musicales con fechas confirmadas  en los municipios de la provincia.");
-
-        // Principado de Asturias
-        TEXTOS_PROVINCIA.put("Asturias", "Programación de orquestas y grupos musicales en Asturias. Fiestas populares, verbenas y eventos culturales con artistas confirmados en los concejos del principado.");
-
-        // Cantabria
-        TEXTOS_PROVINCIA.put("Cantabria", "Actuaciones musicales en Cantabria. Consulta la agenda de orquestas, grupos y artistas para fiestas populares y verbenas en los municipios de la comunidad.");
-
-        // País Vasco
-        TEXTOS_PROVINCIA.put("Álava", "Fiestas y verbenas en Álava con orquestas y grupos musicales. Consulta fechas, municipios y artistas confirmados para las celebraciones de la provincia.");
-        TEXTOS_PROVINCIA.put("Bizkaia", "Agenda musical de Bizkaia. Orquestas, grupos y artistas en las fiestas populares y verbenas de los municipios de la provincia.");
-        TEXTOS_PROVINCIA.put("Gipuzkoa", "Programación de fiestas en Gipuzkoa. Descubre las orquestas, bandas y grupos musicales en los municipios de la provincia para las celebraciones.");
-
-        // Navarra
-        TEXTOS_PROVINCIA.put("Navarra", "Verbenas y fiestas populares en Navarra. Consulta las actuaciones de orquestas y grupos musicales programadas en los municipios de la comunidad.");
-
-        // La Rioja
-        TEXTOS_PROVINCIA.put("La Rioja", "Agenda de conciertos y verbenas en La Rioja. Orquestas, artistas y grupos musicales en las fiestas populares de los municipios de la comunidad.");
-
-        // Castilla y León
-        TEXTOS_PROVINCIA.put("León", "Fiestas y verbenas en León con orquestas y grupos musicales. Consulta fechas, municipios y artistas confirmados para las celebraciones de la provincia.");
-        TEXTOS_PROVINCIA.put("Zamora", "Agenda musical de Zamora. Orquestas, grupos folklóricos y artistas en las fiestas populares y verbenas de los municipios de la provincia.");
-        TEXTOS_PROVINCIA.put("Salamanca", "Conciertos y actuaciones en Salamanca. Descubre las orquestas, bandas y grupos musicales programados en las fiestas de los municipios de la provincia.");
-        TEXTOS_PROVINCIA.put("Burgos", "Programación de fiestas en Burgos. Orquestas, discotecas móviles y grupos musicales con fechas confirmadas en los municipios de la provincia.");
-        TEXTOS_PROVINCIA.put("Palencia", "Verbenas y fiestas populares en Palencia. Consulta las actuaciones de orquestas y grupos musicales programadas en los municipios de la provincia.");
-        TEXTOS_PROVINCIA.put("Valladolid", "Agenda de conciertos y verbenas en Valladolid. Orquestas, artistas y grupos musicales en las fiestas populares de los municipios de la provincia.");
-        TEXTOS_PROVINCIA.put("Soria", "Fiestas y actuaciones musicales en Soria. Descubre las orquestas, grupos y artistas programados en los municipios de la provincia.");
-        TEXTOS_PROVINCIA.put("Segovia", "Programación musical en Segovia. Orquestas, bandas y grupos en las fiestas populares y verbenas de los municipios de la provincia.");
-        TEXTOS_PROVINCIA.put("Ávila", "Consulta las verbenas y fiestas de Ávila. Actuaciones de orquestas, grupos musicales y artistas en los municipios de la provincia.");
-
-        // Madrid
-        TEXTOS_PROVINCIA.put("Madrid", "Agenda de eventos musicales en Madrid. Conciertos, fiestas populares y verbenas con orquestas y artistas en los municipios de la comunidad.");
-
-        // Castilla-La Mancha
-        TEXTOS_PROVINCIA.put("Toledo", "Fiestas y actuaciones en Toledo. Programación de orquestas, grupos musicales y discotecas móviles en los municipios de la provincia.");
-        TEXTOS_PROVINCIA.put("Ciudad Real", "Verbenas populares en Ciudad Real. Consulta las orquestas y grupos musicales programados en las fiestas de los municipios de la provincia.");
-        TEXTOS_PROVINCIA.put("Albacete", "Actuaciones musicales en Albacete. Orquestas, grupos y artistas en las fiestas populares de los municipios de la provincia.");
-        TEXTOS_PROVINCIA.put("Cuenca", "Programación de fiestas en Cuenca. Descubre las orquestas, bandas y grupos musicales en los municipios de la provincia para las celebraciones.");
-        TEXTOS_PROVINCIA.put("Guadalajara", "Fiestas y verbenas en Guadalajara. Agenda de orquestas y grupos musicales programados en los municipios de la provincia.");
-
-        // Extremadura
-        TEXTOS_PROVINCIA.put("Badajoz", "Consulta las próximas fiestas y verbenas en Badajoz. Encuentra orquestas, discotecas móviles y grupos musicales con fechas confirmadas en los municipios de la provincia.");
-        TEXTOS_PROVINCIA.put("Cáceres", "Descubre las actuaciones musicales programadas en Cáceres. Orquestas, bandas y artistas en verbenas y fiestas populares de los municipios de la provincia.");
-
-        // Cataluña
-        TEXTOS_PROVINCIA.put("Barcelona", "Agenda de conciertos y actuaciones en Barcelona. Consulta las fechas de orquestas, grupos musicales y discotecas móviles en los municipios de la provincia.");
-        TEXTOS_PROVINCIA.put("Girona", "Programación de fiestas en Girona. Orquestas, discotecas móviles y grupos musicales con fechas confirmadas en los municipios de la provincia.");
-        TEXTOS_PROVINCIA.put("Lleida", "Verbenas y fiestas populares en Lleida. Consulta las actuaciones de orquestas y grupos musicales programadas en los municipios de la provincia.");
-        TEXTOS_PROVINCIA.put("Tarragona", "Actuaciones musicales en Tarragona. Orquestas, grupos y artistas en las fiestas populares de los municipios de la provincia.");
-
-        // Comunidad Valenciana
-        TEXTOS_PROVINCIA.put("Valencia", "Fiestas y verbenas en Valencia con orquestas y grupos musicales. Consulta fechas, municipios y artistas confirmados para las celebraciones de la provincia.");
-        TEXTOS_PROVINCIA.put("Alicante", "Agenda musical de Alicante. Orquestas, grupos y artistas en las fiestas populares y verbenas de la Costa Blanca.");
-        TEXTOS_PROVINCIA.put("Castellón", "Conciertos y actuaciones en Castellón. Descubre las orquestas, bandas y grupos musicales programados en las fiestas de los municipios de la provincia.");
-
-        // Islas Baleares
-        TEXTOS_PROVINCIA.put("Baleares", "Programación de orquestas y grupos musicales en Baleares. Fiestas populares, verbenas y eventos en Mallorca, Menorca, Ibiza y Formentera.");
-
-        // Islas Canarias
-        TEXTOS_PROVINCIA.put("Las Palmas", "Consulta las próximas fiestas y verbenas en Las Palmas. Encuentra orquestas, grupos y artistas con fechas confirmadas en Gran Canaria, Lanzarote y Fuerteventura.");
-        TEXTOS_PROVINCIA.put("Tenerife", "Agenda de eventos musicales en Santa Cruz de Tenerife. Conciertos, fiestas populares y verbenas en Tenerife, La Gomera, La Palma y El Hierro.");
-
-        // Andalucía
-        TEXTOS_PROVINCIA.put("Sevilla", "Fiestas y actuaciones en Sevilla. Programación de orquestas, grupos musicales y discotecas móviles en los municipios de la provincia.");
-        TEXTOS_PROVINCIA.put("Málaga", "Verbenas populares en Málaga. Consulta las orquestas y grupos musicales programados en las fiestas de la Costa del Sol.");
-        TEXTOS_PROVINCIA.put("Cádiz", "Actuaciones musicales en Cádiz. Orquestas, grupos y artistas en las fiestas populares de los municipios de la provincia.");
-        TEXTOS_PROVINCIA.put("Córdoba", "Programación de fiestas en Córdoba. Descubre las orquestas, bandas y grupos musicales en los municipios de la provincia para las celebraciones.");
-        TEXTOS_PROVINCIA.put("Granada", "Agenda de conciertos y verbenas en Granada. Orquestas, artistas y grupos musicales en las fiestas populares de los municipios de la provincia.");
-        TEXTOS_PROVINCIA.put("Jaén", "Fiestas y actuaciones musicales en Jaén. Descubre las orquestas, grupos y artistas programados en los municipios de la provincia.");
-        TEXTOS_PROVINCIA.put("Almería", "Consulta las verbenas y fiestas de Almería. Actuaciones de orquestas, grupos musicales y artistas en los municipios de la provincia.");
-        TEXTOS_PROVINCIA.put("Huelva", "Agenda de eventos musicales en Huelva. Conciertos, fiestas populares y verbenas con orquestas y artistas en los municipios de la provincia.");
-
-        // Aragón
-        TEXTOS_PROVINCIA.put("Zaragoza", "Fiestas y verbenas en Zaragoza con orquestas y grupos musicales. Consulta fechas, municipios y artistas confirmados para las celebraciones de la provincia.");
-        TEXTOS_PROVINCIA.put("Huesca", "Agenda musical de Huesca. Orquestas, grupos y artistas en las fiestas populares y verbenas de los municipios de la provincia.");
-        TEXTOS_PROVINCIA.put("Teruel", "Conciertos y actuaciones en Teruel. Descubre las orquestas, bandas y grupos musicales programados en las fiestas de los municipios de la provincia.");
-
-        // Murcia
-        TEXTOS_PROVINCIA.put("Murcia", "Programación de fiestas en Murcia. Orquestas, discotecas móviles y grupos musicales con fechas confirmadas en los municipios de la región.");
-
-        // Ceuta y Melilla
-        TEXTOS_PROVINCIA.put("Ceuta", "Actuaciones musicales en Ceuta. Consulta la agenda de orquestas, grupos y artistas para fiestas populares y verbenas en la ciudad autónoma.");
-        TEXTOS_PROVINCIA.put("Melilla", "Fiestas y actuaciones musicales en Melilla. Descubre las orquestas, grupos y artistas programados en la ciudad autónoma.");
-
-        SEO_PROVINCIA_CLAVE.put("Ourense", new ProvinciaSeoCopy(
-            "Orquestas, verbenas y fiestas en Ourense | Festia",
-            "Consulta actuaciones musicales, orquestas, verbenas y conciertos en Ourense. Descubre eventos por municipio, artista y fecha con información actualizada en Festia.",
-            "Orquestas, verbenas y actuaciones musicales en Ourense",
-            "Consulta la agenda de orquestas, verbenas, conciertos y actuaciones musicales previstas en la provincia de Ourense. Encuentra eventos por municipio, revisa qué artistas actúan en cada fecha y descubre fiestas populares con música en directo.",
-            "Festia reúne actuaciones musicales confirmadas en Ourense con información organizada por artista, localidad y día. Si buscas fiestas en Ourense, verbenas este fin de semana u orquestas cerca de ti, aquí puedes localizar los próximos eventos de forma rápida.",
-            "La programación musical de Ourense incluye orquestas, grupos de verbena, discotecas móviles y otros espectáculos habituales en fiestas populares y celebraciones locales. Esta página agrupa los eventos disponibles en distintos municipios de la provincia para facilitar su consulta.",
-            "También puedes explorar artistas concretos, comparar fechas y acceder al detalle de cada actuación musical en Ourense para conocer el lugar, el municipio y la programación prevista."
-        ));
-        SEO_PROVINCIA_CLAVE.put("Bizkaia", new ProvinciaSeoCopy(
-            "Orquestas, verbenas y fiestas en Bizkaia | Festia",
-            "Consulta actuaciones musicales, orquestas, verbenas y conciertos en Bizkaia. Descubre eventos por municipio, artista y fecha con información actualizada en Festia.",
-            "Orquestas, verbenas y actuaciones musicales en Bizkaia",
-            "Consulta la agenda de orquestas, verbenas, conciertos y actuaciones musicales previstas en Bizkaia. Encuentra eventos por municipio, revisa qué artistas actúan en cada fecha y descubre fiestas populares con música en directo.",
-            "Festia reúne actuaciones musicales confirmadas en Bizkaia con información organizada por artista, localidad y día. Si buscas fiestas en Bizkaia, verbenas este fin de semana u orquestas cerca de ti, aquí puedes localizar los próximos eventos de forma rápida.",
-            "La programación musical de Bizkaia incluye orquestas, grupos de verbena, discotecas móviles y otros espectáculos habituales en fiestas populares y celebraciones locales. Esta página agrupa los eventos disponibles en distintos municipios de la provincia para facilitar su consulta.",
-            "También puedes explorar artistas concretos, comparar fechas y acceder al detalle de cada actuación musical en Bizkaia para conocer el lugar, el municipio y la programación prevista."
-        ));
-        SEO_PROVINCIA_CLAVE.put("Pontevedra", new ProvinciaSeoCopy(
-            "Orquestas, verbenas y fiestas en Pontevedra | Festia",
-            "Consulta actuaciones musicales, orquestas, verbenas y conciertos en Pontevedra. Descubre eventos por municipio, artista y fecha con información actualizada en Festia.",
-            "Orquestas, verbenas y actuaciones musicales en Pontevedra",
-            "Consulta la agenda de orquestas, verbenas, conciertos y actuaciones musicales previstas en la provincia de Pontevedra. Encuentra eventos por municipio, revisa qué artistas actúan en cada fecha y descubre fiestas populares con música en directo.",
-            "Festia reúne actuaciones musicales confirmadas en Pontevedra con información organizada por artista, localidad y día. Si buscas fiestas en Pontevedra, verbenas este fin de semana u orquestas cerca de ti, aquí puedes localizar los próximos eventos de forma rápida.",
-            "La programación musical de Pontevedra incluye orquestas, grupos de verbena, discotecas móviles y otros espectáculos habituales en fiestas populares y celebraciones locales. Esta página agrupa los eventos disponibles en distintos municipios de la provincia para facilitar su consulta.",
-            "También puedes explorar artistas concretos, comparar fechas y acceder al detalle de cada actuación musical en Pontevedra para conocer el lugar, el municipio y la programación prevista."
-        ));
-        SEO_PROVINCIA_CLAVE.put("León", new ProvinciaSeoCopy(
-            "Orquestas, verbenas y fiestas en León | Festia",
-            "Consulta actuaciones musicales, orquestas, verbenas y conciertos en León. Descubre eventos por municipio, artista y fecha con información actualizada en Festia.",
-            "Orquestas, verbenas y actuaciones musicales en León",
-            "Consulta la agenda de orquestas, verbenas, conciertos y actuaciones musicales previstas en la provincia de León. Encuentra eventos por municipio, revisa qué artistas actúan en cada fecha y descubre fiestas populares con música en directo.",
-            "Festia reúne actuaciones musicales confirmadas en León con información organizada por artista, localidad y día. Si buscas fiestas en León, verbenas este fin de semana u orquestas cerca de ti, aquí puedes localizar los próximos eventos de forma rápida.",
-            "La programación musical de León incluye orquestas, grupos de verbena, discotecas móviles y otros espectáculos habituales en fiestas populares y celebraciones locales. Esta página agrupa los eventos disponibles en distintos municipios de la provincia para facilitar su consulta.",
-            "También puedes explorar artistas concretos, comparar fechas y acceder al detalle de cada actuación musical en León para conocer el lugar, el municipio y la programación prevista."
-        ));
-        SEO_PROVINCIA_CLAVE.put("Coruña", new ProvinciaSeoCopy(
-            "Orquestas, verbenas y fiestas en A Coruña | Festia",
-            "Consulta actuaciones musicales, orquestas, verbenas y conciertos en A Coruña. Descubre eventos por municipio, artista y fecha con información actualizada en Festia.",
-            "Orquestas, verbenas y actuaciones musicales en A Coruña",
-            "Consulta la agenda de orquestas, verbenas, conciertos y actuaciones musicales previstas en la provincia de A Coruña. Encuentra eventos por municipio, revisa qué artistas actúan en cada fecha y descubre fiestas populares con música en directo.",
-            "Festia reúne actuaciones musicales confirmadas en A Coruña con información organizada por artista, localidad y día. Si buscas fiestas en A Coruña, verbenas este fin de semana u orquestas cerca de ti, aquí puedes localizar los próximos eventos de forma rápida.",
-            "La programación musical de A Coruña incluye orquestas, grupos de verbena, discotecas móviles y otros espectáculos habituales en fiestas populares y celebraciones locales. Esta página agrupa los eventos disponibles en distintos municipios de la provincia para facilitar su consulta.",
-            "También puedes explorar artistas concretos, comparar fechas y acceder al detalle de cada actuación musical en A Coruña para conocer el lugar, el municipio y la programación prevista."
-        ));
-        SEO_PROVINCIA_CLAVE.put("Burgos", new ProvinciaSeoCopy(
-            "Orquestas, verbenas y fiestas en Burgos | Festia",
-            "Consulta actuaciones musicales, orquestas, verbenas y conciertos en Burgos. Descubre eventos por municipio, artista y fecha con información actualizada en Festia.",
-            "Orquestas, verbenas y actuaciones musicales en Burgos",
-            "Consulta la agenda de orquestas, verbenas, conciertos y actuaciones musicales previstas en la provincia de Burgos. Encuentra eventos por municipio, revisa qué artistas actúan en cada fecha y descubre fiestas populares con música en directo.",
-            "Festia reúne actuaciones musicales confirmadas en Burgos con información organizada por artista, localidad y día. Si buscas fiestas en Burgos, verbenas este fin de semana u orquestas cerca de ti, aquí puedes localizar los próximos eventos de forma rápida.",
-            "La programación musical de Burgos incluye orquestas, grupos de verbena, discotecas móviles y otros espectáculos habituales en fiestas populares y celebraciones locales. Esta página agrupa los eventos disponibles en distintos municipios de la provincia para facilitar su consulta.",
-            "También puedes explorar artistas concretos, comparar fechas y acceder al detalle de cada actuación musical en Burgos para conocer el lugar, el municipio y la programación prevista."
-        ));
-        SEO_PROVINCIA_CLAVE.put("Asturias", new ProvinciaSeoCopy(
-            "Orquestas, verbenas y fiestas en Asturias | Festia",
-            "Consulta actuaciones musicales, orquestas, verbenas y conciertos en Asturias. Descubre eventos por municipio, artista y fecha con información actualizada en Festia.",
-            "Orquestas, verbenas y actuaciones musicales en Asturias",
-            "Consulta la agenda de orquestas, verbenas, conciertos y actuaciones musicales previstas en Asturias. Encuentra eventos por municipio, revisa qué artistas actúan en cada fecha y descubre fiestas populares con música en directo.",
-            "Festia reúne actuaciones musicales confirmadas en Asturias con información organizada por artista, localidad y día. Si buscas fiestas en Asturias, verbenas este fin de semana u orquestas cerca de ti, aquí puedes localizar los próximos eventos de forma rápida.",
-            "La programación musical de Asturias incluye orquestas, grupos de verbena, discotecas móviles y otros espectáculos habituales en fiestas populares y celebraciones locales. Esta página agrupa los eventos disponibles en distintos municipios del territorio para facilitar su consulta.",
-            "También puedes explorar artistas concretos, comparar fechas y acceder al detalle de cada actuación musical en Asturias para conocer el lugar, el municipio y la programación prevista."
-        ));
-        SEO_PROVINCIA_CLAVE.put("Zamora", new ProvinciaSeoCopy(
-            "Orquestas, verbenas y fiestas en Zamora | Festia",
-            "Consulta actuaciones musicales, orquestas, verbenas y conciertos en Zamora. Descubre eventos por municipio, artista y fecha con información actualizada en Festia.",
-            "Orquestas, verbenas y actuaciones musicales en Zamora",
-            "Consulta la agenda de orquestas, verbenas, conciertos y actuaciones musicales previstas en la provincia de Zamora. Encuentra eventos por municipio, revisa qué artistas actúan en cada fecha y descubre fiestas populares con música en directo.",
-            "Festia reúne actuaciones musicales confirmadas en Zamora con información organizada por artista, localidad y día. Si buscas fiestas en Zamora, verbenas este fin de semana u orquestas cerca de ti, aquí puedes localizar los próximos eventos de forma rápida.",
-            "La programación musical de Zamora incluye orquestas, grupos de verbena, discotecas móviles y otros espectáculos habituales en fiestas populares y celebraciones locales. Esta página agrupa los eventos disponibles en distintos municipios de la provincia para facilitar su consulta.",
-            "También puedes explorar artistas concretos, comparar fechas y acceder al detalle de cada actuación musical en Zamora para conocer el lugar, el municipio y la programación prevista."
-        ));
-    }
 
     private final EventoPublicoService eventoPublicoService;
+    private final EventoPublicoCatalogoFacade eventoPublicoCatalogoFacade;
     private final LocalizacionService localizacionService;
     private final ObjectMapper objectMapper;
     private final EventoPublicStructuredDataBuilder eventoPublicStructuredDataBuilder;
@@ -593,10 +418,14 @@ public class EventoPublicoController {
         int pageIndex = Math.max(0, page - 1);
         Pageable pageable = PageRequest.of(pageIndex, 20, Sort.by("fecha").ascending().and(Sort.by("artista.nombre").ascending()));
 
-        List<EventoPublicoDto> eventosCatalogo = eventoPublicoService.obtenerEventosPublicosFiltrados(
-            null, null, null, LocalDate.now(), null);
-        Page<EventoPublicoDto> paginaEventos = eventoPublicoService.obtenerEventosPublicosFiltradosPaginados(
-            provincia, municipio, idArtista, fechaDesde, fechaHasta, pageable);
+        EventoPublicoCatalogoFacade.EventoPublicoCatalogoView catalogoView = eventoPublicoCatalogoFacade.prepararCatalogoPublico(
+            new EventoPublicoCatalogoFacade.EventoPublicoCatalogoRequest(
+                provincia, municipio, idArtista, fechaDesde, fechaHasta, pageable, page
+            )
+        );
+
+        List<EventoPublicoDto> eventosCatalogo = catalogoView.eventosCatalogo();
+        Page<EventoPublicoDto> paginaEventos = catalogoView.paginaEventos();
 
         int totalPaginas = paginaEventos.getTotalPages();
         if (totalPaginas > 0 && page > totalPaginas) {
@@ -621,8 +450,8 @@ public class EventoPublicoController {
             (hasta != null && !hasta.isBlank());
         boolean noIndex = filtrosAplicados || paginaEventos.getTotalElements() == 0;
 
-        String titulo = construirTituloListado(provincia, municipio, idArtista, (int) paginaEventos.getTotalElements());
-        String descripcion = construirDescripcionListado(provincia, municipio, idArtista);
+        String titulo = catalogoView.titulo();
+        String descripcion = catalogoView.descripcion();
         String canonicalUrl = construirUrlAbsoluta(request, "/eventos");
 
         model.addAttribute("eventosPorDia", eventosPorDia);
@@ -637,15 +466,9 @@ public class EventoPublicoController {
         model.addAttribute("provincia", provincia);
         model.addAttribute("municipio", municipio);
         model.addAttribute("idArtistaSeleccionado", idArtista);
-        model.addAttribute("provincias", obtenerProvinciasOrdenadas());
-        // Pre-cargar municipios cuando provincia está seleccionada (preservar estado del filtro)
-        if (provincia != null && !provincia.isBlank()) {
-            model.addAttribute("municipiosProvincia",
-                localizacionService.findMunicipiosByProvinciaNombre(provincia));
-        } else {
-            model.addAttribute("municipiosProvincia", List.of());
-        }
-        model.addAttribute("artistasDisponibles", obtenerArtistasOrdenados(eventosCatalogo));
+        model.addAttribute("provincias", catalogoView.provincias());
+        model.addAttribute("municipiosProvincia", catalogoView.municipiosProvincia());
+        model.addAttribute("artistasDisponibles", catalogoView.artistasDisponibles());
         model.addAttribute("ogImage", EVENT_IMAGE_URL);
         model.addAttribute("contextoPagina", "catalogo");
         model.addAttribute("urlBase", "/eventos");
@@ -656,6 +479,7 @@ public class EventoPublicoController {
         model.addAttribute("hayPaginaSiguiente", page < totalPaginas);
         model.addAttribute("paginaAnterior", page - 1);
         model.addAttribute("paginaSiguiente", page + 1);
+        model.addAttribute("quickLinks", catalogoView.quickLinks());
 
         if (page > 1) {
             model.addAttribute("metaRobots", "noindex,follow");
@@ -745,7 +569,7 @@ public class EventoPublicoController {
         boolean indexable = paginaEventos.getTotalElements() > 0;
 
         String year = String.valueOf(java.time.Year.now().getValue());
-        ProvinciaSeoCopy seoProvinciaCopy = obtenerSeoProvinciaCopy(nombreProvinciaCanonico, year);
+        ProvinciaSeoMetadata.SeoCopy seoProvinciaCopy = obtenerSeoProvinciaCopy(nombreProvinciaCanonico, year);
         String titulo = seoProvinciaCopy.titulo();
         String descripcion = seoProvinciaCopy.descripcion();
 
@@ -754,9 +578,7 @@ public class EventoPublicoController {
         model.addAttribute("provincia", nombreProvinciaCanonico);
         model.addAttribute("titulo", titulo);
         model.addAttribute("descripcion", descripcion);
-        model.addAttribute("textoProvincia", TEXTOS_PROVINCIA.getOrDefault(nombreProvinciaCanonico,
-            "Consulta las próximas fiestas y verbenas en " + nombreProvinciaCanonico +
-            ". Encuentra orquestas, discotecas móviles y grupos musicales con fechas confirmadas."));
+        model.addAttribute("textoProvincia", ProvinciaSeoMetadata.textoProvinciaPara(nombreProvinciaCanonico));
         model.addAttribute("seoProvinciaTitulo", seoProvinciaCopy.bloqueTitulo());
         model.addAttribute("seoProvinciaParrafo1", seoProvinciaCopy.parrafo1());
         model.addAttribute("seoProvinciaParrafo2", seoProvinciaCopy.parrafo2());
@@ -1069,25 +891,12 @@ public class EventoPublicoController {
         if (provincia != null && !provincia.isBlank()) {
             return "Agenda de fiestas populares y verbenas en " + provincia + ". Encuentra orquestas, grupos musicales y discotecas móviles filtrando por municipio y fecha.";
         }
-        return "Consulta orquestas, verbenas, conciertos, dúos y grupos musicales por provincia, municipio y fecha. " +
-            "Descubre actuaciones musicales actualizadas cada día en Festia.";
+        return "Consulta fiestas, verbenas, orquestas y actuaciones musicales de próximos eventos en España. " +
+            "Descubre eventos por provincia, municipio y fecha con información actualizada cada día en Festia.";
     }
 
-    private ProvinciaSeoCopy obtenerSeoProvinciaCopy(String provincia, String year) {
-        ProvinciaSeoCopy copy = SEO_PROVINCIA_CLAVE.get(provincia);
-        if (copy != null) {
-            return copy;
-        }
-
-        return new ProvinciaSeoCopy(
-            "Fiestas y Orquestas en " + provincia + " " + year + " | Festia",
-            "Descubre las fiestas populares y verbenas de " + provincia + ". Orquestas, grupos musicales y discotecas móviles con fechas y horarios confirmados.",
-            "Fiestas, verbenas y actuaciones musicales en " + provincia,
-            "Consulta la agenda de orquestas, verbenas y actuaciones musicales previstas en " + provincia + ". Encuentra eventos por municipio, revisa qué artistas actúan en cada fecha y descubre fiestas populares con música en directo.",
-            "Festia reúne actuaciones musicales confirmadas en " + provincia + " con información organizada por artista, localidad y día. Si buscas fiestas, verbenas este fin de semana u orquestas cerca de ti, aquí puedes localizar los próximos eventos de forma rápida.",
-            "La programación musical de " + provincia + " incluye orquestas, grupos de verbena, discotecas móviles y otros espectáculos habituales en fiestas populares y celebraciones locales. Esta página agrupa los eventos disponibles en distintos municipios de la provincia para facilitar su consulta.",
-            "También puedes explorar artistas concretos, comparar fechas y acceder al detalle de cada actuación musical para conocer el lugar, el municipio y la programación prevista."
-        );
+    private ProvinciaSeoMetadata.SeoCopy obtenerSeoProvinciaCopy(String provincia, String year) {
+        return ProvinciaSeoMetadata.seoCopyPara(provincia, year);
     }
 
     // ── Calendario helpers ──────────────────────────────────────────────────────

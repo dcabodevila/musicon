@@ -33,6 +33,9 @@ class EventoPublicoSecurityChainMvcTest {
     private EventoPublicoService eventoPublicoService;
 
     @MockBean
+    private EventoPublicoCatalogoFacade eventoPublicoCatalogoFacade;
+
+    @MockBean
     private LocalizacionService localizacionService;
 
     @MockBean

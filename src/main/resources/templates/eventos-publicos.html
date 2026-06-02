@@ -97,6 +97,55 @@
             border-color: #0d6efd;
             text-decoration: none;
         }
+
+        .eventos-quick-links {
+            margin-top: 0.9rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.55rem;
+        }
+
+        .eventos-quick-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.5rem 0.85rem;
+            border-radius: 999px;
+            border: 1px solid transparent;
+            font-size: 0.82rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .eventos-quick-link:hover {
+            transform: translateY(-1px);
+            text-decoration: none;
+        }
+
+        .eventos-quick-link--today {
+            color: #fff;
+            background: linear-gradient(135deg, #ff7a18 0%, #ef4444 100%);
+            box-shadow: 0 8px 18px rgba(239, 68, 68, 0.24);
+        }
+
+        .eventos-quick-link--weekend {
+            color: #fff;
+            background: linear-gradient(135deg, #4338ca 0%, #2563eb 100%);
+            box-shadow: 0 8px 18px rgba(37, 99, 235, 0.24);
+        }
+
+        .eventos-quick-link--dynamic {
+            color: #0f172a;
+            background: #eef2ff;
+            border-color: #c7d2fe;
+        }
+
+        .eventos-quick-link--dynamic:hover {
+            color: #1d4ed8;
+            border-color: #93c5fd;
+            background: #eff6ff;
+        }
     </style>
     <th:block th:replace="~{fragments/google-analytics :: gtm-head}"/>
     <th:block th:replace="~{fragments/google-analytics :: ga4-head}"/>
@@ -168,13 +217,13 @@
                         <div class="hero-center">
                             <h1 class="hero-title">
                                 <span class="gsap-title-line1"
-                                      th:text="${contextoPagina == 'hoy' ? 'Fiestas hoy, verbenas hoy y' : (nombreArtista != null ? 'Próximas actuaciones de' : (contextoPagina == 'municipio' ? 'Próximas actuaciones en' : (contextoPagina == 'provincia' ? 'Próximas actuaciones en' : 'Próximas orquestas, verbenas y actuaciones')))}">
-                                     Próximas actuaciones
-                                 </span>
+                                      th:text="${contextoPagina == 'hoy' ? 'Fiestas hoy, verbenas hoy y' : (nombreArtista != null ? 'Próximas actuaciones de' : (contextoPagina == 'municipio' ? 'Próximas actuaciones en' : (contextoPagina == 'provincia' ? 'Próximas actuaciones en' : 'Próximas fiestas, verbenas y orquestas en')))}">
+                                      Próximas actuaciones
+                                  </span>
                                 <span class="gsap-title-line2"
-                                      th:text="${contextoPagina == 'hoy' ? 'actuaciones musicales de hoy' : (nombreArtista != null ? nombreArtista : (contextoPagina == 'municipio' and provincia != null and !#strings.isEmpty(provincia) ? municipio + ' (' + provincia + ')' : (contextoPagina == 'municipio' ? municipio : (contextoPagina == 'provincia' ? provincia : 'musicales en España'))))}">
-                                     musicales en España
-                                 </span>
+                                      th:text="${contextoPagina == 'hoy' ? 'actuaciones musicales de hoy' : (nombreArtista != null ? nombreArtista : (contextoPagina == 'municipio' and provincia != null and !#strings.isEmpty(provincia) ? municipio + ' (' + provincia + ')' : (contextoPagina == 'municipio' ? municipio : (contextoPagina == 'provincia' ? provincia : 'España'))))}">
+                                      musicales en España
+                                  </span>
                             </h1>
                             <p class="hero-subtitle" th:text="${textoHoy != null ? textoHoy : (textoProvincia != null ? textoProvincia : 'Orquestas, discotecas móviles y grupos musicales · Verbenas y fiestas populares · Actualizado diariamente')}"></p>
                         </div>
@@ -192,17 +241,7 @@
                             Descubre <strong>orquestas, verbenas, conciertos y grupos musicales</strong> programados en toda España.
                             En Festia puedes consultar actuaciones musicales por <strong>provincia</strong>, <strong>municipio</strong>, <strong>artista</strong> y <strong>fecha</strong>.
                         </p>
-                        <nav class="eventos-seo-intro__links" aria-label="Provincias con más actuaciones">
-                            <a th:href="@{/eventos/hoy}">Fiestas hoy</a>
-                            <a th:href="@{/eventos/provincia/Coruña}">Orquestas en A Coruña</a>
-                            <a th:href="@{/eventos/provincia/Pontevedra}">Verbenas en Pontevedra</a>
-                            <a th:href="@{/eventos/provincia/León}">Fiestas en León</a>
-                            <a th:href="@{/eventos/provincia/Lugo}">Actuaciones en Lugo</a>
-                            <a th:href="@{/eventos/provincia/Ourense}">Orquestas en Ourense</a>
-                            <a th:href="@{/eventos/provincia/Bizkaia}">Orquestas en Bizkaia</a>
-                            <a th:href="@{/eventos/provincia/Zamora}">Verbenas en Zamora</a>
-                            <a th:href="@{/eventos/provincia/Burgos}">Fiestas en Burgos</a>
-                        </nav>
+
                     </div>
                 </div>
 
@@ -313,6 +352,18 @@
                                     </div>
                                 </div>
                             </form>
+
+                            <nav class="eventos-quick-links"
+                                 aria-label="Accesos rápidos de fiestas y verbenas"
+                                 th:if="${contextoPagina == 'catalogo' and quickLinks != null and !#lists.isEmpty(quickLinks)}">
+                                <a th:each="quickLink : ${quickLinks}"
+                                   th:href="${quickLink.href}"
+                                   th:text="${quickLink.label}"
+                                   th:classappend="${quickLink.dynamic ? ' eventos-quick-link--dynamic' : (quickLink.tone == 'today' ? ' eventos-quick-link--today' : ' eventos-quick-link--weekend')}"
+                                   class="eventos-quick-link">
+                                    Fiestas hoy
+                                </a>
+                            </nav>
                         </div>
                     </div>
                 </div>
@@ -368,10 +419,6 @@
                                         <div class="event-card__meta" th:if="${evento.horaActuacion != null}">
                                             <i class="fas fa-clock"></i>
                                             <span th:text="${#temporals.format(evento.horaActuacion, 'HH:mm')} + ' h'">Hora</span>
-                                        </div>
-                                        <div class="event-card__meta" th:if="${evento.horaActuacion == null}">
-                                            <i class="fas fa-clock"></i>
-                                            <span class="fst-italic">Horario por confirmar</span>
                                         </div>
                                         <div class="event-card__meta" th:if="${evento.lugarParaMapa != null}">
                                             <i class="fas fa-map-marker-alt"></i>

@@ -117,13 +117,6 @@
                                                  th:text="${#temporals.format(evento.horaActuacion, 'HH:mm')} + ' h'">Hora</div>
                                         </div>
                                     </div>
-                                    <div class="event-dt__block" th:if="${evento.horaActuacion == null}">
-                                        <i class="fas fa-clock event-dt__icon"></i>
-                                        <div>
-                                            <div class="event-dt__label">Hora</div>
-                                            <div class="event-dt__value fst-italic" style="font-size: 0.85rem; color: #adb5bd;">Por confirmar</div>
-                                        </div>
-                                    </div>
                                 </div>
 
                                 <!-- Lugar -->
