@@ -6,6 +6,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
@@ -19,8 +20,11 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -51,7 +55,8 @@ class EventoPublicoControllerMvcTest {
     void detallePublico_debeRenderizarJsonLdEventSSRConCanonicalYMetadatos() throws Exception {
         EventoPublicoDto evento = crearEvento();
         when(eventoPublicoService.obtenerEventoPublico(10L)).thenReturn(Optional.of(evento));
-        when(eventoPublicoService.obtenerEventosPublicosPorArtista(20L)).thenReturn(List.of(evento));
+        when(eventoPublicoService.obtenerEventosPublicosFiltrados(isNull(), isNull(), eq(20L), any(LocalDate.class), any(LocalDate.class)))
+            .thenReturn(List.of(evento));
 
         mockMvc.perform(get("/eventos/evento/10-los-satelites-lugo-2026-08-15"))
             .andExpect(status().isOk())
@@ -68,7 +73,8 @@ class EventoPublicoControllerMvcTest {
     void detallePublico_debeEmitirUnUnicoObjetoPrincipalEvent() throws Exception {
         EventoPublicoDto evento = crearEvento();
         when(eventoPublicoService.obtenerEventoPublico(10L)).thenReturn(Optional.of(evento));
-        when(eventoPublicoService.obtenerEventosPublicosPorArtista(20L)).thenReturn(List.of(evento));
+        when(eventoPublicoService.obtenerEventosPublicosFiltrados(isNull(), isNull(), eq(20L), any(LocalDate.class), any(LocalDate.class)))
+            .thenReturn(List.of(evento));
 
         String html = mockMvc.perform(get("/eventos/evento/10-los-satelites-lugo-2026-08-15"))
             .andExpect(status().isOk())
@@ -90,7 +96,8 @@ class EventoPublicoControllerMvcTest {
     void detallePublico_debeSerAccesibleSinSesionNiCsrf() throws Exception {
         EventoPublicoDto evento = crearEvento();
         when(eventoPublicoService.obtenerEventoPublico(10L)).thenReturn(Optional.of(evento));
-        when(eventoPublicoService.obtenerEventosPublicosPorArtista(20L)).thenReturn(List.of(evento));
+        when(eventoPublicoService.obtenerEventosPublicosFiltrados(isNull(), isNull(), eq(20L), any(LocalDate.class), any(LocalDate.class)))
+            .thenReturn(List.of(evento));
 
         mockMvc.perform(get("/eventos/evento/10-los-satelites-lugo-2026-08-15"))
             .andExpect(status().isOk());
@@ -233,12 +240,112 @@ class EventoPublicoControllerMvcTest {
     void detallePublico_conHoraSinConfirmar_noDebeMostrarPlaceholderDeHora() throws Exception {
         EventoPublicoDto evento = crearEvento();
         when(eventoPublicoService.obtenerEventoPublico(10L)).thenReturn(Optional.of(evento));
-        when(eventoPublicoService.obtenerEventosPublicosPorArtista(20L)).thenReturn(List.of(evento));
+        when(eventoPublicoService.obtenerEventosPublicosFiltrados(isNull(), isNull(), eq(20L), any(LocalDate.class), any(LocalDate.class)))
+            .thenReturn(List.of(evento));
 
         mockMvc.perform(get("/eventos/evento/10-los-satelites-lugo-2026-08-15"))
             .andExpect(status().isOk())
             .andExpect(content().string(not(containsString("Por confirmar"))))
             .andExpect(content().string(not(containsString("event-dt__label\">Hora</div>"))));
+    }
+
+    @Test
+    void detallePublico_debeMostrarSoloRelacionadosDentroDe45DiasOrdenadosYSinEventoActual() throws Exception {
+        EventoPublicoDto eventoActual = crearEventoConDatos(10L, 20L, "Los Satélites", "Lugo", "Lugo", LocalDateTime.now().plusDays(5));
+        EventoPublicoDto relacionadoValidoTemprano = crearEventoConDatos(11L, 20L, "Los Satélites", "A Coruña", "Coruña", LocalDateTime.now().plusDays(7));
+        EventoPublicoDto relacionadoValidoTardio = crearEventoConDatos(12L, 20L, "Los Satélites", "Ourense", "Ourense", LocalDateTime.now().plusDays(20));
+        EventoPublicoDto relacionadoFueraDeVentana = crearEventoConDatos(13L, 20L, "Los Satélites", "Ponferrada", "León", LocalDateTime.now().plusDays(50));
+        List<EventoPublicoDto> relacionadosMismoArtista = List.of(
+            relacionadoValidoTardio,
+            relacionadoFueraDeVentana,
+            eventoActual,
+            relacionadoValidoTemprano
+        );
+
+        when(eventoPublicoService.obtenerEventoPublico(10L)).thenReturn(Optional.of(eventoActual));
+        when(eventoPublicoService.obtenerEventosPublicosFiltrados(isNull(), isNull(), eq(20L), any(LocalDate.class), any(LocalDate.class)))
+            .thenAnswer(invocation -> {
+                LocalDate fechaDesde = invocation.getArgument(3);
+                LocalDate fechaHasta = invocation.getArgument(4);
+                return relacionadosMismoArtista.stream()
+                    .filter(rel -> {
+                        LocalDate fechaRelacionada = rel.getFecha().toLocalDate();
+                        return (fechaDesde == null || !fechaRelacionada.isBefore(fechaDesde))
+                            && (fechaHasta == null || !fechaRelacionada.isAfter(fechaHasta));
+                    })
+                    .toList();
+            });
+
+        String html = mockMvc.perform(get("/eventos/evento/10-" + eventoActual.getSlug()))
+            .andExpect(status().isOk())
+            .andExpect(content().string(containsString("rel=\"canonical\"")))
+            .andExpect(content().string(containsString("http://localhost/eventos/evento/10-" + eventoActual.getSlug())))
+            .andExpect(content().string(containsString("meta name=\"robots\" content=\"index,follow\"")))
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+        String bloqueRelacionados = html.substring(
+            html.indexOf("event-related-list"),
+            html.indexOf("Informaci", html.indexOf("event-related-list"))
+        );
+
+        org.junit.jupiter.api.Assertions.assertTrue(bloqueRelacionados.contains("/eventos/evento/11-"));
+        org.junit.jupiter.api.Assertions.assertTrue(bloqueRelacionados.contains("/eventos/evento/12-"));
+        org.junit.jupiter.api.Assertions.assertFalse(bloqueRelacionados.contains("/eventos/evento/13-"));
+        org.junit.jupiter.api.Assertions.assertFalse(bloqueRelacionados.contains("/eventos/evento/10-"));
+        org.junit.jupiter.api.Assertions.assertTrue(
+            bloqueRelacionados.indexOf("/eventos/evento/11-") < bloqueRelacionados.indexOf("/eventos/evento/12-"),
+            "Los relacionados deben mantenerse ordenados por fecha ascendente"
+        );
+
+        verify(eventoPublicoService).obtenerEventosPublicosFiltrados(
+            isNull(),
+            isNull(),
+            eq(20L),
+            eq(LocalDate.now()),
+            eq(LocalDate.now().plusDays(45))
+        );
+        verify(eventoPublicoService, never()).obtenerEventosPublicosPorArtista(20L);
+    }
+
+    @Test
+    void apiArtista_debeMantenerSemanticaActualSinAplicarVentanaDe45DiasDelDetalle() throws Exception {
+        EventoPublicoDto eventoProximo = crearEventoConDatos(21L, 20L, "Los Satélites", "Lugo", "Lugo", LocalDateTime.now().plusDays(7));
+        EventoPublicoDto eventoLejano = crearEventoConDatos(22L, 20L, "Los Satélites", "Ponferrada", "León", LocalDateTime.now().plusDays(90));
+        List<EventoPublicoDto> eventosApi = List.of(eventoProximo, eventoLejano);
+
+        when(eventoPublicoService.obtenerEventosPublicosPorArtista(20L)).thenReturn(eventosApi);
+        when(eventoPublicoService.obtenerEventosPublicosFiltrados(isNull(), isNull(), eq(20L), any(LocalDate.class), any(LocalDate.class)))
+            .thenAnswer(invocation -> {
+                LocalDate fechaDesde = invocation.getArgument(3);
+                LocalDate fechaHasta = invocation.getArgument(4);
+                return eventosApi.stream()
+                    .filter(rel -> {
+                        LocalDate fechaRelacionada = rel.getFecha().toLocalDate();
+                        return (fechaDesde == null || !fechaRelacionada.isBefore(fechaDesde))
+                            && (fechaHasta == null || !fechaRelacionada.isAfter(fechaHasta));
+                    })
+                    .toList();
+            });
+
+        mockMvc.perform(get("/eventos/api/artista/20"))
+            .andExpect(status().isOk())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$", hasSize(2)))
+            .andExpect(jsonPath("$[0].id").value(21))
+            .andExpect(jsonPath("$[0].pathPublico").value("/eventos/evento/21-los-satelites-lugo-" + eventoProximo.getFecha().toLocalDate()))
+            .andExpect(jsonPath("$[1].id").value(22))
+            .andExpect(jsonPath("$[1].pathPublico").value("/eventos/evento/22-los-satelites-ponferrada-" + eventoLejano.getFecha().toLocalDate()));
+
+        verify(eventoPublicoService).obtenerEventosPublicosPorArtista(20L);
+        verify(eventoPublicoService, never()).obtenerEventosPublicosFiltrados(
+            isNull(),
+            isNull(),
+            eq(20L),
+            any(LocalDate.class),
+            any(LocalDate.class)
+        );
     }
 
     private EventoPublicoDto crearEvento() {

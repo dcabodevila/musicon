@@ -18,6 +18,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -67,7 +70,8 @@ class EventoPublicoSecurityChainMvcTest {
             .build();
 
         when(eventoPublicoService.obtenerEventoPublico(10L)).thenReturn(Optional.of(evento));
-        when(eventoPublicoService.obtenerEventosPublicosPorArtista(20L)).thenReturn(List.of(evento));
+        when(eventoPublicoService.obtenerEventosPublicosFiltrados(isNull(), isNull(), eq(20L), any(), any()))
+            .thenReturn(List.of(evento));
 
         mockMvc.perform(get("/eventos/evento/10-los-satelites-lugo-2026-08-15"))
             .andExpect(status().isOk());

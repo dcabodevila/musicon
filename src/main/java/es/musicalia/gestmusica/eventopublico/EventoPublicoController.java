@@ -43,6 +43,7 @@ public class EventoPublicoController {
     private static final String ORGANIZER_NAME_FALLBACK = "festia.es";
     private static final String PROVINCIA_CORUNA_CANONICA = "Coruña";
     private static final String PROVINCIA_CORUNA_ALIAS = "A Coruña";
+    private static final long EVENTOS_RELACIONADOS_HORIZONTE_DIAS = 45;
 
     private final EventoPublicoService eventoPublicoService;
     private final EventoPublicoCatalogoFacade eventoPublicoCatalogoFacade;
@@ -90,8 +91,15 @@ public class EventoPublicoController {
         mv.addObject("canonicalUrl", urlCanonica);
         mv.addObject("metaRobots", "index,follow");
 
+        LocalDate fechaDesdeRelacionados = LocalDate.now();
         List<EventoPublicoDto> eventosRelacionados = eventoPublicoService
-            .obtenerEventosPublicosPorArtista(evento.getIdArtista())
+            .obtenerEventosPublicosFiltrados(
+                null,
+                null,
+                evento.getIdArtista(),
+                fechaDesdeRelacionados,
+                fechaDesdeRelacionados.plusDays(EVENTOS_RELACIONADOS_HORIZONTE_DIAS)
+            )
             .stream()
             .filter(e -> !e.getId().equals(id))
             .sorted(Comparator.comparing(EventoPublicoDto::getFecha))
