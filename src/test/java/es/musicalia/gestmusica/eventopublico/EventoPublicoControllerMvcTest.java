@@ -1,5 +1,7 @@
 package es.musicalia.gestmusica.eventopublico;
 
+import es.musicalia.gestmusica.generic.CodigoNombreRecord;
+import es.musicalia.gestmusica.localizacion.Provincia;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -116,7 +118,11 @@ class EventoPublicoControllerMvcTest {
     void listadosPublicos_debenEnlazarACorunaConRutaCanonicaDeProvincia() throws Exception {
         when(eventoPublicoService.obtenerEventosPublicosFiltrados(any(), any(), any(), any(), any()))
             .thenReturn(List.of());
-        when(localizacionService.findAllProvincias()).thenReturn(List.of());
+        when(localizacionService.findAllProvincias()).thenReturn(List.of(
+            new CodigoNombreRecord(1L, "A Coruña"),
+            new CodigoNombreRecord(2L, "Otras"),
+            new CodigoNombreRecord(3L, "Provisional")
+        ));
 
         mockMvc.perform(get("/eventos/hoy"))
             .andExpect(status().isOk())
@@ -129,6 +135,70 @@ class EventoPublicoControllerMvcTest {
         mockMvc.perform(get("/eventos/provincia/A%20Coru%C3%B1a"))
             .andExpect(status().isMovedPermanently())
             .andExpect(redirectedUrl("http://localhost/eventos/provincia/Coru%C3%B1a"));
+    }
+
+    @Test
+    void provinciaPublica_debeResolverCorunaConNombreRealDeBbddSinRomperCanonical() throws Exception {
+        EventoPublicoDto evento = crearEventoConDatos(10L, 20L, "Los Satélites", "Santiago", "A Coruña", LocalDateTime.now().plusDays(5));
+        Provincia provincia = new Provincia();
+        provincia.setNombre("A Coruña");
+
+        when(localizacionService.findProvinciaByNombreUpperCase("A Coruña")).thenReturn(Optional.of(provincia));
+        when(eventoPublicoService.obtenerEventosPublicosFiltradosPaginados(eq("A Coruña"), isNull(), isNull(), any(LocalDate.class), isNull(), any()))
+            .thenReturn(new PageImpl<>(List.of(evento), PageRequest.of(0, 20), 1));
+        when(localizacionService.findAllProvincias()).thenReturn(List.of(new CodigoNombreRecord(1L, "A Coruña")));
+        when(localizacionService.findMunicipiosByProvinciaNombre("A Coruña")).thenReturn(List.of());
+
+        mockMvc.perform(get("/eventos/provincia/Coruña"))
+            .andExpect(status().isOk())
+            .andExpect(content().string(containsString("rel=\"canonical\"")))
+            .andExpect(content().string(containsString("http://localhost/eventos/provincia/Coru%C3%B1a")))
+            .andExpect(content().string(not(containsString("http://localhost/eventos/provincia/A%20Coru%C3%B1a"))))
+            .andExpect(content().string(containsString("<option value=\"Coruña\"")))
+            .andExpect(content().string(not(containsString("<option value=\"A Coruña\""))))
+            .andExpect(content().string(not(containsString("<option value=\"Otras\""))))
+            .andExpect(content().string(not(containsString("<option value=\"Provisional\""))));
+
+        verify(localizacionService).findProvinciaByNombreUpperCase("A Coruña");
+        verify(eventoPublicoService).obtenerEventosPublicosFiltradosPaginados(eq("A Coruña"), isNull(), isNull(), any(LocalDate.class), isNull(), any());
+        verify(localizacionService).findMunicipiosByProvinciaNombre("A Coruña");
+    }
+
+    @Test
+    void apiMunicipios_debeResolverCorunaPublicaConNombreRealDeBbdd() throws Exception {
+        Provincia provincia = new Provincia();
+        provincia.setNombre("A Coruña");
+
+        when(localizacionService.findProvinciaByNombreUpperCase("A Coruña")).thenReturn(Optional.of(provincia));
+        when(localizacionService.findMunicipiosByProvinciaNombre("A Coruña"))
+            .thenReturn(List.of(new CodigoNombreRecord(1L, "Coruña, A")));
+
+        mockMvc.perform(get("/eventos/api/municipios").param("provincia", "Coruña"))
+            .andExpect(status().isOk())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$", hasSize(1)))
+            .andExpect(jsonPath("$[0].nombre").value("Coruña, A"))
+            .andExpect(jsonPath("$[0].provincia").value("A Coruña"));
+
+        verify(localizacionService).findProvinciaByNombreUpperCase("A Coruña");
+        verify(localizacionService).findMunicipiosByProvinciaNombre("A Coruña");
+    }
+
+    @Test
+    void sitemap_noDebeGenerarUrlsDeMunicipioParaProvinciasPublicasExcluidas() throws Exception {
+        EventoPublicoDto eventoLugo = crearEventoConDatos(10L, 20L, "Los Satélites", "Lugo", "Lugo", LocalDateTime.now().plusDays(5));
+        EventoPublicoDto eventoOtras = crearEventoConDatos(11L, 21L, "Olympus", "Sin asignar", "Otras", LocalDateTime.now().plusDays(6));
+        EventoPublicoDto eventoProvisional = crearEventoConDatos(12L, 22L, "Panorama", "Genérico", "Provisional", LocalDateTime.now().plusDays(7));
+
+        when(eventoPublicoService.obtenerTodosEventosPublicos())
+            .thenReturn(List.of(eventoLugo, eventoOtras, eventoProvisional));
+
+        mockMvc.perform(get("/eventos/sitemap.xml"))
+            .andExpect(status().isOk())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_XML))
+            .andExpect(content().string(containsString("/eventos/municipio/Lugo")))
+            .andExpect(content().string(not(containsString("/eventos/municipio/Sin%20asignar"))))
+            .andExpect(content().string(not(containsString("/eventos/municipio/Gen%C3%A9rico"))));
     }
 
     @Test
@@ -165,6 +235,30 @@ class EventoPublicoControllerMvcTest {
             .andExpect(content().string(containsString("meta name=\"robots\" content=\"noindex,follow\"")))
             .andExpect(content().string(not(containsString("\"@type\":\"Event\""))))
             .andExpect(content().string(containsString("\"@type\":\"ItemList\"")));
+    }
+
+    @Test
+    void municipioPublico_debeEnlazarProvinciaCorunaConRutaPublicaCanonica() throws Exception {
+        EventoPublicoDto evento = crearEventoConDatos(10L, 20L, "Los Satélites", "Coruña, A", "A Coruña", LocalDateTime.now().plusDays(5));
+        Provincia provincia = new Provincia();
+        provincia.setNombre("A Coruña");
+
+        when(eventoPublicoService.obtenerEventosPublicosFiltradosPaginados(isNull(), eq("Coruña, A"), isNull(), any(LocalDate.class), isNull(), any()))
+            .thenReturn(new PageImpl<>(List.of(evento), PageRequest.of(0, 10), 1));
+        when(localizacionService.findProvinciaByNombreUpperCase("A Coruña")).thenReturn(Optional.of(provincia));
+        when(localizacionService.findAllProvincias()).thenReturn(List.of(new CodigoNombreRecord(1L, "A Coruña")));
+        when(localizacionService.findMunicipiosByProvinciaNombre("A Coruña"))
+            .thenReturn(List.of(new CodigoNombreRecord(1404L, "Coruña, A")));
+
+        mockMvc.perform(get("/eventos/municipio/{municipio}", "Coruña, A"))
+            .andExpect(status().isOk())
+            .andExpect(content().string(containsString("href=\"/eventos/provincia/Coru%C3%B1a\"")))
+            .andExpect(content().string(containsString("http://localhost/eventos/provincia/Coru%C3%B1a")))
+            .andExpect(content().string(not(containsString("/eventos/provincia/A%20Coru%C3%B1a"))))
+            .andExpect(content().string(containsString("<option value=\"Coruña\"")));
+
+        verify(localizacionService).findProvinciaByNombreUpperCase("A Coruña");
+        verify(localizacionService).findMunicipiosByProvinciaNombre("A Coruña");
     }
 
     @Test

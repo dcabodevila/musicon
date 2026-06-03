@@ -69,6 +69,7 @@ $(document).ready(function(){
 
     const camposRango = ['#idFechaDesdeListado', '#idFechaHastaListado'];
     const camposIndividuales = ['#idFecha1', '#idFecha2', '#idFecha3', '#idFecha4', '#idFecha5', '#idFecha6', '#idFecha7'];
+    const $alertaFiltrosRequeridos = $('#listado-filtros-requeridos-alert');
 
     function tieneValor(selector) {
         return $(selector).val() !== '';
@@ -97,6 +98,33 @@ $(document).ready(function(){
 
     window.actualizarModoFechasListado = actualizarModoFechas;
     actualizarModoFechas();
+
+    function obtenerErroresFiltrosRequeridos() {
+        const errores = [];
+
+        if (!($('#agencias').val() || []).length) {
+            errores.push('Selecciona al menos una agencia.');
+        }
+
+        if (!($('#tiposArtista').val() || []).length) {
+            errores.push('Selecciona al menos un tipo de artista.');
+        }
+
+        if (!($('#ccaa').val() || []).length) {
+            errores.push('Selecciona al menos una comunidad del artista.');
+        }
+
+        return errores;
+    }
+
+    function mostrarErroresFiltrosRequeridos(errores) {
+        if (!errores.length) {
+            $alertaFiltrosRequeridos.addClass('d-none').text('');
+            return;
+        }
+
+        $alertaFiltrosRequeridos.removeClass('d-none').html(errores.join('<br>'));
+    }
 
 
     const municipioChoice = new Choices('#municipio-listado');
@@ -132,6 +160,10 @@ $(document).ready(function(){
 
     let ccaaaSelectChoice = new Choices(ccaaSelect, {
             removeItemButton: true
+    });
+
+    $('#agencias, #tiposArtista, #ccaa').on('change', function() {
+        mostrarErroresFiltrosRequeridos(obtenerErroresFiltrosRequeridos());
     });
 
 
@@ -295,6 +327,15 @@ $(document).ready(function(){
                 notif('error','Las fechas no pueden ser iguales. Por favor, corrige los campos.');
                 return;
             }
+
+            const erroresFiltrosRequeridos = obtenerErroresFiltrosRequeridos();
+            if (erroresFiltrosRequeridos.length) {
+                mostrarErroresFiltrosRequeridos(erroresFiltrosRequeridos);
+                notif('error', erroresFiltrosRequeridos.join(' '));
+                return;
+            }
+
+            mostrarErroresFiltrosRequeridos([]);
 
             // Si pasa las validaciones, proceder con AJAX
             generarPresupuestoAjax();
@@ -487,7 +528,7 @@ $(document).ready(function(){
         // Mensajes específicos por código de estado
         switch (status) {
             case 400:
-                return 'Datos del formulario inválidos';
+                return 'Revisa los filtros obligatorios y los datos del formulario';
             case 500:
                 return 'Error interno del servidor';
             case 0:

@@ -43,6 +43,7 @@ public class EventoPublicoController {
     private static final String ORGANIZER_NAME_FALLBACK = "festia.es";
     private static final String PROVINCIA_CORUNA_CANONICA = "Coruña";
     private static final String PROVINCIA_CORUNA_ALIAS = "A Coruña";
+    private static final Set<String> PROVINCIAS_EXCLUIDAS_PUBLICAS = Set.of("provisional", "otras");
     private static final long EVENTOS_RELACIONADOS_HORIZONTE_DIAS = 45;
 
     private final EventoPublicoService eventoPublicoService;
@@ -288,9 +289,9 @@ public class EventoPublicoController {
 
         // Páginas de provincia (una por provincia distinta, excluir "provisional")
         Map<String, List<EventoPublicoDto>> eventosPorProvincia = eventos.stream()
-            .filter(e -> e.getProvincia() != null && !e.getProvincia().isBlank()
-                && !e.getProvincia().toLowerCase().contains("provisional"))
-            .collect(Collectors.groupingBy(EventoPublicoDto::getProvincia));
+            .filter(e -> e.getProvincia() != null && !e.getProvincia().isBlank())
+            .filter(e -> !esProvinciaExcluidaPublica(e.getProvincia()))
+            .collect(Collectors.groupingBy(e -> normalizarProvinciaCanonica(e.getProvincia())));
         for (Map.Entry<String, List<EventoPublicoDto>> entry : eventosPorProvincia.entrySet()) {
             String nombreProvincia = entry.getKey();
             LocalDate lastMod = entry.getValue().stream()
@@ -310,6 +311,7 @@ public class EventoPublicoController {
         // Páginas de municipio (una por municipio distinto)
         Map<String, List<EventoPublicoDto>> eventosPorMunicipio = eventos.stream()
             .filter(e -> e.getMunicipio() != null && !e.getMunicipio().isBlank())
+            .filter(e -> e.getProvincia() != null && !esProvinciaExcluidaPublica(e.getProvincia()))
             .collect(Collectors.groupingBy(EventoPublicoDto::getMunicipio));
         for (Map.Entry<String, List<EventoPublicoDto>> entry : eventosPorMunicipio.entrySet()) {
             String nombreMunicipio = entry.getKey();
@@ -519,29 +521,31 @@ public class EventoPublicoController {
         HttpServletRequest request) {
 
         String provinciaTrim = UriUtils.decode(provincia.trim(), StandardCharsets.UTF_8);
+        String provinciaPublica = normalizarProvinciaCanonica(provinciaTrim);
         log.info("Listando eventos publicos para provincia: {}", provinciaTrim);
 
-        if (PROVINCIA_CORUNA_ALIAS.equalsIgnoreCase(provinciaTrim)) {
-            StringBuilder redirectUrl = new StringBuilder("/eventos/provincia/" + UriUtils.encodePath(PROVINCIA_CORUNA_CANONICA, StandardCharsets.UTF_8));
+        if (!provinciaPublica.equals(provinciaTrim)) {
+            StringBuilder redirectUrl = new StringBuilder("/eventos/provincia/" + UriUtils.encodePath(provinciaPublica, StandardCharsets.UTF_8));
             if (page > 1) {
                 redirectUrl.append("?page=").append(page);
             }
-            log.info("Redirigiendo 301 alias provincia: {} -> {}", provinciaTrim, PROVINCIA_CORUNA_CANONICA);
+            log.info("Redirigiendo 301 alias provincia: {} -> {}", provinciaTrim, provinciaPublica);
             return crearRedireccionPermanente(construirUrlAbsoluta(request, redirectUrl.toString()));
         }
 
         // Buscar provincia para obtener nombre canónico y validar existencia
-        Optional<Provincia> provinciaOpt = localizacionService.findProvinciaByNombreUpperCase(provinciaTrim);
+        String nombreProvinciaConsulta = normalizarProvinciaParaConsulta(provinciaPublica);
+        Optional<Provincia> provinciaOpt = localizacionService.findProvinciaByNombreUpperCase(nombreProvinciaConsulta);
 
         if (provinciaOpt.isEmpty()) {
             // Provincia no existe - dejar que el flujo normal continúe (mostrará vacío)
             // o podríamos devolver 404. Por ahora mantenemos compatibilidad.
             log.warn("Provincia no encontrada: {}", provinciaTrim);
         } else {
-            String nombreCanonico = provinciaOpt.get().getNombre();
+            String nombreCanonico = normalizarProvinciaCanonica(provinciaOpt.get().getNombre());
 
             // 301 Redirect si el casing de la URL no coincide con el nombre canónico de la DB
-            if (!nombreCanonico.equals(provinciaTrim)) {
+            if (!nombreCanonico.equals(provinciaPublica)) {
                 StringBuilder redirectUrl = new StringBuilder("/eventos/provincia/" + UriUtils.encodePath(nombreCanonico, StandardCharsets.UTF_8));
                 if (page > 1) {
                     redirectUrl.append("?page=").append(page);
@@ -552,14 +556,20 @@ public class EventoPublicoController {
         }
 
         // Usar nombre canónico de la DB para SEO
-        String nombreProvinciaCanonico = provinciaOpt.map(Provincia::getNombre).orElse(provinciaTrim);
+        String nombreProvinciaCanonico = provinciaOpt
+            .map(Provincia::getNombre)
+            .map(this::normalizarProvinciaCanonica)
+            .orElse(provinciaPublica);
+        String nombreProvinciaConsultaCanonico = provinciaOpt
+            .map(Provincia::getNombre)
+            .orElse(nombreProvinciaConsulta);
 
         LocalDate fechaDesde = LocalDate.now();
         int pageIndex = Math.max(0, page - 1);
         Pageable pageable = PageRequest.of(pageIndex, 20, Sort.by("fecha").ascending().and(Sort.by("artista.nombre").ascending()));
 
         Page<EventoPublicoDto> paginaEventos = eventoPublicoService.obtenerEventosPublicosFiltradosPaginados(
-            nombreProvinciaCanonico, null, null, fechaDesde, null, pageable);
+            nombreProvinciaConsultaCanonico, null, null, fechaDesde, null, pageable);
 
         int totalPaginas = paginaEventos.getTotalPages();
         if (totalPaginas > 0 && page > totalPaginas) {
@@ -609,7 +619,7 @@ public class EventoPublicoController {
 
         model.addAttribute("provincias", obtenerProvinciasOrdenadas());
         // Pre-cargar municipios de esta provincia (no todos los 8000)
-        model.addAttribute("municipiosProvincia", localizacionService.findMunicipiosByProvinciaNombre(nombreProvinciaCanonico));
+        model.addAttribute("municipiosProvincia", localizacionService.findMunicipiosByProvinciaNombre(nombreProvinciaConsultaCanonico));
         model.addAttribute("artistasDisponibles", obtenerArtistasOrdenados(eventos));
         model.addAttribute("fechaDesde", fechaDesde.toString());
         model.addAttribute("fechaHasta", null);
@@ -671,11 +681,13 @@ public class EventoPublicoController {
             .orElse("");
 
         // Buscar provincia canónica y verificar redirección 301
-        String nombreProvinciaCanonico = provinciaDelMunicipio;
+        String nombreProvinciaCanonico = normalizarProvinciaCanonica(provinciaDelMunicipio);
+        String nombreProvinciaConsultaCanonico = provinciaDelMunicipio;
         if (!provinciaDelMunicipio.isBlank()) {
             Optional<Provincia> provinciaOpt = localizacionService.findProvinciaByNombreUpperCase(provinciaDelMunicipio);
             if (provinciaOpt.isPresent()) {
-                nombreProvinciaCanonico = provinciaOpt.get().getNombre();
+                nombreProvinciaConsultaCanonico = provinciaOpt.get().getNombre();
+                nombreProvinciaCanonico = normalizarProvinciaCanonica(nombreProvinciaConsultaCanonico);
             }
         }
 
@@ -720,7 +732,7 @@ public class EventoPublicoController {
         model.addAttribute("provincias", obtenerProvinciasOrdenadas());
         // Pre-cargar municipios de la provincia de este municipio
         model.addAttribute("municipiosProvincia",
-            nombreProvinciaCanonico.isBlank() ? List.of() : localizacionService.findMunicipiosByProvinciaNombre(nombreProvinciaCanonico));
+            nombreProvinciaConsultaCanonico.isBlank() ? List.of() : localizacionService.findMunicipiosByProvinciaNombre(nombreProvinciaConsultaCanonico));
         model.addAttribute("artistasDisponibles", obtenerArtistasOrdenados(eventos));
         model.addAttribute("fechaDesde", fechaDesde.toString());
         model.addAttribute("fechaHasta", null);
@@ -790,10 +802,11 @@ public class EventoPublicoController {
         }
 
         String provinciaTrim = provincia.trim();
+        String provinciaConsulta = normalizarProvinciaParaConsulta(provinciaTrim);
         log.info("API: Obteniendo municipios para provincia: {}", provinciaTrim);
 
         // Verify province exists (404 if not found)
-        Optional<Provincia> provinciaOpt = localizacionService.findProvinciaByNombreUpperCase(provinciaTrim);
+        Optional<Provincia> provinciaOpt = localizacionService.findProvinciaByNombreUpperCase(provinciaConsulta);
         if (provinciaOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of("error", "Provincia no encontrada"));
@@ -803,7 +816,7 @@ public class EventoPublicoController {
         String nombreCanonico = provinciaOpt.get().getNombre();
 
         // Get municipalities
-        List<CodigoNombreRecord> municipios = localizacionService.findMunicipiosByProvinciaNombre(provinciaTrim);
+        List<CodigoNombreRecord> municipios = localizacionService.findMunicipiosByProvinciaNombre(provinciaConsulta);
 
         // Map to response DTO with canonical province name
         List<MunicipioResponse> response = municipios.stream()
@@ -850,9 +863,31 @@ public class EventoPublicoController {
         return localizacionService.findAllProvincias().stream()
             .map(CodigoNombreRecord::nombre)
             .filter(nombre -> nombre != null && !nombre.isBlank())
+            .map(this::normalizarProvinciaCanonica)
+            .filter(nombre -> !esProvinciaExcluidaPublica(nombre))
             .distinct()
             .sorted(String.CASE_INSENSITIVE_ORDER)
             .collect(Collectors.toList());
+    }
+
+    private String normalizarProvinciaCanonica(String provincia) {
+        if (provincia == null) {
+            return "";
+        }
+        String provinciaTrim = provincia.trim();
+        return PROVINCIA_CORUNA_ALIAS.equalsIgnoreCase(provinciaTrim) ? PROVINCIA_CORUNA_CANONICA : provinciaTrim;
+    }
+
+    private String normalizarProvinciaParaConsulta(String provincia) {
+        if (provincia == null) {
+            return "";
+        }
+        String provinciaTrim = provincia.trim();
+        return PROVINCIA_CORUNA_CANONICA.equalsIgnoreCase(provinciaTrim) ? PROVINCIA_CORUNA_ALIAS : provinciaTrim;
+    }
+
+    private boolean esProvinciaExcluidaPublica(String provincia) {
+        return PROVINCIAS_EXCLUIDAS_PUBLICAS.contains(normalizarProvinciaCanonica(provincia).toLowerCase(Locale.ROOT));
     }
 
     private List<EventoPublicoDto> obtenerArtistasOrdenados(List<EventoPublicoDto> eventos) {

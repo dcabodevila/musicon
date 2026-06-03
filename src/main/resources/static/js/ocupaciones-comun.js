@@ -450,15 +450,14 @@ function evaluarWarningOdgLocalizacion() {
     }
 
     const ID_PROVINCIA_PROVISIONAL = '53';
-    const ID_MUNICIPIO_PROVISIONAL = '8117';
-
+    const ID_PROVINCIA_OTRAS = '55';
     const idProvincia = String($('#provincia-ocupacion').val() || '');
-    const idMunicipio = String($('#municipio-ocupacion').val() || '');
 
-    const provinciaInvalida = idProvincia === '' || idProvincia === ID_PROVINCIA_PROVISIONAL;
-    const municipioInvalido = idMunicipio === '' || idMunicipio === ID_MUNICIPIO_PROVISIONAL;
+    const provinciaInvalida = idProvincia === ''
+        || idProvincia === ID_PROVINCIA_PROVISIONAL
+        || idProvincia === ID_PROVINCIA_OTRAS;
 
-    if (provinciaInvalida || municipioInvalido) {
+    if (provinciaInvalida) {
         $warning.removeClass('d-none');
     } else {
         $warning.addClass('d-none');

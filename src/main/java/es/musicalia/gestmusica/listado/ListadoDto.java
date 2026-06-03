@@ -1,5 +1,6 @@
 package es.musicalia.gestmusica.listado;
 
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,15 +15,16 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ListadoDto {
-    @NotNull
+    @NotNull(message = "Indica para quién es el listado.")
     private String solicitadoPara;
-    @NotNull
+    @NotNull(message = "Selecciona una comunidad autónoma.")
     private Long idCcaa;
-    @NotNull
+    @NotNull(message = "Selecciona una provincia.")
     private Long idProvincia;
     private Long idMunicipio;
     private String localidad;
     private String comentario;
+    @NotNull(message = "Selecciona un tipo de ocupación.")
     private Long idTipoOcupacion;
 
     @DateTimeFormat(pattern = "dd-MM-yyyy")
@@ -44,8 +46,11 @@ public class ListadoDto {
     private LocalDate fecha6;
     @DateTimeFormat(pattern = "dd-MM-yyyy")
     private LocalDate fecha7;
+    @NotEmpty(message = "Selecciona al menos un tipo de artista.")
     private Set<Long> idsTipoArtista = new HashSet<>();
+    @NotEmpty(message = "Selecciona al menos una agencia.")
     private Set<Long> idsAgencias = new HashSet<>();
+    @NotEmpty(message = "Selecciona al menos una comunidad del artista.")
     private Set<Long> idsComunidades = new HashSet<>();
 
 }

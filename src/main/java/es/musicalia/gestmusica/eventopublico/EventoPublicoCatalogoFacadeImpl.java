@@ -20,6 +20,7 @@ public class EventoPublicoCatalogoFacadeImpl implements EventoPublicoCatalogoFac
 
     private static final String PROVINCIA_CORUNA_CANONICA = "Coruña";
     private static final String PROVINCIA_CORUNA_ALIAS = "A Coruña";
+    private static final Set<String> PROVINCIAS_EXCLUIDAS_PUBLICAS = Set.of("provisional", "otras");
     private static final int MAX_DYNAMIC_QUICK_LINKS = 7;
 
     private final EventoPublicoService eventoPublicoService;
@@ -30,17 +31,20 @@ public class EventoPublicoCatalogoFacadeImpl implements EventoPublicoCatalogoFac
         List<EventoPublicoDto> eventosCatalogo = eventoPublicoService.obtenerEventosPublicosFiltrados(
             null, null, null, LocalDate.now(), null);
 
+        String provinciaConsulta = normalizarProvinciaParaConsulta(request.provincia());
         var paginaEventos = eventoPublicoService.obtenerEventosPublicosFiltradosPaginados(
-            request.provincia(), request.municipio(), request.idArtista(), request.fechaDesde(), request.fechaHasta(), request.pageable());
+            provinciaConsulta, request.municipio(), request.idArtista(), request.fechaDesde(), request.fechaHasta(), request.pageable());
 
         List<String> provincias = localizacionService.findAllProvincias().stream()
-            .map(prov -> prov.nombre().trim())
+            .map(prov -> normalizarProvinciaCanonica(prov.nombre()))
             .filter(nombre -> !nombre.isBlank())
+            .filter(nombre -> !esProvinciaExcluidaPublica(nombre))
+            .distinct()
             .sorted(String.CASE_INSENSITIVE_ORDER)
             .collect(Collectors.toList());
 
         List<CodigoNombreRecord> municipiosProvincia = (request.provincia() != null && !request.provincia().isBlank())
-            ? localizacionService.findMunicipiosByProvinciaNombre(request.provincia())
+            ? localizacionService.findMunicipiosByProvinciaNombre(normalizarProvinciaParaConsulta(request.provincia()))
             : List.of();
 
         List<EventoPublicoDto> artistasDisponibles = eventosCatalogo.stream()
@@ -86,6 +90,7 @@ public class EventoPublicoCatalogoFacadeImpl implements EventoPublicoCatalogoFac
             .filter(evento -> evento.getFecha() != null && !evento.getFecha().toLocalDate().isBefore(hoy))
             .filter(evento -> evento.getProvincia() != null && !evento.getProvincia().isBlank())
             .filter(evento -> evento.getMunicipio() != null && !evento.getMunicipio().isBlank())
+            .filter(evento -> !esProvinciaExcluidaPublica(evento.getProvincia()))
             .toList();
 
         List<QuickLinkView> dinamicos = new ArrayList<>();
@@ -156,6 +161,16 @@ public class EventoPublicoCatalogoFacadeImpl implements EventoPublicoCatalogoFac
     private String normalizarProvinciaCanonica(String provincia) {
         if (provincia == null) return "";
         return PROVINCIA_CORUNA_ALIAS.equalsIgnoreCase(provincia.trim()) ? PROVINCIA_CORUNA_CANONICA : provincia.trim();
+    }
+
+    private String normalizarProvinciaParaConsulta(String provincia) {
+        if (provincia == null) return "";
+        String provinciaTrim = provincia.trim();
+        return PROVINCIA_CORUNA_CANONICA.equalsIgnoreCase(provinciaTrim) ? PROVINCIA_CORUNA_ALIAS : provinciaTrim;
+    }
+
+    private boolean esProvinciaExcluidaPublica(String provincia) {
+        return PROVINCIAS_EXCLUIDAS_PUBLICAS.contains(normalizarProvinciaCanonica(provincia).toLowerCase(Locale.ROOT));
     }
 
     private String construirTituloListado(String provincia, String municipio, Long idArtista, int totalEventos) {

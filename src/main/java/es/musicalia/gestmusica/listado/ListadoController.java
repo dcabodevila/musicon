@@ -24,6 +24,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -157,7 +158,7 @@ public class ListadoController {
                         Map.of("reason", "validation")
                 );
                 Map<String, String> errorResponse = new HashMap<>();
-                errorResponse.put("message", "Datos del formulario inválidos");
+                errorResponse.put("message", getValidationMessage(bindingResult));
                 return ResponseEntity.badRequest()
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(errorResponse);
@@ -205,6 +206,20 @@ public class ListadoController {
 
             return new ResponseEntity<>(informeGenerado, headers, HttpStatus.OK);
 
+        } catch (IllegalArgumentException e) {
+            log.warn("Petición de listado inválida", e);
+            functionalEventTracker.track(
+                    FunctionalEventNames.LISTADO_GENERATED,
+                    FunctionalEventOutcome.FAILURE,
+                    user.getUserId(),
+                    user.getUsuario() != null ? user.getUsuario().getUsername() : null,
+                    Map.of("reason", "validation")
+            );
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.badRequest()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(errorResponse);
         } catch (Exception e) {
             log.error("Error generando listado", e);
             functionalEventTracker.track(
@@ -215,7 +230,7 @@ public class ListadoController {
                     Map.of("reason", "unexpected_error")
             );
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("message", "Error al generar el presupuesto: " + e.getMessage());
+            errorResponse.put("message", "Error al generar el listado: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(errorResponse);
@@ -242,6 +257,20 @@ public class ListadoController {
         }
 
         return Optional.empty();
+    }
+
+    private String getValidationMessage(BindingResult bindingResult) {
+        FieldError firstFieldError = bindingResult.getFieldErrors().stream().findFirst().orElse(null);
+        if (firstFieldError != null && firstFieldError.getDefaultMessage() != null && !firstFieldError.getDefaultMessage().isBlank()) {
+            return firstFieldError.getDefaultMessage();
+        }
+
+        if (!bindingResult.getAllErrors().isEmpty() && bindingResult.getAllErrors().get(0).getDefaultMessage() != null
+                && !bindingResult.getAllErrors().get(0).getDefaultMessage().isBlank()) {
+            return bindingResult.getAllErrors().get(0).getDefaultMessage();
+        }
+
+        return "Datos del formulario inválidos";
     }
 
     private List<LocalDate> getIndividualDates(ListadoDto listadoDto) {

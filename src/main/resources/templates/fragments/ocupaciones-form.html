@@ -124,9 +124,9 @@
 <!--                <i class="fas fa-crown text-warning ms-2" title="Funcionalidad Premium"> Premium</i>-->
               </div>
               <div class="card-body">
-                <div th:if="${isArtistaPermiteOdg == true}" id="warning-odg-localizacion" class="alert alert-warning d-none" role="alert">
+                <div th:if="${isArtistaPublicarEventos == true or isArtistaPermiteOdg == true}" id="warning-odg-localizacion" class="alert alert-warning d-none" role="alert">
                   <i class="fas fa-exclamation-triangle me-2"></i>
-                  Esta ocupación se podrá sincronizar cuando tenga asignada provincia y municipio.
+                  Esta ocupación se podrá sincronizar en eventos cuando tenga asignada al menos la provincia.
                 </div>
                 <div class="mb-3 row">
                   <label class="col-form-label col-sm-3 text-sm-end">Hora de actuación (opcional)</label>

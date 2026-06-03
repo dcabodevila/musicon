@@ -146,6 +146,22 @@
             border-color: #93c5fd;
             background: #eff6ff;
         }
+
+        @media (max-width: 767.98px) {
+            .eventos-quick-links {
+                flex-direction: column;
+            }
+
+            .eventos-quick-link--today,
+            .eventos-quick-link--weekend {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .eventos-quick-link--dynamic {
+                display: none;
+            }
+        }
     </style>
     <th:block th:replace="~{fragments/google-analytics :: gtm-head}"/>
     <th:block th:replace="~{fragments/google-analytics :: ga4-head}"/>

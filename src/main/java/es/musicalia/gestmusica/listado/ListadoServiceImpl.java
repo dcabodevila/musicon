@@ -163,6 +163,7 @@ public class ListadoServiceImpl implements ListadoService {
         String fileNameToExport = "Listado_".concat(TipoOcupacionEnum.getDescripcionById(listadoDto.getIdTipoOcupacion())).concat(DateUtils.getDateStr(new Date(), "ddMMyyyyHHmmss")).concat(".pdf");
 
         List<LocalDate> dateList = sortDates(listadoDto.getFecha1(), listadoDto.getFecha2(), listadoDto.getFecha3(), listadoDto.getFecha4(), listadoDto.getFecha5(), listadoDto.getFecha6(), listadoDto.getFecha7());
+        validateRequiredFilters(listadoDto);
         validateDateSelection(listadoDto, dateList);
 
         parametros.put("colNames", getColNamesListadoFechas());
@@ -425,6 +426,20 @@ public class ListadoServiceImpl implements ListadoService {
 
         if (hasDateRange && !dateList.isEmpty()) {
             throw new IllegalArgumentException("No mezcles rango de fechas con fechas sueltas. Borra uno de los dos bloques.");
+        }
+    }
+
+    private void validateRequiredFilters(ListadoDto listadoDto) {
+        if (listadoDto.getIdsAgencias() == null || listadoDto.getIdsAgencias().isEmpty()) {
+            throw new IllegalArgumentException("Selecciona al menos una agencia.");
+        }
+
+        if (listadoDto.getIdsTipoArtista() == null || listadoDto.getIdsTipoArtista().isEmpty()) {
+            throw new IllegalArgumentException("Selecciona al menos un tipo de artista.");
+        }
+
+        if (listadoDto.getIdsComunidades() == null || listadoDto.getIdsComunidades().isEmpty()) {
+            throw new IllegalArgumentException("Selecciona al menos una comunidad del artista.");
         }
     }
 
