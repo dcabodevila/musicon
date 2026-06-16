@@ -123,6 +123,9 @@ class EventoPublicoControllerMvcTest {
             new CodigoNombreRecord(2L, "Otras"),
             new CodigoNombreRecord(3L, "Provisional")
         ));
+        when(eventoPublicoCatalogoFacade.obtenerQuickLinksPublicos()).thenReturn(List.of(
+            new EventoPublicoCatalogoFacade.QuickLinkView("Fiestas en Coruña", "/eventos/provincia/Coruña", "province", true)
+        ));
 
         mockMvc.perform(get("/eventos/hoy"))
             .andExpect(status().isOk())
@@ -148,12 +151,16 @@ class EventoPublicoControllerMvcTest {
             .thenReturn(new PageImpl<>(List.of(evento), PageRequest.of(0, 20), 1));
         when(localizacionService.findAllProvincias()).thenReturn(List.of(new CodigoNombreRecord(1L, "A Coruña")));
         when(localizacionService.findMunicipiosByProvinciaNombre("A Coruña")).thenReturn(List.of());
+        when(eventoPublicoCatalogoFacade.obtenerQuickLinksPublicos("Coruña", null)).thenReturn(List.of(
+            new EventoPublicoCatalogoFacade.QuickLinkView("Fiestas hoy", "/eventos/hoy", "today", false)
+        ));
 
         mockMvc.perform(get("/eventos/provincia/Coruña"))
             .andExpect(status().isOk())
             .andExpect(content().string(containsString("rel=\"canonical\"")))
             .andExpect(content().string(containsString("http://localhost/eventos/provincia/Coru%C3%B1a")))
             .andExpect(content().string(not(containsString("http://localhost/eventos/provincia/A%20Coru%C3%B1a"))))
+            .andExpect(content().string(containsString("href=\"/eventos/hoy\"")))
             .andExpect(content().string(containsString("<option value=\"Coruña\"")))
             .andExpect(content().string(not(containsString("<option value=\"A Coruña\""))))
             .andExpect(content().string(not(containsString("<option value=\"Otras\""))))
@@ -162,6 +169,7 @@ class EventoPublicoControllerMvcTest {
         verify(localizacionService).findProvinciaByNombreUpperCase("A Coruña");
         verify(eventoPublicoService).obtenerEventosPublicosFiltradosPaginados(eq("A Coruña"), isNull(), isNull(), any(LocalDate.class), isNull(), any());
         verify(localizacionService).findMunicipiosByProvinciaNombre("A Coruña");
+        verify(eventoPublicoCatalogoFacade).obtenerQuickLinksPublicos("Coruña", null);
     }
 
     @Test
@@ -249,9 +257,13 @@ class EventoPublicoControllerMvcTest {
         when(localizacionService.findAllProvincias()).thenReturn(List.of(new CodigoNombreRecord(1L, "A Coruña")));
         when(localizacionService.findMunicipiosByProvinciaNombre("A Coruña"))
             .thenReturn(List.of(new CodigoNombreRecord(1404L, "Coruña, A")));
+        when(eventoPublicoCatalogoFacade.obtenerQuickLinksPublicos("Coruña", "Coruña, A")).thenReturn(List.of(
+            new EventoPublicoCatalogoFacade.QuickLinkView("Fiestas hoy", "/eventos/hoy", "today", false)
+        ));
 
         mockMvc.perform(get("/eventos/municipio/{municipio}", "Coruña, A"))
             .andExpect(status().isOk())
+            .andExpect(content().string(containsString("href=\"/eventos/hoy\"")))
             .andExpect(content().string(containsString("href=\"/eventos/provincia/Coru%C3%B1a\"")))
             .andExpect(content().string(containsString("http://localhost/eventos/provincia/Coru%C3%B1a")))
             .andExpect(content().string(not(containsString("/eventos/provincia/A%20Coru%C3%B1a"))))
@@ -259,6 +271,7 @@ class EventoPublicoControllerMvcTest {
 
         verify(localizacionService).findProvinciaByNombreUpperCase("A Coruña");
         verify(localizacionService).findMunicipiosByProvinciaNombre("A Coruña");
+        verify(eventoPublicoCatalogoFacade).obtenerQuickLinksPublicos("Coruña", "Coruña, A");
     }
 
     @Test
@@ -279,8 +292,8 @@ class EventoPublicoControllerMvcTest {
     @Test
     void listadoCatalogo_debeRenderizarQuickLinksSSRsinBloquesSecundarios() throws Exception {
         LocalDate hoy = LocalDate.now();
-        LocalDate sabado = siguienteSabado();
-        LocalDate domingo = sabado.plusDays(1);
+        LocalDate viernes = siguienteViernes();
+        LocalDate domingo = domingoObjetivo();
 
         List<EventoPublicoDto> catalogo = Stream.of(
                 crearEventoConDatos(10L, 20L, "Los Satélites", "Lugo", "Lugo", hoy.plusDays(2).atTime(22, 0)),
@@ -304,7 +317,7 @@ class EventoPublicoControllerMvcTest {
             .andExpect(content().string(not(containsString("Próximas actuaciones confirmadas"))))
             .andExpect(content().string(not(containsString("Orquestas y artistas con más fechas próximas"))))
             .andExpect(content().string(containsString("href=\"/eventos/hoy\"")))
-            .andExpect(content().string(containsString("href=\"/eventos?desde=" + sabado + "&amp;hasta=" + domingo + "\"")))
+            .andExpect(content().string(containsString("href=\"/eventos?desde=" + viernes + "&amp;hasta=" + domingo + "\"")))
             .andReturn()
             .getResponse()
             .getContentAsString();
@@ -398,7 +411,7 @@ class EventoPublicoControllerMvcTest {
             isNull(),
             eq(20L),
             eq(LocalDate.now()),
-            eq(LocalDate.now().plusDays(45))
+            eq(LocalDate.now().plusDays(EventoPublicoConstantes.HORIZONTE_DIAS_PUBLICOS))
         );
         verify(eventoPublicoService, never()).obtenerEventosPublicosPorArtista(20L);
     }
@@ -460,9 +473,17 @@ class EventoPublicoControllerMvcTest {
             .build();
     }
 
-    private LocalDate siguienteSabado() {
+    private LocalDate siguienteViernes() {
         LocalDate fecha = LocalDate.now();
-        while (fecha.getDayOfWeek().getValue() != 6) {
+        while (fecha.getDayOfWeek() != java.time.DayOfWeek.FRIDAY) {
+            fecha = fecha.plusDays(1);
+        }
+        return fecha;
+    }
+
+    private LocalDate domingoObjetivo() {
+        LocalDate fecha = LocalDate.now();
+        while (fecha.getDayOfWeek() != java.time.DayOfWeek.SUNDAY) {
             fecha = fecha.plusDays(1);
         }
         return fecha;
@@ -479,6 +500,16 @@ class EventoPublicoControllerMvcTest {
     }
 
     private void stubCatalogoFacade(List<EventoPublicoDto> catalogo, long total) {
+        List<EventoPublicoCatalogoFacade.QuickLinkView> quickLinks = List.of(
+            new EventoPublicoCatalogoFacade.QuickLinkView("Fiestas hoy", "/eventos/hoy", "today", false),
+            new EventoPublicoCatalogoFacade.QuickLinkView(
+                "Fiestas este fin de semana",
+                "/eventos?desde=" + siguienteViernes() + "&hasta=" + domingoObjetivo(),
+                "weekend",
+                false
+            )
+        );
+
         when(eventoPublicoCatalogoFacade.prepararCatalogoPublico(any()))
             .thenReturn(new EventoPublicoCatalogoFacade.EventoPublicoCatalogoView(
                 new PageImpl<>(catalogo, PageRequest.of(0, 20), total),
@@ -486,17 +517,10 @@ class EventoPublicoControllerMvcTest {
                 List.of(),
                 List.of(),
                 catalogo,
-                List.of(
-                    new EventoPublicoCatalogoFacade.QuickLinkView("Fiestas hoy", "/eventos/hoy", "today", false),
-                    new EventoPublicoCatalogoFacade.QuickLinkView(
-                        "Fiestas este fin de semana",
-                        "/eventos?desde=" + siguienteSabado() + "&hasta=" + siguienteSabado().plusDays(1),
-                        "weekend",
-                        false
-                    )
-                ),
+                quickLinks,
                 "Orquestas, verbenas y actuaciones musicales en España | Festia",
                 "Consulta fiestas, verbenas, orquestas y actuaciones musicales de próximos eventos en España"
             ));
+        when(eventoPublicoCatalogoFacade.obtenerQuickLinksPublicos()).thenReturn(quickLinks);
     }
 }

@@ -11,6 +11,10 @@ public interface EventoPublicoCatalogoFacade {
 
     EventoPublicoCatalogoView prepararCatalogoPublico(EventoPublicoCatalogoRequest request);
 
+    List<QuickLinkView> obtenerQuickLinksPublicos();
+
+    List<QuickLinkView> obtenerQuickLinksPublicos(String provincia, String municipio);
+
     record EventoPublicoCatalogoRequest(
         String provincia,
         String municipio,

@@ -371,7 +371,7 @@
 
                             <nav class="eventos-quick-links"
                                  aria-label="Accesos rápidos de fiestas y verbenas"
-                                 th:if="${contextoPagina == 'catalogo' and quickLinks != null and !#lists.isEmpty(quickLinks)}">
+                                 th:if="${quickLinks != null and !#lists.isEmpty(quickLinks)}">
                                 <a th:each="quickLink : ${quickLinks}"
                                    th:href="${quickLink.href}"
                                    th:text="${quickLink.label}"

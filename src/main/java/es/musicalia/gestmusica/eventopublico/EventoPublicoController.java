@@ -44,8 +44,6 @@ public class EventoPublicoController {
     private static final String PROVINCIA_CORUNA_CANONICA = "Coruña";
     private static final String PROVINCIA_CORUNA_ALIAS = "A Coruña";
     private static final Set<String> PROVINCIAS_EXCLUIDAS_PUBLICAS = Set.of("provisional", "otras");
-    private static final long EVENTOS_RELACIONADOS_HORIZONTE_DIAS = 45;
-
     private final EventoPublicoService eventoPublicoService;
     private final EventoPublicoCatalogoFacade eventoPublicoCatalogoFacade;
     private final LocalizacionService localizacionService;
@@ -99,7 +97,7 @@ public class EventoPublicoController {
                 null,
                 evento.getIdArtista(),
                 fechaDesdeRelacionados,
-                fechaDesdeRelacionados.plusDays(EVENTOS_RELACIONADOS_HORIZONTE_DIAS)
+                fechaDesdeRelacionados.plusDays(EventoPublicoConstantes.HORIZONTE_DIAS_PUBLICOS)
             )
             .stream()
             .filter(e -> !e.getId().equals(id))
@@ -158,6 +156,7 @@ public class EventoPublicoController {
         // Municipio select starts empty (AJAX loaded)
         model.addAttribute("municipiosProvincia", List.of());
         model.addAttribute("artistasDisponibles", obtenerArtistasOrdenados(eventosCatalogo));
+        model.addAttribute("quickLinks", eventoPublicoCatalogoFacade.obtenerQuickLinksPublicos());
         model.addAttribute("contextoPagina", "artista");
 
         if (!eventos.isEmpty()) {
@@ -371,6 +370,7 @@ public class EventoPublicoController {
         model.addAttribute("provincias", obtenerProvinciasOrdenadas());
         model.addAttribute("municipiosProvincia", List.of());
         model.addAttribute("artistasDisponibles", obtenerArtistasOrdenados(eventos));
+        model.addAttribute("quickLinks", eventoPublicoCatalogoFacade.obtenerQuickLinksPublicos());
         model.addAttribute("ogImage", EVENT_IMAGE_URL);
         model.addAttribute("contextoPagina", "hoy");
         model.addAttribute("urlBase", "/eventos/hoy");
@@ -412,7 +412,7 @@ public class EventoPublicoController {
         log.info("Listando todos los eventos publicos");
 
         LocalDate fechaDesde = LocalDate.now();
-        LocalDate fechaHasta = LocalDate.now().plusDays(45);
+        LocalDate fechaHasta = LocalDate.now().plusDays(EventoPublicoConstantes.HORIZONTE_DIAS_PUBLICOS);
 
         try {
             if (desde != null && !desde.isBlank()) {
@@ -470,7 +470,7 @@ public class EventoPublicoController {
         model.addAttribute("descripcion", descripcion);
         model.addAttribute("fechaDesde", fechaDesde.toString());
         model.addAttribute("fechaHasta", fechaHasta != null ? fechaHasta.toString() : null);
-        model.addAttribute("fechaMaxFiltro", LocalDate.now().plusDays(45).toString());
+        model.addAttribute("fechaMaxFiltro", LocalDate.now().plusDays(EventoPublicoConstantes.HORIZONTE_DIAS_PUBLICOS).toString());
         model.addAttribute("canonicalUrl", canonicalUrl);
         model.addAttribute("metaRobots", noIndex ? "noindex,follow" : "index,follow");
         model.addAttribute("provincia", provincia);
@@ -621,6 +621,7 @@ public class EventoPublicoController {
         // Pre-cargar municipios de esta provincia (no todos los 8000)
         model.addAttribute("municipiosProvincia", localizacionService.findMunicipiosByProvinciaNombre(nombreProvinciaConsultaCanonico));
         model.addAttribute("artistasDisponibles", obtenerArtistasOrdenados(eventos));
+        model.addAttribute("quickLinks", eventoPublicoCatalogoFacade.obtenerQuickLinksPublicos(nombreProvinciaCanonico, null));
         model.addAttribute("fechaDesde", fechaDesde.toString());
         model.addAttribute("fechaHasta", null);
         model.addAttribute("idArtistaSeleccionado", null);
@@ -734,6 +735,7 @@ public class EventoPublicoController {
         model.addAttribute("municipiosProvincia",
             nombreProvinciaConsultaCanonico.isBlank() ? List.of() : localizacionService.findMunicipiosByProvinciaNombre(nombreProvinciaConsultaCanonico));
         model.addAttribute("artistasDisponibles", obtenerArtistasOrdenados(eventos));
+        model.addAttribute("quickLinks", eventoPublicoCatalogoFacade.obtenerQuickLinksPublicos(nombreProvinciaCanonico, municipioTrim));
         model.addAttribute("fechaDesde", fechaDesde.toString());
         model.addAttribute("fechaHasta", null);
         model.addAttribute("idArtistaSeleccionado", null);

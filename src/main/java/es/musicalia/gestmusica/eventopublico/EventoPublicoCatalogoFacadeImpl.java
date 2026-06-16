@@ -21,6 +21,7 @@ public class EventoPublicoCatalogoFacadeImpl implements EventoPublicoCatalogoFac
     private static final String PROVINCIA_CORUNA_CANONICA = "Coruña";
     private static final String PROVINCIA_CORUNA_ALIAS = "A Coruña";
     private static final Set<String> PROVINCIAS_EXCLUIDAS_PUBLICAS = Set.of("provisional", "otras");
+    private static final Set<String> MUNICIPIOS_EXCLUIDOS_PUBLICOS = Set.of("provisional", "sin asignar");
     private static final int MAX_DYNAMIC_QUICK_LINKS = 7;
 
     private final EventoPublicoService eventoPublicoService;
@@ -28,8 +29,9 @@ public class EventoPublicoCatalogoFacadeImpl implements EventoPublicoCatalogoFac
 
     @Override
     public EventoPublicoCatalogoView prepararCatalogoPublico(EventoPublicoCatalogoRequest request) {
+        LocalDate hoy = LocalDate.now();
         List<EventoPublicoDto> eventosCatalogo = eventoPublicoService.obtenerEventosPublicosFiltrados(
-            null, null, null, LocalDate.now(), null);
+            null, null, null, hoy, hoy.plusDays(EventoPublicoConstantes.HORIZONTE_DIAS_PUBLICOS));
 
         String provinciaConsulta = normalizarProvinciaParaConsulta(request.provincia());
         var paginaEventos = eventoPublicoService.obtenerEventosPublicosFiltradosPaginados(
@@ -71,16 +73,33 @@ public class EventoPublicoCatalogoFacadeImpl implements EventoPublicoCatalogoFac
         );
     }
 
-    private List<QuickLinkView> construirQuickLinks(List<EventoPublicoDto> eventosCatalogo) {
+    @Override
+    public List<QuickLinkView> obtenerQuickLinksPublicos() {
+        return obtenerQuickLinksPublicos(null, null);
+    }
+
+    @Override
+    public List<QuickLinkView> obtenerQuickLinksPublicos(String provincia, String municipio) {
         LocalDate hoy = LocalDate.now();
-        LocalDate sabado = calcularSabadoObjetivo(hoy);
-        LocalDate domingo = sabado.plusDays(1);
+        List<EventoPublicoDto> eventosCatalogo = eventoPublicoService.obtenerEventosPublicosFiltrados(
+            null, null, null, hoy, hoy.plusDays(EventoPublicoConstantes.HORIZONTE_DIAS_PUBLICOS));
+        return construirQuickLinks(eventosCatalogo, provincia, municipio);
+    }
+
+    private List<QuickLinkView> construirQuickLinks(List<EventoPublicoDto> eventosCatalogo) {
+        return construirQuickLinks(eventosCatalogo, null, null);
+    }
+
+    private List<QuickLinkView> construirQuickLinks(List<EventoPublicoDto> eventosCatalogo, String provincia, String municipio) {
+        LocalDate hoy = LocalDate.now();
+        LocalDate viernes = calcularViernesObjetivo(hoy);
+        LocalDate domingo = calcularDomingoObjetivo(hoy);
 
         List<QuickLinkView> quickLinks = new ArrayList<>();
         quickLinks.add(new QuickLinkView("Fiestas hoy", "/eventos/hoy", "today", false));
         quickLinks.add(new QuickLinkView(
             "Fiestas este fin de semana",
-            "/eventos?desde=" + sabado + "&hasta=" + domingo,
+            "/eventos?desde=" + viernes + "&hasta=" + domingo,
             "weekend",
             false
         ));
@@ -91,11 +110,19 @@ public class EventoPublicoCatalogoFacadeImpl implements EventoPublicoCatalogoFac
             .filter(evento -> evento.getProvincia() != null && !evento.getProvincia().isBlank())
             .filter(evento -> evento.getMunicipio() != null && !evento.getMunicipio().isBlank())
             .filter(evento -> !esProvinciaExcluidaPublica(evento.getProvincia()))
+            .filter(evento -> !esMunicipioExcluidoPublico(evento.getMunicipio()))
             .toList();
 
         List<QuickLinkView> dinamicos = new ArrayList<>();
-        dinamicos.addAll(obtenerQuickLinksProvincia(eventosValidos));
-        dinamicos.addAll(obtenerQuickLinksMunicipio(eventosValidos));
+        String provinciaContexto = normalizarProvinciaCanonica(provincia);
+        String municipioContexto = municipio == null ? "" : municipio.trim();
+
+        if (!provinciaContexto.isBlank()) {
+            dinamicos.addAll(obtenerQuickLinksMunicipioContextuales(eventosValidos, provinciaContexto, municipioContexto));
+        } else {
+            dinamicos.addAll(obtenerQuickLinksProvincia(eventosValidos));
+            dinamicos.addAll(obtenerQuickLinksMunicipio(eventosValidos));
+        }
 
         quickLinks.addAll(dinamicos.stream().limit(MAX_DYNAMIC_QUICK_LINKS).toList());
         return quickLinks;
@@ -150,11 +177,44 @@ public class EventoPublicoCatalogoFacadeImpl implements EventoPublicoCatalogoFac
             .toList();
     }
 
-    private LocalDate calcularSabadoObjetivo(LocalDate fechaBase) {
+    private List<QuickLinkView> obtenerQuickLinksMunicipioContextuales(List<EventoPublicoDto> eventosValidos, String provincia, String municipioActual) {
+        return eventosValidos.stream()
+            .filter(evento -> provincia.equalsIgnoreCase(normalizarProvinciaCanonica(evento.getProvincia())))
+            .filter(evento -> municipioActual.isBlank() || !municipioActual.equalsIgnoreCase(evento.getMunicipio().trim()))
+            .collect(Collectors.groupingBy(
+                evento -> evento.getMunicipio().trim(),
+                Collectors.collectingAndThen(Collectors.toList(), lista -> new ConteoQuickLink(
+                    lista.get(0).getMunicipio().trim(),
+                    lista.size(),
+                    lista.stream().map(e -> e.getFecha().toLocalDate()).min(LocalDate::compareTo).orElse(LocalDate.MAX)
+                ))
+            ))
+            .values().stream()
+            .sorted(Comparator.comparingLong(ConteoQuickLink::totalActuaciones).reversed()
+                .thenComparing(ConteoQuickLink::primeraFecha)
+                .thenComparing(ConteoQuickLink::nombre, String.CASE_INSENSITIVE_ORDER))
+            .map(conteo -> new QuickLinkView(
+                "Verbenas en " + conteo.nombre(),
+                "/eventos/municipio/" + UriUtils.encodePath(conteo.nombre(), StandardCharsets.UTF_8),
+                "municipality",
+                true
+            ))
+            .toList();
+    }
+
+    static LocalDate calcularViernesObjetivo(LocalDate fechaBase) {
         return switch (fechaBase.getDayOfWeek()) {
-            case SATURDAY -> fechaBase;
-            case SUNDAY -> fechaBase.minusDays(1);
-            default -> fechaBase.with(DayOfWeek.SATURDAY);
+            case FRIDAY, SATURDAY -> fechaBase.with(DayOfWeek.FRIDAY);
+            case SUNDAY -> fechaBase.minusDays(2);
+            default -> fechaBase.with(DayOfWeek.FRIDAY);
+        };
+    }
+
+    static LocalDate calcularDomingoObjetivo(LocalDate fechaBase) {
+        return switch (fechaBase.getDayOfWeek()) {
+            case FRIDAY, SATURDAY -> fechaBase.with(DayOfWeek.SUNDAY);
+            case SUNDAY -> fechaBase;
+            default -> fechaBase.with(DayOfWeek.SUNDAY);
         };
     }
 
@@ -171,6 +231,11 @@ public class EventoPublicoCatalogoFacadeImpl implements EventoPublicoCatalogoFac
 
     private boolean esProvinciaExcluidaPublica(String provincia) {
         return PROVINCIAS_EXCLUIDAS_PUBLICAS.contains(normalizarProvinciaCanonica(provincia).toLowerCase(Locale.ROOT));
+    }
+
+    private boolean esMunicipioExcluidoPublico(String municipio) {
+        return municipio != null
+            && MUNICIPIOS_EXCLUIDOS_PUBLICOS.contains(municipio.trim().toLowerCase(Locale.ROOT));
     }
 
     private String construirTituloListado(String provincia, String municipio, Long idArtista, int totalEventos) {
