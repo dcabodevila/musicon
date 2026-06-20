@@ -1,8 +1,4 @@
 package es.musicalia.gestmusica.eventopublico;
-
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.generic.CodigoNombreRecord;
 import es.musicalia.gestmusica.localizacion.Provincia;
@@ -28,9 +24,12 @@ import org.springframework.web.util.UriUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -40,14 +39,9 @@ import java.util.stream.Collectors;
 public class EventoPublicoController {
     private static final String EVENT_IMAGE_URL =
         "https://res.cloudinary.com/hseoceuyz/image/upload/v1760835633/landing-festia_epbr7a.png";
-    private static final String ORGANIZER_NAME_FALLBACK = "festia.es";
-    private static final String PROVINCIA_CORUNA_CANONICA = "Coruña";
-    private static final String PROVINCIA_CORUNA_ALIAS = "A Coruña";
-    private static final Set<String> PROVINCIAS_EXCLUIDAS_PUBLICAS = Set.of("provisional", "otras");
     private final EventoPublicoService eventoPublicoService;
     private final EventoPublicoCatalogoFacade eventoPublicoCatalogoFacade;
     private final LocalizacionService localizacionService;
-    private final ObjectMapper objectMapper;
     private final EventoPublicStructuredDataBuilder eventoPublicStructuredDataBuilder;
 
     /**
@@ -57,7 +51,9 @@ public class EventoPublicoController {
     @GetMapping("/evento/{id:\\d+}")
     public RedirectView redirigirEventoPublicoLegacy(@PathVariable Long id, HttpServletRequest request) {
         EventoPublicoDto evento = obtenerEventoONotFound(id);
-        return crearRedireccionPermanente(construirUrlAbsoluta(request, evento.getPathPublico()));
+        return EventoPublicoUrlHelper.crearRedireccionPermanente(
+            EventoPublicoUrlHelper.construirUrlAbsoluta(request, evento.getPathPublico())
+        );
     }
 
     /**
@@ -69,10 +65,10 @@ public class EventoPublicoController {
 
         EventoPublicoDto evento = obtenerEventoONotFound(id);
         String slugCanonico = evento.getSlug();
-        String urlCanonica = construirUrlAbsoluta(request, evento.getPathPublico());
+        String urlCanonica = EventoPublicoUrlHelper.construirUrlAbsoluta(request, evento.getPathPublico());
 
         if (!slugCanonico.equals(slug)) {
-            return new ModelAndView(crearRedireccionPermanente(urlCanonica));
+            return new ModelAndView(EventoPublicoUrlHelper.crearRedireccionPermanente(urlCanonica));
         }
 
         ModelAndView mv = new ModelAndView("evento-publico");
@@ -81,8 +77,8 @@ public class EventoPublicoController {
             ? EventoPublicoDto.normalizeImageUrl(evento.getLogoArtista())
             : EVENT_IMAGE_URL;
         mv.addObject("jsonLd", eventoPublicStructuredDataBuilder.buildEventJsonLd(evento, urlCanonica, imageUrl));
-        String baseUrl = construirBaseUrl(request);
-        mv.addObject("breadcrumbJsonLd", buildBreadcrumbJsonLd(baseUrl, evento));
+        String baseUrl = EventoPublicoUrlHelper.construirBaseUrl(request);
+        mv.addObject("breadcrumbJsonLd", eventoPublicStructuredDataBuilder.buildBreadcrumbEventoJsonLd(baseUrl, evento));
         mv.addObject("titulo", evento.getTituloSeo());
         mv.addObject("descripcion", evento.getDescripcionSeo());
         mv.addObject("ogImage", imageUrl);
@@ -91,21 +87,15 @@ public class EventoPublicoController {
         mv.addObject("metaRobots", "index,follow");
 
         LocalDate fechaDesdeRelacionados = LocalDate.now();
-        List<EventoPublicoDto> eventosRelacionados = eventoPublicoService
-            .obtenerEventosPublicosFiltrados(
-                null,
-                null,
-                evento.getIdArtista(),
-                fechaDesdeRelacionados,
-                fechaDesdeRelacionados.plusDays(EventoPublicoConstantes.HORIZONTE_DIAS_PUBLICOS)
-            )
-            .stream()
-            .filter(e -> !e.getId().equals(id))
-            .sorted(Comparator.comparing(EventoPublicoDto::getFecha))
-            .limit(10)
-            .collect(Collectors.toList());
+        List<EventoPublicoDto> eventosRelacionados = eventoPublicoService.obtenerEventosRelacionadosPublicos(
+            id,
+            evento.getIdArtista(),
+            fechaDesdeRelacionados,
+            fechaDesdeRelacionados.plusDays(EventoPublicoConstantes.HORIZONTE_DIAS_PUBLICOS),
+            10
+        );
         mv.addObject("eventosRelacionados", eventosRelacionados);
-        mv.addObject("googleCalendarUrl", buildGoogleCalendarUrl(evento, baseUrl));
+        mv.addObject("googleCalendarUrl", EventoPublicoCalendarLinks.buildGoogleCalendarUrl(evento, baseUrl));
 
         return mv;
     }
@@ -120,7 +110,7 @@ public class EventoPublicoController {
         return ResponseEntity.ok()
             .contentType(MediaType.parseMediaType("text/calendar; charset=UTF-8"))
             .header("Content-Disposition", "attachment; filename=\"festia-evento-" + id + ".ics\"")
-            .body(buildIcal(evento));
+            .body(EventoPublicoCalendarLinks.buildIcal(evento));
     }
 
     /**
@@ -137,7 +127,7 @@ public class EventoPublicoController {
         Map<LocalDate, List<EventoPublicoDto>> eventosPorDia = eventos.stream()
             .collect(Collectors.groupingBy(e -> e.getFecha().toLocalDate(), TreeMap::new, Collectors.toList()));
 
-        String canonicalUrl = construirUrlAbsoluta(request, "/eventos/artista/" + idArtista);
+        String canonicalUrl = EventoPublicoUrlHelper.construirUrlAbsoluta(request, "/eventos/artista/" + idArtista);
         boolean indexable = !eventos.isEmpty();
 
         model.addAttribute("eventos", eventos);
@@ -152,10 +142,10 @@ public class EventoPublicoController {
         model.addAttribute("idArtistaSeleccionado", idArtista);
         List<EventoPublicoDto> eventosCatalogo = eventoPublicoService.obtenerEventosPublicosFiltrados(
             null, null, null, LocalDate.now(), null);
-        model.addAttribute("provincias", obtenerProvinciasOrdenadas());
+        model.addAttribute("provincias", eventoPublicoCatalogoFacade.obtenerProvinciasPublicasOrdenadas());
         // Municipio select starts empty (AJAX loaded)
         model.addAttribute("municipiosProvincia", List.of());
-        model.addAttribute("artistasDisponibles", obtenerArtistasOrdenados(eventosCatalogo));
+        model.addAttribute("artistasDisponibles", eventoPublicoCatalogoFacade.obtenerArtistasOrdenados(eventosCatalogo));
         model.addAttribute("quickLinks", eventoPublicoCatalogoFacade.obtenerQuickLinksPublicos());
         model.addAttribute("contextoPagina", "artista");
 
@@ -167,13 +157,13 @@ public class EventoPublicoController {
                 + ". Fiestas, verbenas y actuaciones con horarios y ubicaciones en Festia.";
             String ogImage = (primerEvento.getLogoArtista() != null && !primerEvento.getLogoArtista().isBlank())
                 ? EventoPublicoDto.normalizeImageUrl(primerEvento.getLogoArtista()) : EVENT_IMAGE_URL;
-            String baseUrl = construirBaseUrl(request);
+            String baseUrl = EventoPublicoUrlHelper.construirBaseUrl(request);
 
             model.addAttribute("nombreArtista", nombreArtista);
             model.addAttribute("titulo", titulo);
             model.addAttribute("descripcion", descripcion);
             model.addAttribute("ogImage", ogImage);
-            model.addAttribute("jsonLd", buildArtistaJsonLd(eventos, baseUrl, canonicalUrl, titulo, descripcion, ogImage));
+            model.addAttribute("jsonLd", eventoPublicStructuredDataBuilder.buildArtistaJsonLd(eventos, baseUrl, canonicalUrl, titulo, descripcion, ogImage));
         } else {
             model.addAttribute("nombreArtista", "Artista");
             model.addAttribute("titulo", "No hay próximas actuaciones | Festia");
@@ -235,7 +225,7 @@ public class EventoPublicoController {
         log.info("Generando sitemap de eventos publicos");
 
         List<EventoPublicoDto> eventos = eventoPublicoService.obtenerTodosEventosPublicos();
-        String baseUrl = construirBaseUrl(request);
+        String baseUrl = EventoPublicoUrlHelper.construirBaseUrl(request);
 
         StringBuilder sitemap = new StringBuilder();
         sitemap.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
@@ -289,8 +279,8 @@ public class EventoPublicoController {
         // Páginas de provincia (una por provincia distinta, excluir "provisional")
         Map<String, List<EventoPublicoDto>> eventosPorProvincia = eventos.stream()
             .filter(e -> e.getProvincia() != null && !e.getProvincia().isBlank())
-            .filter(e -> !esProvinciaExcluidaPublica(e.getProvincia()))
-            .collect(Collectors.groupingBy(e -> normalizarProvinciaCanonica(e.getProvincia())));
+            .filter(e -> !eventoPublicoCatalogoFacade.esProvinciaExcluidaPublica(e.getProvincia()))
+            .collect(Collectors.groupingBy(e -> eventoPublicoCatalogoFacade.normalizarProvinciaCanonica(e.getProvincia())));
         for (Map.Entry<String, List<EventoPublicoDto>> entry : eventosPorProvincia.entrySet()) {
             String nombreProvincia = entry.getKey();
             LocalDate lastMod = entry.getValue().stream()
@@ -310,7 +300,7 @@ public class EventoPublicoController {
         // Páginas de municipio (una por municipio distinto)
         Map<String, List<EventoPublicoDto>> eventosPorMunicipio = eventos.stream()
             .filter(e -> e.getMunicipio() != null && !e.getMunicipio().isBlank())
-            .filter(e -> e.getProvincia() != null && !esProvinciaExcluidaPublica(e.getProvincia()))
+            .filter(e -> e.getProvincia() != null && !eventoPublicoCatalogoFacade.esProvinciaExcluidaPublica(e.getProvincia()))
             .collect(Collectors.groupingBy(EventoPublicoDto::getMunicipio));
         for (Map.Entry<String, List<EventoPublicoDto>> entry : eventosPorMunicipio.entrySet()) {
             String nombreMunicipio = entry.getKey();
@@ -351,8 +341,8 @@ public class EventoPublicoController {
 
         String titulo = "Fiestas hoy, verbenas y actuaciones musicales | Festia";
         String descripcion = "Consulta fiestas hoy, verbenas hoy y actuaciones musicales de hoy en España. Orquestas, grupos y artistas con fecha, hora y ubicación en Festia.";
-        String canonicalUrl = construirUrlAbsoluta(request, "/eventos/hoy");
-        String baseUrl = construirBaseUrl(request);
+        String canonicalUrl = EventoPublicoUrlHelper.construirUrlAbsoluta(request, "/eventos/hoy");
+        String baseUrl = EventoPublicoUrlHelper.construirBaseUrl(request);
         boolean indexable = !eventos.isEmpty();
 
         model.addAttribute("eventosPorDia", eventosPorDia);
@@ -367,9 +357,9 @@ public class EventoPublicoController {
         model.addAttribute("provincia", null);
         model.addAttribute("municipio", null);
         model.addAttribute("idArtistaSeleccionado", null);
-        model.addAttribute("provincias", obtenerProvinciasOrdenadas());
+        model.addAttribute("provincias", eventoPublicoCatalogoFacade.obtenerProvinciasPublicasOrdenadas());
         model.addAttribute("municipiosProvincia", List.of());
-        model.addAttribute("artistasDisponibles", obtenerArtistasOrdenados(eventos));
+        model.addAttribute("artistasDisponibles", eventoPublicoCatalogoFacade.obtenerArtistasOrdenados(eventos));
         model.addAttribute("quickLinks", eventoPublicoCatalogoFacade.obtenerQuickLinksPublicos());
         model.addAttribute("ogImage", EVENT_IMAGE_URL);
         model.addAttribute("contextoPagina", "hoy");
@@ -387,8 +377,8 @@ public class EventoPublicoController {
                 .limit(50)
                 .collect(Collectors.toList());
             if (!eventosJsonLd.isEmpty()) {
-                model.addAttribute("jsonLd", buildItemListJsonLd(eventosJsonLd, baseUrl, titulo, canonicalUrl));
-                model.addAttribute("breadcrumbJsonLd", buildBreadcrumbHoyJsonLd(baseUrl));
+                model.addAttribute("jsonLd", eventoPublicStructuredDataBuilder.buildItemListJsonLd(eventosJsonLd, baseUrl, titulo, canonicalUrl));
+                model.addAttribute("breadcrumbJsonLd", eventoPublicStructuredDataBuilder.buildBreadcrumbHoyJsonLd(baseUrl));
             }
         }
 
@@ -462,7 +452,7 @@ public class EventoPublicoController {
 
         String titulo = catalogoView.titulo();
         String descripcion = catalogoView.descripcion();
-        String canonicalUrl = construirUrlAbsoluta(request, "/eventos");
+        String canonicalUrl = EventoPublicoUrlHelper.construirUrlAbsoluta(request, "/eventos");
 
         model.addAttribute("eventosPorDia", eventosPorDia);
         model.addAttribute("eventos", eventos);
@@ -496,13 +486,13 @@ public class EventoPublicoController {
         }
 
         if (!noIndex && !eventos.isEmpty()) {
-            String baseUrl = construirBaseUrl(request);
+            String baseUrl = EventoPublicoUrlHelper.construirBaseUrl(request);
             List<EventoPublicoDto> eventosParaJsonLd = eventos.stream()
                 .filter(EventoPublicoDto::isIndexableForJsonLd)
                 .limit(50)
                 .collect(Collectors.toList());
             if (!eventosParaJsonLd.isEmpty()) {
-                model.addAttribute("jsonLd", buildItemListJsonLd(eventosParaJsonLd, baseUrl, titulo, canonicalUrl));
+                model.addAttribute("jsonLd", eventoPublicStructuredDataBuilder.buildItemListJsonLd(eventosParaJsonLd, baseUrl, titulo, canonicalUrl));
             }
         }
 
@@ -521,7 +511,7 @@ public class EventoPublicoController {
         HttpServletRequest request) {
 
         String provinciaTrim = UriUtils.decode(provincia.trim(), StandardCharsets.UTF_8);
-        String provinciaPublica = normalizarProvinciaCanonica(provinciaTrim);
+        String provinciaPublica = eventoPublicoCatalogoFacade.normalizarProvinciaCanonica(provinciaTrim);
         log.info("Listando eventos publicos para provincia: {}", provinciaTrim);
 
         if (!provinciaPublica.equals(provinciaTrim)) {
@@ -530,11 +520,13 @@ public class EventoPublicoController {
                 redirectUrl.append("?page=").append(page);
             }
             log.info("Redirigiendo 301 alias provincia: {} -> {}", provinciaTrim, provinciaPublica);
-            return crearRedireccionPermanente(construirUrlAbsoluta(request, redirectUrl.toString()));
+            return EventoPublicoUrlHelper.crearRedireccionPermanente(
+                EventoPublicoUrlHelper.construirUrlAbsoluta(request, redirectUrl.toString())
+            );
         }
 
         // Buscar provincia para obtener nombre canónico y validar existencia
-        String nombreProvinciaConsulta = normalizarProvinciaParaConsulta(provinciaPublica);
+        String nombreProvinciaConsulta = eventoPublicoCatalogoFacade.normalizarProvinciaParaConsulta(provinciaPublica);
         Optional<Provincia> provinciaOpt = localizacionService.findProvinciaByNombreUpperCase(nombreProvinciaConsulta);
 
         if (provinciaOpt.isEmpty()) {
@@ -542,7 +534,7 @@ public class EventoPublicoController {
             // o podríamos devolver 404. Por ahora mantenemos compatibilidad.
             log.warn("Provincia no encontrada: {}", provinciaTrim);
         } else {
-            String nombreCanonico = normalizarProvinciaCanonica(provinciaOpt.get().getNombre());
+            String nombreCanonico = eventoPublicoCatalogoFacade.normalizarProvinciaCanonica(provinciaOpt.get().getNombre());
 
             // 301 Redirect si el casing de la URL no coincide con el nombre canónico de la DB
             if (!nombreCanonico.equals(provinciaPublica)) {
@@ -551,14 +543,16 @@ public class EventoPublicoController {
                     redirectUrl.append("?page=").append(page);
                 }
                 log.info("Redirigiendo 301: {} -> {}", provinciaTrim, nombreCanonico);
-                return "redirect:" + redirectUrl.toString();
+                return EventoPublicoUrlHelper.crearRedireccionPermanente(
+                    EventoPublicoUrlHelper.construirUrlAbsoluta(request, redirectUrl.toString())
+                );
             }
         }
 
         // Usar nombre canónico de la DB para SEO
         String nombreProvinciaCanonico = provinciaOpt
             .map(Provincia::getNombre)
-            .map(this::normalizarProvinciaCanonica)
+            .map(eventoPublicoCatalogoFacade::normalizarProvinciaCanonica)
             .orElse(provinciaPublica);
         String nombreProvinciaConsultaCanonico = provinciaOpt
             .map(Provincia::getNombre)
@@ -581,9 +575,9 @@ public class EventoPublicoController {
         Map<LocalDate, List<EventoPublicoDto>> eventosPorDia = eventos.stream()
             .collect(Collectors.groupingBy(e -> e.getFecha().toLocalDate(), TreeMap::new, Collectors.toList()));
 
-        String baseUrl = construirBaseUrl(request);
+        String baseUrl = EventoPublicoUrlHelper.construirBaseUrl(request);
         String pathProvincia = "/eventos/provincia/" + UriUtils.encodePath(nombreProvinciaCanonico, StandardCharsets.UTF_8);
-        String canonicalUrl = construirUrlAbsoluta(request, pathProvincia);
+        String canonicalUrl = EventoPublicoUrlHelper.construirUrlAbsoluta(request, pathProvincia);
         boolean indexable = paginaEventos.getTotalElements() > 0;
 
         String year = String.valueOf(java.time.Year.now().getValue());
@@ -612,15 +606,15 @@ public class EventoPublicoController {
                 .limit(50)
                 .collect(Collectors.toList());
             if (!eventosJsonLd.isEmpty()) {
-                model.addAttribute("jsonLd", buildItemListJsonLd(eventosJsonLd, baseUrl, titulo, canonicalUrl));
-                model.addAttribute("breadcrumbJsonLd", buildBreadcrumbProvinciaJsonLd(baseUrl, nombreProvinciaCanonico));
+                model.addAttribute("jsonLd", eventoPublicStructuredDataBuilder.buildItemListJsonLd(eventosJsonLd, baseUrl, titulo, canonicalUrl));
+                model.addAttribute("breadcrumbJsonLd", eventoPublicStructuredDataBuilder.buildBreadcrumbProvinciaJsonLd(baseUrl, nombreProvinciaCanonico));
             }
         }
 
-        model.addAttribute("provincias", obtenerProvinciasOrdenadas());
+        model.addAttribute("provincias", eventoPublicoCatalogoFacade.obtenerProvinciasPublicasOrdenadas());
         // Pre-cargar municipios de esta provincia (no todos los 8000)
-        model.addAttribute("municipiosProvincia", localizacionService.findMunicipiosByProvinciaNombre(nombreProvinciaConsultaCanonico));
-        model.addAttribute("artistasDisponibles", obtenerArtistasOrdenados(eventos));
+        model.addAttribute("municipiosProvincia", eventoPublicoCatalogoFacade.obtenerMunicipiosPublicosPorProvincia(nombreProvinciaConsultaCanonico));
+        model.addAttribute("artistasDisponibles", eventoPublicoCatalogoFacade.obtenerArtistasOrdenados(eventos));
         model.addAttribute("quickLinks", eventoPublicoCatalogoFacade.obtenerQuickLinksPublicos(nombreProvinciaCanonico, null));
         model.addAttribute("fechaDesde", fechaDesde.toString());
         model.addAttribute("fechaHasta", null);
@@ -682,13 +676,13 @@ public class EventoPublicoController {
             .orElse("");
 
         // Buscar provincia canónica y verificar redirección 301
-        String nombreProvinciaCanonico = normalizarProvinciaCanonica(provinciaDelMunicipio);
+        String nombreProvinciaCanonico = eventoPublicoCatalogoFacade.normalizarProvinciaCanonica(provinciaDelMunicipio);
         String nombreProvinciaConsultaCanonico = provinciaDelMunicipio;
         if (!provinciaDelMunicipio.isBlank()) {
             Optional<Provincia> provinciaOpt = localizacionService.findProvinciaByNombreUpperCase(provinciaDelMunicipio);
             if (provinciaOpt.isPresent()) {
                 nombreProvinciaConsultaCanonico = provinciaOpt.get().getNombre();
-                nombreProvinciaCanonico = normalizarProvinciaCanonica(nombreProvinciaConsultaCanonico);
+                nombreProvinciaCanonico = eventoPublicoCatalogoFacade.normalizarProvinciaCanonica(nombreProvinciaConsultaCanonico);
             }
         }
 
@@ -696,9 +690,9 @@ public class EventoPublicoController {
         // no tenemos tabla de municipios canónicos en este momento.
         // La provincia sí se normaliza mediante findProvinciaByNombreUpperCase.
 
-        String baseUrl = construirBaseUrl(request);
+        String baseUrl = EventoPublicoUrlHelper.construirBaseUrl(request);
         String pathMunicipio = "/eventos/municipio/" + UriUtils.encodePath(municipioTrim, StandardCharsets.UTF_8);
-        String canonicalUrl = construirUrlAbsoluta(request, pathMunicipio);
+        String canonicalUrl = EventoPublicoUrlHelper.construirUrlAbsoluta(request, pathMunicipio);
         boolean indexable = paginaEventos.getTotalElements() > 0;
 
         String year = String.valueOf(java.time.Year.now().getValue());
@@ -724,17 +718,17 @@ public class EventoPublicoController {
                 .limit(50)
                 .collect(Collectors.toList());
             if (!eventosJsonLd.isEmpty()) {
-                model.addAttribute("jsonLd", buildItemListJsonLd(eventosJsonLd, baseUrl, tituloConProvincia, canonicalUrl));
+                model.addAttribute("jsonLd", eventoPublicStructuredDataBuilder.buildItemListJsonLd(eventosJsonLd, baseUrl, tituloConProvincia, canonicalUrl));
                 model.addAttribute("breadcrumbJsonLd",
-                    buildBreadcrumbMunicipioJsonLd(baseUrl, municipioTrim, nombreProvinciaCanonico));
+                    eventoPublicStructuredDataBuilder.buildBreadcrumbMunicipioJsonLd(baseUrl, municipioTrim, nombreProvinciaCanonico));
             }
         }
 
-        model.addAttribute("provincias", obtenerProvinciasOrdenadas());
+        model.addAttribute("provincias", eventoPublicoCatalogoFacade.obtenerProvinciasPublicasOrdenadas());
         // Pre-cargar municipios de la provincia de este municipio
         model.addAttribute("municipiosProvincia",
-            nombreProvinciaConsultaCanonico.isBlank() ? List.of() : localizacionService.findMunicipiosByProvinciaNombre(nombreProvinciaConsultaCanonico));
-        model.addAttribute("artistasDisponibles", obtenerArtistasOrdenados(eventos));
+            nombreProvinciaConsultaCanonico.isBlank() ? List.of() : eventoPublicoCatalogoFacade.obtenerMunicipiosPublicosPorProvincia(nombreProvinciaConsultaCanonico));
+        model.addAttribute("artistasDisponibles", eventoPublicoCatalogoFacade.obtenerArtistasOrdenados(eventos));
         model.addAttribute("quickLinks", eventoPublicoCatalogoFacade.obtenerQuickLinksPublicos(nombreProvinciaCanonico, municipioTrim));
         model.addAttribute("fechaDesde", fechaDesde.toString());
         model.addAttribute("fechaHasta", null);
@@ -804,7 +798,7 @@ public class EventoPublicoController {
         }
 
         String provinciaTrim = provincia.trim();
-        String provinciaConsulta = normalizarProvinciaParaConsulta(provinciaTrim);
+        String provinciaConsulta = eventoPublicoCatalogoFacade.normalizarProvinciaParaConsulta(provinciaTrim);
         log.info("API: Obteniendo municipios para provincia: {}", provinciaTrim);
 
         // Verify province exists (404 if not found)
@@ -837,392 +831,7 @@ public class EventoPublicoController {
         return eventoOpt.get();
     }
 
-    private String construirBaseUrl(HttpServletRequest request) {
-        String scheme = request.getScheme();
-        String serverName = request.getServerName();
-        int serverPort = request.getServerPort();
-        String contextPath = request.getContextPath();
-
-        String baseUrl = scheme + "://" + serverName;
-        if ((scheme.equals("http") && serverPort != 80) || (scheme.equals("https") && serverPort != 443)) {
-            baseUrl += ":" + serverPort;
-        }
-        return baseUrl + contextPath;
-    }
-
-    private String construirUrlAbsoluta(HttpServletRequest request, String path) {
-        return construirBaseUrl(request) + path;
-    }
-
-    private RedirectView crearRedireccionPermanente(String destinationUrl) {
-        RedirectView redirectView = new RedirectView(destinationUrl);
-        redirectView.setExposeModelAttributes(false);
-        redirectView.setStatusCode(HttpStatus.MOVED_PERMANENTLY);
-        return redirectView;
-    }
-
-    private List<String> obtenerProvinciasOrdenadas() {
-        return localizacionService.findAllProvincias().stream()
-            .map(CodigoNombreRecord::nombre)
-            .filter(nombre -> nombre != null && !nombre.isBlank())
-            .map(this::normalizarProvinciaCanonica)
-            .filter(nombre -> !esProvinciaExcluidaPublica(nombre))
-            .distinct()
-            .sorted(String.CASE_INSENSITIVE_ORDER)
-            .collect(Collectors.toList());
-    }
-
-    private String normalizarProvinciaCanonica(String provincia) {
-        if (provincia == null) {
-            return "";
-        }
-        String provinciaTrim = provincia.trim();
-        return PROVINCIA_CORUNA_ALIAS.equalsIgnoreCase(provinciaTrim) ? PROVINCIA_CORUNA_CANONICA : provinciaTrim;
-    }
-
-    private String normalizarProvinciaParaConsulta(String provincia) {
-        if (provincia == null) {
-            return "";
-        }
-        String provinciaTrim = provincia.trim();
-        return PROVINCIA_CORUNA_CANONICA.equalsIgnoreCase(provinciaTrim) ? PROVINCIA_CORUNA_ALIAS : provinciaTrim;
-    }
-
-    private boolean esProvinciaExcluidaPublica(String provincia) {
-        return PROVINCIAS_EXCLUIDAS_PUBLICAS.contains(normalizarProvinciaCanonica(provincia).toLowerCase(Locale.ROOT));
-    }
-
-    private List<EventoPublicoDto> obtenerArtistasOrdenados(List<EventoPublicoDto> eventos) {
-        Map<Long, EventoPublicoDto> artistasUnicos = eventos.stream()
-            .collect(Collectors.toMap(
-                EventoPublicoDto::getIdArtista,
-                evento -> evento,
-                (first, second) -> first,
-                LinkedHashMap::new));
-
-        return artistasUnicos.values().stream()
-            .sorted(Comparator.comparing(EventoPublicoDto::getNombreArtista, String.CASE_INSENSITIVE_ORDER))
-            .collect(Collectors.toList());
-    }
-
-    private String construirTituloListado(String provincia, String municipio, Long idArtista) {
-        return construirTituloListado(provincia, municipio, idArtista, 0);
-    }
-
-    private String construirTituloListado(String provincia, String municipio, Long idArtista, int totalEventos) {
-        String year = String.valueOf(java.time.Year.now().getValue());
-        if (idArtista != null) {
-            return "Conciertos y Fechas del Artista | Festia";
-        }
-        if (municipio != null && !municipio.isBlank() && provincia != null && !provincia.isBlank()) {
-            return "Fiestas y Orquestas en " + municipio + ", " + provincia + " " + year + " | Festia";
-        }
-        if (provincia != null && !provincia.isBlank()) {
-            return "Fiestas y Orquestas en " + provincia + " " + year + " | Festia";
-        }
-        if (totalEventos > 0) {
-            return "Orquestas, verbenas y actuaciones musicales en España | Festia";
-        }
-        return "Orquestas, verbenas y actuaciones musicales en España | Festia";
-    }
-
-    private String construirDescripcionListado(String provincia, String municipio, Long idArtista) {
-        if (idArtista != null) {
-            return "Descubre todas las fechas confirmadas del artista. Consulta conciertos, verbenas y fiestas populares con horarios y ubicaciones en Festia.";
-        }
-        if (municipio != null && !municipio.isBlank() && provincia != null && !provincia.isBlank()) {
-            return "Consulta las fiestas y verbenas de " + municipio + " (" + provincia + "). Orquestas, discotecas móviles y grupos musicales con fechas y horarios confirmados.";
-        }
-        if (provincia != null && !provincia.isBlank()) {
-            return "Agenda de fiestas populares y verbenas en " + provincia + ". Encuentra orquestas, grupos musicales y discotecas móviles filtrando por municipio y fecha.";
-        }
-        return "Consulta fiestas, verbenas, orquestas y actuaciones musicales de próximos eventos en España. " +
-            "Descubre eventos por provincia, municipio y fecha con información actualizada cada día en Festia.";
-    }
-
     private ProvinciaSeoMetadata.SeoCopy obtenerSeoProvinciaCopy(String provincia, String year) {
         return ProvinciaSeoMetadata.seoCopyPara(provincia, year);
-    }
-
-    // ── Calendario helpers ──────────────────────────────────────────────────────
-
-    private String buildGoogleCalendarUrl(EventoPublicoDto evento, String baseUrl) {
-        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
-        String start = evento.getFecha().format(fmt);
-        String end   = evento.getFecha().plusHours(3).format(fmt);
-        String location = (evento.getLugarParaMapa() != null ? evento.getLugarParaMapa() + ", " : "")
-            + evento.getMunicipio() + ", " + evento.getProvincia();
-
-        return "https://calendar.google.com/calendar/render?action=TEMPLATE"
-            + "&text=" + UriUtils.encodeQueryParam(evento.getTituloEvento(), StandardCharsets.UTF_8)
-            + "&dates=" + start + "/" + end
-            + "&details=" + UriUtils.encodeQueryParam(evento.getDescripcionSeo(), StandardCharsets.UTF_8)
-            + "&location=" + UriUtils.encodeQueryParam(location, StandardCharsets.UTF_8)
-            + "&sprop=url:" + UriUtils.encodeQueryParam(baseUrl + evento.getPathPublico(), StandardCharsets.UTF_8);
-    }
-
-    private String buildIcal(EventoPublicoDto evento) {
-        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
-        String now   = LocalDateTime.now().format(fmt) + "Z";
-        String start = evento.getFecha().format(fmt);
-        String end   = evento.getFecha().plusHours(3).format(fmt);
-        String location = (evento.getLugarParaMapa() != null ? evento.getLugarParaMapa() + ", " : "")
-            + evento.getMunicipio() + ", " + evento.getProvincia();
-
-        return "BEGIN:VCALENDAR\r\n"
-            + "VERSION:2.0\r\n"
-            + "PRODID:-//festia.es//Festia//ES\r\n"
-            + "BEGIN:VEVENT\r\n"
-            + "UID:" + evento.getId() + "@festia.es\r\n"
-            + "DTSTAMP:" + now + "\r\n"
-            + "DTSTART;TZID=Europe/Madrid:" + start + "\r\n"
-            + "DTEND;TZID=Europe/Madrid:" + end + "\r\n"
-            + "SUMMARY:" + escapeIcal(evento.getTituloEvento()) + "\r\n"
-            + "DESCRIPTION:" + escapeIcal(evento.getDescripcionSeo()) + "\r\n"
-            + "LOCATION:" + escapeIcal(location) + "\r\n"
-            + "END:VEVENT\r\n"
-            + "END:VCALENDAR";
-    }
-
-    private String escapeIcal(String s) {
-        if (s == null) return "";
-        return s.replace("\\", "\\\\").replace(";", "\\;").replace(",", "\\,").replace("\n", "\\n");
-    }
-
-    // ── JSON-LD helpers ─────────────────────────────────────────────────────────
-
-    private String serializarJsonLd(Object data) {
-        try {
-            return objectMapper.writeValueAsString(data).replace("</", "<\\/");
-        } catch (JsonProcessingException ex) {
-            log.error("Error serializando JSON-LD", ex);
-            return "{}";
-        }
-    }
-
-    /**
-     * Genera JSON-LD ItemList con los MusicEvent de la lista de eventos.
-     */
-    private String buildItemListJsonLd(List<EventoPublicoDto> eventos, String baseUrl, String listName, String listUrl) {
-        List<Map<String, Object>> items = new ArrayList<>();
-        int position = 1;
-        for (EventoPublicoDto evento : eventos) {
-            String organizerName = (evento.getNombreAgencia() != null && !evento.getNombreAgencia().isBlank())
-                ? evento.getNombreAgencia() : ORGANIZER_NAME_FALLBACK;
-String imageUrl = (evento.getLogoArtista() != null && !evento.getLogoArtista().isBlank())
-                ? EventoPublicoDto.normalizeImageUrl(evento.getLogoArtista()) : EVENT_IMAGE_URL;
-            Map<String, Object> listItem = new LinkedHashMap<>();
-            listItem.put("@type", "ListItem");
-            listItem.put("position", position++);
-            listItem.put("item", evento.toJsonLdMap(baseUrl, organizerName, evento.getUrlOrganizador(), imageUrl));
-            items.add(listItem);
-        }
-
-        Map<String, Object> root = new LinkedHashMap<>();
-        root.put("@context", "https://schema.org");
-        root.put("@type", "ItemList");
-        root.put("name", listName);
-        root.put("url", listUrl);
-        root.put("numberOfItems", items.size());
-        root.put("itemListElement", items);
-
-        return serializarJsonLd(root);
-    }
-
-    /**
-     * Genera JSON-LD combinado [MusicGroup, ItemList] para la página de artista.
-     */
-    private String buildArtistaJsonLd(List<EventoPublicoDto> eventos, String baseUrl, String artistaUrl,
-                                      String listName, String listDescription, String imageUrl) {
-        EventoPublicoDto primerEvento = eventos.get(0);
-
-        Map<String, Object> musicGroup = new LinkedHashMap<>();
-        musicGroup.put("@context", "https://schema.org");
-        musicGroup.put("@type", "MusicGroup");
-        musicGroup.put("name", primerEvento.getNombreArtista());
-        musicGroup.put("url", artistaUrl);
-        if (imageUrl != null && !imageUrl.isBlank()) {
-            musicGroup.put("image", imageUrl);
-        }
-        musicGroup.put("description", listDescription);
-
-        List<Map<String, Object>> items = new ArrayList<>();
-        int position = 1;
-        for (EventoPublicoDto evento : eventos.subList(0, Math.min(eventos.size(), 50))) {
-            String organizerName = (evento.getNombreAgencia() != null && !evento.getNombreAgencia().isBlank())
-                ? evento.getNombreAgencia() : ORGANIZER_NAME_FALLBACK;
-            String evtImage = (evento.getLogoArtista() != null && !evento.getLogoArtista().isBlank())
-                ? EventoPublicoDto.normalizeImageUrl(evento.getLogoArtista()) : EVENT_IMAGE_URL;
-            Map<String, Object> listItem = new LinkedHashMap<>();
-            listItem.put("@type", "ListItem");
-            listItem.put("position", position++);
-            listItem.put("item", evento.toJsonLdMap(baseUrl, organizerName, evento.getUrlOrganizador(), evtImage));
-            items.add(listItem);
-        }
-
-        Map<String, Object> itemList = new LinkedHashMap<>();
-        itemList.put("@context", "https://schema.org");
-        itemList.put("@type", "ItemList");
-        itemList.put("name", listName);
-        itemList.put("url", artistaUrl);
-        itemList.put("numberOfItems", items.size());
-        itemList.put("itemListElement", items);
-
-        return serializarJsonLd(List.of(musicGroup, itemList));
-    }
-
-    /**
-     * Genera JSON-LD BreadcrumbList para la página de provincia (3 niveles).
-     */
-    private String buildBreadcrumbProvinciaJsonLd(String baseUrl, String provincia) {
-        List<Map<String, Object>> breadcrumbs = new ArrayList<>();
-
-        Map<String, Object> item1 = new LinkedHashMap<>();
-        item1.put("@type", "ListItem");
-        item1.put("position", 1);
-        item1.put("name", "Festia");
-        item1.put("item", baseUrl);
-        breadcrumbs.add(item1);
-
-        Map<String, Object> item2 = new LinkedHashMap<>();
-        item2.put("@type", "ListItem");
-        item2.put("position", 2);
-        item2.put("name", "Eventos");
-        item2.put("item", baseUrl + "/eventos");
-        breadcrumbs.add(item2);
-
-        Map<String, Object> item3 = new LinkedHashMap<>();
-        item3.put("@type", "ListItem");
-        item3.put("position", 3);
-        item3.put("name", provincia);
-        item3.put("item", baseUrl + "/eventos/provincia/" + UriUtils.encodePath(provincia, StandardCharsets.UTF_8));
-        breadcrumbs.add(item3);
-
-        Map<String, Object> root = new LinkedHashMap<>();
-        root.put("@context", "https://schema.org");
-        root.put("@type", "BreadcrumbList");
-        root.put("itemListElement", breadcrumbs);
-
-        return serializarJsonLd(root);
-    }
-
-    /**
-     * Genera JSON-LD BreadcrumbList para la página de municipio (4 niveles).
-     */
-    private String buildBreadcrumbMunicipioJsonLd(String baseUrl, String municipio, String provincia) {
-        List<Map<String, Object>> breadcrumbs = new ArrayList<>();
-
-        Map<String, Object> item1 = new LinkedHashMap<>();
-        item1.put("@type", "ListItem");
-        item1.put("position", 1);
-        item1.put("name", "Festia");
-        item1.put("item", baseUrl);
-        breadcrumbs.add(item1);
-
-        Map<String, Object> item2 = new LinkedHashMap<>();
-        item2.put("@type", "ListItem");
-        item2.put("position", 2);
-        item2.put("name", "Eventos");
-        item2.put("item", baseUrl + "/eventos");
-        breadcrumbs.add(item2);
-
-        if (!provincia.isBlank()) {
-            Map<String, Object> item3 = new LinkedHashMap<>();
-            item3.put("@type", "ListItem");
-            item3.put("position", 3);
-            item3.put("name", provincia);
-            item3.put("item", baseUrl + "/eventos/provincia/" + UriUtils.encodePath(provincia, StandardCharsets.UTF_8));
-            breadcrumbs.add(item3);
-        }
-
-        Map<String, Object> itemMunicipio = new LinkedHashMap<>();
-        itemMunicipio.put("@type", "ListItem");
-        itemMunicipio.put("position", provincia.isBlank() ? 3 : 4);
-        itemMunicipio.put("name", municipio);
-        itemMunicipio.put("item", baseUrl + "/eventos/municipio/" + UriUtils.encodePath(municipio, StandardCharsets.UTF_8));
-        breadcrumbs.add(itemMunicipio);
-
-        Map<String, Object> root = new LinkedHashMap<>();
-        root.put("@context", "https://schema.org");
-        root.put("@type", "BreadcrumbList");
-        root.put("itemListElement", breadcrumbs);
-
-        return serializarJsonLd(root);
-    }
-
-    /**
-     * Genera JSON-LD BreadcrumbList para la landing de eventos de hoy.
-     */
-    private String buildBreadcrumbHoyJsonLd(String baseUrl) {
-        List<Map<String, Object>> breadcrumbs = new ArrayList<>();
-
-        Map<String, Object> item1 = new LinkedHashMap<>();
-        item1.put("@type", "ListItem");
-        item1.put("position", 1);
-        item1.put("name", "Festia");
-        item1.put("item", baseUrl);
-        breadcrumbs.add(item1);
-
-        Map<String, Object> item2 = new LinkedHashMap<>();
-        item2.put("@type", "ListItem");
-        item2.put("position", 2);
-        item2.put("name", "Eventos");
-        item2.put("item", baseUrl + "/eventos");
-        breadcrumbs.add(item2);
-
-        Map<String, Object> item3 = new LinkedHashMap<>();
-        item3.put("@type", "ListItem");
-        item3.put("position", 3);
-        item3.put("name", "Eventos de hoy");
-        item3.put("item", baseUrl + "/eventos/hoy");
-        breadcrumbs.add(item3);
-
-        Map<String, Object> root = new LinkedHashMap<>();
-        root.put("@context", "https://schema.org");
-        root.put("@type", "BreadcrumbList");
-        root.put("itemListElement", breadcrumbs);
-
-        return serializarJsonLd(root);
-    }
-
-    /**
-     * Genera JSON-LD BreadcrumbList para la página de evento individual.
-     */
-    private String buildBreadcrumbJsonLd(String baseUrl, EventoPublicoDto evento) {
-        List<Map<String, Object>> breadcrumbs = new ArrayList<>();
-
-        Map<String, Object> item1 = new LinkedHashMap<>();
-        item1.put("@type", "ListItem");
-        item1.put("position", 1);
-        item1.put("name", "Festia");
-        item1.put("item", baseUrl);
-        breadcrumbs.add(item1);
-
-        Map<String, Object> item2 = new LinkedHashMap<>();
-        item2.put("@type", "ListItem");
-        item2.put("position", 2);
-        item2.put("name", "Eventos");
-        item2.put("item", baseUrl + "/eventos");
-        breadcrumbs.add(item2);
-
-        Map<String, Object> item3 = new LinkedHashMap<>();
-        item3.put("@type", "ListItem");
-        item3.put("position", 3);
-        item3.put("name", evento.getNombreArtista());
-        item3.put("item", baseUrl + "/eventos/artista/" + evento.getIdArtista());
-        breadcrumbs.add(item3);
-
-        Map<String, Object> item4 = new LinkedHashMap<>();
-        item4.put("@type", "ListItem");
-        item4.put("position", 4);
-        item4.put("name", evento.getTituloEvento());
-        breadcrumbs.add(item4);
-
-        Map<String, Object> root = new LinkedHashMap<>();
-        root.put("@context", "https://schema.org");
-        root.put("@type", "BreadcrumbList");
-        root.put("itemListElement", breadcrumbs);
-
-        return serializarJsonLd(root);
     }
 }

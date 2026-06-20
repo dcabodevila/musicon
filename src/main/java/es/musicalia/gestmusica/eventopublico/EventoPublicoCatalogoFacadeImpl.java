@@ -37,29 +37,13 @@ public class EventoPublicoCatalogoFacadeImpl implements EventoPublicoCatalogoFac
         var paginaEventos = eventoPublicoService.obtenerEventosPublicosFiltradosPaginados(
             provinciaConsulta, request.municipio(), request.idArtista(), request.fechaDesde(), request.fechaHasta(), request.pageable());
 
-        List<String> provincias = localizacionService.findAllProvincias().stream()
-            .map(prov -> normalizarProvinciaCanonica(prov.nombre()))
-            .filter(nombre -> !nombre.isBlank())
-            .filter(nombre -> !esProvinciaExcluidaPublica(nombre))
-            .distinct()
-            .sorted(String.CASE_INSENSITIVE_ORDER)
-            .collect(Collectors.toList());
+        List<String> provincias = obtenerProvinciasPublicasOrdenadas();
 
         List<CodigoNombreRecord> municipiosProvincia = (request.provincia() != null && !request.provincia().isBlank())
-            ? localizacionService.findMunicipiosByProvinciaNombre(normalizarProvinciaParaConsulta(request.provincia()))
+            ? obtenerMunicipiosPublicosPorProvincia(request.provincia())
             : List.of();
 
-        List<EventoPublicoDto> artistasDisponibles = eventosCatalogo.stream()
-            .filter(e -> e.getIdArtista() != null)
-            .collect(Collectors.toMap(
-                EventoPublicoDto::getIdArtista,
-                e -> EventoPublicoDto.builder().idArtista(e.getIdArtista()).nombreArtista(e.getNombreArtista()).build(),
-                (existing, replacement) -> existing,
-                LinkedHashMap::new
-            ))
-            .values().stream()
-            .sorted(Comparator.comparing(EventoPublicoDto::getNombreArtista, String.CASE_INSENSITIVE_ORDER))
-            .collect(Collectors.toList());
+        List<EventoPublicoDto> artistasDisponibles = obtenerArtistasOrdenados(eventosCatalogo);
 
         return new EventoPublicoCatalogoView(
             paginaEventos,
@@ -84,6 +68,63 @@ public class EventoPublicoCatalogoFacadeImpl implements EventoPublicoCatalogoFac
         List<EventoPublicoDto> eventosCatalogo = eventoPublicoService.obtenerEventosPublicosFiltrados(
             null, null, null, hoy, hoy.plusDays(EventoPublicoConstantes.HORIZONTE_DIAS_PUBLICOS));
         return construirQuickLinks(eventosCatalogo, provincia, municipio);
+    }
+
+    @Override
+    public String normalizarProvinciaCanonica(String provincia) {
+        if (provincia == null) return "";
+        return PROVINCIA_CORUNA_ALIAS.equalsIgnoreCase(provincia.trim()) ? PROVINCIA_CORUNA_CANONICA : provincia.trim();
+    }
+
+    @Override
+    public String normalizarProvinciaParaConsulta(String provincia) {
+        if (provincia == null) return "";
+        String provinciaTrim = provincia.trim();
+        return PROVINCIA_CORUNA_CANONICA.equalsIgnoreCase(provinciaTrim) ? PROVINCIA_CORUNA_ALIAS : provinciaTrim;
+    }
+
+    @Override
+    public boolean esProvinciaExcluidaPublica(String provincia) {
+        return PROVINCIAS_EXCLUIDAS_PUBLICAS.contains(normalizarProvinciaCanonica(provincia).toLowerCase(Locale.ROOT));
+    }
+
+    @Override
+    public List<String> obtenerProvinciasPublicasOrdenadas() {
+        return localizacionService.findAllProvincias().stream()
+            .map(CodigoNombreRecord::nombre)
+            .filter(nombre -> nombre != null && !nombre.isBlank())
+            .map(this::normalizarProvinciaCanonica)
+            .filter(nombre -> !esProvinciaExcluidaPublica(nombre))
+            .distinct()
+            .sorted(String.CASE_INSENSITIVE_ORDER)
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CodigoNombreRecord> obtenerMunicipiosPublicosPorProvincia(String provincia) {
+        if (provincia == null || provincia.isBlank()) {
+            return List.of();
+        }
+        return localizacionService.findMunicipiosByProvinciaNombre(normalizarProvinciaParaConsulta(provincia)).stream()
+            .filter(municipio -> municipio.nombre() != null && !municipio.nombre().isBlank())
+            .filter(municipio -> !esMunicipioExcluidoPublico(municipio.nombre()))
+            .toList();
+    }
+
+    @Override
+    public List<EventoPublicoDto> obtenerArtistasOrdenados(List<EventoPublicoDto> eventos) {
+        return eventos.stream()
+            .filter(Objects::nonNull)
+            .filter(e -> e.getIdArtista() != null)
+            .collect(Collectors.toMap(
+                EventoPublicoDto::getIdArtista,
+                e -> EventoPublicoDto.builder().idArtista(e.getIdArtista()).nombreArtista(e.getNombreArtista()).build(),
+                (existing, replacement) -> existing,
+                LinkedHashMap::new
+            ))
+            .values().stream()
+            .sorted(Comparator.comparing(EventoPublicoDto::getNombreArtista, String.CASE_INSENSITIVE_ORDER))
+            .collect(Collectors.toList());
     }
 
     private List<QuickLinkView> construirQuickLinks(List<EventoPublicoDto> eventosCatalogo) {
@@ -216,21 +257,6 @@ public class EventoPublicoCatalogoFacadeImpl implements EventoPublicoCatalogoFac
             case SUNDAY -> fechaBase;
             default -> fechaBase.with(DayOfWeek.SUNDAY);
         };
-    }
-
-    private String normalizarProvinciaCanonica(String provincia) {
-        if (provincia == null) return "";
-        return PROVINCIA_CORUNA_ALIAS.equalsIgnoreCase(provincia.trim()) ? PROVINCIA_CORUNA_CANONICA : provincia.trim();
-    }
-
-    private String normalizarProvinciaParaConsulta(String provincia) {
-        if (provincia == null) return "";
-        String provinciaTrim = provincia.trim();
-        return PROVINCIA_CORUNA_CANONICA.equalsIgnoreCase(provinciaTrim) ? PROVINCIA_CORUNA_ALIAS : provinciaTrim;
-    }
-
-    private boolean esProvinciaExcluidaPublica(String provincia) {
-        return PROVINCIAS_EXCLUIDAS_PUBLICAS.contains(normalizarProvinciaCanonica(provincia).toLowerCase(Locale.ROOT));
     }
 
     private boolean esMunicipioExcluidoPublico(String municipio) {

@@ -15,6 +15,18 @@ public interface EventoPublicoCatalogoFacade {
 
     List<QuickLinkView> obtenerQuickLinksPublicos(String provincia, String municipio);
 
+    String normalizarProvinciaCanonica(String provincia);
+
+    String normalizarProvinciaParaConsulta(String provincia);
+
+    boolean esProvinciaExcluidaPublica(String provincia);
+
+    List<String> obtenerProvinciasPublicasOrdenadas();
+
+    List<CodigoNombreRecord> obtenerMunicipiosPublicosPorProvincia(String provincia);
+
+    List<EventoPublicoDto> obtenerArtistasOrdenados(List<EventoPublicoDto> eventos);
+
     record EventoPublicoCatalogoRequest(
         String provincia,
         String municipio,

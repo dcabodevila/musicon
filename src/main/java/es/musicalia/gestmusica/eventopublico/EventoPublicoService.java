@@ -76,6 +76,13 @@ public interface EventoPublicoService {
         LocalDate fechaHasta,
         Pageable pageable);
 
+    List<EventoPublicoDto> obtenerEventosRelacionadosPublicos(
+        Long idEventoActual,
+        Long idArtista,
+        LocalDate fechaDesde,
+        LocalDate fechaHasta,
+        int limite);
+
     /**
      * Obtiene todos los eventos públicos para el sitemap
      * @return Lista de todos los eventos públicos futuros

@@ -112,6 +112,48 @@ class EventoPublicoCatalogoFacadeImplTest {
     }
 
     @Test
+    void metodosPublicosDeCatalogo_debenNormalizarCorunaYExcluirValoresPublicos() {
+        when(localizacionService.findAllProvincias()).thenReturn(List.of(
+            new CodigoNombreRecord(1L, "A Coruña"),
+            new CodigoNombreRecord(2L, "Otras"),
+            new CodigoNombreRecord(3L, "Provisional"),
+            new CodigoNombreRecord(4L, "Lugo")
+        ));
+
+        assertEquals("Coruña", facade.normalizarProvinciaCanonica("A Coruña"));
+        assertEquals("A Coruña", facade.normalizarProvinciaParaConsulta("Coruña"));
+        assertTrue(facade.esProvinciaExcluidaPublica("Otras"));
+        assertTrue(facade.esProvinciaExcluidaPublica("Provisional"));
+        assertEquals(List.of("Coruña", "Lugo"), facade.obtenerProvinciasPublicasOrdenadas());
+    }
+
+    @Test
+    void metodosPublicosDeCatalogo_debenResolverMunicipiosContextualesConNombreRealDeProvincia() {
+        when(localizacionService.findMunicipiosByProvinciaNombre("A Coruña")).thenReturn(List.of(
+            new CodigoNombreRecord(1L, "Santiago de Compostela"),
+            new CodigoNombreRecord(2L, "Sin asignar"),
+            new CodigoNombreRecord(3L, "Provisional")
+        ));
+
+        List<CodigoNombreRecord> municipios = facade.obtenerMunicipiosPublicosPorProvincia("Coruña");
+
+        assertEquals(List.of("Santiago de Compostela"), municipios.stream().map(CodigoNombreRecord::nombre).toList());
+        verify(localizacionService).findMunicipiosByProvinciaNombre("A Coruña");
+    }
+
+    @Test
+    void metodosPublicosDeCatalogo_debenOrdenarArtistasSinDuplicados() {
+        List<EventoPublicoDto> eventos = List.of(
+            crearEvento(1L, 2L, "Lugo", "Lugo", "Zeta Show", LocalDate.now().plusDays(1).atTime(20, 0)),
+            crearEvento(2L, 1L, "Vigo", "Pontevedra", "Alfa Band", LocalDate.now().plusDays(2).atTime(20, 0)),
+            crearEvento(3L, 2L, "Ourense", "Ourense", "Zeta Show", LocalDate.now().plusDays(3).atTime(20, 0))
+        );
+
+        assertEquals(List.of("Alfa Band", "Zeta Show"),
+            facade.obtenerArtistasOrdenados(eventos).stream().map(EventoPublicoDto::getNombreArtista).toList());
+    }
+
+    @Test
     void obtenerQuickLinksPublicos_debeContextualizarMunicipiosParaProvincia() {
         LocalDate hoy = LocalDate.now();
         List<EventoPublicoDto> catalogo = List.of(

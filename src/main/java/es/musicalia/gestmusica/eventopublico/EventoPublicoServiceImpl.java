@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -85,6 +86,25 @@ public class EventoPublicoServiceImpl implements EventoPublicoService {
         Specification<Ocupacion> spec = buildFiltrosPublicosSpec(provincia, municipio, idArtista, fechaDesde, fechaHasta);
         return ocupacionRepository.findAll(spec, pageable)
             .map(this::convertirAEventoPublico);
+    }
+
+    @Override
+    public List<EventoPublicoDto> obtenerEventosRelacionadosPublicos(
+        Long idEventoActual,
+        Long idArtista,
+        LocalDate fechaDesde,
+        LocalDate fechaHasta,
+        int limite) {
+
+        Specification<Ocupacion> spec = buildFiltrosPublicosSpec(null, null, idArtista, fechaDesde, fechaHasta);
+        return ocupacionRepository.findAll(spec, Sort.by(Sort.Direction.ASC, "fecha", "artista.nombre")).stream()
+            .map(this::convertirAEventoPublico)
+            .filter(evento -> idEventoActual == null || !idEventoActual.equals(evento.getId()))
+            .filter(evento -> fechaDesde == null || !evento.getFecha().toLocalDate().isBefore(fechaDesde))
+            .filter(evento -> fechaHasta == null || !evento.getFecha().toLocalDate().isAfter(fechaHasta))
+            .sorted(Comparator.comparing(EventoPublicoDto::getFecha))
+            .limit(limite)
+            .collect(Collectors.toList());
     }
 
     @Override
