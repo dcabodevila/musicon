@@ -114,7 +114,7 @@ public class WebSecurityConfig {
 					.requestMatchers("/robots.txt").permitAll()
 					.requestMatchers("/release-notes/**").permitAll()
 
-					.requestMatchers("/fragments/**", "/static/**", "/adminkit/**", "/img/**", "/logo/**", "/favicon.ico", "/js/**", "/css/**", "/leaflet/**", "/geojson/**").permitAll()
+					.requestMatchers("/fragments/**", "/static/**", "/adminkit/**", "/img/**", "/logo/**", "/favicon.ico", "/js/**", "/css/**", "/leaflet/**", "/geojson/**", "/vendor/**").permitAll()
 					.requestMatchers("/android-icon-*.png", "/apple-icon-*.png", "/ms-icon-*.png").permitAll()
 
 					.requestMatchers("/service-worker.js", "/sw-register.js").permitAll()
