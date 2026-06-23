@@ -99,65 +99,76 @@
         }
 
         .eventos-quick-links {
-            margin-top: 0.9rem;
+            margin-top: 1rem;
             display: flex;
             flex-wrap: wrap;
-            gap: 0.55rem;
+            gap: 0.5rem;
+            justify-content: center;
         }
 
         .eventos-quick-link {
             display: inline-flex;
             align-items: center;
-            gap: 0.35rem;
-            padding: 0.5rem 0.85rem;
+            gap: 0.4rem;
+            padding: 0.5rem 0.95rem;
             border-radius: 999px;
-            border: 1px solid transparent;
-            font-size: 0.82rem;
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            font-size: 0.8rem;
             font-weight: 600;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.10);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
             text-decoration: none;
-            transition: all 0.2s ease;
+            transition: transform 0.2s ease, background-color 0.2s ease,
+                        border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
         .eventos-quick-link:hover {
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.18);
+            border-color: rgba(255, 255, 255, 0.55);
+            box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
             text-decoration: none;
         }
 
         .eventos-quick-link--today {
-            color: #fff;
+            background: linear-gradient(135deg, rgba(255, 122, 24, 0.92) 0%, rgba(239, 68, 68, 0.92) 100%);
+            border-color: rgba(255, 255, 255, 0.35);
+            box-shadow: 0 8px 18px rgba(239, 68, 68, 0.30);
+        }
+
+        .eventos-quick-link--today:hover {
             background: linear-gradient(135deg, #ff7a18 0%, #ef4444 100%);
-            box-shadow: 0 8px 18px rgba(239, 68, 68, 0.24);
+            border-color: rgba(255, 255, 255, 0.65);
+            box-shadow: 0 12px 26px rgba(239, 68, 68, 0.42);
         }
 
         .eventos-quick-link--weekend {
-            color: #fff;
+            background: linear-gradient(135deg, rgba(67, 56, 202, 0.92) 0%, rgba(37, 99, 235, 0.92) 100%);
+            border-color: rgba(255, 255, 255, 0.35);
+            box-shadow: 0 8px 18px rgba(37, 99, 235, 0.30);
+        }
+
+        .eventos-quick-link--weekend:hover {
             background: linear-gradient(135deg, #4338ca 0%, #2563eb 100%);
-            box-shadow: 0 8px 18px rgba(37, 99, 235, 0.24);
+            border-color: rgba(255, 255, 255, 0.65);
+            box-shadow: 0 12px 26px rgba(37, 99, 235, 0.42);
         }
 
         .eventos-quick-link--dynamic {
-            color: #0f172a;
-            background: #eef2ff;
-            border-color: #c7d2fe;
+            color: #eaf2ff;
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(199, 210, 254, 0.30);
         }
 
         .eventos-quick-link--dynamic:hover {
-            color: #1d4ed8;
-            border-color: #93c5fd;
-            background: #eff6ff;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.16);
+            border-color: rgba(147, 197, 253, 0.60);
         }
 
         @media (max-width: 767.98px) {
-            .eventos-quick-links {
-                flex-direction: column;
-            }
-
-            .eventos-quick-link--today,
-            .eventos-quick-link--weekend {
-                width: 100%;
-                justify-content: center;
-            }
-
             .eventos-quick-link--dynamic {
                 display: none;
             }
@@ -231,53 +242,30 @@
                             <img src="/logo/logo-name-transparente-alt-color.png" alt="festia.es" class="hero-logo"/>
                         </div>
                         <div class="hero-center">
+                            <p class="eventos-hero-v2__kicker">Agenda musical en directo</p>
                             <h1 class="hero-title">
                                 <span class="gsap-title-line1"
-                                      th:text="${contextoPagina == 'hoy' ? 'Fiestas hoy, verbenas hoy y' : (nombreArtista != null ? 'Próximas actuaciones de' : (contextoPagina == 'municipio' ? 'Próximas actuaciones en' : (contextoPagina == 'provincia' ? 'Próximas actuaciones en' : 'Próximas fiestas, verbenas y orquestas en')))}">
+                                      th:text="${contextoPagina == 'hoy' ? 'Fiestas verbenas y' : (nombreArtista != null ? 'Próximas actuaciones de' : (contextoPagina == 'municipio' ? 'Próximas actuaciones en' : (contextoPagina == 'provincia' ? 'Próximas actuaciones en' : 'Próximas fiestas, verbenas y orquestas en')))}">
                                       Próximas actuaciones
                                   </span>
                                 <span class="gsap-title-line2"
-                                      th:text="${contextoPagina == 'hoy' ? 'actuaciones musicales de hoy' : (nombreArtista != null ? nombreArtista : (contextoPagina == 'municipio' and provincia != null and !#strings.isEmpty(provincia) ? municipio + ' (' + provincia + ')' : (contextoPagina == 'municipio' ? municipio : (contextoPagina == 'provincia' ? provincia : 'España'))))}">
+                                      th:text="${contextoPagina == 'hoy' ? 'actuaciones musicales hoy' : (nombreArtista != null ? nombreArtista : (contextoPagina == 'municipio' and provincia != null and !#strings.isEmpty(provincia) ? municipio + ' (' + provincia + ')' : (contextoPagina == 'municipio' ? municipio : (contextoPagina == 'provincia' ? provincia : 'España'))))}">
                                       musicales en España
                                   </span>
                             </h1>
                             <p class="hero-subtitle" th:text="${textoHoy != null ? textoHoy : (textoProvincia != null ? textoProvincia : 'Orquestas, discotecas móviles y grupos musicales · Verbenas y fiestas populares · Actualizado diariamente')}"></p>
+                            <nav class="eventos-hero-v2__quicklinks eventos-quick-links"
+                                 aria-label="Accesos rápidos de fiestas y verbenas"
+                                 th:if="${quickLinks != null and !#lists.isEmpty(quickLinks)}">
+                                <a th:each="quickLink : ${quickLinks}"
+                                   th:href="${quickLink.href}"
+                                   th:text="${quickLink.label}"
+                                   th:classappend="${quickLink.dynamic ? ' eventos-quick-link--dynamic' : (quickLink.tone == 'today' ? ' eventos-quick-link--today' : ' eventos-quick-link--weekend')}"
+                                   class="eventos-quick-link">
+                                    Fiestas hoy
+                                </a>
+                            </nav>
                         </div>
-                        <div class="hero-right"></div>
-                    </div>
-                </div>
-
-                <!-- Intro SEO Above the Fold -->
-                <div th:if="${contextoPagina == 'catalogo' or contextoPagina == null}" class="px-3 pt-3">
-                    <div class="eventos-seo-intro">
-                        <h2 class="eventos-seo-intro__title">
-                            Orquestas, verbenas y actuaciones musicales en España
-                        </h2>
-                        <p class="eventos-seo-intro__text">
-                            Descubre <strong>orquestas, verbenas, conciertos y grupos musicales</strong> programados en toda España.
-                            En Festia puedes consultar actuaciones musicales por <strong>provincia</strong>, <strong>municipio</strong>, <strong>artista</strong> y <strong>fecha</strong>.
-                        </p>
-
-                    </div>
-                </div>
-
-                <div th:if="${contextoPagina == 'hoy'}" class="px-3 pt-3">
-                    <div class="eventos-seo-intro">
-                        <h2 class="eventos-seo-intro__title">
-                            Fiestas hoy, verbenas hoy y música en directo
-                        </h2>
-                        <p class="eventos-seo-intro__text">
-                            Consulta las <strong>fiestas de hoy</strong>, <strong>verbenas de hoy</strong> y
-                            <strong>actuaciones musicales de hoy</strong> publicadas en Festia. Esta página muestra solo eventos
-                            programados para el día actual, con artistas, horarios, municipios y provincias cuando están disponibles.
-                        </p>
-                        <nav class="eventos-seo-intro__links" aria-label="Rutas principales de eventos">
-                            <a th:href="@{/eventos}">Todos los eventos</a>
-                            <a th:href="@{/eventos/provincia/Coruña}">Fiestas en A Coruña</a>
-                            <a th:href="@{/eventos/provincia/Pontevedra}">Verbenas en Pontevedra</a>
-                            <a th:href="@{/eventos/provincia/Ourense}">Orquestas en Ourense</a>
-                            <a th:href="@{/eventos/provincia/León}">Actuaciones en León</a>
-                        </nav>
                     </div>
                 </div>
 
@@ -369,18 +357,7 @@
                                 </div>
                             </form>
 
-                            <nav class="eventos-quick-links"
-                                 aria-label="Accesos rápidos de fiestas y verbenas"
-                                 th:if="${quickLinks != null and !#lists.isEmpty(quickLinks)}">
-                                <a th:each="quickLink : ${quickLinks}"
-                                   th:href="${quickLink.href}"
-                                   th:text="${quickLink.label}"
-                                   th:classappend="${quickLink.dynamic ? ' eventos-quick-link--dynamic' : (quickLink.tone == 'today' ? ' eventos-quick-link--today' : ' eventos-quick-link--weekend')}"
-                                   class="eventos-quick-link">
-                                    Fiestas hoy
-                                </a>
-                            </nav>
-                        </div>
+                            </div>
                     </div>
                 </div>
 

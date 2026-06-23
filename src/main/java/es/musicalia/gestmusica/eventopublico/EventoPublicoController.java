@@ -369,7 +369,7 @@ public class EventoPublicoController {
         model.addAttribute("totalEventos", eventos.size());
         model.addAttribute("hayPaginaAnterior", false);
         model.addAttribute("hayPaginaSiguiente", false);
-        model.addAttribute("textoHoy", "Fiestas hoy, verbenas hoy y actuaciones musicales confirmadas para el dia actual. Encuentra orquestas, grupos musicales y artistas con horarios y ubicaciones actualizadas.");
+        model.addAttribute("textoHoy", "Actuaciones de orquestas y bandas musicales confirmadas para el día actual. Disfruta las festias!");
 
         if (indexable) {
             List<EventoPublicoDto> eventosJsonLd = eventos.stream()
