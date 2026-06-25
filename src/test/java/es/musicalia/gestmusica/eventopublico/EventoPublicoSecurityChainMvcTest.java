@@ -76,4 +76,13 @@ class EventoPublicoSecurityChainMvcTest {
         mockMvc.perform(get("/eventos/evento/10-los-satelites-lugo-2026-08-15"))
             .andExpect(status().isOk());
     }
+
+    @Test
+    void feedCalendarioArtista_debeSerAccesibleSinSesionNiCsrf() throws Exception {
+        when(eventoPublicoService.obtenerFeedCalendarioArtista(20L, "token-ok"))
+            .thenReturn("BEGIN:VCALENDAR\r\nEND:VCALENDAR");
+
+        mockMvc.perform(get("/eventos/artista/20/calendar/token-ok.ics"))
+            .andExpect(status().isOk());
+    }
 }

@@ -52,4 +52,6 @@ public interface ArtistaRepository extends JpaRepository<Artista, Long> {
     @Query("select new es.musicalia.gestmusica.artista.ArtistaRecord(a.id, a.nombre, a.logo, c.instagram, c.facebook, c.youtube, c.web, a.tiktok, a.musica, a.google) from Artista a left join a.contacto c where a.id in (:idsMisArtistas) and a.activo order by a.nombre")
     Page<ArtistaRecord> findMisArtistasPaginated(@Param("idsMisArtistas") Set<Long> idsMisArtistas, Pageable pageable);
 
+    Optional<Artista> findByIdAndCalendarSubscriptionToken(Long id, String calendarSubscriptionToken);
+
 }

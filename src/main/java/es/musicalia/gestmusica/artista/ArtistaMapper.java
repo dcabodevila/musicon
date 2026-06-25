@@ -36,6 +36,10 @@ public interface ArtistaMapper {
     @Mapping(target = "solicitudOdgPendiente", source = "solicitudOdgPendiente")
     @Mapping(target = "solicitudOdgAprobada", source = "solicitudOdgAprobada")
     @Mapping(target = "publicarEventos", source = "publicarEventos")
+    @Mapping(target = "permitirSuscripcionCalendario", source = "permitirSuscripcionCalendario")
+    @Mapping(target = "calendarSubscriptionToken", source = "calendarSubscriptionToken")
+    @Mapping(target = "calendarSubscriptionTokenRotatedAt", source = "calendarSubscriptionTokenRotatedAt")
+    @Mapping(target = "calendarSubscriptionUrl", ignore = true)
     ArtistaDto toDto(Artista artista);
 
     @Named("tipoArtistaToIdList")

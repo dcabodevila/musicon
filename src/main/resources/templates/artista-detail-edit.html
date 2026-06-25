@@ -278,16 +278,42 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="mb-3 row">
+                                    <div class="mb-3 row align-items-center" th:if="${artistaDto.id != null}">
                                         <label class="col-form-label col-sm-3 text-sm-end pt-sm-0" for="publicarEventos">Publicar eventos</label>
                                         <div class="col-sm-9">
-                                            <div class="form-check form-switch">
+                                            <div class="form-check form-switch mb-0">
                                                 <input class="form-check-input" type="checkbox" th:field="*{publicarEventos}" id="publicarEventos">
                                                 <i class="fas fa-info-circle ms-2 info-icon"
                                                    data-bs-toggle="tooltip"
                                                    data-bs-placement="right"
                                                    title="Si esta activado, las ocupaciones de este artista se mostraran en festia.es/eventos y podrán ser encontradas por motores de búsqueda."
                                                 ></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 row align-items-center" th:if="${artistaDto.id != null}">
+                                        <label class="col-form-label col-sm-3 text-sm-end pt-sm-0" for="permitirSuscripcionCalendario">Suscripción al calendario</label>
+                                        <div class="col-sm-9">
+                                            <div class="d-flex align-items-center flex-wrap gap-2">
+                                                <div class="form-check form-switch mb-0">
+                                                    <input class="form-check-input" type="checkbox" th:field="*{permitirSuscripcionCalendario}" id="permitirSuscripcionCalendario">
+                                                    <i class="fas fa-info-circle ms-2 info-icon"
+                                                       data-bs-toggle="tooltip"
+                                                       data-bs-placement="right"
+                                                       title="Permite crear un calendario de Apple o Google Calendar al que suscribirte para ver todos los eventos del artista actualizados automáticamente. Puedes compartir el enlace con otras personas."></i>
+                                                </div>
+                                                <input type="hidden"
+                                                       id="calendarSubscriptionUrl"
+                                                       th:value="${artistaDto.calendarSubscriptionUrl}"
+                                                       th:if="${artistaDto.permitirSuscripcionCalendario and artistaDto.calendarSubscriptionUrl != null}">
+                                                <button type="button" class="btn btn-sm btn-outline-secondary" id="btnCopiarUrlCalendario"
+                                                        th:if="${artistaDto.permitirSuscripcionCalendario and artistaDto.calendarSubscriptionUrl != null}">Copiar URL al calendario</button>
+                                                <a class="btn btn-sm btn-outline-primary"
+                                                   th:href="@{https://calendar.google.com/calendar/render(cid=${artistaDto.calendarSubscriptionUrl})}"
+                                                   target="_blank"
+                                                   rel="noopener noreferrer"
+                                                   id="btnSuscribirseCalendario"
+                                                   th:if="${artistaDto.permitirSuscripcionCalendario and artistaDto.calendarSubscriptionUrl != null}">Suscribirse al calendario</a>
                                             </div>
                                         </div>
                                     </div>

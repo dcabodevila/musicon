@@ -30,6 +30,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -53,6 +54,9 @@ public class ArtistaServiceImpl implements ArtistaService {
 
     @Value("${app.odg.activacion.destinatario:info@festia.es}")
     private String odgActivacionDestinatario;
+
+    @Value("${app.base-url:https://festia.es}")
+    private String baseUrl;
 
 	public ArtistaServiceImpl(ArtistaRepository artistaRepository, UsuarioRepository usuarioRepository, ContactoRepository agenciaContactoRepository,
                               TipoEscenarioRepository tipoEscenarioRepository,
@@ -132,6 +136,7 @@ public class ArtistaServiceImpl implements ArtistaService {
 
 	private ArtistaDto getArtistaDto(Artista artista) {
 		ArtistaDto artistaDto = artistaMapper.toDto(artista);
+		artistaDto.setCalendarSubscriptionUrl(construirUrlSuscripcionCalendario(artista));
 
 		final Contacto contacto = artista.getContacto();
 
@@ -240,12 +245,27 @@ public class ArtistaServiceImpl implements ArtistaService {
         artista.setPublicarEventos(Boolean.TRUE.equals(dto.getPublicarEventos()));
 		artista.setBiografia(dto.getBiografia());
 		artista.setCondicionesContratacion(dto.getCondicionesContratacion());
-		artista.setPermiteOrquestasDeGalicia(dto.isPermiteOrquestasDeGalicia());
+        artista.setPermiteOrquestasDeGalicia(dto.isPermiteOrquestasDeGalicia());
         artista.setSincronizarOdg(dto.isSincronizarOdg());
         artista.setGoogle(StringUtils.removeHttp(dto.getGoogle()));
         artista.setTiktok(StringUtils.removeHttp(dto.getTiktok()));
         artista.setMusica(StringUtils.removeHttp(dto.getMusica()));
         artista.setCif(dto.getCif());
+        actualizarSuscripcionCalendario(artista, dto);
+    }
+
+    private void actualizarSuscripcionCalendario(Artista artista, ArtistaDto dto) {
+        boolean suscripcionHabilitada = Boolean.TRUE.equals(dto.getPermitirSuscripcionCalendario());
+        artista.setPermitirSuscripcionCalendario(suscripcionHabilitada);
+
+        if (suscripcionHabilitada) {
+            if (artista.getCalendarSubscriptionToken() == null || artista.getCalendarSubscriptionToken().isBlank()) {
+                rotarTokenSuscripcionCalendario(artista);
+            }
+            return;
+        }
+
+        anularTokenSuscripcionCalendario(artista);
     }
 
     private void actualizarTiposArtista(Artista artista, List<Long> idsTipoArtista) {
@@ -453,6 +473,67 @@ public class ArtistaServiceImpl implements ArtistaService {
                 .messageType("success")
                 .message("Publicación en OrquestasDeGalicia activada correctamente")
                 .build();
+    }
+
+    @Override
+    @Transactional(readOnly = false)
+    public DefaultResponseBody regenerarTokenSuscripcionCalendario(Long idArtista) {
+        Artista artista = artistaRepository.findById(idArtista).orElseThrow();
+
+        if (!artista.isPermitirSuscripcionCalendario()) {
+            return DefaultResponseBody.builder()
+                    .success(false)
+                    .messageType("warning")
+                    .message("Activa primero la suscripción al calendario para generar la URL")
+                    .build();
+        }
+
+        rotarTokenSuscripcionCalendario(artista);
+        artistaRepository.save(artista);
+
+        return DefaultResponseBody.builder()
+                .success(true)
+                .messageType("success")
+                .message("Token regenerado correctamente")
+                .build();
+    }
+
+    @Override
+    @Transactional(readOnly = false)
+    public DefaultResponseBody revocarTokenSuscripcionCalendario(Long idArtista) {
+        Artista artista = artistaRepository.findById(idArtista).orElseThrow();
+        anularTokenSuscripcionCalendario(artista);
+        artistaRepository.save(artista);
+
+        return DefaultResponseBody.builder()
+                .success(true)
+                .messageType("success")
+                .message("Suscripción deshabilitada y token revocado")
+                .build();
+    }
+
+    private void rotarTokenSuscripcionCalendario(Artista artista) {
+        artista.setCalendarSubscriptionToken(UUID.randomUUID().toString().replace("-", ""));
+        artista.setCalendarSubscriptionTokenRotatedAt(LocalDateTime.now());
+    }
+
+    private void anularTokenSuscripcionCalendario(Artista artista) {
+        artista.setPermitirSuscripcionCalendario(false);
+        artista.setCalendarSubscriptionToken(null);
+        artista.setCalendarSubscriptionTokenRotatedAt(null);
+    }
+
+    private String construirUrlSuscripcionCalendario(Artista artista) {
+        if (!artista.isPermitirSuscripcionCalendario()) {
+            return null;
+        }
+
+        String token = artista.getCalendarSubscriptionToken();
+        if (token == null || token.isBlank() || artista.getId() == null) {
+            return null;
+        }
+
+        return baseUrl + "/eventos/artista/" + artista.getId() + "/calendar/" + token + ".ics";
     }
 
     private boolean esAdmin() {

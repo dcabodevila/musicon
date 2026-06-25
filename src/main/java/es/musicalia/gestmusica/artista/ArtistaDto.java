@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,12 +73,17 @@ public class ArtistaDto {
     private boolean solicitudOdgPendiente;
     private boolean solicitudOdgAprobada;
     private Boolean publicarEventos;
+    private Boolean permitirSuscripcionCalendario;
+    private String calendarSubscriptionToken;
+    private LocalDateTime calendarSubscriptionTokenRotatedAt;
+    private String calendarSubscriptionUrl;
 
 
     public ArtistaDto(){
         activo=true;
         tarifasPublicas = true;
         publicarEventos = false;
+        permitirSuscripcionCalendario = false;
     }
 
  }

@@ -138,6 +138,79 @@ $(document).ready(function () {
         });
     }
 
+    const $calendarSubscriptionUrl = $('#calendarSubscriptionUrl');
+    const $btnCopiarUrlCalendario = $('#btnCopiarUrlCalendario');
+    if ($btnCopiarUrlCalendario.length && $calendarSubscriptionUrl.length) {
+        $btnCopiarUrlCalendario.on('click', async function () {
+            try {
+                await navigator.clipboard.writeText($calendarSubscriptionUrl.val());
+                notif('success', 'URL copiada correctamente');
+            } catch (error) {
+                $calendarSubscriptionUrl.trigger('select');
+                document.execCommand('copy');
+                notif('success', 'URL copiada correctamente');
+            }
+        });
+    }
+
+    const $btnRegenerarTokenCalendario = $('#btnRegenerarTokenCalendario');
+    if ($btnRegenerarTokenCalendario.length) {
+        $btnRegenerarTokenCalendario.on('click', function () {
+            const idArtista = $(this).data('id-artista');
+            $btnRegenerarTokenCalendario.prop('disabled', true);
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                url: '/artista/' + idArtista + '/calendar-subscription/regenerate',
+                dataType: 'json',
+                cache: false,
+                success: function (data) {
+                    if (data.success) {
+                        notif(data.messageType ? data.messageType : 'success', data.message);
+                        window.location.reload();
+                        return;
+                    }
+                    notif(data.messageType ? data.messageType : 'error', data.message);
+                    $btnRegenerarTokenCalendario.prop('disabled', false);
+                },
+                error: function () {
+                    notif('error', 'Error al regenerar la URL de suscripción');
+                    $btnRegenerarTokenCalendario.prop('disabled', false);
+                }
+            });
+        });
+    }
+
+    const $btnRevocarTokenCalendario = $('#btnRevocarTokenCalendario');
+    if ($btnRevocarTokenCalendario.length) {
+        $btnRevocarTokenCalendario.on('click', function () {
+            const idArtista = $(this).data('id-artista');
+            $btnRevocarTokenCalendario.prop('disabled', true);
+
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                url: '/artista/' + idArtista + '/calendar-subscription/revoke',
+                dataType: 'json',
+                cache: false,
+                success: function (data) {
+                    if (data.success) {
+                        notif(data.messageType ? data.messageType : 'success', data.message);
+                        window.location.reload();
+                        return;
+                    }
+                    notif(data.messageType ? data.messageType : 'error', data.message);
+                    $btnRevocarTokenCalendario.prop('disabled', false);
+                },
+                error: function () {
+                    notif('error', 'Error al revocar la URL de suscripción');
+                    $btnRevocarTokenCalendario.prop('disabled', false);
+                }
+            });
+        });
+    }
+
     // Preview de imagen de artista con validación de tamaño
     const logoInputArtista = document.getElementById('logo-input-artista');
     const logoPreviewArtista = document.getElementById('logo-preview-artista');

@@ -10,6 +10,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Entity
@@ -133,5 +134,14 @@ public class Artista {
 
     @Column(name = "publicar_eventos")
     private boolean publicarEventos;
+
+    @Column(name = "permitir_suscripcion_calendario")
+    private boolean permitirSuscripcionCalendario;
+
+    @Column(name = "calendar_subscription_token", length = 64)
+    private String calendarSubscriptionToken;
+
+    @Column(name = "calendar_subscription_token_rotated_at")
+    private LocalDateTime calendarSubscriptionTokenRotatedAt;
 
 }

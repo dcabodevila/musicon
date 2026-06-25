@@ -24,6 +24,10 @@ public interface EventoPublicoService {
      */
     Optional<EventoPublicoDto> obtenerEventoPublico(Long idOcupacion);
 
+    String obtenerFeedCalendarioArtista(Long idArtista, String token);
+
+    String obtenerUrlSuscripcionCalendarioArtista(Long idArtista);
+
     /**
      * Obtiene eventos públicos por provincia
      * @param provincia Nombre de la provincia

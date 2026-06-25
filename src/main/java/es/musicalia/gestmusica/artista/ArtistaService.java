@@ -33,4 +33,8 @@ public interface ArtistaService {
     DefaultResponseBody solicitarActivacionOrquestasDeGalicia(Long idArtista);
 
     DefaultResponseBody activarPublicacionOrquestasDeGalicia(Long idArtista);
+
+    DefaultResponseBody regenerarTokenSuscripcionCalendario(Long idArtista);
+
+    DefaultResponseBody revocarTokenSuscripcionCalendario(Long idArtista);
 }

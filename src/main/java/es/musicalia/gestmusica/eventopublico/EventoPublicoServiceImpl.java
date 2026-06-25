@@ -1,5 +1,7 @@
 package es.musicalia.gestmusica.eventopublico;
 
+import es.musicalia.gestmusica.artista.Artista;
+import es.musicalia.gestmusica.artista.ArtistaRepository;
 import es.musicalia.gestmusica.ocupacion.Ocupacion;
 import es.musicalia.gestmusica.ocupacion.OcupacionEstadoEnum;
 import es.musicalia.gestmusica.ocupacion.OcupacionRepository;
@@ -11,6 +13,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,6 +23,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -27,6 +32,7 @@ import java.util.stream.Collectors;
 public class EventoPublicoServiceImpl implements EventoPublicoService {
 
     private final OcupacionRepository ocupacionRepository;
+    private final ArtistaRepository artistaRepository;
 
     @Override
     public List<EventoPublicoDto> obtenerEventosPublicosPorArtista(Long idArtista) {
@@ -46,6 +52,30 @@ public class EventoPublicoServiceImpl implements EventoPublicoService {
             .filter(o -> o.getArtista() != null && o.getArtista().isActivo())
             .filter(o -> o.getArtista() != null && o.getArtista().isPublicarEventos())
             .map(this::convertirAEventoPublico);
+    }
+
+    @Override
+    public String obtenerFeedCalendarioArtista(Long idArtista, String token) {
+        Artista artista = artistaRepository.findByIdAndCalendarSubscriptionToken(idArtista, token)
+            .filter(this::isSuscripcionCalendarioVigente)
+            .orElseThrow(() -> new ResponseStatusException(NOT_FOUND));
+
+        List<EventoPublicoDto> eventos = ocupacionRepository.findAll(
+                buildFiltrosPublicosSpec(null, null, idArtista, LocalDate.now(), null),
+                Sort.by(Sort.Direction.ASC, "fecha", "artista.nombre")
+            ).stream()
+            .map(this::convertirAEventoPublico)
+            .collect(Collectors.toList());
+
+        return EventoPublicoCalendarLinks.buildArtistCalendar(artista.getNombre(), eventos, LocalDateTime::now);
+    }
+
+    @Override
+    public String obtenerUrlSuscripcionCalendarioArtista(Long idArtista) {
+        return artistaRepository.findById(idArtista)
+            .filter(this::isSuscripcionCalendarioVigente)
+            .map(artista -> "/eventos/artista/" + artista.getId() + "/calendar/" + artista.getCalendarSubscriptionToken() + ".ics")
+            .orElse(null);
     }
 
     @Override
@@ -178,6 +208,14 @@ public class EventoPublicoServiceImpl implements EventoPublicoService {
             return url;
         }
         return "https://" + url;
+    }
+
+    private boolean isSuscripcionCalendarioVigente(Artista artista) {
+        return artista.isActivo()
+            && artista.isPublicarEventos()
+            && artista.isPermitirSuscripcionCalendario()
+            && artista.getCalendarSubscriptionToken() != null
+            && !artista.getCalendarSubscriptionToken().isBlank();
     }
 
     private Specification<Ocupacion> buildFiltrosPublicosSpec(

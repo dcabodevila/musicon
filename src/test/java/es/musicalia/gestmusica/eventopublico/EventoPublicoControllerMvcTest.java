@@ -372,6 +372,55 @@ class EventoPublicoControllerMvcTest {
     }
 
     @Test
+    void artistaPublico_debeMostrarSoloEventosDeProximos45DiasYOcultarCtaCalendarioPublica() throws Exception {
+        EventoPublicoDto eventoDentroDeVentana = crearEventoConDatos(10L, 20L, "Los Satélites", "Lugo", "Lugo", LocalDateTime.now().plusDays(5));
+        EventoPublicoDto eventoFueraDeVentana = crearEventoConDatos(11L, 20L, "Los Satélites", "Ponferrada", "León", LocalDateTime.now().plusDays(60));
+        when(eventoPublicoService.obtenerEventosPublicosFiltrados(isNull(), isNull(), eq(20L), any(LocalDate.class), isNull()))
+            .thenReturn(List.of(eventoDentroDeVentana, eventoFueraDeVentana));
+        when(eventoPublicoService.obtenerEventosPublicosFiltrados(isNull(), isNull(), isNull(), any(LocalDate.class), isNull()))
+            .thenReturn(List.of(eventoDentroDeVentana));
+        when(eventoPublicoCatalogoFacade.obtenerQuickLinksPublicos()).thenReturn(List.of());
+
+        mockMvc.perform(get("/eventos/artista/20"))
+            .andExpect(status().isOk())
+            .andExpect(content().string(containsString("Los Satélites")))
+            .andExpect(content().string(not(containsString("Suscribirse al calendario"))))
+            .andExpect(content().string(not(containsString("Apple Calendar"))))
+            .andExpect(content().string(not(containsString("Google Calendar"))))
+            .andExpect(content().string(not(containsString("Ponferrada"))));
+
+        verify(eventoPublicoService).obtenerEventosPublicosFiltrados(
+            isNull(),
+            isNull(),
+            eq(20L),
+            eq(LocalDate.now()),
+            eq(LocalDate.now().plusDays(EventoPublicoConstantes.HORIZONTE_DIAS_PUBLICOS))
+        );
+        verify(eventoPublicoService, never()).obtenerUrlSuscripcionCalendarioArtista(20L);
+    }
+
+    @Test
+    void feedCalendarioArtista_debeResponder200ConTextCalendarInline() throws Exception {
+        when(eventoPublicoService.obtenerFeedCalendarioArtista(20L, "token-ok"))
+            .thenReturn("BEGIN:VCALENDAR\r\nEND:VCALENDAR");
+
+        mockMvc.perform(get("/eventos/artista/20/calendar/token-ok.ics"))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType("text/calendar;charset=UTF-8"))
+            .andExpect(header().string("Content-Disposition", containsString("inline; filename=\"festia-artista-20.ics\"")))
+            .andExpect(content().string(containsString("BEGIN:VCALENDAR")));
+    }
+
+    @Test
+    void feedCalendarioArtista_debeResponder404UniformeCuandoNoEsElegible() throws Exception {
+        when(eventoPublicoService.obtenerFeedCalendarioArtista(20L, "token-ko"))
+            .thenThrow(new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND));
+
+        mockMvc.perform(get("/eventos/artista/20/calendar/token-ko.ics"))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
     void listadoCatalogo_debeRenderizarQuickLinksSSRsinBloquesSecundarios() throws Exception {
         LocalDate hoy = LocalDate.now();
         LocalDate viernes = siguienteViernes();

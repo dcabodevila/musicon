@@ -270,6 +270,18 @@ public class ArtistaController {
         return ResponseEntity.ok(artistaService.activarPublicacionOrquestasDeGalicia(idArtista));
     }
 
+    @PostMapping("/{id}/calendar-subscription/regenerate")
+    @ResponseBody
+    public ResponseEntity<DefaultResponseBody> regenerarTokenCalendario(@PathVariable("id") Long idArtista) {
+        return ResponseEntity.ok(artistaService.regenerarTokenSuscripcionCalendario(idArtista));
+    }
+
+    @PostMapping("/{id}/calendar-subscription/revoke")
+    @ResponseBody
+    public ResponseEntity<DefaultResponseBody> revocarTokenCalendario(@PathVariable("id") Long idArtista) {
+        return ResponseEntity.ok(artistaService.revocarTokenSuscripcionCalendario(idArtista));
+    }
+
 
     private OcupacionSaveDto getNewOcupacionSaveDto(long idArtista) {
         ArtistaDto artista = this.artistaService.findArtistaDtoById(idArtista);

@@ -3,6 +3,7 @@ package es.musicalia.gestmusica.eventopublico;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -38,6 +39,39 @@ class EventoPublicoCalendarLinksTest {
             .contains("DESCRIPTION:Los Satélites actúa en Rúa do Franco\\, Praza do Obradoiro\\; nivel\\\\1 (A Coruña) el 15 de agosto de 2026 en Rúa do Franco\\, Santiago. Toda la información en Festia.\r\n")
             .contains("LOCATION:Rúa do Franco\\, Praza do Obradoiro\\; nivel\\\\1\\, A Coruña\r\n")
             .endsWith("END:VCALENDAR");
+    }
+
+    @Test
+    void buildArtistCalendar_debeGenerarMultiEventoConUidEstableYEscenarioAllDay() {
+        EventoPublicoDto eventoConHora = crearEventoConLugar("Rúa do Franco, Santiago", "Praza do Obradoiro");
+        EventoPublicoDto eventoAllDay = EventoPublicoDto.builder()
+            .id(11L)
+            .idArtista(20L)
+            .nombreArtista("Los Satélites")
+            .lugar("Campo da festa")
+            .municipio("Arzúa")
+            .provincia("A Coruña")
+            .fecha(LocalDateTime.of(2026, 8, 20, 0, 0))
+            .fechaActualizacion(LocalDateTime.of(2026, 8, 2, 10, 30))
+            .build();
+
+        String ical = EventoPublicoCalendarLinks.buildArtistCalendar(
+            "Los Satélites",
+            List.of(eventoConHora, eventoAllDay),
+            () -> LocalDateTime.of(2026, 8, 1, 9, 45, 30)
+        );
+
+        assertThat(ical)
+            .contains("X-WR-CALNAME:Festia - Los Satélites\r\n")
+            .contains("UID:10@festia.es\r\n")
+            .contains("UID:11@festia.es\r\n")
+            .contains("DTSTART;TZID=Europe/Madrid:20260815T213000\r\n")
+            .contains("DTEND;TZID=Europe/Madrid:20260816T003000\r\n")
+            .contains("DTSTART;VALUE=DATE:20260820\r\n")
+            .contains("DTEND;VALUE=DATE:20260821\r\n")
+            .contains("SUMMARY:Actuación de Los Satélites en Campo da festa\\, Arzúa\r\n")
+            .contains("LOCATION:Campo da festa\\, Arzúa\\, A Coruña\r\n");
+        assertThat(ical.split("BEGIN:VEVENT", -1)).hasSize(3);
     }
 
     private EventoPublicoDto crearEventoConLugar(String lugar, String municipio) {

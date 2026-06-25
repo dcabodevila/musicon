@@ -1,6 +1,7 @@
 package es.musicalia.gestmusica.eventopublico;
 
 import es.musicalia.gestmusica.artista.Artista;
+import es.musicalia.gestmusica.artista.ArtistaRepository;
 import es.musicalia.gestmusica.localizacion.Municipio;
 import es.musicalia.gestmusica.localizacion.Provincia;
 import es.musicalia.gestmusica.ocupacion.Ocupacion;
@@ -18,12 +19,17 @@ import org.springframework.data.jpa.domain.Specification;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+import org.springframework.web.server.ResponseStatusException;
 
 @ExtendWith(MockitoExtension.class)
 class EventoPublicoServiceImplTest {
@@ -31,11 +37,14 @@ class EventoPublicoServiceImplTest {
     @Mock
     private OcupacionRepository ocupacionRepository;
 
+    @Mock
+    private ArtistaRepository artistaRepository;
+
     private EventoPublicoServiceImpl service;
 
     @BeforeEach
     void setUp() {
-        service = new EventoPublicoServiceImpl(ocupacionRepository);
+        service = new EventoPublicoServiceImpl(ocupacionRepository, artistaRepository);
     }
 
     @Test
@@ -54,6 +63,64 @@ class EventoPublicoServiceImplTest {
 
         assertEquals(List.of(13L, 11L), relacionados.stream().map(EventoPublicoDto::getId).toList());
         verify(ocupacionRepository).findAll(any(Specification.class), eq(Sort.by(Sort.Direction.ASC, "fecha", "artista.nombre")));
+    }
+
+    @Test
+    void obtenerFeedCalendarioArtista_debeConstruirFeedConEventosElegiblesYAllDay() {
+        Artista artista = crearArtistaConSuscripcion(20L, "token-ok");
+        Ocupacion eventoConHora = crearOcupacion(10L, 20L, LocalDateTime.of(2026, 8, 16, 22, 0), "Los Satélites", "Lugo", "Lugo");
+        eventoConHora.setHoraActuacionDesde(java.time.LocalTime.of(22, 0));
+        eventoConHora.setHoraActuacionHasta(java.time.LocalTime.of(1, 0));
+        eventoConHora.setLugar("Praza Maior");
+        Ocupacion eventoAllDay = crearOcupacion(11L, 20L, LocalDateTime.of(2026, 8, 17, 0, 0), "Los Satélites", "Sarria", "Lugo");
+
+        when(artistaRepository.findByIdAndCalendarSubscriptionToken(20L, "token-ok")).thenReturn(Optional.of(artista));
+        when(ocupacionRepository.findAll(any(Specification.class), any(Sort.class))).thenReturn(List.of(eventoConHora, eventoAllDay));
+
+        String feed = service.obtenerFeedCalendarioArtista(20L, "token-ok");
+
+        assertThat(feed)
+            .contains("BEGIN:VCALENDAR")
+            .contains("UID:10@festia.es")
+            .contains("UID:11@festia.es")
+            .contains("DTSTART;TZID=Europe/Madrid:20260816T220000")
+            .contains("DTSTART;VALUE=DATE:20260817");
+    }
+
+    @Test
+    void obtenerFeedCalendarioArtista_debeGenerarFeedVacioSiNoHayEventosElegibles() {
+        Artista artista = crearArtistaConSuscripcion(20L, "token-ok");
+
+        when(artistaRepository.findByIdAndCalendarSubscriptionToken(20L, "token-ok")).thenReturn(Optional.of(artista));
+        when(ocupacionRepository.findAll(any(Specification.class), any(Sort.class))).thenReturn(List.of());
+
+        String feed = service.obtenerFeedCalendarioArtista(20L, "token-ok");
+
+        assertThat(feed)
+            .contains("BEGIN:VCALENDAR")
+            .contains("END:VCALENDAR")
+            .doesNotContain("BEGIN:VEVENT");
+    }
+
+    @Test
+    void obtenerFeedCalendarioArtista_debeResponder404UniformeSiTokenInvalidoRevocadoODeshabilitado() {
+        when(artistaRepository.findByIdAndCalendarSubscriptionToken(20L, "token-invalido")).thenReturn(Optional.empty());
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+            () -> service.obtenerFeedCalendarioArtista(20L, "token-invalido"));
+
+        assertEquals(NOT_FOUND, exception.getStatusCode());
+    }
+
+    private Artista crearArtistaConSuscripcion(Long idArtista, String token) {
+        Artista artista = new Artista();
+        artista.setId(idArtista);
+        artista.setNombre("Los Satélites");
+        artista.setActivo(true);
+        artista.setPublicarEventos(true);
+        artista.setPermitirSuscripcionCalendario(true);
+        artista.setCalendarSubscriptionToken(token);
+        return artista;
     }
 
     private Ocupacion crearOcupacion(Long id, Long idArtista, LocalDateTime fecha, String artistaNombre, String municipioNombre, String provinciaNombre) {

@@ -113,6 +113,15 @@ public class EventoPublicoController {
             .body(EventoPublicoCalendarLinks.buildIcal(evento));
     }
 
+    @GetMapping(value = "/artista/{idArtista}/calendar/{token}.ics")
+    @ResponseBody
+    public ResponseEntity<String> descargarCalendarioArtista(@PathVariable Long idArtista, @PathVariable String token) {
+        return ResponseEntity.ok()
+            .contentType(MediaType.parseMediaType("text/calendar; charset=UTF-8"))
+            .header("Content-Disposition", "inline; filename=\"festia-artista-" + idArtista + ".ics\"")
+            .body(eventoPublicoService.obtenerFeedCalendarioArtista(idArtista, token));
+    }
+
     /**
      * Lista de eventos publicos de un artista.
      */
@@ -121,9 +130,10 @@ public class EventoPublicoController {
         log.info("Listando eventos publicos para artista: {}", idArtista);
 
         LocalDate fechaDesde = LocalDate.now();
+        LocalDate fechaHasta = fechaDesde.plusDays(EventoPublicoConstantes.HORIZONTE_DIAS_PUBLICOS);
 
         List<EventoPublicoDto> eventos = eventoPublicoService.obtenerEventosPublicosFiltrados(
-            null, null, idArtista, fechaDesde, null);
+            null, null, idArtista, fechaDesde, fechaHasta);
         Map<LocalDate, List<EventoPublicoDto>> eventosPorDia = eventos.stream()
             .collect(Collectors.groupingBy(e -> e.getFecha().toLocalDate(), TreeMap::new, Collectors.toList()));
 
@@ -136,7 +146,7 @@ public class EventoPublicoController {
         model.addAttribute("canonicalUrl", canonicalUrl);
         model.addAttribute("metaRobots", indexable ? "index,follow" : "noindex,follow");
         model.addAttribute("fechaDesde", fechaDesde.toString());
-        model.addAttribute("fechaHasta", null);
+        model.addAttribute("fechaHasta", fechaHasta.toString());
         model.addAttribute("provincia", null);
         model.addAttribute("municipio", null);
         model.addAttribute("idArtistaSeleccionado", idArtista);
