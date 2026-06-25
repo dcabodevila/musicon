@@ -118,7 +118,7 @@ public class EventoPublicoController {
     public ResponseEntity<String> descargarCalendarioArtista(@PathVariable Long idArtista, @PathVariable String token) {
         return ResponseEntity.ok()
             .contentType(MediaType.parseMediaType("text/calendar; charset=UTF-8"))
-            .header("Content-Disposition", "inline; filename=\"festia-artista-" + idArtista + ".ics\"")
+            .header("Content-Disposition", "attachment; filename=\"festia-artista-" + idArtista + ".ics\"")
             .body(eventoPublicoService.obtenerFeedCalendarioArtista(idArtista, token));
     }
 

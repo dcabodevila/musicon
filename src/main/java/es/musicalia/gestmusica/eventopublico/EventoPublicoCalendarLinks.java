@@ -44,8 +44,10 @@ final class EventoPublicoCalendarLinks {
             .append("BEGIN:VCALENDAR\r\n")
             .append("VERSION:2.0\r\n")
             .append("PRODID:-//festia.es//Festia//ES\r\n")
+            .append("METHOD:PUBLISH\r\n")
             .append("CALSCALE:GREGORIAN\r\n")
-            .append("X-WR-CALNAME:").append(escapeIcal("Festia - " + artistName)).append("\r\n");
+            .append("X-WR-CALNAME:").append(escapeIcal("Festia - " + artistName)).append("\r\n")
+            .append("X-WR-TIMEZONE:Europe/Madrid\r\n");
 
         for (EventoPublicoDto evento : eventos) {
             calendar.append("BEGIN:VEVENT\r\n")
@@ -60,7 +62,7 @@ final class EventoPublicoCalendarLinks {
                 .append("END:VEVENT\r\n");
         }
 
-        return calendar.append("END:VCALENDAR").toString();
+        return calendar.append("END:VCALENDAR\r\n").toString();
     }
 
     private static void appendEventDates(StringBuilder calendar, EventoPublicoDto evento, DateTimeFormatter dateTimeFormatter) {

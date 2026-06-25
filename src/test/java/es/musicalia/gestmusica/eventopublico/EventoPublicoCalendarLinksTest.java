@@ -38,7 +38,7 @@ class EventoPublicoCalendarLinksTest {
             .contains("SUMMARY:Actuación de Los Satélites en Rúa do Franco\\, Praza do Obradoiro\\; nivel\\\\1\r\n")
             .contains("DESCRIPTION:Los Satélites actúa en Rúa do Franco\\, Praza do Obradoiro\\; nivel\\\\1 (A Coruña) el 15 de agosto de 2026 en Rúa do Franco\\, Santiago. Toda la información en Festia.\r\n")
             .contains("LOCATION:Rúa do Franco\\, Praza do Obradoiro\\; nivel\\\\1\\, A Coruña\r\n")
-            .endsWith("END:VCALENDAR");
+            .endsWith("END:VCALENDAR\r\n");
     }
 
     @Test
