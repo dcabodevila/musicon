@@ -309,7 +309,7 @@
                                                 <button type="button" class="btn btn-sm btn-outline-secondary" id="btnCopiarUrlCalendario"
                                                         th:if="${artistaDto.permitirSuscripcionCalendario and artistaDto.calendarSubscriptionUrl != null}">Copiar URL al calendario</button>
                                                 <a class="btn btn-sm btn-outline-primary"
-                                                   th:href="@{https://calendar.google.com/calendar/render(cid=${artistaDto.calendarSubscriptionUrl})}"
+                                                   th:href="${artistaDto.googleCalendarSubscriptionUrl}"
                                                    target="_blank"
                                                    rel="noopener noreferrer"
                                                    id="btnSuscribirseCalendario"

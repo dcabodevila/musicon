@@ -136,7 +136,9 @@ public class ArtistaServiceImpl implements ArtistaService {
 
 	private ArtistaDto getArtistaDto(Artista artista) {
 		ArtistaDto artistaDto = artistaMapper.toDto(artista);
-		artistaDto.setCalendarSubscriptionUrl(construirUrlSuscripcionCalendario(artista));
+		String urlSuscripcion = construirUrlSuscripcionCalendario(artista);
+		artistaDto.setCalendarSubscriptionUrl(urlSuscripcion);
+		artistaDto.setGoogleCalendarSubscriptionUrl(construirUrlGoogleCalendar(urlSuscripcion));
 
 		final Contacto contacto = artista.getContacto();
 
@@ -534,6 +536,14 @@ public class ArtistaServiceImpl implements ArtistaService {
         }
 
         return baseUrl + "/eventos/artista/" + artista.getId() + "/calendar/" + token + ".ics";
+    }
+
+    private String construirUrlGoogleCalendar(String feedUrl) {
+        if (feedUrl == null || feedUrl.isBlank()) {
+            return null;
+        }
+        return "https://calendar.google.com/calendar/render?cid=" 
+            + org.springframework.web.util.UriUtils.encode(feedUrl, java.nio.charset.StandardCharsets.UTF_8);
     }
 
     private boolean esAdmin() {

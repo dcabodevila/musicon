@@ -40,6 +40,7 @@ public interface ArtistaMapper {
     @Mapping(target = "calendarSubscriptionToken", source = "calendarSubscriptionToken")
     @Mapping(target = "calendarSubscriptionTokenRotatedAt", source = "calendarSubscriptionTokenRotatedAt")
     @Mapping(target = "calendarSubscriptionUrl", ignore = true)
+    @Mapping(target = "googleCalendarSubscriptionUrl", ignore = true)
     ArtistaDto toDto(Artista artista);
 
     @Named("tipoArtistaToIdList")

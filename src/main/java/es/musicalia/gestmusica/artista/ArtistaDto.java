@@ -77,6 +77,7 @@ public class ArtistaDto {
     private String calendarSubscriptionToken;
     private LocalDateTime calendarSubscriptionTokenRotatedAt;
     private String calendarSubscriptionUrl;
+    private String googleCalendarSubscriptionUrl;
 
 
     public ArtistaDto(){
