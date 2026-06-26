@@ -42,6 +42,16 @@ class EventoPublicoCalendarLinksTest {
     }
 
     @Test
+    void buildIcal_debeMantenerPrefijoActuacionDeEnEventoIndividual() {
+        EventoPublicoDto evento = crearEventoConLugar("Rúa do Franco, Santiago", "Praza do Obradoiro");
+
+        String ical = EventoPublicoCalendarLinks.buildIcal(evento, () -> LocalDateTime.of(2026, 8, 1, 9, 45, 30));
+
+        assertThat(ical)
+            .contains("SUMMARY:Actuación de Los Satélites en Rúa do Franco\\, Praza do Obradoiro\r\n");
+    }
+
+    @Test
     void buildArtistCalendar_debeGenerarMultiEventoConUidEstableYEscenarioAllDay() {
         EventoPublicoDto eventoConHora = crearEventoConLugar("Rúa do Franco, Santiago", "Praza do Obradoiro");
         EventoPublicoDto eventoAllDay = EventoPublicoDto.builder()
@@ -63,15 +73,45 @@ class EventoPublicoCalendarLinksTest {
 
         assertThat(ical)
             .contains("X-WR-CALNAME:Festia - Los Satélites\r\n")
+            .contains("X-PUBLISHED-TTL:PT1H\r\n")
+            .contains("REFRESH-INTERVAL;VALUE=DURATION:PT1H\r\n")
+            .contains("BEGIN:VTIMEZONE\r\n")
+            .contains("TZID:Europe/Madrid\r\n")
+            .contains("END:VTIMEZONE\r\n")
             .contains("UID:10@festia.es\r\n")
             .contains("UID:11@festia.es\r\n")
             .contains("DTSTART;TZID=Europe/Madrid:20260815T213000\r\n")
             .contains("DTEND;TZID=Europe/Madrid:20260816T003000\r\n")
             .contains("DTSTART;VALUE=DATE:20260820\r\n")
             .contains("DTEND;VALUE=DATE:20260821\r\n")
-            .contains("SUMMARY:Actuación de Los Satélites en Campo da festa\\, Arzúa\r\n")
+            .contains("SUMMARY:Los Satélites en Rúa do Franco\\, Praza do Obradoiro\r\n")
+            .contains("SUMMARY:Los Satélites en Campo da festa\\, Arzúa\r\n")
+            .doesNotContain("SUMMARY:Actuación de ")
             .contains("LOCATION:Campo da festa\\, Arzúa\\, A Coruña\r\n");
         assertThat(ical.split("BEGIN:VEVENT", -1)).hasSize(3);
+    }
+
+    @Test
+    void buildArtistCalendar_debeEliminarSoloElPrefijoLiteralExactoActuacionDe() {
+        EventoPublicoDto evento = EventoPublicoDto.builder()
+            .id(12L)
+            .idArtista(20L)
+            .nombreArtista("Actuación de Luxe")
+            .lugar("Recinto ferial")
+            .municipio("Vilalba")
+            .provincia("Lugo")
+            .fecha(LocalDateTime.of(2026, 9, 10, 23, 0))
+            .build();
+
+        String ical = EventoPublicoCalendarLinks.buildArtistCalendar(
+            "Actuación de Luxe",
+            List.of(evento),
+            () -> LocalDateTime.of(2026, 8, 1, 9, 45, 30)
+        );
+
+        assertThat(ical)
+            .contains("SUMMARY:Actuación de Luxe en Recinto ferial\\, Vilalba\r\n")
+            .doesNotContain("SUMMARY:Luxe en Recinto ferial\\, Vilalba\r\n");
     }
 
     private EventoPublicoDto crearEventoConLugar(String lugar, String municipio) {

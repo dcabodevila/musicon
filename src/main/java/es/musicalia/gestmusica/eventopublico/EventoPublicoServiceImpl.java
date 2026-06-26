@@ -31,6 +31,8 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 @Transactional(readOnly = true)
 public class EventoPublicoServiceImpl implements EventoPublicoService {
 
+    private static final long FEED_ARTISTA_HORIZONTE_FUTURO_DIAS = 45L;
+
     private final OcupacionRepository ocupacionRepository;
     private final ArtistaRepository artistaRepository;
 
@@ -60,11 +62,17 @@ public class EventoPublicoServiceImpl implements EventoPublicoService {
             .filter(this::isSuscripcionCalendarioVigente)
             .orElseThrow(() -> new ResponseStatusException(NOT_FOUND));
 
+        LocalDate hoy = LocalDate.now();
+        LocalDate fechaDesde = hoy.minusMonths(12);
+        LocalDate fechaHasta = hoy.plusDays(FEED_ARTISTA_HORIZONTE_FUTURO_DIAS);
+
         List<EventoPublicoDto> eventos = ocupacionRepository.findAll(
-                buildFiltrosPublicosSpec(null, null, idArtista, LocalDate.now(), null),
+                buildFiltrosPublicosSpec(null, null, idArtista, fechaDesde, fechaHasta),
                 Sort.by(Sort.Direction.ASC, "fecha", "artista.nombre")
             ).stream()
             .map(this::convertirAEventoPublico)
+            .filter(evento -> !evento.getFecha().toLocalDate().isBefore(fechaDesde))
+            .filter(evento -> !evento.getFecha().toLocalDate().isAfter(fechaHasta))
             .collect(Collectors.toList());
 
         return EventoPublicoCalendarLinks.buildArtistCalendar(artista.getNombre(), eventos, LocalDateTime::now);

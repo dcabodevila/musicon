@@ -30,14 +30,19 @@ final class EventoPublicoCalendarLinks {
     }
 
     static String buildIcal(EventoPublicoDto evento) {
-        return buildArtistCalendar(evento.getNombreArtista(), List.of(evento), LocalDateTime::now);
+        return buildCalendar(evento.getNombreArtista(), List.of(evento), LocalDateTime::now, false);
     }
 
     static String buildIcal(EventoPublicoDto evento, Supplier<LocalDateTime> nowSupplier) {
-        return buildArtistCalendar(evento.getNombreArtista(), List.of(evento), nowSupplier);
+        return buildCalendar(evento.getNombreArtista(), List.of(evento), nowSupplier, false);
     }
 
     static String buildArtistCalendar(String artistName, List<EventoPublicoDto> eventos, Supplier<LocalDateTime> nowSupplier) {
+        return buildCalendar(artistName, eventos, nowSupplier, true);
+    }
+
+    private static String buildCalendar(String artistName, List<EventoPublicoDto> eventos, Supplier<LocalDateTime> nowSupplier,
+                                        boolean normalizeArtistFeedSummary) {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
         String fallbackDtStamp = nowSupplier.get().format(dateTimeFormatter) + "Z";
         StringBuilder calendar = new StringBuilder()
@@ -47,7 +52,27 @@ final class EventoPublicoCalendarLinks {
             .append("METHOD:PUBLISH\r\n")
             .append("CALSCALE:GREGORIAN\r\n")
             .append("X-WR-CALNAME:").append(escapeIcal("Festia - " + artistName)).append("\r\n")
-            .append("X-WR-TIMEZONE:Europe/Madrid\r\n");
+            .append("X-WR-TIMEZONE:Europe/Madrid\r\n")
+            .append("X-PUBLISHED-TTL:PT1H\r\n")
+            .append("REFRESH-INTERVAL;VALUE=DURATION:PT1H\r\n")
+            .append("BEGIN:VTIMEZONE\r\n")
+            .append("TZID:Europe/Madrid\r\n")
+            .append("X-LIC-LOCATION:Europe/Madrid\r\n")
+            .append("BEGIN:DAYLIGHT\r\n")
+            .append("TZOFFSETFROM:+0100\r\n")
+            .append("TZOFFSETTO:+0200\r\n")
+            .append("TZNAME:CEST\r\n")
+            .append("DTSTART:19700329T020000\r\n")
+            .append("RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU\r\n")
+            .append("END:DAYLIGHT\r\n")
+            .append("BEGIN:STANDARD\r\n")
+            .append("TZOFFSETFROM:+0200\r\n")
+            .append("TZOFFSETTO:+0100\r\n")
+            .append("TZNAME:CET\r\n")
+            .append("DTSTART:19701025T030000\r\n")
+            .append("RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU\r\n")
+            .append("END:STANDARD\r\n")
+            .append("END:VTIMEZONE\r\n");
 
         for (EventoPublicoDto evento : eventos) {
             calendar.append("BEGIN:VEVENT\r\n")
@@ -56,7 +81,7 @@ final class EventoPublicoCalendarLinks {
 
             appendEventDates(calendar, evento, dateTimeFormatter);
 
-            calendar.append("SUMMARY:").append(escapeIcal(evento.getTituloEvento())).append("\r\n")
+            calendar.append("SUMMARY:").append(escapeIcal(resolveSummary(evento, normalizeArtistFeedSummary))).append("\r\n")
                 .append("DESCRIPTION:").append(escapeIcal(evento.getDescripcionSeo())).append("\r\n")
                 .append("LOCATION:").append(escapeIcal(buildLocation(evento))).append("\r\n")
                 .append("END:VEVENT\r\n");
@@ -114,6 +139,18 @@ final class EventoPublicoCalendarLinks {
     private static String buildLocation(EventoPublicoDto evento) {
         return (evento.getLugarParaMapa() != null ? evento.getLugarParaMapa() + ", " : "")
             + evento.getMunicipio() + ", " + evento.getProvincia();
+    }
+
+    private static String resolveSummary(EventoPublicoDto evento, boolean normalizeArtistFeedSummary) {
+        String titulo = evento.getTituloEvento();
+        return normalizeArtistFeedSummary ? stripActuacionDePrefix(titulo) : titulo;
+    }
+
+    private static String stripActuacionDePrefix(String titulo) {
+        if (titulo == null) {
+            return null;
+        }
+        return titulo.startsWith("Actuación de ") ? titulo.substring("Actuación de ".length()) : titulo;
     }
 
     private static String escapeIcal(String s) {

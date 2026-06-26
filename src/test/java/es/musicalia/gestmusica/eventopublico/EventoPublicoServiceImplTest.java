@@ -66,25 +66,45 @@ class EventoPublicoServiceImplTest {
     }
 
     @Test
-    void obtenerFeedCalendarioArtista_debeConstruirFeedConEventosElegiblesYAllDay() {
+    void obtenerFeedCalendarioArtista_debeAplicarVentanaPropiaEIncluirLimites() {
         Artista artista = crearArtistaConSuscripcion(20L, "token-ok");
-        Ocupacion eventoConHora = crearOcupacion(10L, 20L, LocalDateTime.of(2026, 8, 16, 22, 0), "Los Satélites", "Lugo", "Lugo");
-        eventoConHora.setHoraActuacionDesde(java.time.LocalTime.of(22, 0));
-        eventoConHora.setHoraActuacionHasta(java.time.LocalTime.of(1, 0));
-        eventoConHora.setLugar("Praza Maior");
-        Ocupacion eventoAllDay = crearOcupacion(11L, 20L, LocalDateTime.of(2026, 8, 17, 0, 0), "Los Satélites", "Sarria", "Lugo");
+        LocalDate hoy = LocalDate.now();
+        Ocupacion eventoFueraDeLimiteInferior = crearOcupacion(9L, 20L, hoy.minusMonths(12).minusDays(1).atTime(22, 0), "Los Satélites", "Ourense", "Ourense");
+        Ocupacion eventoEnLimiteInferior = crearOcupacion(10L, 20L, hoy.minusMonths(12).atTime(22, 0), "Los Satélites", "Lugo", "Lugo");
+        eventoEnLimiteInferior.setHoraActuacionDesde(java.time.LocalTime.of(22, 0));
+        eventoEnLimiteInferior.setHoraActuacionHasta(java.time.LocalTime.of(1, 0));
+        eventoEnLimiteInferior.setLugar("Praza Maior");
+        Ocupacion eventoEnLimite45 = crearOcupacion(45L, 20L, hoy.plusDays(45).atTime(21, 30), "Los Satélites", "Sarria", "Lugo");
+        Ocupacion eventoFueraDeLimite46 = crearOcupacion(46L, 20L, hoy.plusDays(46).atTime(21, 30), "Los Satélites", "Monforte", "Lugo");
 
         when(artistaRepository.findByIdAndCalendarSubscriptionToken(20L, "token-ok")).thenReturn(Optional.of(artista));
-        when(ocupacionRepository.findAll(any(Specification.class), any(Sort.class))).thenReturn(List.of(eventoConHora, eventoAllDay));
+        when(ocupacionRepository.findAll(any(Specification.class), any(Sort.class)))
+            .thenReturn(List.of(eventoFueraDeLimiteInferior, eventoEnLimiteInferior, eventoEnLimite45, eventoFueraDeLimite46));
 
         String feed = service.obtenerFeedCalendarioArtista(20L, "token-ok");
 
         assertThat(feed)
             .contains("BEGIN:VCALENDAR")
+            .doesNotContain("UID:9@festia.es")
             .contains("UID:10@festia.es")
+            .contains("UID:45@festia.es")
+            .doesNotContain("UID:46@festia.es")
+            .doesNotContain("SUMMARY:Actuación de ");
+    }
+
+    @Test
+    void obtenerFeedCalendarioArtista_debeConstruirFeedAllDayDentroDeVentana() {
+        Artista artista = crearArtistaConSuscripcion(20L, "token-ok");
+        Ocupacion eventoAllDay = crearOcupacion(11L, 20L, LocalDate.now().plusDays(1).atStartOfDay(), "Los Satélites", "Sarria", "Lugo");
+
+        when(artistaRepository.findByIdAndCalendarSubscriptionToken(20L, "token-ok")).thenReturn(Optional.of(artista));
+        when(ocupacionRepository.findAll(any(Specification.class), any(Sort.class))).thenReturn(List.of(eventoAllDay));
+
+        String feed = service.obtenerFeedCalendarioArtista(20L, "token-ok");
+
+        assertThat(feed)
             .contains("UID:11@festia.es")
-            .contains("DTSTART;TZID=Europe/Madrid:20260816T220000")
-            .contains("DTSTART;VALUE=DATE:20260817");
+            .contains("DTSTART;VALUE=DATE:" + LocalDate.now().plusDays(1).format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE));
     }
 
     @Test
