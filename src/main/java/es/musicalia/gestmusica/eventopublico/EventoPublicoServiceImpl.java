@@ -35,11 +35,13 @@ public class EventoPublicoServiceImpl implements EventoPublicoService {
 
     private final OcupacionRepository ocupacionRepository;
     private final ArtistaRepository artistaRepository;
+    private final EventoPublicoDateWindow eventoPublicoDateWindow;
 
     @Override
     public List<EventoPublicoDto> obtenerEventosPublicosPorArtista(Long idArtista) {
         log.info("Obteniendo eventos publicos para artista: {}", idArtista);
-        return obtenerEventosPublicosFiltrados(null, null, idArtista, LocalDate.now(), null);
+        EventoPublicoDateWindow.DateRange dateRange = eventoPublicoDateWindow.effectiveUpcomingWindow(null, null);
+        return obtenerEventosPublicosFiltrados(null, null, idArtista, dateRange.fechaDesde(), dateRange.fechaHasta());
     }
 
     @Override
@@ -67,7 +69,7 @@ public class EventoPublicoServiceImpl implements EventoPublicoService {
         LocalDate fechaHasta = hoy.plusDays(FEED_ARTISTA_HORIZONTE_FUTURO_DIAS);
 
         List<EventoPublicoDto> eventos = ocupacionRepository.findAll(
-                buildFiltrosPublicosSpec(null, null, idArtista, fechaDesde, fechaHasta),
+                buildFiltrosPublicosSinVentanaSpec(null, null, idArtista, fechaDesde, fechaHasta),
                 Sort.by(Sort.Direction.ASC, "fecha", "artista.nombre")
             ).stream()
             .map(this::convertirAEventoPublico)
@@ -106,9 +108,12 @@ public class EventoPublicoServiceImpl implements EventoPublicoService {
         LocalDate fechaDesde,
         LocalDate fechaHasta) {
 
-        Specification<Ocupacion> spec = buildFiltrosPublicosSpec(provincia, municipio, idArtista, fechaDesde, fechaHasta);
+        EventoPublicoDateWindow.DateRange dateRange = eventoPublicoDateWindow.effectiveUpcomingWindow(fechaDesde, fechaHasta);
+        Specification<Ocupacion> spec = buildFiltrosPublicosSpec(provincia, municipio, idArtista, dateRange.fechaDesde(), dateRange.fechaHasta());
         return ocupacionRepository.findAll(spec, Sort.by(Sort.Direction.ASC, "fecha", "artista.nombre")).stream()
             .map(this::convertirAEventoPublico)
+            .filter(evento -> !evento.getFecha().toLocalDate().isBefore(dateRange.fechaDesde()))
+            .filter(evento -> !evento.getFecha().toLocalDate().isAfter(dateRange.fechaHasta()))
             .collect(Collectors.toList());
     }
 
@@ -121,9 +126,17 @@ public class EventoPublicoServiceImpl implements EventoPublicoService {
         LocalDate fechaHasta,
         Pageable pageable) {
 
-        Specification<Ocupacion> spec = buildFiltrosPublicosSpec(provincia, municipio, idArtista, fechaDesde, fechaHasta);
-        return ocupacionRepository.findAll(spec, pageable)
+        EventoPublicoDateWindow.DateRange dateRange = eventoPublicoDateWindow.effectiveUpcomingWindow(fechaDesde, fechaHasta);
+        Specification<Ocupacion> spec = buildFiltrosPublicosSpec(provincia, municipio, idArtista, dateRange.fechaDesde(), dateRange.fechaHasta());
+        Page<EventoPublicoDto> pagina = ocupacionRepository.findAll(spec, pageable)
             .map(this::convertirAEventoPublico);
+
+        List<EventoPublicoDto> eventosFiltrados = pagina.getContent().stream()
+            .filter(evento -> !evento.getFecha().toLocalDate().isBefore(dateRange.fechaDesde()))
+            .filter(evento -> !evento.getFecha().toLocalDate().isAfter(dateRange.fechaHasta()))
+            .collect(Collectors.toList());
+
+        return new MetadataPreservingPage<>(eventosFiltrados, pagina.getPageable(), pagina.getTotalElements());
     }
 
     @Override
@@ -134,12 +147,13 @@ public class EventoPublicoServiceImpl implements EventoPublicoService {
         LocalDate fechaHasta,
         int limite) {
 
-        Specification<Ocupacion> spec = buildFiltrosPublicosSpec(null, null, idArtista, fechaDesde, fechaHasta);
+        EventoPublicoDateWindow.DateRange dateRange = eventoPublicoDateWindow.effectiveUpcomingWindow(fechaDesde, fechaHasta);
+        Specification<Ocupacion> spec = buildFiltrosPublicosSpec(null, null, idArtista, dateRange.fechaDesde(), dateRange.fechaHasta());
         return ocupacionRepository.findAll(spec, Sort.by(Sort.Direction.ASC, "fecha", "artista.nombre")).stream()
             .map(this::convertirAEventoPublico)
             .filter(evento -> idEventoActual == null || !idEventoActual.equals(evento.getId()))
-            .filter(evento -> fechaDesde == null || !evento.getFecha().toLocalDate().isBefore(fechaDesde))
-            .filter(evento -> fechaHasta == null || !evento.getFecha().toLocalDate().isAfter(fechaHasta))
+            .filter(evento -> !evento.getFecha().toLocalDate().isBefore(dateRange.fechaDesde()))
+            .filter(evento -> !evento.getFecha().toLocalDate().isAfter(dateRange.fechaHasta()))
             .sorted(Comparator.comparing(EventoPublicoDto::getFecha))
             .limit(limite)
             .collect(Collectors.toList());
@@ -233,6 +247,17 @@ public class EventoPublicoServiceImpl implements EventoPublicoService {
         LocalDate fechaDesde,
         LocalDate fechaHasta) {
 
+        EventoPublicoDateWindow.DateRange dateRange = eventoPublicoDateWindow.effectiveUpcomingWindow(fechaDesde, fechaHasta);
+        return buildFiltrosPublicosSinVentanaSpec(provincia, municipio, idArtista, dateRange.fechaDesde(), dateRange.fechaHasta());
+    }
+
+    private Specification<Ocupacion> buildFiltrosPublicosSinVentanaSpec(
+        String provincia,
+        String municipio,
+        Long idArtista,
+        LocalDate fechaDesde,
+        LocalDate fechaHasta) {
+
         Specification<Ocupacion> spec = Specification.where(null);
         spec = spec.and((root, query, cb) ->
             cb.equal(root.get("ocupacionEstado").get("id"), OcupacionEstadoEnum.OCUPADO.getId()));
@@ -264,13 +289,11 @@ public class EventoPublicoServiceImpl implements EventoPublicoService {
             spec = spec.and((root, query, cb) -> cb.equal(root.get("artista").get("id"), idArtista));
         }
 
-        LocalDateTime desde = (fechaDesde != null) ? fechaDesde.atStartOfDay() : LocalDateTime.now();
+        LocalDateTime desde = fechaDesde.atStartOfDay();
         spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("fecha"), desde));
 
-        if (fechaHasta != null) {
-            LocalDateTime hasta = fechaHasta.atTime(LocalTime.MAX);
-            spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("fecha"), hasta));
-        }
+        LocalDateTime hasta = fechaHasta.atTime(LocalTime.MAX);
+        spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("fecha"), hasta));
 
         return spec;
     }

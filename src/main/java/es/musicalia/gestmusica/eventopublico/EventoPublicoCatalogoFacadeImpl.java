@@ -26,16 +26,19 @@ public class EventoPublicoCatalogoFacadeImpl implements EventoPublicoCatalogoFac
 
     private final EventoPublicoService eventoPublicoService;
     private final LocalizacionService localizacionService;
+    private final EventoPublicoDateWindow eventoPublicoDateWindow;
 
     @Override
     public EventoPublicoCatalogoView prepararCatalogoPublico(EventoPublicoCatalogoRequest request) {
-        LocalDate hoy = LocalDate.now();
+        LocalDate hoy = eventoPublicoDateWindow.today();
+        LocalDate horizon = eventoPublicoDateWindow.publicHorizon();
+        EventoPublicoDateWindow.DateRange requestedRange = eventoPublicoDateWindow.effectiveUpcomingWindow(request.fechaDesde(), request.fechaHasta());
         List<EventoPublicoDto> eventosCatalogo = eventoPublicoService.obtenerEventosPublicosFiltrados(
-            null, null, null, hoy, hoy.plusDays(EventoPublicoConstantes.HORIZONTE_DIAS_PUBLICOS));
+            null, null, null, hoy, horizon);
 
         String provinciaConsulta = normalizarProvinciaParaConsulta(request.provincia());
         var paginaEventos = eventoPublicoService.obtenerEventosPublicosFiltradosPaginados(
-            provinciaConsulta, request.municipio(), request.idArtista(), request.fechaDesde(), request.fechaHasta(), request.pageable());
+            provinciaConsulta, request.municipio(), request.idArtista(), requestedRange.fechaDesde(), requestedRange.fechaHasta(), request.pageable());
 
         List<String> provincias = obtenerProvinciasPublicasOrdenadas();
 
@@ -64,9 +67,9 @@ public class EventoPublicoCatalogoFacadeImpl implements EventoPublicoCatalogoFac
 
     @Override
     public List<QuickLinkView> obtenerQuickLinksPublicos(String provincia, String municipio) {
-        LocalDate hoy = LocalDate.now();
+        LocalDate hoy = eventoPublicoDateWindow.today();
         List<EventoPublicoDto> eventosCatalogo = eventoPublicoService.obtenerEventosPublicosFiltrados(
-            null, null, null, hoy, hoy.plusDays(EventoPublicoConstantes.HORIZONTE_DIAS_PUBLICOS));
+            null, null, null, hoy, eventoPublicoDateWindow.publicHorizon());
         return construirQuickLinks(eventosCatalogo, provincia, municipio);
     }
 
@@ -132,7 +135,7 @@ public class EventoPublicoCatalogoFacadeImpl implements EventoPublicoCatalogoFac
     }
 
     private List<QuickLinkView> construirQuickLinks(List<EventoPublicoDto> eventosCatalogo, String provincia, String municipio) {
-        LocalDate hoy = LocalDate.now();
+        LocalDate hoy = eventoPublicoDateWindow.today();
         LocalDate viernes = calcularViernesObjetivo(hoy);
         LocalDate domingo = calcularDomingoObjetivo(hoy);
 

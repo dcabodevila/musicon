@@ -6,6 +6,7 @@ import es.musicalia.gestmusica.config.CustomPermissionEvaluator;
 import es.musicalia.gestmusica.localizacion.LocalizacionService;
 import es.musicalia.gestmusica.mensaje.MensajeService;
 import es.musicalia.gestmusica.observabilidad.FunctionalEventTracker;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -14,6 +15,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +30,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(EventoPublicoController.class)
 @Import({DefaultEventoPublicStructuredDataBuilder.class, WebSecurityConfig.class})
 class EventoPublicoSecurityChainMvcTest {
+
+    private static final LocalDate TODAY = LocalDate.of(2026, 7, 1);
+    private static final LocalDate HORIZON = LocalDate.of(2026, 8, 15);
 
     @Autowired
     private MockMvc mockMvc;
@@ -55,6 +60,15 @@ class EventoPublicoSecurityChainMvcTest {
 
     @MockBean
     private CustomPermissionEvaluator customPermissionEvaluator;
+
+    @MockBean
+    private EventoPublicoDateWindow eventoPublicoDateWindow;
+
+    @BeforeEach
+    void setUpDateWindow() {
+        when(eventoPublicoDateWindow.today()).thenReturn(TODAY);
+        when(eventoPublicoDateWindow.publicHorizon()).thenReturn(HORIZON);
+    }
 
     @Test
     void detallePublico_debeResponder200ConSecurityChainRealSinSesionNiCsrf() throws Exception {

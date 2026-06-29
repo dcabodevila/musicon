@@ -51,7 +51,7 @@ final class EventoPublicoCalendarLinks {
             .append("PRODID:-//festia.es//Festia//ES\r\n")
             .append("METHOD:PUBLISH\r\n")
             .append("CALSCALE:GREGORIAN\r\n")
-            .append("X-WR-CALNAME:").append(escapeIcal("Festia - " + artistName)).append("\r\n")
+            .append(foldIcalLine("X-WR-CALNAME:" + escapeIcal("Festia - " + artistName))).append("\r\n")
             .append("X-WR-TIMEZONE:Europe/Madrid\r\n")
             .append("X-PUBLISHED-TTL:PT1H\r\n")
             .append("REFRESH-INTERVAL;VALUE=DURATION:PT1H\r\n")
@@ -81,10 +81,10 @@ final class EventoPublicoCalendarLinks {
 
             appendEventDates(calendar, evento, dateTimeFormatter);
 
-            calendar.append("SUMMARY:").append(escapeIcal(resolveSummary(evento, normalizeArtistFeedSummary))).append("\r\n")
-                .append("DESCRIPTION:").append(escapeIcal(evento.getDescripcionSeo())).append("\r\n")
-                .append("LOCATION:").append(escapeIcal(buildLocation(evento))).append("\r\n")
-                .append("END:VEVENT\r\n");
+            appendIcalProperty(calendar, "SUMMARY", resolveSummary(evento, normalizeArtistFeedSummary));
+            appendIcalProperty(calendar, "DESCRIPTION", evento.getDescripcionSeo());
+            appendIcalProperty(calendar, "LOCATION", buildLocation(evento));
+            calendar.append("END:VEVENT\r\n");
         }
 
         return calendar.append("END:VCALENDAR\r\n").toString();
@@ -120,13 +120,12 @@ final class EventoPublicoCalendarLinks {
             return start.plusHours(3);
         }
 
-        LocalDate fechaFin = start.toLocalDate();
-        LocalTime horaActuacion = evento.getHoraActuacion();
-        if (horaActuacion != null && horaActuacion.getHour() >= 12 && horaActuacionHasta.getHour() < horaActuacion.getHour()) {
-            fechaFin = fechaFin.plusDays(1);
+        LocalDateTime end = start.toLocalDate().atTime(horaActuacionHasta);
+        if (!end.isAfter(start)) {
+            end = end.plusDays(1);
         }
 
-        return fechaFin.atTime(horaActuacionHasta);
+        return end;
     }
 
     private static String resolveDtStamp(EventoPublicoDto evento, String fallbackDtStamp, DateTimeFormatter dateTimeFormatter) {
@@ -161,5 +160,32 @@ final class EventoPublicoCalendarLinks {
             .replace(";", "\\;")
             .replace(",", "\\,")
             .replace("\n", "\\n");
+    }
+
+    private static void appendIcalProperty(StringBuilder calendar, String name, String value) {
+        calendar.append(foldIcalLine(name + ":" + escapeIcal(value))).append("\r\n");
+    }
+
+    private static String foldIcalLine(String line) {
+        if (line.getBytes(StandardCharsets.UTF_8).length <= 75) {
+            return line;
+        }
+
+        StringBuilder folded = new StringBuilder();
+        int currentLineOctets = 0;
+        for (int offset = 0; offset < line.length(); ) {
+            int codePoint = line.codePointAt(offset);
+            String character = new String(Character.toChars(codePoint));
+            int characterOctets = character.getBytes(StandardCharsets.UTF_8).length;
+            int limit = folded.length() == 0 ? 75 : 74;
+            if (currentLineOctets > 0 && currentLineOctets + characterOctets > limit) {
+                folded.append("\r\n ");
+                currentLineOctets = 0;
+            }
+            folded.append(character);
+            currentLineOctets += characterOctets;
+            offset += Character.charCount(codePoint);
+        }
+        return folded.toString();
     }
 }

@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface EventoPublicoService {
 
     /**
-     * Obtiene todos los eventos públicos de un artista (ocupaciones confirmadas futuras)
+     * Obtiene todos los eventos públicos de un artista dentro de la ventana pública hoy..hoy+45.
      * @param idArtista ID del artista
      * @return Lista de eventos públicos
      */
@@ -29,7 +29,7 @@ public interface EventoPublicoService {
     String obtenerUrlSuscripcionCalendarioArtista(Long idArtista);
 
     /**
-     * Obtiene eventos públicos por provincia
+     * Obtiene eventos públicos por provincia dentro de la ventana pública hoy..hoy+45.
      * @param provincia Nombre de la provincia
      * @param fechaDesde Fecha desde (opcional)
      * @param fechaHasta Fecha hasta (opcional)
@@ -38,7 +38,7 @@ public interface EventoPublicoService {
     List<EventoPublicoDto> obtenerEventosPublicosPorProvincia(String provincia, LocalDate fechaDesde, LocalDate fechaHasta);
 
     /**
-     * Obtiene eventos públicos por municipio (coincidencia parcial, case-insensitive)
+     * Obtiene eventos públicos por municipio dentro de la ventana pública hoy..hoy+45.
      * @param municipio Nombre del municipio
      * @param fechaDesde Fecha desde (opcional)
      * @param fechaHasta Fecha hasta (opcional)
@@ -47,7 +47,7 @@ public interface EventoPublicoService {
     List<EventoPublicoDto> obtenerEventosPublicosPorMunicipio(String municipio, LocalDate fechaDesde, LocalDate fechaHasta);
 
     /**
-     * Obtiene eventos publicos con filtros combinables.
+     * Obtiene eventos publicos con filtros combinables, siempre limitados a la ventana pública hoy..hoy+45.
      * @param provincia Nombre de provincia (opcional)
      * @param municipio Nombre de municipio (opcional)
      * @param idArtista ID de artista (opcional)
@@ -63,7 +63,7 @@ public interface EventoPublicoService {
         LocalDate fechaHasta);
 
     /**
-     * Obtiene eventos públicos con filtros combinables y paginación.
+     * Obtiene eventos públicos con filtros combinables y paginación, siempre limitados a la ventana pública hoy..hoy+45.
      * @param provincia Nombre de provincia (opcional)
      * @param municipio Nombre de municipio (opcional)
      * @param idArtista ID de artista (opcional)
@@ -88,7 +88,7 @@ public interface EventoPublicoService {
         int limite);
 
     /**
-     * Obtiene todos los eventos públicos para el sitemap
+     * Obtiene todos los eventos públicos para el sitemap sin aplicar el horizonte público de 45 días.
      * @return Lista de todos los eventos públicos futuros
      */
     List<EventoPublicoDto> obtenerTodosEventosPublicos();

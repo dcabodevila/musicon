@@ -3,6 +3,7 @@ package es.musicalia.gestmusica.eventopublico;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,7 +31,9 @@ class EventoPublicoCalendarLinksTest {
 
         String ical = EventoPublicoCalendarLinks.buildIcal(evento, () -> LocalDateTime.of(2026, 8, 1, 9, 45, 30));
 
-        assertThat(ical)
+        String unfolded = unfoldIcal(ical);
+
+        assertThat(unfolded)
             .contains("BEGIN:VCALENDAR\r\n")
             .contains("DTSTAMP:20260801T094530Z\r\n")
             .contains("DTSTART;TZID=Europe/Madrid:20260815T213000\r\n")
@@ -39,6 +42,8 @@ class EventoPublicoCalendarLinksTest {
             .contains("DESCRIPTION:Los Satélites actúa en Rúa do Franco\\, Praza do Obradoiro\\; nivel\\\\1 (A Coruña) el 15 de agosto de 2026 en Rúa do Franco\\, Santiago. Toda la información en Festia.\r\n")
             .contains("LOCATION:Rúa do Franco\\, Praza do Obradoiro\\; nivel\\\\1\\, A Coruña\r\n")
             .endsWith("END:VCALENDAR\r\n");
+        assertThat(ical.split("\r\n"))
+            .allSatisfy(line -> assertThat(line.getBytes(java.nio.charset.StandardCharsets.UTF_8).length).isLessThanOrEqualTo(75));
     }
 
     @Test
@@ -47,7 +52,7 @@ class EventoPublicoCalendarLinksTest {
 
         String ical = EventoPublicoCalendarLinks.buildIcal(evento, () -> LocalDateTime.of(2026, 8, 1, 9, 45, 30));
 
-        assertThat(ical)
+        assertThat(unfoldIcal(ical))
             .contains("SUMMARY:Actuación de Los Satélites en Rúa do Franco\\, Praza do Obradoiro\r\n");
     }
 
@@ -71,7 +76,7 @@ class EventoPublicoCalendarLinksTest {
             () -> LocalDateTime.of(2026, 8, 1, 9, 45, 30)
         );
 
-        assertThat(ical)
+        assertThat(unfoldIcal(ical))
             .contains("X-WR-CALNAME:Festia - Los Satélites\r\n")
             .contains("X-PUBLISHED-TTL:PT1H\r\n")
             .contains("REFRESH-INTERVAL;VALUE=DURATION:PT1H\r\n")
@@ -92,6 +97,32 @@ class EventoPublicoCalendarLinksTest {
     }
 
     @Test
+    void buildArtistCalendar_debePasarAlDiaSiguienteCuandoLaHoraFinNoEsPosteriorAlInicio() {
+        EventoPublicoDto evento = EventoPublicoDto.builder()
+            .id(7460L)
+            .idArtista(20L)
+            .nombreArtista("Costa Dorada")
+            .lugar("AS ENCROBAS")
+            .municipio("Cerceda")
+            .provincia("A Coruña")
+            .fecha(LocalDateTime.of(2026, 5, 22, 0, 0))
+            .horaActuacion(LocalTime.of(11, 0))
+            .horaActuacionHasta(LocalTime.of(3, 30))
+            .build();
+
+        String ical = EventoPublicoCalendarLinks.buildArtistCalendar(
+            "Costa Dorada",
+            List.of(evento),
+            () -> LocalDateTime.of(2026, 5, 1, 9, 45, 30)
+        );
+
+        assertThat(unfoldIcal(ical))
+            .contains("UID:7460@festia.es\r\n")
+            .contains("DTSTART;TZID=Europe/Madrid:20260522T110000\r\n")
+            .contains("DTEND;TZID=Europe/Madrid:20260523T033000\r\n");
+    }
+
+    @Test
     void buildArtistCalendar_debeEliminarSoloElPrefijoLiteralExactoActuacionDe() {
         EventoPublicoDto evento = EventoPublicoDto.builder()
             .id(12L)
@@ -109,9 +140,13 @@ class EventoPublicoCalendarLinksTest {
             () -> LocalDateTime.of(2026, 8, 1, 9, 45, 30)
         );
 
-        assertThat(ical)
+        assertThat(unfoldIcal(ical))
             .contains("SUMMARY:Actuación de Luxe en Recinto ferial\\, Vilalba\r\n")
             .doesNotContain("SUMMARY:Luxe en Recinto ferial\\, Vilalba\r\n");
+    }
+
+    private String unfoldIcal(String ical) {
+        return ical.replace("\r\n ", "");
     }
 
     private EventoPublicoDto crearEventoConLugar(String lugar, String municipio) {

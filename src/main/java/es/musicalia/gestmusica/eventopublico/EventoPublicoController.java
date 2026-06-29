@@ -43,6 +43,7 @@ public class EventoPublicoController {
     private final EventoPublicoCatalogoFacade eventoPublicoCatalogoFacade;
     private final LocalizacionService localizacionService;
     private final EventoPublicStructuredDataBuilder eventoPublicStructuredDataBuilder;
+    private final EventoPublicoDateWindow eventoPublicoDateWindow;
 
     /**
      * URL legada: /eventos/evento/{id}
@@ -86,12 +87,12 @@ public class EventoPublicoController {
         mv.addObject("canonicalUrl", urlCanonica);
         mv.addObject("metaRobots", "index,follow");
 
-        LocalDate fechaDesdeRelacionados = LocalDate.now();
+        LocalDate fechaDesdeRelacionados = eventoPublicoDateWindow.today();
         List<EventoPublicoDto> eventosRelacionados = eventoPublicoService.obtenerEventosRelacionadosPublicos(
             id,
             evento.getIdArtista(),
             fechaDesdeRelacionados,
-            fechaDesdeRelacionados.plusDays(EventoPublicoConstantes.HORIZONTE_DIAS_PUBLICOS),
+            eventoPublicoDateWindow.publicHorizon(),
             10
         );
         mv.addObject("eventosRelacionados", eventosRelacionados);
@@ -129,8 +130,9 @@ public class EventoPublicoController {
     public String listarEventosPorArtista(@PathVariable Long idArtista, Model model, HttpServletRequest request) {
         log.info("Listando eventos publicos para artista: {}", idArtista);
 
-        LocalDate fechaDesde = LocalDate.now();
-        LocalDate fechaHasta = fechaDesde.plusDays(EventoPublicoConstantes.HORIZONTE_DIAS_PUBLICOS);
+        EventoPublicoDateWindow.DateRange dateRange = eventoPublicoDateWindow.effectiveUpcomingWindow(null, null);
+        LocalDate fechaDesde = dateRange.fechaDesde();
+        LocalDate fechaHasta = dateRange.fechaHasta();
 
         List<EventoPublicoDto> eventos = eventoPublicoService.obtenerEventosPublicosFiltrados(
             null, null, idArtista, fechaDesde, fechaHasta);
@@ -151,7 +153,7 @@ public class EventoPublicoController {
         model.addAttribute("municipio", null);
         model.addAttribute("idArtistaSeleccionado", idArtista);
         List<EventoPublicoDto> eventosCatalogo = eventoPublicoService.obtenerEventosPublicosFiltrados(
-            null, null, null, LocalDate.now(), null);
+            null, null, null, fechaDesde, fechaHasta);
         model.addAttribute("provincias", eventoPublicoCatalogoFacade.obtenerProvinciasPublicasOrdenadas());
         // Municipio select starts empty (AJAX loaded)
         model.addAttribute("municipiosProvincia", List.of());
@@ -222,7 +224,12 @@ public class EventoPublicoController {
             return ResponseEntity.badRequest().build();
         }
 
-        List<EventoPublicoDto> eventos = eventoPublicoService.obtenerEventosPublicosPorProvincia(provincia, fechaDesde, fechaHasta);
+        EventoPublicoDateWindow.DateRange dateRange = eventoPublicoDateWindow.effectiveUpcomingWindow(fechaDesde, fechaHasta);
+        List<EventoPublicoDto> eventos = eventoPublicoService.obtenerEventosPublicosPorProvincia(
+            provincia,
+            dateRange.fechaDesde(),
+            dateRange.fechaHasta()
+        );
         return ResponseEntity.ok(eventos);
     }
 
@@ -343,7 +350,7 @@ public class EventoPublicoController {
     public String listarEventosHoy(Model model, HttpServletRequest request) {
         log.info("Listando eventos publicos de hoy");
 
-        LocalDate hoy = LocalDate.now();
+        LocalDate hoy = eventoPublicoDateWindow.today();
         List<EventoPublicoDto> eventos = eventoPublicoService.obtenerEventosPublicosFiltrados(
             null, null, null, hoy, hoy);
         Map<LocalDate, List<EventoPublicoDto>> eventosPorDia = eventos.stream()
@@ -411,19 +418,23 @@ public class EventoPublicoController {
 
         log.info("Listando todos los eventos publicos");
 
-        LocalDate fechaDesde = LocalDate.now();
-        LocalDate fechaHasta = LocalDate.now().plusDays(EventoPublicoConstantes.HORIZONTE_DIAS_PUBLICOS);
+        LocalDate fechaDesdeSolicitada = null;
+        LocalDate fechaHastaSolicitada = null;
 
         try {
             if (desde != null && !desde.isBlank()) {
-                fechaDesde = LocalDate.parse(desde, DateTimeFormatter.ISO_LOCAL_DATE);
+                fechaDesdeSolicitada = LocalDate.parse(desde, DateTimeFormatter.ISO_LOCAL_DATE);
             }
             if (hasta != null && !hasta.isBlank()) {
-                fechaHasta = LocalDate.parse(hasta, DateTimeFormatter.ISO_LOCAL_DATE);
+                fechaHastaSolicitada = LocalDate.parse(hasta, DateTimeFormatter.ISO_LOCAL_DATE);
             }
         } catch (Exception e) {
             log.error("Error parseando fechas: {}", e.getMessage());
         }
+
+        EventoPublicoDateWindow.DateRange dateRange = eventoPublicoDateWindow.effectiveUpcomingWindow(fechaDesdeSolicitada, fechaHastaSolicitada);
+        LocalDate fechaDesde = dateRange.fechaDesde();
+        LocalDate fechaHasta = dateRange.fechaHasta();
 
         int pageIndex = Math.max(0, page - 1);
         Pageable pageable = PageRequest.of(pageIndex, 20, Sort.by("fecha").ascending().and(Sort.by("artista.nombre").ascending()));
@@ -434,8 +445,7 @@ public class EventoPublicoController {
             )
         );
 
-        List<EventoPublicoDto> eventosCatalogo = catalogoView.eventosCatalogo();
-        Page<EventoPublicoDto> paginaEventos = catalogoView.paginaEventos();
+        Page<EventoPublicoDto> paginaEventos = filtrarPaginaPorRango(catalogoView.paginaEventos(), fechaDesde, fechaHasta);
 
         int totalPaginas = paginaEventos.getTotalPages();
         if (totalPaginas > 0 && page > totalPaginas) {
@@ -469,8 +479,8 @@ public class EventoPublicoController {
         model.addAttribute("titulo", titulo);
         model.addAttribute("descripcion", descripcion);
         model.addAttribute("fechaDesde", fechaDesde.toString());
-        model.addAttribute("fechaHasta", fechaHasta != null ? fechaHasta.toString() : null);
-        model.addAttribute("fechaMaxFiltro", LocalDate.now().plusDays(EventoPublicoConstantes.HORIZONTE_DIAS_PUBLICOS).toString());
+        model.addAttribute("fechaHasta", fechaHasta.toString());
+        model.addAttribute("fechaMaxFiltro", eventoPublicoDateWindow.publicHorizon().toString());
         model.addAttribute("canonicalUrl", canonicalUrl);
         model.addAttribute("metaRobots", noIndex ? "noindex,follow" : "index,follow");
         model.addAttribute("provincia", provincia);
@@ -568,12 +578,17 @@ public class EventoPublicoController {
             .map(Provincia::getNombre)
             .orElse(nombreProvinciaConsulta);
 
-        LocalDate fechaDesde = LocalDate.now();
+        LocalDate fechaDesde = eventoPublicoDateWindow.today();
+        LocalDate fechaHasta = eventoPublicoDateWindow.publicHorizon();
         int pageIndex = Math.max(0, page - 1);
         Pageable pageable = PageRequest.of(pageIndex, 20, Sort.by("fecha").ascending().and(Sort.by("artista.nombre").ascending()));
 
-        Page<EventoPublicoDto> paginaEventos = eventoPublicoService.obtenerEventosPublicosFiltradosPaginados(
-            nombreProvinciaConsultaCanonico, null, null, fechaDesde, null, pageable);
+        Page<EventoPublicoDto> paginaEventos = filtrarPaginaPorRango(
+            eventoPublicoService.obtenerEventosPublicosFiltradosPaginados(
+                nombreProvinciaConsultaCanonico, null, null, fechaDesde, fechaHasta, pageable),
+            fechaDesde,
+            fechaHasta
+        );
 
         int totalPaginas = paginaEventos.getTotalPages();
         if (totalPaginas > 0 && page > totalPaginas) {
@@ -627,7 +642,8 @@ public class EventoPublicoController {
         model.addAttribute("artistasDisponibles", eventoPublicoCatalogoFacade.obtenerArtistasOrdenados(eventos));
         model.addAttribute("quickLinks", eventoPublicoCatalogoFacade.obtenerQuickLinksPublicos(nombreProvinciaCanonico, null));
         model.addAttribute("fechaDesde", fechaDesde.toString());
-        model.addAttribute("fechaHasta", null);
+        model.addAttribute("fechaHasta", fechaHasta.toString());
+        model.addAttribute("fechaMaxFiltro", fechaHasta.toString());
         model.addAttribute("idArtistaSeleccionado", null);
         model.addAttribute("municipio", null);
         model.addAttribute("contextoPagina", "provincia");
@@ -661,12 +677,17 @@ public class EventoPublicoController {
         String municipioTrim = municipio.trim();
         log.info("Listando eventos publicos para municipio: {}", municipioTrim);
 
-        LocalDate fechaDesde = LocalDate.now();
+        LocalDate fechaDesde = eventoPublicoDateWindow.today();
+        LocalDate fechaHasta = eventoPublicoDateWindow.publicHorizon();
         int pageIndex = Math.max(0, page - 1);
         Pageable pageable = PageRequest.of(pageIndex, 10, Sort.by("fecha").ascending().and(Sort.by("artista.nombre").ascending()));
 
-        Page<EventoPublicoDto> paginaEventos = eventoPublicoService.obtenerEventosPublicosFiltradosPaginados(
-            null, municipioTrim, null, fechaDesde, null, pageable);
+        Page<EventoPublicoDto> paginaEventos = filtrarPaginaPorRango(
+            eventoPublicoService.obtenerEventosPublicosFiltradosPaginados(
+                null, municipioTrim, null, fechaDesde, fechaHasta, pageable),
+            fechaDesde,
+            fechaHasta
+        );
 
         int totalPaginas = paginaEventos.getTotalPages();
         if (totalPaginas > 0 && page > totalPaginas) {
@@ -741,7 +762,8 @@ public class EventoPublicoController {
         model.addAttribute("artistasDisponibles", eventoPublicoCatalogoFacade.obtenerArtistasOrdenados(eventos));
         model.addAttribute("quickLinks", eventoPublicoCatalogoFacade.obtenerQuickLinksPublicos(nombreProvinciaCanonico, municipioTrim));
         model.addAttribute("fechaDesde", fechaDesde.toString());
-        model.addAttribute("fechaHasta", null);
+        model.addAttribute("fechaHasta", fechaHasta.toString());
+        model.addAttribute("fechaMaxFiltro", fechaHasta.toString());
         model.addAttribute("idArtistaSeleccionado", null);
         model.addAttribute("contextoPagina", "municipio");
         model.addAttribute("urlBase", "/eventos/municipio/" + UriUtils.encodePath(municipioTrim, StandardCharsets.UTF_8));
@@ -787,8 +809,9 @@ public class EventoPublicoController {
             return ResponseEntity.badRequest().build();
         }
 
+        EventoPublicoDateWindow.DateRange dateRange = eventoPublicoDateWindow.effectiveUpcomingWindow(fechaDesde, fechaHasta);
         List<EventoPublicoDto> eventos = eventoPublicoService.obtenerEventosPublicosPorMunicipio(
-            municipio.trim(), fechaDesde, fechaHasta);
+            municipio.trim(), dateRange.fechaDesde(), dateRange.fechaHasta());
         return ResponseEntity.ok(eventos);
     }
 
@@ -839,6 +862,17 @@ public class EventoPublicoController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Evento no encontrado");
         }
         return eventoOpt.get();
+    }
+
+    private Page<EventoPublicoDto> filtrarPaginaPorRango(Page<EventoPublicoDto> paginaEventos, LocalDate fechaDesde, LocalDate fechaHasta) {
+        List<EventoPublicoDto> eventosFiltrados = paginaEventos.getContent().stream()
+            .filter(evento -> {
+                LocalDate fechaEvento = evento.getFecha().toLocalDate();
+                return !fechaEvento.isBefore(fechaDesde) && !fechaEvento.isAfter(fechaHasta);
+            })
+            .toList();
+
+        return new MetadataPreservingPage<>(eventosFiltrados, paginaEventos.getPageable(), paginaEventos.getTotalElements());
     }
 
     private ProvinciaSeoMetadata.SeoCopy obtenerSeoProvinciaCopy(String provincia, String year) {

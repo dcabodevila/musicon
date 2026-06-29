@@ -2,9 +2,9 @@ package es.musicalia.gestmusica.eventopublico;
 
 import es.musicalia.gestmusica.generic.CodigoNombreRecord;
 import es.musicalia.gestmusica.localizacion.LocalizacionService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -12,8 +12,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -27,18 +30,29 @@ import static org.mockito.Mockito.when;
 @MockitoSettings(strictness = Strictness.LENIENT)
 class EventoPublicoCatalogoFacadeImplTest {
 
+    private static final LocalDate TODAY = LocalDate.of(2026, 7, 1);
+    private static final LocalDate HORIZON = LocalDate.of(2026, 8, 15);
+
     @Mock
     private EventoPublicoService eventoPublicoService;
 
     @Mock
     private LocalizacionService localizacionService;
 
-    @InjectMocks
     private EventoPublicoCatalogoFacadeImpl facade;
+
+    @BeforeEach
+    void setUp() {
+        EventoPublicoDateWindow dateWindow = new EventoPublicoDateWindow(Clock.fixed(
+            Instant.parse("2026-07-01T10:15:30Z"),
+            ZoneId.of("Europe/Madrid")
+        ));
+        facade = new EventoPublicoCatalogoFacadeImpl(eventoPublicoService, localizacionService, dateWindow);
+    }
 
     @Test
     void prepararCatalogoPublico_debeLimitarQuickLinksDinamicosANoMasDeSieteYNormalizarCoruna() {
-        LocalDate hoy = LocalDate.now();
+        LocalDate hoy = TODAY;
         List<EventoPublicoDto> catalogo = List.of(
             crearEvento(1L, 10L, "Lugo", "Lugo", "Orquesta 10", hoy.plusDays(1).atTime(22, 0)),
             crearEvento(2L, 11L, "Vigo", "Pontevedra", "Orquesta 11", hoy.plusDays(2).atTime(22, 0)),
@@ -70,7 +84,7 @@ class EventoPublicoCatalogoFacadeImplTest {
 
         EventoPublicoCatalogoFacade.EventoPublicoCatalogoView view = facade.prepararCatalogoPublico(
             new EventoPublicoCatalogoFacade.EventoPublicoCatalogoRequest(
-                null, null, null, hoy, hoy.plusDays(EventoPublicoConstantes.HORIZONTE_DIAS_PUBLICOS), PageRequest.of(0, 20), 1));
+                null, null, null, hoy, HORIZON, PageRequest.of(0, 20), 1));
 
         long dinamicos = view.quickLinks().stream().filter(EventoPublicoCatalogoFacade.QuickLinkView::dynamic).count();
         assertTrue(dinamicos <= 7);
@@ -80,17 +94,32 @@ class EventoPublicoCatalogoFacadeImplTest {
         assertEquals(List.of("Coruña", "Lugo"), view.provincias());
 
         facade.prepararCatalogoPublico(new EventoPublicoCatalogoFacade.EventoPublicoCatalogoRequest(
-            "Coruña", null, null, hoy, hoy.plusDays(EventoPublicoConstantes.HORIZONTE_DIAS_PUBLICOS), PageRequest.of(0, 20), 1));
+            "Coruña", null, null, hoy, HORIZON, PageRequest.of(0, 20), 1));
         verify(eventoPublicoService).obtenerEventosPublicosFiltradosPaginados(
-            eq("A Coruña"), isNull(), isNull(), eq(hoy), eq(hoy.plusDays(EventoPublicoConstantes.HORIZONTE_DIAS_PUBLICOS)), any());
+            eq("A Coruña"), isNull(), isNull(), eq(hoy), eq(HORIZON), any());
         verify(eventoPublicoService, times(2)).obtenerEventosPublicosFiltrados(
-            isNull(), isNull(), isNull(), eq(hoy), eq(hoy.plusDays(EventoPublicoConstantes.HORIZONTE_DIAS_PUBLICOS)));
+            isNull(), isNull(), isNull(), eq(hoy), eq(HORIZON));
         verify(localizacionService).findMunicipiosByProvinciaNombre("A Coruña");
     }
 
     @Test
+    void prepararCatalogoPublico_debeRecortarHastaSolicitadaMasAllaDelHorizonte() {
+        when(eventoPublicoService.obtenerEventosPublicosFiltrados(isNull(), isNull(), isNull(), any(LocalDate.class), any(LocalDate.class)))
+            .thenReturn(List.of());
+        when(eventoPublicoService.obtenerEventosPublicosFiltradosPaginados(any(), any(), any(), any(), any(), any()))
+            .thenReturn(new PageImpl<>(List.of(), PageRequest.of(0, 20), 0));
+        when(localizacionService.findAllProvincias()).thenReturn(List.of());
+
+        facade.prepararCatalogoPublico(new EventoPublicoCatalogoFacade.EventoPublicoCatalogoRequest(
+            null, null, null, TODAY, LocalDate.of(2026, 9, 30), PageRequest.of(0, 20), 1));
+
+        verify(eventoPublicoService).obtenerEventosPublicosFiltradosPaginados(
+            eq(""), isNull(), isNull(), eq(TODAY), eq(HORIZON), any());
+    }
+
+    @Test
     void prepararCatalogoPublico_debeOrdenarArtistasPorNombreSinDuplicados() {
-        LocalDate hoy = LocalDate.now();
+        LocalDate hoy = TODAY;
         List<EventoPublicoDto> catalogo = List.of(
             crearEvento(1L, 2L, "Lugo", "Lugo", "Zeta Show", hoy.plusDays(2).atTime(20, 0)),
             crearEvento(2L, 1L, "Vigo", "Pontevedra", "Alfa Band", hoy.plusDays(3).atTime(20, 0)),
@@ -105,7 +134,7 @@ class EventoPublicoCatalogoFacadeImplTest {
 
         EventoPublicoCatalogoFacade.EventoPublicoCatalogoView view = facade.prepararCatalogoPublico(
             new EventoPublicoCatalogoFacade.EventoPublicoCatalogoRequest(
-                null, null, null, hoy, hoy.plusDays(EventoPublicoConstantes.HORIZONTE_DIAS_PUBLICOS), PageRequest.of(0, 20), 1));
+                null, null, null, hoy, HORIZON, PageRequest.of(0, 20), 1));
 
         assertEquals(List.of("Alfa Band", "Zeta Show"),
             view.artistasDisponibles().stream().map(EventoPublicoDto::getNombreArtista).toList());
@@ -155,14 +184,14 @@ class EventoPublicoCatalogoFacadeImplTest {
 
     @Test
     void obtenerQuickLinksPublicos_debeContextualizarMunicipiosParaProvincia() {
-        LocalDate hoy = LocalDate.now();
+        LocalDate hoy = TODAY;
         List<EventoPublicoDto> catalogo = List.of(
             crearEvento(1L, 10L, "Lugo", "Lugo", "Orquesta 10", hoy.plusDays(1).atTime(22, 0)),
             crearEvento(2L, 11L, "Monforte de Lemos", "Lugo", "Orquesta 11", hoy.plusDays(2).atTime(22, 0)),
             crearEvento(3L, 12L, "Sarria", "Lugo", "Orquesta 12", hoy.plusDays(3).atTime(22, 0)),
             crearEvento(4L, 13L, "Vigo", "Pontevedra", "Orquesta 13", hoy.plusDays(4).atTime(22, 0)),
             crearEvento(5L, 14L, "Provisional", "Lugo", "Orquesta 14", hoy.plusDays(5).atTime(22, 0)),
-            crearEvento(6L, 15L, "Betanzos", "A Coruña", "Orquesta 15", hoy.plusDays(EventoPublicoConstantes.HORIZONTE_DIAS_PUBLICOS + 1).atTime(22, 0))
+            crearEvento(6L, 15L, "Betanzos", "A Coruña", "Orquesta 15", HORIZON.plusDays(1).atTime(22, 0))
         );
 
         when(eventoPublicoService.obtenerEventosPublicosFiltrados(isNull(), isNull(), isNull(), any(LocalDate.class), any(LocalDate.class)))
@@ -181,7 +210,7 @@ class EventoPublicoCatalogoFacadeImplTest {
 
     @Test
     void obtenerQuickLinksPublicos_debeContextualizarOtrosMunicipiosDeLaProvinciaParaMunicipio() {
-        LocalDate hoy = LocalDate.now();
+        LocalDate hoy = TODAY;
         List<EventoPublicoDto> catalogo = List.of(
             crearEvento(1L, 10L, "Lugo", "Lugo", "Orquesta 10", hoy.plusDays(1).atTime(22, 0)),
             crearEvento(2L, 11L, "Monforte de Lemos", "Lugo", "Orquesta 11", hoy.plusDays(2).atTime(22, 0)),
@@ -224,6 +253,16 @@ class EventoPublicoCatalogoFacadeImplTest {
             "/eventos?desde=" + calcularViernesEsperado(hoy) + "&hasta=" + calcularDomingoEsperado(hoy),
             finDeSemana.href()
         );
+    }
+
+    @Test
+    void obtenerQuickLinksPublicos_debeSolicitarCatalogoDentroDelHorizonteCompartido() {
+        when(eventoPublicoService.obtenerEventosPublicosFiltrados(isNull(), isNull(), isNull(), any(LocalDate.class), any(LocalDate.class)))
+            .thenReturn(List.of());
+
+        facade.obtenerQuickLinksPublicos();
+
+        verify(eventoPublicoService).obtenerEventosPublicosFiltrados(isNull(), isNull(), isNull(), eq(TODAY), eq(HORIZON));
     }
 
     @Test
