@@ -165,6 +165,37 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-header d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+                                    <div>
+                                        <h5 class="card-title mb-1">
+                                            <i class="fas fa-fire text-success me-2"></i>Mapa de calor de ocupaciones por artista
+                                        </h5>
+                                        <p class="text-muted mb-0">Visualiza las ocupaciones creadas durante los últimos 12 meses por día del mes.</p>
+                                    </div>
+                                    <div class="actividad-heatmap__selector-wrap">
+                                        <label for="artistHeatmapSelect" class="form-label mb-1 fw-semibold">Artista activo</label>
+                                        <select id="artistHeatmapSelect" class="form-select" data-heatmap-url="/actividad/ocupaciones-heatmap">
+                                            <option value="">-- Selecciona un artista --</option>
+                                            <option th:each="artist : ${activeArtists}" th:value="${artist.id}" th:text="${artist.nombre}">Artista</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div id="actividadHeatmapStatus" class="text-muted small mb-3">
+                                        Selecciona un artista para cargar el mapa de calor.
+                                    </div>
+                                    <div id="actividadHeatmapError" class="alert alert-danger py-2 px-3 mb-3 d-none" role="alert"></div>
+                                    <div id="actividadHeatmapContainer" class="actividad-heatmap__container d-none">
+                                        <div id="actividadHeatmapChart" style="min-height: 420px;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     
                         <!-- Tabla de Actividad Tarifas -->
                         <div class="row mt-4">
@@ -280,9 +311,19 @@
         .opacity-50 {
             opacity: 0.5;
         }
+        .actividad-heatmap__selector-wrap {
+            width: 100%;
+            max-width: 420px;
+        }
+        .actividad-heatmap__container {
+            background: linear-gradient(180deg, #f8fbf9 0%, #ffffff 100%);
+            border: 1px solid #e8f2eb;
+            border-radius: 0.75rem;
+            padding: 1rem;
+        }
     </style>
 
-    <script type="text/javascript" th:src="@{/js/actividad.js}"></script>1
+    <script type="text/javascript" th:src="@{/js/actividad.js}"></script>
 
 </body>
 </html>

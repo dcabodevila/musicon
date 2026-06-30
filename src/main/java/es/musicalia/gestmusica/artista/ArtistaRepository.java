@@ -1,5 +1,6 @@
 package es.musicalia.gestmusica.artista;
 
+import es.musicalia.gestmusica.actividad.ActividadArtistaOptionRecord;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -51,6 +52,11 @@ public interface ArtistaRepository extends JpaRepository<Artista, Long> {
 
     @Query("select new es.musicalia.gestmusica.artista.ArtistaRecord(a.id, a.nombre, a.logo, c.instagram, c.facebook, c.youtube, c.web, a.tiktok, a.musica, a.google) from Artista a left join a.contacto c where a.id in (:idsMisArtistas) and a.activo order by a.nombre")
     Page<ArtistaRecord> findMisArtistasPaginated(@Param("idsMisArtistas") Set<Long> idsMisArtistas, Pageable pageable);
+
+    @Query("select new es.musicalia.gestmusica.actividad.ActividadArtistaOptionRecord(a.id, a.nombre) from Artista a where a.activo = true order by a.nombre asc")
+    List<ActividadArtistaOptionRecord> findAllActiveOptionsOrderByName();
+
+    boolean existsByIdAndActivoTrue(Long id);
 
     Optional<Artista> findByIdAndCalendarSubscriptionToken(Long id, String calendarSubscriptionToken);
 

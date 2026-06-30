@@ -1,6 +1,7 @@
 package es.musicalia.gestmusica.ocupacion;
 
 import es.musicalia.gestmusica.actividad.ActividadRecord;
+import es.musicalia.gestmusica.actividad.OcupacionHeatmapBucketRecord;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -105,4 +106,22 @@ public interface OcupacionRepository extends JpaRepository<Ocupacion, Long>, Jpa
 
 	@Query("SELECT COUNT(o) FROM Ocupacion o WHERE o.tarifa.id = :tarifaId AND o.activo = true")
 	long countActivasByTarifaId(@Param("tarifaId") Long tarifaId);
+
+    @Query("""
+        select new es.musicalia.gestmusica.actividad.OcupacionHeatmapBucketRecord(
+            year(o.fechaCreacion),
+            month(o.fechaCreacion),
+            day(o.fechaCreacion),
+            count(o)
+        )
+        from Ocupacion o
+        where o.artista.id = :artistId
+            and o.fechaCreacion >= :from
+            and o.fechaCreacion < :toExclusive
+        group by year(o.fechaCreacion), month(o.fechaCreacion), day(o.fechaCreacion)
+        order by year(o.fechaCreacion), month(o.fechaCreacion), day(o.fechaCreacion)
+        """)
+    List<OcupacionHeatmapBucketRecord> findOccupationCreationHeatmapBuckets(@Param("artistId") Long artistId,
+                                                                            @Param("from") LocalDateTime from,
+                                                                            @Param("toExclusive") LocalDateTime toExclusive);
 }

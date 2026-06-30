@@ -4,13 +4,15 @@ package es.musicalia.gestmusica.actividad;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.usuario.UserService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.session.SessionInformation;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -20,6 +22,7 @@ import java.util.List;
 
 @Slf4j
 @Controller
+@PreAuthorize("hasAuthority('ACCESO_PANEL_ADMIN')")
 @RequestMapping(value="actividad")
 public class ActividadController {
 
@@ -37,13 +40,19 @@ public class ActividadController {
     }
 
     @GetMapping
-    public String actividad(@AuthenticationPrincipal CustomAuthenticatedUser user,
-                          Model model) {
+    public String actividad(Model model) {
         model.addAttribute("actividadTarifas", this.actividadService.findActividadTarifas());
         model.addAttribute("actividadOcupaciones", this.actividadService.findActividadOcupaciones());
+        model.addAttribute("activeArtists", this.actividadService.findActiveArtistOptions());
         model.addAttribute("usuariosConectados", obtenerUsuariosConectados());
         model.addAttribute("usuarios", this.userService.findAllUsuarioRecords());
         return "actividad";
+    }
+
+    @GetMapping("/ocupaciones-heatmap")
+    @ResponseBody
+    public ActividadOcupacionesHeatmapResponse ocupacionesHeatmap(@RequestParam Long artistId) {
+        return actividadService.findOcupacionesHeatmap(artistId);
     }
 
 
