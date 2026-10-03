@@ -22,3 +22,4 @@ Decisions:
 - Task 3: commit 939fd26. Report fill tests: Representante width 160 without importes, 110 with; RED observed (110 != 160).
 - Task 4: commit a6bba48 (className text-end). Task 5: commit 4062380 (template row). Structural checks only.
 - Task 6: commit a1ea3a7. AccessDeniedException -> 403 via accessDeniedPage. 10 focused tests green; RED observed reverting OcupacionController (4 failures).
+- Follow-up: commit 33e072d, filter labels above inputs (row g-3 / col-md-3 / form-label, as in ocupaciones-form). Structural check only.
