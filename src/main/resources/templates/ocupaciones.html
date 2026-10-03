@@ -40,8 +40,6 @@
                                             <option th:each="agencia : ${listaAgencias}" th:value="${agencia.id}" th:text="${agencia.nombre}"></option>
                                         </select>
                                     </div>
-                                </div>
-                                <div class="mb-3 row">
                                     <label class="col-form-label col-sm-2">Artista</label>
                                     <div class="col-sm-3">
                                         <select id="artista" th:field="*{idArtista}" class="form-control choices-single">
