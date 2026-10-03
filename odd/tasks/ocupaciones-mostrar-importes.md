@@ -14,6 +14,7 @@ Decisions:
 - [x] 4. List: Importe column right-aligned.
 - [x] 5. Filter: Agencia and Artista selects on the same row.
 - [x] 6. Security: list screen endpoints (/ocupacion/list GET/POST, /list/data, /ocupaciones-pdf, /ocupaciones-excel, /artista/artistas/{idAgencia}) require access to the requested agencia (agencia in user's mapPermisosAgencia; admins map all agencias); 403 otherwise. No idAgencia keeps only the existing artist OCUPACIONES restriction (user decision: users with artist-only access keep visibility).
+- [ ] 7. Importes gated by `VER_DATOS_ECONOMICOS` per artist: checkbox shown only if the user has it on at least one artist; list and PDF fill importe only for rows whose artist grants it (blank otherwise), even if `mostrarImportes=true` is forced. Supersedes the earlier "no permission gating" decision (artist role lost `VER_DATOS_ECONOMICOS` in sql/1.0.7, so importes leaked).
 
 ## Evidence
 - Task 1: commit e662e44. Tests OcupacionMostrarImportesTest (2) + OcupacionListadoJrxmlTest (1) green on JDK 17. Representante PDF column narrowed 160->110 to fit Importe (50).
