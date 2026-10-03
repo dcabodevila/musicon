@@ -888,6 +888,7 @@ public class OcupacionServiceImpl implements OcupacionService {
 				.estado(ocupacion.estado() != null ? ocupacion.estado() : "")
 				.nombreComercialRepresentante(usuario.getNombreComercial() != null ? usuario.getNombreComercial() : "")
 				.telefonoRepresentante(usuario.getTelefono() != null ? usuario.getTelefono() : "")
+				.importe(ocupacion.importe() != null ? ocupacion.importe() : "")
 				.build();
 	}
 
@@ -924,6 +925,7 @@ public class OcupacionServiceImpl implements OcupacionService {
 			filtrosAplicados.append(" Hasta: ").append(ocupacionListFilterDto.getFechaHasta().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
 		}
 		parametros.put("filtros", filtrosAplicados.toString());
+		parametros.put("MOSTRAR_IMPORTES", ocupacionListFilterDto.isMostrarImportes());
 
 		String fileNameToExport = "Ocupaciones_" + DateUtils.getDateStr(new java.util.Date(), "ddMMyyyyHHmmss") + ".pdf";
 

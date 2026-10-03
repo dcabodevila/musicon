@@ -262,7 +262,8 @@ public class OcupacionController {
             @RequestParam(value = "fechaHasta", required = false) String fechaHastaStr,
             @RequestParam(value = "search[value]", required = false) String searchValue,
             @RequestParam(value = "order[0][column]", defaultValue = "1") int orderColumn,
-            @RequestParam(value = "order[0][dir]", defaultValue = "desc") String orderDir
+            @RequestParam(value = "order[0][dir]", defaultValue = "desc") String orderDir,
+            @RequestParam(value = "mostrarImportes", required = false, defaultValue = "false") boolean mostrarImportes
     ) {
         try {
             int pageSize = length > 0 ? length : 10;
@@ -279,6 +280,7 @@ public class OcupacionController {
                     .idArtista(idArtista)
                     .fechaDesde(fechaDesde != null ? fechaDesde : LocalDate.now())
                     .fechaHasta(fechaHasta)
+                    .mostrarImportes(mostrarImportes)
                     .build();
 
             Page<OcupacionListRecord> pageResult = this.ocupacionService.findOcupacionesByArtistasListAndDatesActivoPaginado(
@@ -289,7 +291,7 @@ public class OcupacionController {
             );
 
             List<Map<String, Object>> rows = pageResult.getContent().stream()
-                    .map(this::toDataTableRow)
+                    .map(ocupacion -> toDataTableRow(ocupacion, mostrarImportes))
                     .toList();
 
             Map<String, Object> response = new HashMap<>();
@@ -441,7 +443,7 @@ public class OcupacionController {
         };
     }
 
-    private Map<String, Object> toDataTableRow(OcupacionListRecord ocupacion) {
+    Map<String, Object> toDataTableRow(OcupacionListRecord ocupacion, boolean mostrarImportes) {
         Map<String, Object> row = new HashMap<>();
         row.put("id", ocupacion.id());
         row.put("artista", ocupacion.artista());
@@ -458,6 +460,7 @@ public class OcupacionController {
         row.put("longitud", ocupacion.longitud());
         row.put("latitudProvincia", ocupacion.latitudProvincia());
         row.put("longitudProvincia", ocupacion.longitudProvincia());
+        row.put("importe", mostrarImportes && ocupacion.importe() != null ? ocupacion.importe() : "");
         return row;
     }
 
