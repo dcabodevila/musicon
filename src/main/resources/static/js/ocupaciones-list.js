@@ -182,6 +182,7 @@ $(document).ready(function () {
             },
             {
                 data: "importe",
+                orderable: false,
                 defaultContent: "",
                 render: function (importe) {
                     return importe ? importe + " \u20ac" : "";

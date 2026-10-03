@@ -49,6 +49,10 @@ class OcupacionMostrarImportesTest {
                 "Usuario",
                 null,
                 null,
-                LocalDateTime.now());
+                LocalDateTime.now(),
+                null,
+                null,
+                null,
+                null);
     }
 }
