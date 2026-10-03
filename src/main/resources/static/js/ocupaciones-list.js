@@ -127,6 +127,9 @@ $(document).ready(function () {
             url: "https://cdn.datatables.net/plug-ins/1.13.1/i18n/es-ES.json"
         },
         order: [[1, "desc"]],
+        columnDefs: [
+            { targets: 8, visible: $("#mostrarImportes-ocupacion").is(":checked") }
+        ],
         ajax: {
             url: "/ocupacion/list/data",
             type: "POST",
@@ -134,6 +137,7 @@ $(document).ready(function () {
                 $form.serializeArray().forEach(function (field) {
                     d[field.name] = field.value;
                 });
+                d.mostrarImportes = $("#mostrarImportes-ocupacion").is(":checked");
             }
         },
         drawCallback: function (settings) {
@@ -177,6 +181,15 @@ $(document).ready(function () {
                 }
             },
             {
+                data: "importe",
+                orderable: false,
+                className: "text-end",
+                defaultContent: "",
+                render: function (importe) {
+                    return importe ? importe + " \u20ac" : "";
+                }
+            },
+            {
                 data: "id",
                 orderable: false,
                 searchable: false,
@@ -214,6 +227,11 @@ $(document).ready(function () {
             notif("error", "Selecciona la fecha ocupación desde");
             return;
         }
+        table.ajax.reload();
+    });
+
+    $("#mostrarImportes-ocupacion").on("change", function () {
+        table.column(8).visible($(this).is(":checked"));
         table.ajax.reload();
     });
 

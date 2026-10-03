@@ -43,4 +43,6 @@ public class OcupacionExcelDto {
 
     @ExcelColumn(value = "Teléfono Representante", order = 10)
     private String telefonoRepresentante;
+
+    private String importe;
 }

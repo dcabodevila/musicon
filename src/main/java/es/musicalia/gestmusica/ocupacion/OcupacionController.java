@@ -12,6 +12,7 @@ import es.musicalia.gestmusica.localizacion.LocalizacionService;
 import es.musicalia.gestmusica.observabilidad.FunctionalEventNames;
 import es.musicalia.gestmusica.observabilidad.FunctionalEventOutcome;
 import es.musicalia.gestmusica.observabilidad.FunctionalEventTracker;
+import es.musicalia.gestmusica.permiso.PermisoAgenciaEnum;
 import es.musicalia.gestmusica.usuario.UserService;
 import es.musicalia.gestmusica.util.DateUtils;
 import es.musicalia.gestmusica.util.DefaultResponseBody;
@@ -25,6 +26,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -122,6 +124,12 @@ public class OcupacionController {
         model.addAttribute("isArtistaPublicarEventos", isArtistaPublicarEventos);
         model.addAttribute("listaUsuarios", this.userService.findAllUsuarioRecordsNotAdmin());
         model.addAttribute("idUsuarioAutenticado", this.userService.isUserAutheticated()? this.userService.obtenerUsuarioAutenticado().get().getId() : null);
+    }
+
+    private void validarAccesoAgencia(CustomAuthenticatedUser user, Long idAgencia) {
+        if (!user.hasAccesoAgencia(idAgencia)) {
+            throw new AccessDeniedException("No tiene acceso a la agencia solicitada");
+        }
     }
 
     public Set<Long> obtenerArtistasConPermisoOcupaciones(Map<Long, Set<String>> mapPermisosArtista) {
@@ -262,14 +270,16 @@ public class OcupacionController {
             @RequestParam(value = "fechaHasta", required = false) String fechaHastaStr,
             @RequestParam(value = "search[value]", required = false) String searchValue,
             @RequestParam(value = "order[0][column]", defaultValue = "1") int orderColumn,
-            @RequestParam(value = "order[0][dir]", defaultValue = "desc") String orderDir
+            @RequestParam(value = "order[0][dir]", defaultValue = "desc") String orderDir,
+            @RequestParam(value = "mostrarImportes", required = false, defaultValue = "false") boolean mostrarImportes
     ) {
+        Long idAgencia = parseLongValue(idAgenciaStr);
+        validarAccesoAgencia(user, idAgencia);
         try {
             int pageSize = length > 0 ? length : 10;
             int page = Math.max(0, start / pageSize);
             Sort sort = Sort.by("desc".equalsIgnoreCase(orderDir) ? Sort.Direction.DESC : Sort.Direction.ASC, getSortColumnName(orderColumn));
             Pageable pageable = PageRequest.of(page, pageSize, sort);
-            Long idAgencia = parseLongValue(idAgenciaStr);
             Long idArtista = parseLongValue(idArtistaStr);
             LocalDate fechaDesde = parseDateValue(fechaDesdeStr);
             LocalDate fechaHasta = parseDateValue(fechaHastaStr);
@@ -279,6 +289,7 @@ public class OcupacionController {
                     .idArtista(idArtista)
                     .fechaDesde(fechaDesde != null ? fechaDesde : LocalDate.now())
                     .fechaHasta(fechaHasta)
+                    .mostrarImportes(mostrarImportes)
                     .build();
 
             Page<OcupacionListRecord> pageResult = this.ocupacionService.findOcupacionesByArtistasListAndDatesActivoPaginado(
@@ -289,7 +300,7 @@ public class OcupacionController {
             );
 
             List<Map<String, Object>> rows = pageResult.getContent().stream()
-                    .map(this::toDataTableRow)
+                    .map(ocupacion -> toDataTableRow(ocupacion, mostrarImportes, user))
                     .toList();
 
             Map<String, Object> response = new HashMap<>();
@@ -368,6 +379,7 @@ public class OcupacionController {
     @PostMapping("/ocupaciones-excel")
     public ResponseEntity<byte[]> exportarOcupacionesExcel(@AuthenticationPrincipal CustomAuthenticatedUser user,
                                                             @ModelAttribute OcupacionListFilterDto ocupacionListFilterDto) {
+        validarAccesoAgencia(user, ocupacionListFilterDto.getIdAgencia());
         // Generar archivo Excel
         var excelStream = this.ocupacionService.exportOcupacionesToExcel(user, ocupacionListFilterDto);
 
@@ -388,6 +400,7 @@ public class OcupacionController {
     @PostMapping("/ocupaciones-pdf")
     public ResponseEntity<byte[]> exportarOcupacionesPDF(@AuthenticationPrincipal CustomAuthenticatedUser user,
                                                           @ModelAttribute OcupacionListFilterDto ocupacionListFilterDto) {
+        validarAccesoAgencia(user, ocupacionListFilterDto.getIdAgencia());
         // Generar archivo PDF
         byte[] pdfBytes = this.ocupacionService.exportOcupacionesToPDF(user, ocupacionListFilterDto);
 
@@ -409,6 +422,8 @@ public class OcupacionController {
 
         OcupacionListFilterDto filter = model.containsAttribute("ocupacionListFilterDto") ? (OcupacionListFilterDto) model.getAttribute("ocupacionListFilterDto") : OcupacionListFilterDto.builder().fechaDesde(LocalDate.now()).fechaHasta(LocalDate.now().plusMonths(2)).build() ;
 
+        validarAccesoAgencia(user, filter.getIdAgencia());
+
         if (!model.containsAttribute("listaOcupaciones")) {
             model.addAttribute("listaOcupaciones", new ArrayList<>());
         }
@@ -424,6 +439,7 @@ public class OcupacionController {
         }
 
         model.addAttribute("listaArtistasPermisosOcupacion", this.artistaService.findMisArtistas(obtenerArtistasConPermisoOcupaciones(user.getMapPermisosArtista())));
+        model.addAttribute("puedeVerImportes", user.hasPermisoEnAlgunArtista(PermisoAgenciaEnum.VER_DATOS_ECONOMICOS.name()));
 
     }
 
@@ -441,7 +457,7 @@ public class OcupacionController {
         };
     }
 
-    private Map<String, Object> toDataTableRow(OcupacionListRecord ocupacion) {
+    Map<String, Object> toDataTableRow(OcupacionListRecord ocupacion, boolean mostrarImportes, CustomAuthenticatedUser user) {
         Map<String, Object> row = new HashMap<>();
         row.put("id", ocupacion.id());
         row.put("artista", ocupacion.artista());
@@ -458,6 +474,8 @@ public class OcupacionController {
         row.put("longitud", ocupacion.longitud());
         row.put("latitudProvincia", ocupacion.latitudProvincia());
         row.put("longitudProvincia", ocupacion.longitudProvincia());
+        boolean puedeVerImporte = user.hasPermisoArtista(ocupacion.idArtista(), PermisoAgenciaEnum.VER_DATOS_ECONOMICOS.name());
+        row.put("importe", mostrarImportes && puedeVerImporte && ocupacion.importe() != null ? ocupacion.importe() : "");
         return row;
     }
 
