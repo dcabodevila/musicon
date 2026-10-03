@@ -863,18 +863,21 @@ public class OcupacionServiceImpl implements OcupacionService {
 		// Convertir a DTOs para Excel y ordenar por fecha ascendente
 		List<OcupacionExcelDto> datosExcel = ocupaciones.stream()
 				.sorted(Comparator.comparing(OcupacionListRecord::start))
-				.map(this::mapToOcupacionExcelDto)
+				.map(ocupacion -> mapToOcupacionExcelDto(ocupacion, user, true))
 				.collect(Collectors.toList());
 
 		// Exportar a Excel
 		return excelExportService.exportToExcel(datosExcel, OcupacionExcelDto.class, "Ocupaciones");
 	}
 
-	private OcupacionExcelDto mapToOcupacionExcelDto(OcupacionListRecord ocupacion) {
+	OcupacionExcelDto mapToOcupacionExcelDto(OcupacionListRecord ocupacion, CustomAuthenticatedUser user, boolean mostrarImportes) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
 		// Buscar el usuario para obtener nombre comercial y teléfono
 		Usuario usuario = userService.findUsuarioById(ocupacion.idUsuario());
+
+		boolean puedeVerImporte = mostrarImportes
+				&& user.hasPermisoArtista(ocupacion.idArtista(), PermisoAgenciaEnum.VER_DATOS_ECONOMICOS.name());
 
 		return OcupacionExcelDto.builder()
 				.id(ocupacion.id())
@@ -888,6 +891,7 @@ public class OcupacionServiceImpl implements OcupacionService {
 				.estado(ocupacion.estado() != null ? ocupacion.estado() : "")
 				.nombreComercialRepresentante(usuario.getNombreComercial() != null ? usuario.getNombreComercial() : "")
 				.telefonoRepresentante(usuario.getTelefono() != null ? usuario.getTelefono() : "")
+				.importe(puedeVerImporte && ocupacion.importe() != null ? ocupacion.importe() : "")
 				.build();
 	}
 
@@ -896,9 +900,12 @@ public class OcupacionServiceImpl implements OcupacionService {
 		// Obtener las ocupaciones filtradas y convertir a DTOs
 		List<OcupacionListRecord> ocupaciones = findOcupacionesByArtistasListAndDatesActivo(user, ocupacionListFilterDto);
 
+		boolean mostrarImportesPdf = ocupacionListFilterDto.isMostrarImportes()
+				&& user.hasPermisoEnAlgunArtista(PermisoAgenciaEnum.VER_DATOS_ECONOMICOS.name());
+
 		List<OcupacionExcelDto> datosOcupaciones = ocupaciones.stream()
 				.sorted(Comparator.comparing(OcupacionListRecord::start))
-				.map(this::mapToOcupacionExcelDto)
+				.map(ocupacion -> mapToOcupacionExcelDto(ocupacion, user, mostrarImportesPdf))
 				.collect(Collectors.toList());
 
 		// Crear DataSource con la colección de ocupaciones
@@ -924,6 +931,7 @@ public class OcupacionServiceImpl implements OcupacionService {
 			filtrosAplicados.append(" Hasta: ").append(ocupacionListFilterDto.getFechaHasta().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
 		}
 		parametros.put("filtros", filtrosAplicados.toString());
+		parametros.put("MOSTRAR_IMPORTES", mostrarImportesPdf);
 
 		String fileNameToExport = "Ocupaciones_" + DateUtils.getDateStr(new java.util.Date(), "ddMMyyyyHHmmss") + ".pdf";
 

@@ -24,4 +24,6 @@ public class OcupacionListFilterDto {
     @DateTimeFormat(pattern = "dd-MM-yyyy")
     private LocalDate fechaHasta;
 
+    private boolean mostrarImportes;
+
 }
