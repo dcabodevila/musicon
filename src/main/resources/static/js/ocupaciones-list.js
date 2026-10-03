@@ -183,6 +183,7 @@ $(document).ready(function () {
             {
                 data: "importe",
                 orderable: false,
+                className: "text-end",
                 defaultContent: "",
                 render: function (importe) {
                     return importe ? importe + " \u20ac" : "";
