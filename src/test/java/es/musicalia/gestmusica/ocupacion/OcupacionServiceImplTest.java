@@ -1380,5 +1380,121 @@ class OcupacionServiceImplTest {
             // Cleanup
             SecurityContextHolder.clearContext();
         }
+
+        @Test
+        @DisplayName("Usuario sin VER_DATOS_ECONOMICOS en ningún artista -> fuerza MOSTRAR_IMPORTES a false")
+        void sinPermisoEnNingunArtista_forzaMostrarImportesFalse() {
+            CustomAuthenticatedUser user = mock(CustomAuthenticatedUser.class);
+            when(user.getUserId()).thenReturn(1L);
+            Map<Long, Set<String>> permisos = new HashMap<>();
+            permisos.put(1L, Set.of(PermisoArtistaEnum.OCUPACIONES.name()));
+            when(user.getMapPermisosArtista()).thenReturn(permisos);
+            when(user.hasPermisoEnAlgunArtista(PermisoAgenciaEnum.VER_DATOS_ECONOMICOS.name())).thenReturn(false);
+
+            Authentication authentication = mock(Authentication.class);
+            when(authentication.getPrincipal()).thenReturn(user);
+            SecurityContext securityContext = mock(SecurityContext.class);
+            when(securityContext.getAuthentication()).thenReturn(authentication);
+            SecurityContextHolder.setContext(securityContext);
+
+            OcupacionListFilterDto filterDto = new OcupacionListFilterDto();
+            filterDto.setFechaDesde(LocalDate.now());
+            filterDto.setMostrarImportes(true);
+
+            lenient().when(accesoRepository.findAccesoByIdUsuarioAndIdAgenciaAndCodigoRol(anyLong(), any(), any()))
+                    .thenReturn(Optional.empty());
+            when(ocupacionRepository.findAll(any(org.springframework.data.jpa.domain.Specification.class), any(org.springframework.data.domain.Pageable.class)))
+                    .thenReturn(org.springframework.data.domain.Page.empty());
+
+            byte[] pdfBytes = new byte[]{0x25, 0x50, 0x44, 0x46};
+            when(informeService.imprimirInformeConDataSource(anyMap(), anyString(), anyString(), any()))
+                    .thenReturn(pdfBytes);
+
+            org.mockito.ArgumentCaptor<Map> parametrosCaptor = org.mockito.ArgumentCaptor.forClass(Map.class);
+
+            ocupacionService.exportOcupacionesToPDF(user, filterDto);
+
+            verify(informeService).imprimirInformeConDataSource(parametrosCaptor.capture(), anyString(), anyString(), any());
+            assertThat(parametrosCaptor.getValue().get("MOSTRAR_IMPORTES")).isEqualTo(false);
+
+            SecurityContextHolder.clearContext();
+        }
+    }
+
+    // =========================================================================
+    // Tests para mapToOcupacionExcelDto - permisos VER_DATOS_ECONOMICOS
+    // =========================================================================
+
+    @Nested
+    @DisplayName("mapToOcupacionExcelDto - Permisos sobre importe")
+    class MapToOcupacionExcelDtoTest {
+
+        @Test
+        @DisplayName("mostrarImportes true y permiso en el artista -> incluye importe")
+        void conPermisoYMostrarImportes_incluyeImporte() {
+            CustomAuthenticatedUser user = mock(CustomAuthenticatedUser.class);
+            when(user.hasPermisoArtista(1L, PermisoAgenciaEnum.VER_DATOS_ECONOMICOS.name())).thenReturn(true);
+            lenient().when(userService.findUsuarioById(anyLong())).thenReturn(crearUsuario(1L, "user", "user@test.com"));
+
+            OcupacionListRecord ocupacion = crearOcupacionListRecord(1L, "1500");
+
+            OcupacionExcelDto dto = ocupacionService.mapToOcupacionExcelDto(ocupacion, user, true);
+
+            assertThat(dto.getImporte()).isEqualTo("1500");
+        }
+
+        @Test
+        @DisplayName("mostrarImportes true pero sin permiso en el artista -> no incluye importe")
+        void sinPermiso_noIncluyeImporte() {
+            CustomAuthenticatedUser user = mock(CustomAuthenticatedUser.class);
+            when(user.hasPermisoArtista(1L, PermisoAgenciaEnum.VER_DATOS_ECONOMICOS.name())).thenReturn(false);
+            lenient().when(userService.findUsuarioById(anyLong())).thenReturn(crearUsuario(1L, "user", "user@test.com"));
+
+            OcupacionListRecord ocupacion = crearOcupacionListRecord(1L, "1500");
+
+            OcupacionExcelDto dto = ocupacionService.mapToOcupacionExcelDto(ocupacion, user, true);
+
+            assertThat(dto.getImporte()).isEqualTo("");
+        }
+
+        @Test
+        @DisplayName("mostrarImportes false aunque tenga permiso -> no incluye importe")
+        void mostrarImportesFalse_noIncluyeImporte() {
+            CustomAuthenticatedUser user = mock(CustomAuthenticatedUser.class);
+            lenient().when(userService.findUsuarioById(anyLong())).thenReturn(crearUsuario(1L, "user", "user@test.com"));
+
+            OcupacionListRecord ocupacion = crearOcupacionListRecord(1L, "1500");
+
+            OcupacionExcelDto dto = ocupacionService.mapToOcupacionExcelDto(ocupacion, user, false);
+
+            assertThat(dto.getImporte()).isEqualTo("");
+            verify(user, never()).hasPermisoArtista(anyLong(), anyString());
+        }
+
+        private OcupacionListRecord crearOcupacionListRecord(Long idArtista, String importe) {
+            return new OcupacionListRecord(
+                    1L,
+                    LocalDateTime.now(),
+                    idArtista,
+                    "Artista",
+                    importe,
+                    true,
+                    "Boda",
+                    "Provincia",
+                    "Municipio",
+                    "Localidad",
+                    false,
+                    false,
+                    "Confirmado",
+                    1L,
+                    "Usuario",
+                    null,
+                    null,
+                    LocalDateTime.now(),
+                    null,
+                    null,
+                    null,
+                    null);
+        }
     }
 }

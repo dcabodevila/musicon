@@ -12,6 +12,7 @@ import es.musicalia.gestmusica.localizacion.LocalizacionService;
 import es.musicalia.gestmusica.observabilidad.FunctionalEventNames;
 import es.musicalia.gestmusica.observabilidad.FunctionalEventOutcome;
 import es.musicalia.gestmusica.observabilidad.FunctionalEventTracker;
+import es.musicalia.gestmusica.permiso.PermisoAgenciaEnum;
 import es.musicalia.gestmusica.usuario.UserService;
 import es.musicalia.gestmusica.util.DateUtils;
 import es.musicalia.gestmusica.util.DefaultResponseBody;
@@ -299,7 +300,7 @@ public class OcupacionController {
             );
 
             List<Map<String, Object>> rows = pageResult.getContent().stream()
-                    .map(ocupacion -> toDataTableRow(ocupacion, mostrarImportes))
+                    .map(ocupacion -> toDataTableRow(ocupacion, mostrarImportes, user))
                     .toList();
 
             Map<String, Object> response = new HashMap<>();
@@ -438,6 +439,7 @@ public class OcupacionController {
         }
 
         model.addAttribute("listaArtistasPermisosOcupacion", this.artistaService.findMisArtistas(obtenerArtistasConPermisoOcupaciones(user.getMapPermisosArtista())));
+        model.addAttribute("puedeVerImportes", user.hasPermisoEnAlgunArtista(PermisoAgenciaEnum.VER_DATOS_ECONOMICOS.name()));
 
     }
 
@@ -455,7 +457,7 @@ public class OcupacionController {
         };
     }
 
-    Map<String, Object> toDataTableRow(OcupacionListRecord ocupacion, boolean mostrarImportes) {
+    Map<String, Object> toDataTableRow(OcupacionListRecord ocupacion, boolean mostrarImportes, CustomAuthenticatedUser user) {
         Map<String, Object> row = new HashMap<>();
         row.put("id", ocupacion.id());
         row.put("artista", ocupacion.artista());
@@ -472,7 +474,8 @@ public class OcupacionController {
         row.put("longitud", ocupacion.longitud());
         row.put("latitudProvincia", ocupacion.latitudProvincia());
         row.put("longitudProvincia", ocupacion.longitudProvincia());
-        row.put("importe", mostrarImportes && ocupacion.importe() != null ? ocupacion.importe() : "");
+        boolean puedeVerImporte = user.hasPermisoArtista(ocupacion.idArtista(), PermisoAgenciaEnum.VER_DATOS_ECONOMICOS.name());
+        row.put("importe", mostrarImportes && puedeVerImporte && ocupacion.importe() != null ? ocupacion.importe() : "");
         return row;
     }
 

@@ -37,4 +37,14 @@ public class CustomAuthenticatedUser extends User {
 		return idAgencia == null || (mapPermisosAgencia != null && mapPermisosAgencia.containsKey(idAgencia));
 	}
 
+	public boolean hasPermisoArtista(Long idArtista, String codigoPermiso) {
+		return idArtista != null && mapPermisosArtista != null
+				&& mapPermisosArtista.getOrDefault(idArtista, Set.of()).contains(codigoPermiso);
+	}
+
+	public boolean hasPermisoEnAlgunArtista(String codigoPermiso) {
+		return mapPermisosArtista != null && mapPermisosArtista.values().stream()
+				.anyMatch(permisos -> permisos != null && permisos.contains(codigoPermiso));
+	}
+
 }
