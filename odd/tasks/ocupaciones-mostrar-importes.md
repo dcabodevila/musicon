@@ -14,3 +14,4 @@ Decisions:
 ## Evidence
 - Task 1: commit e662e44. Tests OcupacionMostrarImportesTest (2) + OcupacionListadoJrxmlTest (1) green on JDK 17. Representante PDF column narrowed 160->110 to fit Importe (50).
 - Task 2: commit 423d8b6. node --check + mvnw compile (JDK 17) OK. No automated UI test; manual browser check pending.
+- Rebased onto develop (= main 6190821); resolved toDataTableRow conflict keeping lat/lng + importe. Follow-up commit 52411f4. 77 ocupacion tests green (JDK 17).
