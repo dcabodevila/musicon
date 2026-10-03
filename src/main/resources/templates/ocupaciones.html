@@ -32,35 +32,34 @@
 
                         <div class="card-body">
                             <div class="mb-3">
-                                <div class="mb-3 row">
-                                    <label class="col-form-label col-sm-2">Agencia</label>
-                                    <div class="col-sm-3">
+                                <div class="row g-3 mb-3">
+                                    <div class="col-12 col-md-3">
+                                        <label for="agencia" class="form-label">Agencia</label>
                                         <select id="agencia" th:field="*{idAgencia}" class="form-control choices-single">
                                             <option sec:authorize="hasAuthority('ACCESO_PANEL_ADMIN')" value="">Todas las agencias</option>
                                             <option th:each="agencia : ${listaAgencias}" th:value="${agencia.id}" th:text="${agencia.nombre}"></option>
                                         </select>
                                     </div>
-                                    <label class="col-form-label col-sm-2">Artista</label>
-                                    <div class="col-sm-3">
+                                    <div class="col-12 col-md-3">
+                                        <label for="artista" class="form-label">Artista</label>
                                         <select id="artista" th:field="*{idArtista}" class="form-control choices-single">
                                             <option value="">Todos los artistas de la agencia</option>
                                             <option th:each="artista : ${listaArtistas}" th:value="${artista.id}"
                                                     th:text="${artista.nombre}"></option>
-
                                         </select>
                                     </div>
                                 </div>
-                                <div class="mb-3 row">
-
-                                    <label class="col-form-label col-sm-2"> Fechas actuación </label>
-                                    <div class="col-sm-3">
+                                <div class="row g-3 mb-3">
+                                    <div class="col-12 col-md-3">
+                                        <label for="idFechaDesde" class="form-label">Fecha actuación inicial</label>
                                         <div class="input-wrapper">
                                             <input id="idFechaDesde" required th:field="*{fechaDesde}" type="text"
                                                    class="form-control flatpickr flatpickr-minimum"
                                                    placeholder="Fecha inicial" readonly="readonly">
                                         </div>
                                     </div>
-                                    <div class="col-sm-3">
+                                    <div class="col-12 col-md-3">
+                                        <label for="idFechaHasta" class="form-label">Fecha actuación final</label>
                                         <div class="input-wrapper">
                                             <input id="idFechaHasta" th:field="*{fechaHasta}" type="text"
                                                    required class="form-control flatpickr flatpickr-minimum"
@@ -71,9 +70,9 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="mb-3 row">
-                                    <label class="col-form-label col-sm-2" for="mostrarImportes-ocupacion">Mostrar Importes</label>
-                                    <div class="col-sm-3">
+                                <div class="row g-3 mb-3">
+                                    <div class="col-12 col-md-3">
+                                        <label for="mostrarImportes-ocupacion" class="form-label">Mostrar Importes</label>
                                         <div class="form-check form-switch">
                                             <input id="mostrarImportes-ocupacion" th:field="*{mostrarImportes}" class="form-check-input" type="checkbox">
                                         </div>
