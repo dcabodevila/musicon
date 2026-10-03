@@ -21,6 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -253,7 +254,10 @@ public class ArtistaController {
 
     @GetMapping("/artistas/{idAgencia}")
     @ResponseBody
-    public ResponseEntity<List<ArtistaRecord>> obtenerArtistasPorAgencia(@PathVariable Long idAgencia) {
+    public ResponseEntity<List<ArtistaRecord>> obtenerArtistasPorAgencia(@AuthenticationPrincipal CustomAuthenticatedUser user, @PathVariable Long idAgencia) {
+        if (!user.hasAccesoAgencia(idAgencia)) {
+            throw new AccessDeniedException("No tiene acceso a la agencia solicitada");
+        }
         List<ArtistaRecord> artistas = artistaService.findArtistasRecordByIdAgencia(idAgencia);
         return ResponseEntity.ok(artistas);
     }

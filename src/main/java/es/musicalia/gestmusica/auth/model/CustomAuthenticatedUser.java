@@ -33,5 +33,8 @@ public class CustomAuthenticatedUser extends User {
 		this.mapPermisosAgencia = mapPermisosAgencia;
 	}
 
+	public boolean hasAccesoAgencia(Long idAgencia) {
+		return idAgencia == null || (mapPermisosAgencia != null && mapPermisosAgencia.containsKey(idAgencia));
+	}
 
 }

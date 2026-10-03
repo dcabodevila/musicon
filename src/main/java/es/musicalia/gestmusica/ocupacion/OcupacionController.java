@@ -25,6 +25,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -122,6 +123,12 @@ public class OcupacionController {
         model.addAttribute("isArtistaPublicarEventos", isArtistaPublicarEventos);
         model.addAttribute("listaUsuarios", this.userService.findAllUsuarioRecordsNotAdmin());
         model.addAttribute("idUsuarioAutenticado", this.userService.isUserAutheticated()? this.userService.obtenerUsuarioAutenticado().get().getId() : null);
+    }
+
+    private void validarAccesoAgencia(CustomAuthenticatedUser user, Long idAgencia) {
+        if (!user.hasAccesoAgencia(idAgencia)) {
+            throw new AccessDeniedException("No tiene acceso a la agencia solicitada");
+        }
     }
 
     public Set<Long> obtenerArtistasConPermisoOcupaciones(Map<Long, Set<String>> mapPermisosArtista) {
@@ -265,12 +272,13 @@ public class OcupacionController {
             @RequestParam(value = "order[0][dir]", defaultValue = "desc") String orderDir,
             @RequestParam(value = "mostrarImportes", required = false, defaultValue = "false") boolean mostrarImportes
     ) {
+        Long idAgencia = parseLongValue(idAgenciaStr);
+        validarAccesoAgencia(user, idAgencia);
         try {
             int pageSize = length > 0 ? length : 10;
             int page = Math.max(0, start / pageSize);
             Sort sort = Sort.by("desc".equalsIgnoreCase(orderDir) ? Sort.Direction.DESC : Sort.Direction.ASC, getSortColumnName(orderColumn));
             Pageable pageable = PageRequest.of(page, pageSize, sort);
-            Long idAgencia = parseLongValue(idAgenciaStr);
             Long idArtista = parseLongValue(idArtistaStr);
             LocalDate fechaDesde = parseDateValue(fechaDesdeStr);
             LocalDate fechaHasta = parseDateValue(fechaHastaStr);
@@ -370,6 +378,7 @@ public class OcupacionController {
     @PostMapping("/ocupaciones-excel")
     public ResponseEntity<byte[]> exportarOcupacionesExcel(@AuthenticationPrincipal CustomAuthenticatedUser user,
                                                             @ModelAttribute OcupacionListFilterDto ocupacionListFilterDto) {
+        validarAccesoAgencia(user, ocupacionListFilterDto.getIdAgencia());
         // Generar archivo Excel
         var excelStream = this.ocupacionService.exportOcupacionesToExcel(user, ocupacionListFilterDto);
 
@@ -390,6 +399,7 @@ public class OcupacionController {
     @PostMapping("/ocupaciones-pdf")
     public ResponseEntity<byte[]> exportarOcupacionesPDF(@AuthenticationPrincipal CustomAuthenticatedUser user,
                                                           @ModelAttribute OcupacionListFilterDto ocupacionListFilterDto) {
+        validarAccesoAgencia(user, ocupacionListFilterDto.getIdAgencia());
         // Generar archivo PDF
         byte[] pdfBytes = this.ocupacionService.exportOcupacionesToPDF(user, ocupacionListFilterDto);
 
@@ -410,6 +420,8 @@ public class OcupacionController {
     private void getModelAttributeComunOcupacionList(CustomAuthenticatedUser user, Model model) {
 
         OcupacionListFilterDto filter = model.containsAttribute("ocupacionListFilterDto") ? (OcupacionListFilterDto) model.getAttribute("ocupacionListFilterDto") : OcupacionListFilterDto.builder().fechaDesde(LocalDate.now()).fechaHasta(LocalDate.now().plusMonths(2)).build() ;
+
+        validarAccesoAgencia(user, filter.getIdAgencia());
 
         if (!model.containsAttribute("listaOcupaciones")) {
             model.addAttribute("listaOcupaciones", new ArrayList<>());
