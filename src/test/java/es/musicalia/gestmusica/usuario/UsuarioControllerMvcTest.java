@@ -12,7 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -43,24 +43,24 @@ class UsuarioControllerMvcTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private UserService userService;
-    @MockBean
+    @MockitoBean
     private AccesoService accesoService;
-    @MockBean
+    @MockitoBean
     private LocalizacionService localizacionService;
-    @MockBean
+    @MockitoBean
     private EmailService emailService;
 
-    @MockBean
+    @MockitoBean
     private UserDetailsService userDetailsService;
-    @MockBean
+    @MockitoBean
     private RateLimitingFilter rateLimitingFilter;
-    @MockBean
+    @MockitoBean
     private CustomPermissionEvaluator customPermissionEvaluator;
-    @MockBean
+    @MockitoBean
     private MensajeService mensajeService;
-    @MockBean
+    @MockitoBean
     private FunctionalEventTracker functionalEventTracker;
 
     @BeforeEach

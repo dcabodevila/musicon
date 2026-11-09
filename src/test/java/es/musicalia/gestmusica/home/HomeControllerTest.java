@@ -16,7 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -52,20 +52,20 @@ class HomeControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private OcupacionService ocupacionService;
-    @MockBean
+    @MockitoBean
     private AgenciaPublicacionEventosService agenciaPublicacionEventosService;
 
-    @MockBean
+    @MockitoBean
     private UserDetailsService userDetailsService;
-    @MockBean
+    @MockitoBean
     private RateLimitingFilter rateLimitingFilter;
-    @MockBean
+    @MockitoBean
     private CustomPermissionEvaluator customPermissionEvaluator;
-    @MockBean
+    @MockitoBean
     private MensajeService mensajeService;
-    @MockBean
+    @MockitoBean
     private FunctionalEventTracker functionalEventTracker;
 
     @BeforeEach
