@@ -173,9 +173,9 @@ class EventoPublicoCatalogoFacadeImplTest {
     @Test
     void metodosPublicosDeCatalogo_debenOrdenarArtistasSinDuplicados() {
         List<EventoPublicoDto> eventos = List.of(
-            crearEvento(1L, 2L, "Lugo", "Lugo", "Zeta Show", LocalDate.now().plusDays(1).atTime(20, 0)),
-            crearEvento(2L, 1L, "Vigo", "Pontevedra", "Alfa Band", LocalDate.now().plusDays(2).atTime(20, 0)),
-            crearEvento(3L, 2L, "Ourense", "Ourense", "Zeta Show", LocalDate.now().plusDays(3).atTime(20, 0))
+            crearEvento(1L, 2L, "Lugo", "Lugo", "Zeta Show", TODAY.plusDays(1).atTime(20, 0)),
+            crearEvento(2L, 1L, "Vigo", "Pontevedra", "Alfa Band", TODAY.plusDays(2).atTime(20, 0)),
+            crearEvento(3L, 2L, "Ourense", "Ourense", "Zeta Show", TODAY.plusDays(3).atTime(20, 0))
         );
 
         assertEquals(List.of("Alfa Band", "Zeta Show"),
@@ -234,7 +234,7 @@ class EventoPublicoCatalogoFacadeImplTest {
 
     @Test
     void obtenerQuickLinksPublicos_debeUsarRangoDeViernesADomingoEnElEnlaceDeFinDeSemana() {
-        LocalDate hoy = LocalDate.now();
+        LocalDate hoy = TODAY;
         List<EventoPublicoDto> catalogo = List.of(
             crearEvento(1L, 10L, "Lugo", "Lugo", "Orquesta 10", hoy.plusDays(1).atTime(22, 0))
         );
