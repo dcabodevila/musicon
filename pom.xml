@@ -47,6 +47,12 @@
 			<artifactId>spring-session-core</artifactId>
 		</dependency>
 		<dependency>
+			<!-- WebAuthn (passkeys) support for Spring Security; version tested by Spring Security 6.5.x -->
+			<groupId>com.webauthn4j</groupId>
+			<artifactId>webauthn4j-core</artifactId>
+			<version>0.29.7.RELEASE</version>
+		</dependency>
+		<dependency>
 			<groupId>org.thymeleaf.extras</groupId>
 			<artifactId>thymeleaf-extras-springsecurity6</artifactId>
 		</dependency>

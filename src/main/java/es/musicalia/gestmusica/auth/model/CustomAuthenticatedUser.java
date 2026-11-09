@@ -38,7 +38,7 @@ public class CustomAuthenticatedUser extends User {
 	/**
 	 * Login name used as principal identity (remember-me, WebAuthn and session registry reload the user by it).
 	 */
-	private static String nombreDeLogin(Usuario u) {
+	public static String nombreDeLogin(Usuario u) {
 		if (u.getUsername() != null && !u.getUsername().isBlank()) {
 			return u.getUsername();
 		}

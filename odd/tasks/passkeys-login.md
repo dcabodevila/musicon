@@ -18,7 +18,7 @@ Branch: `feature/passkeys-login`, chained on `feature/upgrade-spring-boot-3.5` (
 
 ## Tasks
 - T1 (S6, S1 prerequisite): principal name = login username; navbar shows full name. Route: inline. Commit: 9b0a947.
-- T2 (S1, S2): remember me + autocomplete on login form. Route: inline. Commit: pending.
+- T2 (S1, S2): remember me + autocomplete on login form. Route: inline. Commit: 7027766.
 - T3 (S3, S6): WebAuthn config, dependency, entities/repositories, SQL script `sql/1.7.0/`. Route: inline. Commit: pending.
 - T4 (S3): login page passkey button + conditional UI JS. Route: inline. Commit: pending.
 - T5 (S4, S5): post-login offer + profile management UI. Route: inline. Commit: pending.
@@ -32,3 +32,6 @@ Branch: `feature/passkeys-login`, chained on `feature/upgrade-spring-boot-3.5` (
 - L5: T1: RED observed (3 failures: username was "Juan " / full name). Navbar via `sec:authentication="principal.nombreCompleto"` broke MVC tests whose principal is a plain `User`; then `${#authentication.name}` broke tests with no security context. Final: model attribute `nombreUsuarioAutenticado` from GlobalControllerAdvice with `sec:authentication="name"` fallback.
 - L6: Slice boundary: the passkeys PR is chained on feature/upgrade-spring-boot-3.5 (base 69dcd64); its commit counter starts there, not at origin/main.
 - L7: T2: RED observed (4 remember-me tests failing, 3 existing-behaviour tests passing). Test gotcha: the UserDetailsService mock must return a fresh User per call (Spring erases credentials after login and TokenBasedRememberMeServices reloads the user to sign the cookie); a failed login sends a cancel cookie (Max-Age=0). GREEN: 7/7; suite 372 tests, same 12 baseline failures. Prod requires REMEMBER_ME_KEY (application-prod.properties); dev/test fall back to a random key per start with a WARN.
+- L8: Slice 2 (passkeys PR, chained on slice 1 = T1+T2 up to 7027766) starts with T3.
+- L9: T3: webauthn4j-core 0.29.7.RELEASE (version pinned by Spring Security 6.5.11's libs.versions.toml; not in Boot BOM). JPA-backed adapters `PasskeyUserEntityRepository` (returns the user's current login name, so a username change does not break passkeys) and `PasskeyCredentialRepository`; tables `gestmusica.webauthn_usuario` / `gestmusica.webauthn_credencial` in `sql/1.7.0/01_webauthn_passkeys.sql` (validated on a throwaway PostgreSQL 16 cluster: idempotent, cascade delete, column types). RED observed (compile + 2 security tests); GREEN 13 adapter tests + 5 security tests. Contract learned: anonymous POST /webauthn/register/options answers 400 (Spring's filter), not a login redirect. Passkey login goes through the same UserDetailsService as password login (same active-user rules; by username it does not filter inactive users, pre-existing behaviour, unchanged).
+- L10: T3 suite: 390 tests, same 12 baseline failures, none new.

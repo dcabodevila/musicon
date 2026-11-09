@@ -56,6 +56,10 @@ public class WebSecurityConfig {
     private FunctionalEventTracker functionalEventTracker;
     @Value("${app.security.remember-me.key:}")
     private String rememberMeKey;
+    @Value("${app.security.webauthn.rp-id}")
+    private String webauthnRpId;
+    @Value("${app.security.webauthn.allowed-origins}")
+    private String[] webauthnAllowedOrigins;
 
 	@Bean
 	public AuthenticationProvider authProvider(){
@@ -170,6 +174,12 @@ public class WebSecurityConfig {
             )
 	            .rememberMe(rememberMe -> rememberMe
 	                .rememberMeServices(rememberMeServices())
+	            )
+	            .webAuthn(webAuthn -> webAuthn
+	                .rpName("Festia")
+	                .rpId(webauthnRpId)
+	                .allowedOrigins(webauthnAllowedOrigins)
+	                .disableDefaultRegistrationPage(true)
 	            )
 	            .exceptionHandling(exceptionHandling -> exceptionHandling
 	                .accessDeniedPage("/403")
