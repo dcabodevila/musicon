@@ -14,6 +14,18 @@
         loadFailed: 'No hemos podido cargar tus dispositivos. Recarga la página para intentarlo de nuevo.',
     };
 
+    /** Same per-device flag as passkey-offer.js: a device with a passkey is not offered one again. */
+    function markDeviceRegistered(username) {
+        if (!username) {
+            return;
+        }
+        try {
+            window.localStorage.setItem('festia.passkeyOffer.' + username, 'created');
+        } catch (err) {
+            // Private mode without storage: the offer may simply appear again.
+        }
+    }
+
     function formatDate(value) {
         if (!value) {
             return null;
@@ -28,6 +40,8 @@
         const label = document.getElementById('passkeys-perfil-label');
         const add = document.getElementById('passkeys-perfil-add');
         const message = document.getElementById('passkeys-perfil-message');
+        const card = document.getElementById('passkeys-perfil');
+        const username = card && card.dataset ? card.dataset.username : null;
         if (!passkeys || !list || !message) {
             return;
         }
@@ -105,10 +119,12 @@
                 add.disabled = true;
                 try {
                     await passkeys.register(label && label.value ? label.value : passkeys.suggestDeviceName());
+                    markDeviceRegistered(username);
                     say(MESSAGES.added);
                     await refresh();
                 } catch (err) {
                     if (err && err.code === 'already-registered') {
+                        markDeviceRegistered(username);
                         say(MESSAGES.alreadyRegistered);
                     } else if (!err || err.code !== 'cancelled') {
                         console.error(err);

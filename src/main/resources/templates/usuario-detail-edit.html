@@ -133,7 +133,7 @@
                             </div>
                         </div>
 
-                        <div id="passkeys-perfil" class="card" th:if="${esMiPerfil}">
+                        <div id="passkeys-perfil" class="card" th:if="${esMiPerfil}" th:attr="data-username=${#authentication.name}">
                             <div class="card-header">
                                 <h5 class="card-title">Acceso con huella o Face ID</h5>
                                 <h6 class="card-subtitle text-muted">Entra sin contraseña desde los dispositivos que añadas. Tu huella o tu cara no salen nunca del dispositivo.</h6>

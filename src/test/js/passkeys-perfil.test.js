@@ -57,9 +57,9 @@ async function settle() {
     }
 }
 
-async function load({passkeys, confirm = () => true}) {
+async function load({passkeys, confirm = () => true, localStorage = storage()}) {
     const page = {
-        'passkeys-perfil': node('section'),
+        'passkeys-perfil': node('section', {dataset: {username: 'jperez'}}),
         'passkeys-perfil-list': node('ul'),
         'passkeys-perfil-empty': node('p', {hidden: true}),
         'passkeys-perfil-label': node('input'),
@@ -72,12 +72,24 @@ async function load({passkeys, confirm = () => true}) {
         createElement: (tag) => node(tag),
         addEventListener() {},
     };
-    const window = {FestiaPasskeys: passkeys, confirm};
+    const window = {FestiaPasskeys: passkeys, confirm, localStorage};
     const context = {window, document, console: {error() {}}, Promise, Error, Date};
     vm.createContext(context);
     vm.runInContext(SOURCE, context);
     await settle();
+    page.localStorage = localStorage;
     return page;
+}
+
+function storage() {
+    const data = {};
+    return {
+        data,
+        getItem: (k) => (k in data ? data[k] : null),
+        setItem: (k, v) => {
+            data[k] = String(v);
+        },
+    };
 }
 
 function passkeys(lista, overrides = {}) {
@@ -172,4 +184,22 @@ test('si falla la carga muestra un mensaje de error', async () => {
     const page = await load({passkeys: passkeys([], {list: async () => { throw Object.assign(new Error('500'), {code: 'rejected'}); }})});
 
     assert.match(page['passkeys-perfil-message'].textContent, /No hemos podido cargar/);
+});
+
+test('anadir este dispositivo deja de ofrecer la passkey tras el login en este dispositivo', async () => {
+    const page = await load({passkeys: passkeys([])});
+
+    await page['passkeys-perfil-add'].fire('click');
+    await settle();
+
+    assert.equal(page.localStorage.data['festia.passkeyOffer.jperez'], 'created');
+});
+
+test('si falla el alta no se marca el dispositivo', async () => {
+    const page = await load({passkeys: passkeys([], {register: async () => { throw Object.assign(new Error('x'), {code: 'rejected'}); }})});
+
+    await page['passkeys-perfil-add'].fire('click');
+    await settle();
+
+    assert.equal(page.localStorage.data['festia.passkeyOffer.jperez'], undefined);
 });
