@@ -1,6 +1,11 @@
 package es.musicalia.gestmusica.home;
 
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
+import es.musicalia.gestmusica.passkey.PasskeyOffer;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
+import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.Matchers.not;
 import es.musicalia.gestmusica.config.CustomPermissionEvaluator;
 import es.musicalia.gestmusica.config.RateLimitingFilter;
 import es.musicalia.gestmusica.config.ThymeleafConfig;
@@ -102,6 +107,23 @@ class HomeControllerTest {
                 .andExpect(content().string(not(containsString("carrousel-lista-ocupaciones-pendientes"))));
 
         verifyNoInteractions(ocupacionService);
+    }
+
+    @Test
+    void home_trasLoginConContrasena_debeOfrecerPasskeyUnaVez() throws Exception {
+        CustomAuthenticatedUser usuario = authenticatedUser(Set.of(new SimpleGrantedAuthority("USER")), Map.of());
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute(PasskeyOffer.SESSION_ATTRIBUTE, true);
+
+        mockMvc.perform(get("/").session(session).accept(MediaType.TEXT_HTML).with(user(usuario)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("id=\"passkey-offer\"")))
+                .andExpect(content().string(containsString("¿Quieres entrar con huella o Face ID la próxima vez?")))
+                .andExpect(content().string(matchesPattern("(?s).*src=\"/js/passkey-offer(-[0-9a-f]+)?[.]js\".*")));
+
+        mockMvc.perform(get("/").session(session).accept(MediaType.TEXT_HTML).with(user(usuario)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(not(containsString("id=\"passkey-offer\""))));
     }
 
     @Test

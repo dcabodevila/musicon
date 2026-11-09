@@ -18,7 +18,7 @@ function jsonResponse(status, body) {
 }
 
 /** Loads passkeys.js in a fake browser with scripted fetch responses. */
-function load({responses = [], credentials = {}, publicKeyCredential = {isConditionalMediationAvailable: async () => true}, contextPath = '/'} = {}) {
+function load({responses = [], credentials = {}, publicKeyCredential = {isConditionalMediationAvailable: async () => true}, contextPath = '/', userAgent = ''} = {}) {
     const requests = [];
     const metas = {_csrf: 'token-123', _csrf_header: 'X-CSRF-TOKEN'};
     const window = {
@@ -40,7 +40,7 @@ function load({responses = [], credentials = {}, publicKeyCredential = {isCondit
         if (!next) throw new Error('Unexpected request ' + url);
         return next;
     };
-    const context = {window, document, fetch, navigator: {credentials}, Uint8Array, ArrayBuffer, String, JSON, Error, Promise, AbortController, console};
+    const context = {window, document, fetch, navigator: {credentials, userAgent}, Uint8Array, ArrayBuffer, String, JSON, Error, Promise, AbortController, console};
     window.window = window;
     vm.createContext(context);
     vm.runInContext(SOURCE, context);
@@ -223,4 +223,15 @@ test('isSupported: false si el navegador no tiene WebAuthn', () => {
 test('isConditionalAvailable: true solo si el navegador ofrece autorrelleno de passkeys', async () => {
     assert.equal(await load().api.isConditionalAvailable(), true);
     assert.equal(await load({publicKeyCredential: {}}).api.isConditionalAvailable(), false);
+});
+
+test('suggestDeviceName: propone un nombre segun el dispositivo', () => {
+    const name = (userAgent) => load({userAgent}).api.suggestDeviceName();
+
+    assert.equal(name('Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)'), 'iPhone');
+    assert.equal(name('Mozilla/5.0 (iPad; CPU OS 18_0 like Mac OS X)'), 'iPad');
+    assert.equal(name('Mozilla/5.0 (Linux; Android 15; Pixel 9)'), 'Android');
+    assert.equal(name('Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5)'), 'Mac');
+    assert.equal(name('Mozilla/5.0 (Windows NT 10.0; Win64; x64)'), 'Windows');
+    assert.equal(name('Mozilla/5.0 (X11; Linux x86_64)'), 'Este dispositivo');
 });

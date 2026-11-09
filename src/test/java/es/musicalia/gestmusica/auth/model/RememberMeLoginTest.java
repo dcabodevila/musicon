@@ -6,6 +6,7 @@ import es.musicalia.gestmusica.config.WebSecurityConfig;
 import es.musicalia.gestmusica.localizacion.LocalizacionService;
 import es.musicalia.gestmusica.mensaje.MensajeService;
 import es.musicalia.gestmusica.observabilidad.FunctionalEventTracker;
+import es.musicalia.gestmusica.passkey.PasskeyOffer;
 import es.musicalia.gestmusica.usuario.CodigoVerificacionService;
 import es.musicalia.gestmusica.usuario.UserService;
 import jakarta.servlet.FilterChain;
@@ -106,6 +107,17 @@ class RememberMeLoginTest {
                 .andExpect(redirectedUrl("/"))
                 .andExpect(authenticated().withUsername("jperez"))
                 .andExpect(cookie().doesNotExist("remember-me"));
+    }
+
+    @Test
+    void login_conPassword_debeMarcarLaOfertaDePasskey() throws Exception {
+        MvcResult result = mockMvc.perform(post("/auth/login").with(csrf())
+                        .param("username", "jperez")
+                        .param("password", "secret"))
+                .andExpect(redirectedUrl("/"))
+                .andReturn();
+
+        assertThat(result.getRequest().getSession(false).getAttribute(PasskeyOffer.SESSION_ATTRIBUTE)).isEqualTo(true);
     }
 
     @Test

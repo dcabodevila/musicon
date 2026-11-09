@@ -137,6 +137,8 @@ class PasskeyLoginTest {
 
         MvcResult result = mockMvc.perform(loginConPasskey(session)).andReturn();
 
+        assertThat(result.getRequest().getSession(false).getAttribute(PasskeyOffer.SESSION_ATTRIBUTE))
+                .as("no passkey offer after signing in with a passkey").isNull();
         String sesionNueva = result.getRequest().getSession(false).getId();
         assertThat(sesionNueva).isNotEqualTo(sesionAnterior);
         assertThat(sesionesActivasDe("jperez")).extracting(SessionInformation::getSessionId).containsExactly(sesionNueva);

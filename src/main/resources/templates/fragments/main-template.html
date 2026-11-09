@@ -344,6 +344,37 @@
 
 	</footer>
 
+	<th:block th:if="${ofrecerPasskey}">
+		<section id="passkey-offer" class="passkey-offer card shadow-lg" role="dialog" aria-labelledby="passkey-offer-title"
+				 th:attr="data-username=${#authentication.name}" hidden>
+			<div class="card-body">
+				<h5 id="passkey-offer-title" class="card-title mb-2">¿Quieres entrar con huella o Face ID la próxima vez?</h5>
+				<p class="text-muted mb-3">Tu huella o tu cara no salen nunca del dispositivo. Siempre podrás seguir entrando con tu contraseña.</p>
+				<label for="passkey-offer-label" class="form-label">Nombre de este dispositivo</label>
+				<input id="passkey-offer-label" type="text" class="form-control mb-3" maxlength="100" autocomplete="off"/>
+				<p id="passkey-offer-message" class="mb-3" role="status" aria-live="polite"></p>
+				<div class="d-flex gap-2 justify-content-end">
+					<button id="passkey-offer-dismiss" type="button" class="btn btn-link">Ahora no</button>
+					<button id="passkey-offer-accept" type="button" class="btn btn-primary">Activar</button>
+				</div>
+			</div>
+		</section>
+		<style>
+			.passkey-offer {
+				position: fixed;
+				right: 1rem;
+				bottom: 1rem;
+				z-index: 1080;
+				width: min(420px, calc(100vw - 2rem));
+			}
+			.passkey-offer[hidden] {
+				display: none;
+			}
+		</style>
+		<script th:src="@{/js/passkeys.js}" th:attr="data-context-path=@{/}"></script>
+		<script th:src="@{/js/passkey-offer.js}"></script>
+	</th:block>
+
 
 </div>
 </body>

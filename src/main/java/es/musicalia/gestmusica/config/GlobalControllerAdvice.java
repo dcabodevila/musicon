@@ -3,6 +3,8 @@ package es.musicalia.gestmusica.config;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.cloudinary.CloudinaryException;
 import es.musicalia.gestmusica.mensaje.MensajeService;
+import es.musicalia.gestmusica.passkey.PasskeyOffer;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -32,11 +34,12 @@ public class GlobalControllerAdvice {
     }
 
     @ModelAttribute
-    public void addGlobalAttributes(@AuthenticationPrincipal CustomAuthenticatedUser user , Model model) {
+    public void addGlobalAttributes(@AuthenticationPrincipal CustomAuthenticatedUser user , Model model, HttpServletRequest request) {
 
             if (user != null) {
                 model.addAttribute("imagenUsuarioAutenticado", user.getUsuario().getImagen());
                 model.addAttribute("nombreUsuarioAutenticado", user.getNombreCompleto());
+                model.addAttribute("ofrecerPasskey", PasskeyOffer.consume(request));
 
                 model.addAttribute("misAgencias", user.getMapPermisosAgencia().keySet());
                 final Map<Long, Set<String>> mapPermisosArtista = user.getMapPermisosArtista();

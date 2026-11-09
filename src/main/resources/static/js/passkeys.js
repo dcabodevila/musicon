@@ -93,6 +93,17 @@
             && await pkc.isUserVerifyingPlatformAuthenticatorAvailable());
     }
 
+    /** Default device name for a new passkey; the user can change it. */
+    function suggestDeviceName() {
+        const userAgent = (navigator && navigator.userAgent) || '';
+        if (/iPhone/.test(userAgent)) return 'iPhone';
+        if (/iPad/.test(userAgent)) return 'iPad';
+        if (/Android/.test(userAgent)) return 'Android';
+        if (/Macintosh|Mac OS X/.test(userAgent)) return 'Mac';
+        if (/Windows/.test(userAgent)) return 'Windows';
+        return 'Este dispositivo';
+    }
+
     /** Signs in with a passkey and returns the URL to go to. */
     async function authenticate(settings) {
         const conditional = !!(settings && settings.conditional);
@@ -182,6 +193,7 @@
         isSupported,
         isConditionalAvailable,
         isPlatformAuthenticatorAvailable,
+        suggestDeviceName,
         authenticate,
         register,
     };
