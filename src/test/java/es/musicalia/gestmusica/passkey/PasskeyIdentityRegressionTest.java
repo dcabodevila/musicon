@@ -134,6 +134,34 @@ class PasskeyIdentityRegressionTest {
     }
 
     @Test
+    void recordarme_passwordCambiada_noDebeAutenticarNiContaminarLaSiguienteCuenta() {
+        UsuarioIdRememberMeServices remember = new UsuarioIdRememberMeServices("clave-solo-test", details);
+        jakarta.servlet.http.Cookie cookieAlice = cookieTrasLogin(remember, entrarComoAlice());
+        alice.setPassword(encoder.encode("nueva"));
+
+        assertThat(autoLogin(remember, cookieAlice)).isNull();
+        assertThat(usuarioRestaurado(remember, comoBob())).isEqualTo(2L);
+    }
+
+    @Test
+    void recordarme_trasRestaurarUnaCuenta_laSiguienteNoSeContamina() {
+        UsuarioIdRememberMeServices remember = new UsuarioIdRememberMeServices("clave-solo-test", details);
+        assertThat(autoLogin(remember, cookieTrasLogin(remember, entrarComoAlice()))).isNotNull();
+
+        assertThat(usuarioRestaurado(remember, comoBob())).isEqualTo(2L);
+    }
+
+    private Authentication comoBob() {
+        var bob = details.loadUserByUsuarioId(2L, false);
+        return UsernamePasswordAuthenticationToken.authenticated(bob, null, bob.getAuthorities());
+    }
+
+    private static Long usuarioRestaurado(UsuarioIdRememberMeServices remember, Authentication auth) {
+        Authentication restored = autoLogin(remember, cookieTrasLogin(remember, auth));
+        return restored == null ? null : ((CustomAuthenticatedUser) restored.getPrincipal()).getUserId();
+    }
+
+    @Test
     void loginConEmail_debeSeguirResolviendoAlDuenoDelEmail() {
         assertThat(((CustomAuthenticatedUser) details.loadUserByUsername(BOB_EMAIL)).getUserId()).isEqualTo(2L);
     }
