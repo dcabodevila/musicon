@@ -7,7 +7,10 @@ import { BASE_URL, HEADLESS, STORAGE_STATE } from './support/env';
  * The app allows one session per user (maximumSessions(1)), so the order matters:
  *  1. `setup` logs in once and stores the session in e2e/.auth/user.json.
  *  2. `autenticado` reuses that session for listados, ocupaciones and tarifas.
- *  3. `anonimo` runs last, because its fresh logins would expire the stored session.
+ *  3. `anonimo` runs last, because its fresh logins would expire the stored session. It is the
+ *     `teardown` of `setup`, not a dependent of `autenticado`: a dependent project is skipped
+ *     when its dependency fails, while a teardown runs after every project that depends on
+ *     `setup` has finished, whatever its result.
  * One worker keeps the data flows (create -> edit -> delete) deterministic.
  */
 export default defineConfig({
@@ -32,6 +35,7 @@ export default defineConfig({
     {
       name: 'setup',
       testMatch: /auth\.setup\.ts/,
+      teardown: 'anonimo',
       use: { ...devices['Desktop Chrome'], headless: HEADLESS },
     },
     {
@@ -43,7 +47,6 @@ export default defineConfig({
     {
       name: 'anonimo',
       testMatch: /(login|registro)\.spec\.ts/,
-      dependencies: ['autenticado'],
       use: { ...devices['Desktop Chrome'], headless: HEADLESS },
     },
   ],

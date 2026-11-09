@@ -30,7 +30,12 @@ async function importeEn(page: Page, fecha: string): Promise<string | null> {
 }
 
 async function openModal(page: Page, range: string[], importe: string): Promise<void> {
-  await page.locator('#btnNuevaTarifa').click();
+  // While the artista has no tarifas, artistas.js adds `tutorial-focus` to this button: an
+  // endless pulse animation, so a mouse click never sees a stable element. Activate it with
+  // the keyboard, as a user can, which opens the same Bootstrap modal.
+  const nuevaTarifa = page.locator('#btnNuevaTarifa');
+  await expect(nuevaTarifa).toBeVisible();
+  await nuevaTarifa.press('Enter');
   await expect(page.locator('#modalNuevaTarifa')).toBeVisible();
   await setFlatpickrDate(page, 'idFechaDesde', range[0]);
   await setFlatpickrDate(page, 'idFechaHasta', range[range.length - 1]);

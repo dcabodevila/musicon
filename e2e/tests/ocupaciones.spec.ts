@@ -63,12 +63,14 @@ async function saveForm(page: Page): Promise<SaveResponse> {
 
 async function anular(page: Page, id: number): Promise<{ success: boolean; message: string }> {
   // The page reloads right after the (synchronous) XHR, which can discard the response
-  // body; capture it while proxying the real request instead.
+  // body; capture it while proxying the real request instead. jQuery (`cache: false`) adds
+  // a `?_=<timestamp>` query, so match on the path: a glob without the query never matches.
+  const isAnular = (url: URL): boolean => url.pathname === `/ocupacion/anular/${id}`;
   let resolveBody: (value: { status: number; json: { success: boolean; message: string } }) => void;
   const captured = new Promise<{ status: number; json: { success: boolean; message: string } }>((resolve) => {
     resolveBody = resolve;
   });
-  await page.route(`**/ocupacion/anular/${id}`, async (route) => {
+  await page.route(isAnular, async (route) => {
     const response = await route.fetch();
     resolveBody({ status: response.status(), json: await response.json() });
     await route.fulfill({ response });
@@ -78,7 +80,7 @@ async function anular(page: Page, id: number): Promise<{ success: boolean; messa
   await expect(page.locator('#modalConfirmacion')).toBeVisible();
   await page.locator('#btnConfirmar').click();
   const { status, json } = await captured;
-  await page.unroute(`**/ocupacion/anular/${id}`);
+  await page.unroute(isAnular);
   expect(status).toBe(200);
   return json;
 }

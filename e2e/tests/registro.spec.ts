@@ -1,6 +1,5 @@
 import { expect, type Page, test } from '@playwright/test';
 import { E2E_USER, e2eId } from '../support/env';
-import { chooseFirstOption } from '../support/ui';
 
 /*
  * Only validation paths are covered: every case is rejected before
@@ -21,7 +20,9 @@ async function fillValidForm(page: Page, username: string): Promise<void> {
   await page.locator('#apellidos').fill('E2E');
   await page.locator('#nombreComercial').fill(username);
   await page.locator('#telefono').fill('600000000');
-  await chooseFirstOption(page, 'provincia');
+  // registration.html does not load Choices.js, so #provincia is a plain native select.
+  await page.locator('#provincia').selectOption({ index: 1 });
+  await expect(page.locator('#provincia')).not.toHaveValue('');
   await page.locator('#tipoUsuario').selectOption('ARTISTA');
   await page.locator('#aceptaPolitica').check();
 }
