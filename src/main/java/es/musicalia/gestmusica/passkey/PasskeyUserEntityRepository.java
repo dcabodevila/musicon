@@ -3,6 +3,8 @@ package es.musicalia.gestmusica.passkey;
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.usuario.Usuario;
 import es.musicalia.gestmusica.usuario.UsuarioRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.webauthn.api.Bytes;
 import org.springframework.security.web.webauthn.api.ImmutablePublicKeyCredentialUserEntity;
 import org.springframework.security.web.webauthn.api.PublicKeyCredentialUserEntity;
@@ -15,12 +17,13 @@ import java.util.Optional;
 /**
  * Stores WebAuthn user entities in {@code gestmusica.webauthn_usuario}, linked to the application user.
  * The returned name is always the user's current login name, so passkeys keep working after a username change.
+ * <p>
+ * Lookups by name (used while registering a passkey) only resolve the signed-in user, by id: a login name can be
+ * ambiguous because a username may look like another user's email.
  */
 @Repository
 @Transactional
 public class PasskeyUserEntityRepository implements PublicKeyCredentialUserEntityRepository {
-
-    private static final String EMAIL_PATTERN = "^[A-Za-z0-9+_.-]+@(.+)$";
 
     private final WebauthnUsuarioRepository webauthnUsuarioRepository;
     private final UsuarioRepository usuarioRepository;
@@ -42,16 +45,17 @@ public class PasskeyUserEntityRepository implements PublicKeyCredentialUserEntit
     @Override
     @Transactional(readOnly = true)
     public PublicKeyCredentialUserEntity findByUsername(String username) {
-        return buscarUsuario(username)
-                .flatMap(usuario -> webauthnUsuarioRepository.findByUsuarioId(usuario.getId()))
+        return usuarioAutenticado(username)
+                .flatMap(usuarioId -> webauthnUsuarioRepository.findByUsuarioId(usuarioId))
                 .map(PasskeyUserEntityRepository::toUserEntity)
                 .orElse(null);
     }
 
     @Override
     public void save(PublicKeyCredentialUserEntity userEntity) {
-        Usuario usuario = buscarUsuario(userEntity.getName())
-                .orElseThrow(() -> new IllegalStateException("No user found for passkey owner " + userEntity.getName()));
+        Usuario usuario = usuarioAutenticado(userEntity.getName())
+                .flatMap(usuarioRepository::findById)
+                .orElseThrow(() -> new IllegalStateException("A passkey can only be registered by the signed-in user"));
         WebauthnUsuario webauthnUsuario = webauthnUsuarioRepository.findById(userEntity.getId().toBase64UrlString())
                 .orElseGet(WebauthnUsuario::new);
         webauthnUsuario.setId(userEntity.getId().toBase64UrlString());
@@ -66,14 +70,15 @@ public class PasskeyUserEntityRepository implements PublicKeyCredentialUserEntit
         webauthnUsuarioRepository.deleteById(id.toBase64UrlString());
     }
 
-    private Optional<Usuario> buscarUsuario(String username) {
-        if (username == null || username.isBlank()) {
+    /** Id of the signed-in user when {@code username} is their login name; empty otherwise. */
+    private static Optional<Long> usuarioAutenticado(String username) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (username == null || authentication == null
+                || !(authentication.getPrincipal() instanceof CustomAuthenticatedUser user)
+                || !username.equals(user.getUsername())) {
             return Optional.empty();
         }
-        String trimmed = username.trim();
-        return trimmed.matches(EMAIL_PATTERN)
-                ? usuarioRepository.findUsuarioActivoByMail(trimmed)
-                : usuarioRepository.findByUsername(trimmed);
+        return Optional.of(user.getUserId());
     }
 
     private static PublicKeyCredentialUserEntity toUserEntity(WebauthnUsuario webauthnUsuario) {

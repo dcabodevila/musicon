@@ -2,19 +2,28 @@ package es.musicalia.gestmusica.passkey;
 
 import es.musicalia.gestmusica.usuario.Usuario;
 import es.musicalia.gestmusica.usuario.UsuarioRepository;
+import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.webauthn.api.Bytes;
 import org.springframework.security.web.webauthn.api.ImmutablePublicKeyCredentialUserEntity;
 import org.springframework.security.web.webauthn.api.PublicKeyCredentialUserEntity;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 class PasskeyUserEntityRepositoryTest {
@@ -56,32 +65,41 @@ class PasskeyUserEntityRepositoryTest {
     }
 
     @Test
-    void findByUsername_debeResolverElUsuarioPorUsername() {
-        when(usuarioRepository.findByUsername("jperez")).thenReturn(Optional.of(usuario));
+    void findByUsername_debeResolverAlUsuarioAutenticadoPorSuId() {
+        autenticar(usuario);
         when(webauthnUsuarioRepository.findByUsuarioId(7L)).thenReturn(Optional.of(webauthnUsuario("jperez")));
 
         assertThat(repository.findByUsername("jperez").getId()).isEqualTo(userHandle);
+        verifyNoInteractions(usuarioRepository);
     }
 
     @Test
-    void findByUsername_conEmail_debeResolverElUsuarioActivoPorEmail() {
-        when(usuarioRepository.findUsuarioActivoByMail("juan@festia.es")).thenReturn(Optional.of(usuario));
-        when(webauthnUsuarioRepository.findByUsuarioId(7L)).thenReturn(Optional.of(webauthnUsuario("juan@festia.es")));
+    void findByUsername_deOtroUsuario_debeDevolverNullSinBuscarPorNombreNiEmail() {
+        autenticar(usuario);
 
-        assertThat(repository.findByUsername("juan@festia.es").getId()).isEqualTo(userHandle);
+        assertThat(repository.findByUsername("juan@festia.es")).isNull();
+        assertThat(repository.findByUsername("otro")).isNull();
+        verifyNoInteractions(usuarioRepository, webauthnUsuarioRepository);
+    }
+
+    @Test
+    void findByUsername_sinUsuarioAutenticado_debeDevolverNull() {
+        assertThat(repository.findByUsername("jperez")).isNull();
+        verifyNoInteractions(usuarioRepository, webauthnUsuarioRepository);
     }
 
     @Test
     void findByUsername_sinPasskeys_debeDevolverNull() {
-        when(usuarioRepository.findByUsername("jperez")).thenReturn(Optional.of(usuario));
+        autenticar(usuario);
         when(webauthnUsuarioRepository.findByUsuarioId(7L)).thenReturn(Optional.empty());
 
         assertThat(repository.findByUsername("jperez")).isNull();
     }
 
     @Test
-    void save_debeVincularElUsuarioDeLaAplicacion() {
-        when(usuarioRepository.findByUsername("jperez")).thenReturn(Optional.of(usuario));
+    void save_debeVincularAlUsuarioAutenticado() {
+        autenticar(usuario);
+        when(usuarioRepository.findById(7L)).thenReturn(Optional.of(usuario));
         when(webauthnUsuarioRepository.findById(userHandle.toBase64UrlString())).thenReturn(Optional.empty());
 
         repository.save(ImmutablePublicKeyCredentialUserEntity.builder()
@@ -96,11 +114,19 @@ class PasskeyUserEntityRepositoryTest {
     }
 
     @Test
-    void save_conUsuarioInexistente_debeFallar() {
-        when(usuarioRepository.findByUsername("nadie")).thenReturn(Optional.empty());
+    void save_paraOtroUsuario_debeFallarSinGuardar() {
+        autenticar(usuario);
 
         assertThatThrownBy(() -> repository.save(ImmutablePublicKeyCredentialUserEntity.builder()
-                .id(userHandle).name("nadie").displayName("Nadie").build()))
+                .id(userHandle).name("otro").displayName("Otro").build()))
+                .isInstanceOf(IllegalStateException.class);
+        verify(webauthnUsuarioRepository, never()).save(any());
+    }
+
+    @Test
+    void save_sinUsuarioAutenticado_debeFallar() {
+        assertThatThrownBy(() -> repository.save(ImmutablePublicKeyCredentialUserEntity.builder()
+                .id(userHandle).name("jperez").displayName("Juan").build()))
                 .isInstanceOf(IllegalStateException.class);
     }
 
@@ -109,6 +135,18 @@ class PasskeyUserEntityRepositoryTest {
         repository.delete(userHandle);
 
         verify(webauthnUsuarioRepository).deleteById(userHandle.toBase64UrlString());
+    }
+
+    @AfterEach
+    void limpiarContexto() {
+        SecurityContextHolder.clearContext();
+    }
+
+    private static void autenticar(Usuario usuario) {
+        usuario.setPassword("{noop}x");
+        CustomAuthenticatedUser principal = new CustomAuthenticatedUser(usuario, true, true, true, true, List.of(), Map.of(), Map.of());
+        SecurityContextHolder.getContext().setAuthentication(
+                UsernamePasswordAuthenticationToken.authenticated(principal, null, principal.getAuthorities()));
     }
 
     private WebauthnUsuario webauthnUsuario(String nombre) {

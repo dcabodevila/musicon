@@ -16,8 +16,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import es.musicalia.gestmusica.usuario.Usuario;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import java.util.List;
+import java.util.Map;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -61,7 +63,7 @@ class RememberMeLoginTest {
     @MockitoBean
     private MensajeService mensajeService;
     @MockitoBean
-    private UserDetailsService userDetailsService;
+    private UsuarioUserDetailsService userDetailsService;
     @MockitoBean
     private RateLimitingFilter rateLimitingFilter;
     @MockitoBean
@@ -77,11 +79,9 @@ class RememberMeLoginTest {
 
         String passwordHash = new BCryptPasswordEncoder().encode("secret");
         // A fresh instance per call, like the real service: Spring Security erases credentials after login.
-        when(userDetailsService.loadUserByUsername(eq("jperez"))).thenAnswer(invocation ->
-                User.withUsername("jperez")
-                        .password(passwordHash)
-                        .authorities("USER")
-                        .build());
+        when(userDetailsService.loadUserByUsername(eq("jperez"))).thenAnswer(invocation -> jperez(passwordHash));
+        // Remember-me reloads by user id, without counting a new access.
+        when(userDetailsService.loadUserByUsuarioId(7L, false)).thenAnswer(invocation -> jperez(passwordHash));
     }
 
     @Test
@@ -164,6 +164,25 @@ class RememberMeLoginTest {
                 .andExpect(content().string(containsString("name=\"remember-me\"")))
                 .andExpect(content().string(containsString("autocomplete=\"username")))
                 .andExpect(content().string(containsString("autocomplete=\"current-password\"")));
+    }
+
+    @Test
+    void cookieRecordarme_debeIdentificarAlUsuarioPorSuIdYNoPorSuLogin() throws Exception {
+        Cookie rememberMe = loginConRecordarme();
+
+        String token = new String(java.util.Base64.getDecoder().decode(rememberMe.getValue()));
+        assertThat(token).startsWith("7:").doesNotContain("jperez");
+    }
+
+    private static CustomAuthenticatedUser jperez(String passwordHash) {
+        Usuario usuario = new Usuario();
+        usuario.setId(7L);
+        usuario.setUsername("jperez");
+        usuario.setNombre("Juan");
+        usuario.setActivo(true);
+        usuario.setPassword(passwordHash);
+        return new CustomAuthenticatedUser(usuario, true, true, true, true,
+                List.of(new SimpleGrantedAuthority("USER")), Map.of(), Map.of());
     }
 
     private Cookie loginConRecordarme() throws Exception {
