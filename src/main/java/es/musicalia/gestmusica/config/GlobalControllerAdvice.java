@@ -36,6 +36,7 @@ public class GlobalControllerAdvice {
 
             if (user != null) {
                 model.addAttribute("imagenUsuarioAutenticado", user.getUsuario().getImagen());
+                model.addAttribute("nombreUsuarioAutenticado", user.getNombreCompleto());
 
                 model.addAttribute("misAgencias", user.getMapPermisosAgencia().keySet());
                 final Map<Long, Set<String>> mapPermisosArtista = user.getMapPermisosArtista();

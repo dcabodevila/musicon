@@ -134,7 +134,8 @@
 						</div>
 						<div class="flex-grow-1 ps-2">
 							<a class="sidebar-user-title dropdown-toggle text-secondary" href="#" data-bs-toggle="dropdown" aria-expanded="false">
-								<a th:remove="tag" sec:authentication="name">Nombre usuario</a>
+								<a th:remove="tag" th:if="${nombreUsuarioAutenticado}" th:text="${nombreUsuarioAutenticado}">Nombre usuario</a>
+								<a th:remove="tag" th:unless="${nombreUsuarioAutenticado}" sec:authentication="name">Nombre usuario</a>
 							</a>
 							<div class="dropdown-menu dropdown-menu-end">
 								<a class="dropdown-item" th:href="@{/usuarios/mi-perfil}"><i class="align-middle me-1" data-feather="user"></i> Mi perfil</a>
