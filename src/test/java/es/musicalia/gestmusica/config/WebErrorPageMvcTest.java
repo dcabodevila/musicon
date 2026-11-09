@@ -3,6 +3,7 @@ package es.musicalia.gestmusica.config;
 import es.musicalia.gestmusica.home.HomeController;
 import es.musicalia.gestmusica.mensaje.MensajeService;
 import es.musicalia.gestmusica.observabilidad.FunctionalEventTracker;
+import es.musicalia.gestmusica.agencia.publicacioneventos.AgenciaPublicacionEventosService;
 import es.musicalia.gestmusica.ocupacion.OcupacionService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.RequestDispatcher;
@@ -48,6 +49,9 @@ public class WebErrorPageMvcTest {
 
     @MockitoBean
     private OcupacionService ocupacionService;
+
+    @MockitoBean
+    private AgenciaPublicacionEventosService agenciaPublicacionEventosService;
 
     @MockitoBean
     private UserDetailsService userDetailsService;
