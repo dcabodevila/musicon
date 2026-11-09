@@ -97,7 +97,7 @@ class AuthControllerTest {
         mockMvc.perform(get("/auth/login").param("logout", "true"))
             .andExpect(status().isOk())
             .andExpect(view().name("login"))
-            .andExpect(model().attribute("message", "You have been logged out successfully."));
+            .andExpect(model().attribute("message", "Has cerrado sesión correctamente."));
     }
 
     // ==================== GET /auth/registration ====================
