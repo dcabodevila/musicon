@@ -45,6 +45,7 @@ function passkeys(overrides = {}) {
     return Object.assign({
         calls,
         isSupported: () => true,
+        isMobileDevice: () => true,
         isConditionalAvailable: async () => false,
         authenticate: async (settings) => {
             calls.push(settings || {});
@@ -110,4 +111,13 @@ test('si el usuario cancela no se muestra ningun error', async () => {
     await button.fire('click');
 
     assert.equal(error.hidden, true);
+});
+
+test('en escritorio no se muestra el boton ni se ofrece la passkey en el campo de usuario', async () => {
+    const api = passkeys({isMobileDevice: () => false, isConditionalAvailable: async () => true});
+
+    const {button} = await load(api);
+
+    assert.equal(button.hidden, true);
+    assert.equal(api.calls.length, 0);
 });

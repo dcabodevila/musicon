@@ -93,11 +93,27 @@
             && await pkc.isUserVerifyingPlatformAuthenticatorAvailable());
     }
 
+    /** iPadOS in desktop mode reports itself as a Mac; only its touch screen tells it apart. */
+    function isIpadDesktopMode() {
+        const userAgent = (navigator && navigator.userAgent) || '';
+        return /Macintosh/.test(userAgent) && !!navigator && navigator.maxTouchPoints > 1;
+    }
+
+    /** Phones and tablets: the passkey UI (offer, login button, adding a device) is only shown there. */
+    function isMobileDevice() {
+        const userAgent = (navigator && navigator.userAgent) || '';
+        if (/iPhone|iPad|iPod|Android/i.test(userAgent) || isIpadDesktopMode()) {
+            return true;
+        }
+        const userAgentData = navigator && navigator.userAgentData;
+        return !!(userAgentData && userAgentData.mobile === true);
+    }
+
     /** Default device name for a new passkey; the user can change it. */
     function suggestDeviceName() {
         const userAgent = (navigator && navigator.userAgent) || '';
         if (/iPhone/.test(userAgent)) return 'iPhone';
-        if (/iPad/.test(userAgent)) return 'iPad';
+        if (/iPad/.test(userAgent) || isIpadDesktopMode()) return 'iPad';
         if (/Android/.test(userAgent)) return 'Android';
         if (/Macintosh|Mac OS X/.test(userAgent)) return 'Mac';
         if (/Windows/.test(userAgent)) return 'Windows';
@@ -207,6 +223,7 @@
 
     window.FestiaPasskeys = {
         isSupported,
+        isMobileDevice,
         isConditionalAvailable,
         isPlatformAuthenticatorAvailable,
         suggestDeviceName,

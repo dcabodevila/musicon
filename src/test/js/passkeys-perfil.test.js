@@ -64,6 +64,8 @@ async function load({passkeys, confirm = () => true, localStorage = storage()}) 
         'passkeys-perfil-empty': node('p', {hidden: true}),
         'passkeys-perfil-label': node('input'),
         'passkeys-perfil-add': node('button', {hidden: true}),
+        'passkeys-perfil-add-form': node('div', {hidden: true}),
+        'passkeys-perfil-mobile-hint': node('p', {hidden: true}),
         'passkeys-perfil-message': node('p'),
     };
     const document = {
@@ -97,6 +99,7 @@ function passkeys(lista, overrides = {}) {
     return Object.assign({
         calls,
         isSupported: () => true,
+        isMobileDevice: () => true,
         suggestDeviceName: () => 'iPhone',
         list: async () => lista.slice(),
         register: async (label) => {
@@ -202,4 +205,26 @@ test('si falla el alta no se marca el dispositivo', async () => {
     await settle();
 
     assert.equal(page.localStorage.data['festia.passkeyOffer.jperez'], undefined);
+});
+
+test('en escritorio solo se puede ver y eliminar, no anadir este dispositivo', async () => {
+    const page = await load({passkeys: passkeys([IPHONE], {isMobileDevice: () => false})});
+
+    assert.equal(page['passkeys-perfil-add'].hidden, true);
+    assert.equal(page['passkeys-perfil-list'].children.length, 1);
+    assert.equal(page['passkeys-perfil-list'].buttons().length, 1);
+});
+
+test('en movil se muestra el formulario para anadir y no la indicacion', async () => {
+    const page = await load({passkeys: passkeys([])});
+
+    assert.equal(page['passkeys-perfil-add-form'].hidden, false);
+    assert.equal(page['passkeys-perfil-mobile-hint'].hidden, true);
+});
+
+test('en escritorio se oculta el formulario y se indica anadirlo desde el movil', async () => {
+    const page = await load({passkeys: passkeys([], {isMobileDevice: () => false})});
+
+    assert.equal(page['passkeys-perfil-add-form'].hidden, true);
+    assert.equal(page['passkeys-perfil-mobile-hint'].hidden, false);
 });

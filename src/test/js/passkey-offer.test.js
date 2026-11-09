@@ -61,6 +61,7 @@ function passkeys(overrides = {}) {
     return Object.assign({
         registered,
         isSupported: () => true,
+        isMobileDevice: () => true,
         isPlatformAuthenticatorAvailable: async () => true,
         suggestDeviceName: () => 'iPhone',
         register: async (label) => {
@@ -162,4 +163,10 @@ test('error del servidor muestra un mensaje y permite reintentar', async () => {
 
     assert.match(page['passkey-offer-message'].textContent, /No hemos podido/);
     assert.equal(page['passkey-offer-accept'].disabled, false);
+});
+
+test('en escritorio no se ofrece la passkey tras el login', async () => {
+    const {page} = await load({passkeys: passkeys({isMobileDevice: () => false})});
+
+    assert.equal(page['passkey-offer'].hidden, true);
 });

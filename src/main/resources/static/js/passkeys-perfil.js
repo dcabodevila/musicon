@@ -108,7 +108,17 @@
             }
         }
 
-        if (add && passkeys.isSupported()) {
+        const addForm = document.getElementById('passkeys-perfil-add-form');
+        const mobileHint = document.getElementById('passkeys-perfil-mobile-hint');
+        const canAdd = passkeys.isSupported() && passkeys.isMobileDevice();
+        if (addForm) {
+            addForm.hidden = !canAdd;
+        }
+        if (mobileHint) {
+            mobileHint.hidden = canAdd;
+        }
+
+        if (add && canAdd) {
             if (label) {
                 label.value = passkeys.suggestDeviceName();
             }

@@ -14,7 +14,7 @@
         const passkeys = window.FestiaPasskeys;
         const button = document.getElementById('passkey-login');
         const error = document.getElementById('passkey-login-error');
-        if (!passkeys || !button || !passkeys.isSupported()) {
+        if (!passkeys || !button || !passkeys.isSupported() || !passkeys.isMobileDevice()) {
             return;
         }
 

@@ -18,7 +18,7 @@ function jsonResponse(status, body) {
 }
 
 /** Loads passkeys.js in a fake browser with scripted fetch responses. */
-function load({responses = [], credentials = {}, publicKeyCredential = {isConditionalMediationAvailable: async () => true}, contextPath = '/', userAgent = ''} = {}) {
+function load({responses = [], credentials = {}, publicKeyCredential = {isConditionalMediationAvailable: async () => true}, contextPath = '/', userAgent = '', maxTouchPoints = 0, userAgentData} = {}) {
     const requests = [];
     const metas = {_csrf: 'token-123', _csrf_header: 'X-CSRF-TOKEN'};
     const window = {
@@ -40,7 +40,7 @@ function load({responses = [], credentials = {}, publicKeyCredential = {isCondit
         if (!next) throw new Error('Unexpected request ' + url);
         return next;
     };
-    const context = {window, document, fetch, encodeURIComponent, navigator: {credentials, userAgent}, Uint8Array, ArrayBuffer, String, JSON, Error, Promise, AbortController, console};
+    const context = {window, document, fetch, encodeURIComponent, navigator: {credentials, userAgent, maxTouchPoints, userAgentData}, Uint8Array, ArrayBuffer, String, JSON, Error, Promise, AbortController, console};
     window.window = window;
     vm.createContext(context);
     vm.runInContext(SOURCE, context);
@@ -259,4 +259,27 @@ test('remove: si el servidor no la encuentra lanza error "rejected"', async () =
     const {api} = load({responses: [{ok: false, status: 404}]});
 
     await assert.rejects(api.remove('cred-x'), (err) => err.code === 'rejected');
+});
+
+test('isMobileDevice: telefonos y tablets si, escritorio no', () => {
+    const mobile = (settings) => load(settings).api.isMobileDevice();
+
+    assert.equal(mobile({userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)'}), true);
+    assert.equal(mobile({userAgent: 'Mozilla/5.0 (iPad; CPU OS 18_0 like Mac OS X)'}), true);
+    assert.equal(mobile({userAgent: 'Mozilla/5.0 (Linux; Android 15; Pixel 9) Mobile'}), true);
+    assert.equal(mobile({userAgent: 'Mozilla/5.0 (Linux; Android 14; SM-X710)'}), true);
+    assert.equal(mobile({userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}), false);
+    assert.equal(mobile({userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5)'}), false);
+    assert.equal(mobile({userAgent: 'Mozilla/5.0 (X11; Linux x86_64)'}), false);
+});
+
+test('isMobileDevice: iPad en modo escritorio (se anuncia como Mac con pantalla tactil) cuenta como movil', () => {
+    const {api} = load({userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)', maxTouchPoints: 5});
+
+    assert.equal(api.isMobileDevice(), true);
+});
+
+test('isMobileDevice: usa userAgentData.mobile cuando el navegador lo ofrece', () => {
+    assert.equal(load({userAgent: 'Mozilla/5.0 (Linux; Android 15)', userAgentData: {mobile: true}}).api.isMobileDevice(), true);
+    assert.equal(load({userAgent: 'Mozilla/5.0 (Windows NT 10.0)', userAgentData: {mobile: false}}).api.isMobileDevice(), false);
 });
