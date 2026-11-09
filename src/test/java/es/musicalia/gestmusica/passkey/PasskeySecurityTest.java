@@ -33,6 +33,9 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.matchesPattern;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -106,6 +109,17 @@ class PasskeySecurityTest {
                 .andExpect(jsonPath("$.challenge").isNotEmpty())
                 .andExpect(jsonPath("$.rp.id").value("localhost"))
                 .andExpect(jsonPath("$.user.name").value("jperez"));
+    }
+
+    @Test
+    void paginaLogin_debeOfrecerPasskeyYAutorrelleno() throws Exception {
+        mockMvc.perform(get("/auth/login"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("autocomplete=\"username webauthn\"")))
+                .andExpect(content().string(containsString("id=\"passkey-login\"")))
+                .andExpect(content().string(containsString("Entrar con huella o Face ID")))
+                .andExpect(content().string(matchesPattern("(?s).*src=\"/js/passkeys(-[0-9a-f]+)?[.]js\" data-context-path=\"/\".*")))
+                .andExpect(content().string(matchesPattern("(?s).*src=\"/js/login-passkey(-[0-9a-f]+)?[.]js\".*")));
     }
 
     @Test

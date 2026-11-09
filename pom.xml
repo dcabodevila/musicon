@@ -232,6 +232,8 @@
 									<arguments>
 										<argument>--test</argument>
 										<argument>src/test/js/actividad.heatmap.test.js</argument>
+										<argument>src/test/js/passkeys.test.js</argument>
+										<argument>src/test/js/login-passkey.test.js</argument>
 									</arguments>
 								</configuration>
 							</execution>
