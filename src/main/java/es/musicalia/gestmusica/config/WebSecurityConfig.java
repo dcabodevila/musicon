@@ -1,12 +1,17 @@
 package es.musicalia.gestmusica.config;
 
 import es.musicalia.gestmusica.observabilidad.FunctionalEventTracker;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.RememberMeServices;
+import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices;
+import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices.RememberMeTokenAlgorithm;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,11 +31,19 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import jakarta.servlet.DispatcherType;
 
+import java.security.SecureRandom;
+import java.time.Duration;
+import java.util.HexFormat;
 
+
+@Slf4j
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class WebSecurityConfig {
+	static final String REMEMBER_ME_COOKIE = "remember-me";
+	static final Duration REMEMBER_ME_VALIDITY = Duration.ofDays(30);
+
 	@Bean
 	public BCryptPasswordEncoder bCryptPasswordEncoder() {
 		return new BCryptPasswordEncoder();
@@ -41,6 +54,8 @@ public class WebSecurityConfig {
     private RateLimitingFilter rateLimitingFilter;
     @Autowired
     private FunctionalEventTracker functionalEventTracker;
+    @Value("${app.security.remember-me.key:}")
+    private String rememberMeKey;
 
 	@Bean
 	public AuthenticationProvider authProvider(){
@@ -53,6 +68,26 @@ public class WebSecurityConfig {
 		return http.getSharedObject(AuthenticationManagerBuilder.class)
 				.build();
 	}
+    @Bean
+    public RememberMeServices rememberMeServices() {
+        TokenBasedRememberMeServices services = new TokenBasedRememberMeServices(
+                resolveRememberMeKey(), this.userDetailsService, RememberMeTokenAlgorithm.SHA256);
+        services.setCookieName(REMEMBER_ME_COOKIE);
+        services.setParameter(REMEMBER_ME_COOKIE);
+        services.setTokenValiditySeconds((int) REMEMBER_ME_VALIDITY.toSeconds());
+        return services;
+    }
+
+    private String resolveRememberMeKey() {
+        if (rememberMeKey != null && !rememberMeKey.isBlank()) {
+            return rememberMeKey;
+        }
+        log.warn("app.security.remember-me.key is not set: using a random key, remember-me cookies will not survive a restart");
+        byte[] random = new byte[32];
+        new SecureRandom().nextBytes(random);
+        return HexFormat.of().formatHex(random);
+    }
+
     @Bean
     public SessionRegistry sessionRegistry() {
         return new SessionRegistryImpl();
@@ -133,6 +168,9 @@ public class WebSecurityConfig {
                 .successHandler(new FunctionalLoginSuccessHandler(functionalEventTracker))
                 .failureHandler(new FunctionalLoginFailureHandler(functionalEventTracker))
             )
+	            .rememberMe(rememberMe -> rememberMe
+	                .rememberMeServices(rememberMeServices())
+	            )
 	            .exceptionHandling(exceptionHandling -> exceptionHandling
 	                .accessDeniedPage("/403")
 	            )
@@ -141,7 +179,7 @@ public class WebSecurityConfig {
 	                .logoutUrl("/logout")
 	                .invalidateHttpSession(true)
 	                .clearAuthentication(true)
-	                .deleteCookies("JSESSIONID")
+	                .deleteCookies("JSESSIONID", REMEMBER_ME_COOKIE)
 	                .logoutSuccessHandler(new FunctionalLogoutSuccessHandler(functionalEventTracker))
 	                .permitAll()
 	            )
