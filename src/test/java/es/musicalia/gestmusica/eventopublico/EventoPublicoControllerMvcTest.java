@@ -350,7 +350,7 @@ class EventoPublicoControllerMvcTest {
 
     @Test
     void municipioPublico_debeEnlazarProvinciaCorunaConRutaPublicaCanonica() throws Exception {
-        EventoPublicoDto evento = crearEventoConDatos(10L, 20L, "Los Satélites", "Coruña, A", "A Coruña", LocalDateTime.now().plusDays(5));
+        EventoPublicoDto evento = crearEventoConDatos(10L, 20L, "Los Satélites", "Coruña, A", "A Coruña", TODAY.plusDays(5).atTime(0, 0));
         Provincia provincia = new Provincia();
         provincia.setNombre("A Coruña");
 

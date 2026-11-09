@@ -43,6 +43,9 @@ public class AuthController {
         if (error != null) {
             model.addAttribute("error", "Usuario o contraseña no válidos.");
         }
+        if (logout != null) {
+            model.addAttribute("message", "Has cerrado sesión correctamente.");
+        }
 
 //        SecurityContextHolder.clearContext();
         return "login";
