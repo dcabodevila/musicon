@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -45,26 +45,26 @@ class InfoControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private AgenciaRepository agenciaRepository;
-    @MockBean
+    @MockitoBean
     private ArtistaRepository artistaRepository;
-    @MockBean
+    @MockitoBean
     private UsuarioRepository usuarioRepository;
-    @MockBean
+    @MockitoBean
     private ListadoRepository listadoRepository;
-    @MockBean
+    @MockitoBean
     private OcupacionRepository ocupacionRepository;
 
-    @MockBean
+    @MockitoBean
     private UserDetailsService userDetailsService;
-    @MockBean
+    @MockitoBean
     private RateLimitingFilter rateLimitingFilter;
-    @MockBean
+    @MockitoBean
     private CustomPermissionEvaluator customPermissionEvaluator;
-    @MockBean
+    @MockitoBean
     private MensajeService mensajeService;
-    @MockBean
+    @MockitoBean
     private FunctionalEventTracker functionalEventTracker;
 
     @BeforeEach

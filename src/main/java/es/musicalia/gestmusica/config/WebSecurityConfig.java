@@ -1,12 +1,16 @@
 package es.musicalia.gestmusica.config;
 
 import es.musicalia.gestmusica.observabilidad.FunctionalEventTracker;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.RememberMeServices;
+import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,14 +27,41 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.DefaultSecurityFilterChain;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
+import org.springframework.security.web.webauthn.api.PublicKeyCredentialRpEntity;
+import org.springframework.security.web.webauthn.authentication.WebAuthnAuthenticationFilter;
+import org.springframework.security.web.webauthn.management.PublicKeyCredentialUserEntityRepository;
+import org.springframework.security.web.webauthn.management.UserCredentialRepository;
+import org.springframework.security.web.webauthn.management.MapPublicKeyCredentialUserEntityRepository;
+import org.springframework.security.web.webauthn.management.MapUserCredentialRepository;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.security.web.webauthn.management.WebAuthnRelyingPartyOperations;
+import org.springframework.security.web.webauthn.management.Webauthn4JRelyingPartyOperations;
+import es.musicalia.gestmusica.passkey.PasskeyAuthenticationProvider;
+import es.musicalia.gestmusica.passkey.PasskeyOwnerLoader;
+import es.musicalia.gestmusica.auth.model.UsuarioUserDetailsService;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import jakarta.servlet.DispatcherType;
 
+import java.security.SecureRandom;
+import java.time.Duration;
+import java.util.HexFormat;
+import java.util.Set;
 
+
+@Slf4j
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class WebSecurityConfig {
+	static final String REMEMBER_ME_COOKIE = "remember-me";
+	static final Duration REMEMBER_ME_VALIDITY = Duration.ofDays(30);
+	static final String WEBAUTHN_RP_NAME = "Festia";
+
 	@Bean
 	public BCryptPasswordEncoder bCryptPasswordEncoder() {
 		return new BCryptPasswordEncoder();
@@ -41,11 +72,16 @@ public class WebSecurityConfig {
     private RateLimitingFilter rateLimitingFilter;
     @Autowired
     private FunctionalEventTracker functionalEventTracker;
+    @Value("${app.security.remember-me.key:}")
+    private String rememberMeKey;
+    @Value("${app.security.webauthn.rp-id}")
+    private String webauthnRpId;
+    @Value("${app.security.webauthn.allowed-origins}")
+    private String[] webauthnAllowedOrigins;
 
 	@Bean
 	public AuthenticationProvider authProvider(){
-		DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
-		daoAuthenticationProvider.setUserDetailsService(this.userDetailsService);
+		DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider(this.userDetailsService);
 		daoAuthenticationProvider.setPasswordEncoder(bCryptPasswordEncoder());
 		return daoAuthenticationProvider;
 	}
@@ -54,6 +90,59 @@ public class WebSecurityConfig {
 		return http.getSharedObject(AuthenticationManagerBuilder.class)
 				.build();
 	}
+    @Bean
+    public RememberMeServices rememberMeServices() {
+        TokenBasedRememberMeServices services = new UsuarioIdRememberMeServices(resolveRememberMeKey(), usuarioUserDetailsService());
+        services.setCookieName(REMEMBER_ME_COOKIE);
+        services.setParameter(REMEMBER_ME_COOKIE);
+        services.setTokenValiditySeconds((int) REMEMBER_ME_VALIDITY.toSeconds());
+        return services;
+    }
+
+    /**
+     * Id-based loading for password-less re-authentication. Resolved on use, so web slice tests that mock a plain
+     * {@link UserDetailsService} can still build this configuration.
+     */
+    private UsuarioUserDetailsService usuarioUserDetailsService() {
+        return new UsuarioUserDetailsService() {
+            @Override
+            public UserDetails loadUserByUsername(String username) {
+                return userDetailsService.loadUserByUsername(username);
+            }
+
+            @Override
+            public UserDetails loadUserByUsuarioId(Long usuarioId, boolean registrarAcceso) {
+                if (userDetailsService instanceof UsuarioUserDetailsService byId) {
+                    return byId.loadUserByUsuarioId(usuarioId, registrarAcceso);
+                }
+                throw new UsernameNotFoundException("Loading users by id is not available");
+            }
+        };
+    }
+
+    private String resolveRememberMeKey() {
+        if (rememberMeKey != null && !rememberMeKey.isBlank()) {
+            return rememberMeKey;
+        }
+        log.warn("app.security.remember-me.key is not set: using a random key, remember-me cookies will not survive a restart");
+        byte[] random = new byte[32];
+        new SecureRandom().nextBytes(random);
+        return HexFormat.of().formatHex(random);
+    }
+
+    @Bean
+    public WebAuthnRelyingPartyOperations webAuthnRelyingPartyOperations(
+            ObjectProvider<PublicKeyCredentialUserEntityRepository> userEntityRepository,
+            ObjectProvider<UserCredentialRepository> userCredentialRepository) {
+        // Same fallback Spring Security applies when no repository bean exists (web slice tests);
+        // the application always provides the JPA-backed repositories.
+        return new Webauthn4JRelyingPartyOperations(
+                userEntityRepository.getIfAvailable(MapPublicKeyCredentialUserEntityRepository::new),
+                userCredentialRepository.getIfAvailable(MapUserCredentialRepository::new),
+                PublicKeyCredentialRpEntity.builder().id(webauthnRpId).name(WEBAUTHN_RP_NAME).build(),
+                Set.of(webauthnAllowedOrigins));
+    }
+
     @Bean
     public SessionRegistry sessionRegistry() {
         return new SessionRegistryImpl();
@@ -103,7 +192,8 @@ public class WebSecurityConfig {
 
     @Bean
     @Order(2)
-    public SecurityFilterChain appChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain appChain(HttpSecurity http, WebAuthnRelyingPartyOperations webAuthnRelyingPartyOperations,
+                                        ObjectProvider<PasskeyOwnerLoader> passkeyOwnerLoader) throws Exception {
         http
             .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))
             .authorizeHttpRequests(authz -> authz
@@ -134,6 +224,15 @@ public class WebSecurityConfig {
                 .successHandler(new FunctionalLoginSuccessHandler(functionalEventTracker))
                 .failureHandler(new FunctionalLoginFailureHandler(functionalEventTracker))
             )
+	            .rememberMe(rememberMe -> rememberMe
+	                .rememberMeServices(rememberMeServices())
+	            )
+	            .webAuthn(webAuthn -> webAuthn
+	                .rpName(WEBAUTHN_RP_NAME)
+	                .rpId(webauthnRpId)
+	                .allowedOrigins(webauthnAllowedOrigins)
+	                .disableDefaultRegistrationPage(true)
+	            )
 	            .exceptionHandling(exceptionHandling -> exceptionHandling
 	                .accessDeniedPage("/403")
 	            )
@@ -142,14 +241,41 @@ public class WebSecurityConfig {
 	                .logoutUrl("/logout")
 	                .invalidateHttpSession(true)
 	                .clearAuthentication(true)
-	                .deleteCookies("JSESSIONID")
+	                .deleteCookies("JSESSIONID", REMEMBER_ME_COOKIE)
 	                .logoutSuccessHandler(new FunctionalLogoutSuccessHandler(functionalEventTracker))
 	                .permitAll()
 	            )
 	            .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
+        DefaultSecurityFilterChain chain = http.build();
+        securePasskeyLogin(chain, http.getSharedObject(SessionAuthenticationStrategy.class), webAuthnRelyingPartyOperations,
+                passkeyOwnerLoader);
+        return chain;
 	}
+
+    /**
+     * Spring Security's WebAuthn configurer leaves the passkey login filter without session handling
+     * (no session fixation protection, no maximum-sessions control) and authenticates a WebAuthn user entity
+     * instead of the application user. Align it with the form login.
+     */
+    private void securePasskeyLogin(DefaultSecurityFilterChain chain, SessionAuthenticationStrategy sessionStrategy,
+                                    WebAuthnRelyingPartyOperations webAuthnRelyingPartyOperations,
+                                    ObjectProvider<PasskeyOwnerLoader> passkeyOwnerLoader) {
+        WebAuthnAuthenticationFilter passkeyLogin = chain.getFilters().stream()
+                .filter(WebAuthnAuthenticationFilter.class::isInstance)
+                .map(WebAuthnAuthenticationFilter.class::cast)
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("WebAuthn login filter not found"));
+        if (sessionStrategy == null) {
+            throw new IllegalStateException("Session authentication strategy not available for passkey login");
+        }
+        passkeyLogin.setAuthenticationManager(new ProviderManager(
+                new PasskeyAuthenticationProvider(webAuthnRelyingPartyOperations,
+                        userHandle -> passkeyOwnerLoader.getObject().loadOwner(userHandle))));
+        passkeyLogin.setSessionAuthenticationStrategy(sessionStrategy);
+        passkeyLogin.setAuthenticationSuccessHandler(new FunctionalPasskeyLoginSuccessHandler(functionalEventTracker));
+        passkeyLogin.setAuthenticationFailureHandler(new FunctionalPasskeyLoginFailureHandler(functionalEventTracker));
+    }
 	@Bean
 	public MethodSecurityExpressionHandler methodSecurityExpressionHandler(CustomPermissionEvaluator permissionEvaluator) {
 		DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();

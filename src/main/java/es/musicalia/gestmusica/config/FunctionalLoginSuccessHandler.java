@@ -4,6 +4,7 @@ import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.observabilidad.FunctionalEventNames;
 import es.musicalia.gestmusica.observabilidad.FunctionalEventOutcome;
 import es.musicalia.gestmusica.observabilidad.FunctionalEventTracker;
+import es.musicalia.gestmusica.passkey.PasskeyOffer;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -43,6 +44,7 @@ public class FunctionalLoginSuccessHandler implements AuthenticationSuccessHandl
                 Map.of("source", "form_login")
         );
 
+        PasskeyOffer.mark(request);
         delegate.onAuthenticationSuccess(request, response, authentication);
     }
 }

@@ -70,8 +70,8 @@ public class ActividadController {
                     for (SessionInformation session : sessions) {
                         if (!session.isExpired()) {
                             UsuarioConectadoDto usuarioDto = new UsuarioConectadoDto();
-                            usuarioDto.setNombre(user.getUsername());
-                            usuarioDto.setNombreCompleto(user.getUsername());
+                            usuarioDto.setNombre(user.getNombreCompleto());
+                            usuarioDto.setNombreCompleto(user.getNombreCompleto());
                             usuarioDto.setUltimaActividad(
                                     LocalDateTime.ofInstant(session.getLastRequest().toInstant(), ZoneId.systemDefault())
                             );

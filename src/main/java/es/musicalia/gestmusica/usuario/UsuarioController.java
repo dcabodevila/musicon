@@ -114,6 +114,7 @@ public class UsuarioController {
 
         final UsuarioEdicionDTO usuarioEdicionDTO = this.userService.getMiPerfil(user.getUserId());
         cargarModeloFormularioEdicion(model, usuarioEdicionDTO, this.accesoService.getMisAccesos(user.getUserId()));
+        model.addAttribute("esMiPerfil", true);
         return "usuario-detail-edit";
     }
 
