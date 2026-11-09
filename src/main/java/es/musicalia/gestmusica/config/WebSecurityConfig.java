@@ -11,7 +11,6 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices;
-import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices.RememberMeTokenAlgorithm;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -41,6 +40,10 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.security.web.webauthn.management.WebAuthnRelyingPartyOperations;
 import org.springframework.security.web.webauthn.management.Webauthn4JRelyingPartyOperations;
 import es.musicalia.gestmusica.passkey.PasskeyAuthenticationProvider;
+import es.musicalia.gestmusica.passkey.PasskeyOwnerLoader;
+import es.musicalia.gestmusica.auth.model.UsuarioUserDetailsService;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import jakarta.servlet.DispatcherType;
 
@@ -89,12 +92,32 @@ public class WebSecurityConfig {
 	}
     @Bean
     public RememberMeServices rememberMeServices() {
-        TokenBasedRememberMeServices services = new TokenBasedRememberMeServices(
-                resolveRememberMeKey(), this.userDetailsService, RememberMeTokenAlgorithm.SHA256);
+        TokenBasedRememberMeServices services = new UsuarioIdRememberMeServices(resolveRememberMeKey(), usuarioUserDetailsService());
         services.setCookieName(REMEMBER_ME_COOKIE);
         services.setParameter(REMEMBER_ME_COOKIE);
         services.setTokenValiditySeconds((int) REMEMBER_ME_VALIDITY.toSeconds());
         return services;
+    }
+
+    /**
+     * Id-based loading for password-less re-authentication. Resolved on use, so web slice tests that mock a plain
+     * {@link UserDetailsService} can still build this configuration.
+     */
+    private UsuarioUserDetailsService usuarioUserDetailsService() {
+        return new UsuarioUserDetailsService() {
+            @Override
+            public UserDetails loadUserByUsername(String username) {
+                return userDetailsService.loadUserByUsername(username);
+            }
+
+            @Override
+            public UserDetails loadUserByUsuarioId(Long usuarioId, boolean registrarAcceso) {
+                if (userDetailsService instanceof UsuarioUserDetailsService byId) {
+                    return byId.loadUserByUsuarioId(usuarioId, registrarAcceso);
+                }
+                throw new UsernameNotFoundException("Loading users by id is not available");
+            }
+        };
     }
 
     private String resolveRememberMeKey() {
@@ -169,7 +192,8 @@ public class WebSecurityConfig {
 
     @Bean
     @Order(2)
-    public SecurityFilterChain appChain(HttpSecurity http, WebAuthnRelyingPartyOperations webAuthnRelyingPartyOperations) throws Exception {
+    public SecurityFilterChain appChain(HttpSecurity http, WebAuthnRelyingPartyOperations webAuthnRelyingPartyOperations,
+                                        ObjectProvider<PasskeyOwnerLoader> passkeyOwnerLoader) throws Exception {
         http
             .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))
             .authorizeHttpRequests(authz -> authz
@@ -224,7 +248,8 @@ public class WebSecurityConfig {
 	            .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class);
 
         DefaultSecurityFilterChain chain = http.build();
-        securePasskeyLogin(chain, http.getSharedObject(SessionAuthenticationStrategy.class), webAuthnRelyingPartyOperations);
+        securePasskeyLogin(chain, http.getSharedObject(SessionAuthenticationStrategy.class), webAuthnRelyingPartyOperations,
+                passkeyOwnerLoader);
         return chain;
 	}
 
@@ -234,7 +259,8 @@ public class WebSecurityConfig {
      * instead of the application user. Align it with the form login.
      */
     private void securePasskeyLogin(DefaultSecurityFilterChain chain, SessionAuthenticationStrategy sessionStrategy,
-                                    WebAuthnRelyingPartyOperations webAuthnRelyingPartyOperations) {
+                                    WebAuthnRelyingPartyOperations webAuthnRelyingPartyOperations,
+                                    ObjectProvider<PasskeyOwnerLoader> passkeyOwnerLoader) {
         WebAuthnAuthenticationFilter passkeyLogin = chain.getFilters().stream()
                 .filter(WebAuthnAuthenticationFilter.class::isInstance)
                 .map(WebAuthnAuthenticationFilter.class::cast)
@@ -244,7 +270,8 @@ public class WebSecurityConfig {
             throw new IllegalStateException("Session authentication strategy not available for passkey login");
         }
         passkeyLogin.setAuthenticationManager(new ProviderManager(
-                new PasskeyAuthenticationProvider(webAuthnRelyingPartyOperations, this.userDetailsService)));
+                new PasskeyAuthenticationProvider(webAuthnRelyingPartyOperations,
+                        userHandle -> passkeyOwnerLoader.getObject().loadOwner(userHandle))));
         passkeyLogin.setSessionAuthenticationStrategy(sessionStrategy);
         passkeyLogin.setAuthenticationSuccessHandler(new FunctionalPasskeyLoginSuccessHandler(functionalEventTracker));
         passkeyLogin.setAuthenticationFailureHandler(new FunctionalPasskeyLoginFailureHandler(functionalEventTracker));

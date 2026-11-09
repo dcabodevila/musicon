@@ -12,6 +12,7 @@
         failed: 'No hemos podido activar el acceso con huella o Face ID. Puedes intentarlo más tarde desde Mi perfil.',
     };
 
+    /** Also written by passkeys-perfil.js when a passkey is added from "Mi perfil". */
     function storageKey(username) {
         return 'festia.passkeyOffer.' + username;
     }
@@ -39,7 +40,7 @@
         const accept = document.getElementById('passkey-offer-accept');
         const dismiss = document.getElementById('passkey-offer-dismiss');
         const message = document.getElementById('passkey-offer-message');
-        if (!passkeys || !offer || !accept || !dismiss || !passkeys.isSupported()) {
+        if (!passkeys || !offer || !accept || !dismiss || !passkeys.isSupported() || !passkeys.isMobileDevice()) {
             return;
         }
         const username = offer.dataset.username;

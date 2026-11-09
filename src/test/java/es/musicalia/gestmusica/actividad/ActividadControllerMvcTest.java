@@ -18,6 +18,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.session.SessionInformation;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -30,7 +31,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
@@ -95,6 +100,28 @@ class ActividadControllerMvcTest {
         when(actividadService.findActividadTarifas()).thenReturn(List.of());
         when(actividadService.findActividadOcupaciones()).thenReturn(List.of());
         when(userService.findAllUsuarioRecords()).thenReturn(List.of(new UsuarioRecord(1L, "Admin User", "Festia")));
+    }
+
+    @Test
+    void actividad_usuariosConectados_debenMostrarNombreCompletoNoElLogin() throws Exception {
+        when(actividadService.findActiveArtistOptions()).thenReturn(List.of());
+        Usuario conectado = new Usuario();
+        conectado.setId(42L);
+        conectado.setUsername("jperez");
+        conectado.setNombre("Juan");
+        conectado.setApellidos("Pérez");
+        conectado.setPassword("secret");
+        CustomAuthenticatedUser principal =
+                new CustomAuthenticatedUser(conectado, true, true, true, true, Set.of(), Map.of(), Map.of());
+        when(sessionRegistry.getAllPrincipals()).thenReturn(List.of(principal));
+        when(sessionRegistry.getAllSessions(principal, false))
+                .thenReturn(List.of(new SessionInformation(principal, "sesion-juan", new java.util.Date())));
+
+        mockMvc.perform(get("/actividad").with(user(adminUser())))
+            .andExpect(status().isOk())
+            .andExpect(model().attribute("usuariosConectados", hasItem(allOf(
+                hasProperty("sessionId", is("sesion-juan")),
+                hasProperty("nombreCompleto", is("Juan Pérez"))))));
     }
 
     @Test

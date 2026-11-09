@@ -95,6 +95,8 @@ class PasskeyLoginTest {
     private UserCredentialRepository userCredentialRepository;
     @MockitoBean
     private WebAuthnRelyingPartyOperations rpOperations;
+    @MockitoBean
+    private PasskeyOwnerLoader passkeyOwnerLoader;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -110,7 +112,7 @@ class PasskeyLoginTest {
 
         when(rpOperations.createCredentialRequestOptions(any())).thenAnswer(invocation ->
                 PublicKeyCredentialRequestOptions.builder().challenge(Bytes.random()).rpId("localhost").build());
-        when(userDetailsService.loadUserByUsername("jperez")).thenAnswer(invocation -> usuarioAutenticado());
+        when(passkeyOwnerLoader.loadOwner(Bytes.fromBase64("BAUG"))).thenAnswer(invocation -> usuarioAutenticado());
     }
 
     @Test
@@ -173,6 +175,7 @@ class PasskeyLoginTest {
                 .andExpect(status().isUnauthorized())
                 .andExpect(unauthenticated());
 
+        verify(passkeyOwnerLoader, never()).loadOwner(any());
         verify(userDetailsService, never()).loadUserByUsername(any());
         verify(functionalEventTracker).track(eq(FunctionalEventNames.AUTH_LOGIN), eq(FunctionalEventOutcome.FAILURE),
                 isNull(), isNull(), eq(Map.of("source", "passkey", "reason", "BadCredentialsException")));

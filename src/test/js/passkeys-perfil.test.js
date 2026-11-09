@@ -57,13 +57,15 @@ async function settle() {
     }
 }
 
-async function load({passkeys, confirm = () => true}) {
+async function load({passkeys, confirm = () => true, localStorage = storage()}) {
     const page = {
-        'passkeys-perfil': node('section'),
+        'passkeys-perfil': node('section', {dataset: {username: 'jperez'}}),
         'passkeys-perfil-list': node('ul'),
         'passkeys-perfil-empty': node('p', {hidden: true}),
         'passkeys-perfil-label': node('input'),
         'passkeys-perfil-add': node('button', {hidden: true}),
+        'passkeys-perfil-add-form': node('div', {hidden: true}),
+        'passkeys-perfil-mobile-hint': node('p', {hidden: true}),
         'passkeys-perfil-message': node('p'),
     };
     const document = {
@@ -72,12 +74,24 @@ async function load({passkeys, confirm = () => true}) {
         createElement: (tag) => node(tag),
         addEventListener() {},
     };
-    const window = {FestiaPasskeys: passkeys, confirm};
+    const window = {FestiaPasskeys: passkeys, confirm, localStorage};
     const context = {window, document, console: {error() {}}, Promise, Error, Date};
     vm.createContext(context);
     vm.runInContext(SOURCE, context);
     await settle();
+    page.localStorage = localStorage;
     return page;
+}
+
+function storage() {
+    const data = {};
+    return {
+        data,
+        getItem: (k) => (k in data ? data[k] : null),
+        setItem: (k, v) => {
+            data[k] = String(v);
+        },
+    };
 }
 
 function passkeys(lista, overrides = {}) {
@@ -85,6 +99,7 @@ function passkeys(lista, overrides = {}) {
     return Object.assign({
         calls,
         isSupported: () => true,
+        isMobileDevice: () => true,
         suggestDeviceName: () => 'iPhone',
         list: async () => lista.slice(),
         register: async (label) => {
@@ -172,4 +187,44 @@ test('si falla la carga muestra un mensaje de error', async () => {
     const page = await load({passkeys: passkeys([], {list: async () => { throw Object.assign(new Error('500'), {code: 'rejected'}); }})});
 
     assert.match(page['passkeys-perfil-message'].textContent, /No hemos podido cargar/);
+});
+
+test('anadir este dispositivo deja de ofrecer la passkey tras el login en este dispositivo', async () => {
+    const page = await load({passkeys: passkeys([])});
+
+    await page['passkeys-perfil-add'].fire('click');
+    await settle();
+
+    assert.equal(page.localStorage.data['festia.passkeyOffer.jperez'], 'created');
+});
+
+test('si falla el alta no se marca el dispositivo', async () => {
+    const page = await load({passkeys: passkeys([], {register: async () => { throw Object.assign(new Error('x'), {code: 'rejected'}); }})});
+
+    await page['passkeys-perfil-add'].fire('click');
+    await settle();
+
+    assert.equal(page.localStorage.data['festia.passkeyOffer.jperez'], undefined);
+});
+
+test('en escritorio solo se puede ver y eliminar, no anadir este dispositivo', async () => {
+    const page = await load({passkeys: passkeys([IPHONE], {isMobileDevice: () => false})});
+
+    assert.equal(page['passkeys-perfil-add'].hidden, true);
+    assert.equal(page['passkeys-perfil-list'].children.length, 1);
+    assert.equal(page['passkeys-perfil-list'].buttons().length, 1);
+});
+
+test('en movil se muestra el formulario para anadir y no la indicacion', async () => {
+    const page = await load({passkeys: passkeys([])});
+
+    assert.equal(page['passkeys-perfil-add-form'].hidden, false);
+    assert.equal(page['passkeys-perfil-mobile-hint'].hidden, true);
+});
+
+test('en escritorio se oculta el formulario y se indica anadirlo desde el movil', async () => {
+    const page = await load({passkeys: passkeys([], {isMobileDevice: () => false})});
+
+    assert.equal(page['passkeys-perfil-add-form'].hidden, true);
+    assert.equal(page['passkeys-perfil-mobile-hint'].hidden, false);
 });
