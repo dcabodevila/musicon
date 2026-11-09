@@ -19,7 +19,8 @@ Branch: `feature/passkeys-login`, chained on `feature/upgrade-spring-boot-3.5` (
 ## Tasks
 - T1 (S6, S1 prerequisite): principal name = login username; navbar shows full name. Route: inline. Commit: 9b0a947.
 - T2 (S1, S2): remember me + autocomplete on login form. Route: inline. Commit: 7027766.
-- T3 (S3, S6): WebAuthn config, dependency, entities/repositories, SQL script `sql/1.7.0/`. Route: inline. Commit: pending.
+- T3 (S3, S6): WebAuthn config, dependency, entities/repositories, SQL script `sql/1.7.0/`. Route: inline. Commit: 56fd7ac.
+- T4a (S3, S6): secure passkey login (app principal, session strategy, tracking). Route: inline. Commit: see L12.
 - T4 (S3): login page passkey button + conditional UI JS. Route: inline. Commit: pending.
 - T5 (S4, S5): post-login offer + profile management UI. Route: inline. Commit: pending.
 - T6: independent verify (Risk items 1, 2, 3) + RDD review. Route: gentle-ai-verify + gentle_review. Commit: n/a.
@@ -35,3 +36,5 @@ Branch: `feature/passkeys-login`, chained on `feature/upgrade-spring-boot-3.5` (
 - L8: Slice 2 (passkeys PR, chained on slice 1 = T1+T2 up to 7027766) starts with T3.
 - L9: T3: webauthn4j-core 0.29.7.RELEASE (version pinned by Spring Security 6.5.11's libs.versions.toml; not in Boot BOM). JPA-backed adapters `PasskeyUserEntityRepository` (returns the user's current login name, so a username change does not break passkeys) and `PasskeyCredentialRepository`; tables `gestmusica.webauthn_usuario` / `gestmusica.webauthn_credencial` in `sql/1.7.0/01_webauthn_passkeys.sql` (validated on a throwaway PostgreSQL 16 cluster: idempotent, cascade delete, column types). RED observed (compile + 2 security tests); GREEN 13 adapter tests + 5 security tests. Contract learned: anonymous POST /webauthn/register/options answers 400 (Spring's filter), not a login redirect. Passkey login goes through the same UserDetailsService as password login (same active-user rules; by username it does not filter inactive users, pre-existing behaviour, unchanged).
 - L10: T3 suite: 390 tests, same 12 baseline failures, none new.
+- L11: T4a (security defects found in Spring Security 6.5.11 WebAuthn, by bytecode inspection of WebAuthnConfigurer/WebAuthnAuthenticationProvider): (1) the passkey login filter gets no SessionAuthenticationStrategy -> no session fixation protection and no maximumSessions(1) control; (2) the authenticated principal is a PublicKeyCredentialUserEntity, not CustomAuthenticatedUser, which would break every @AuthenticationPrincipal/permission check after a passkey login. Fix: own `PasskeyAuthenticationProvider` (verifies with WebAuthnRelyingPartyOperations, loads the user through the same UserDetailsService, AccountStatusUserDetailsChecker) and, after `http.build()`, set on WebAuthnAuthenticationFilter the shared SessionAuthenticationStrategy, the provider, and tracking handlers (source=passkey; JSON success to "/", 401 on failure). `WebAuthnRelyingPartyOperations` is now our bean (configurer picks it up). RED observed 5/6 (CSRF test already passed); GREEN 6/6 plus 12 previous security tests.
+- L12: T4a suite: 396 tests, same 12 baseline failures, none new.

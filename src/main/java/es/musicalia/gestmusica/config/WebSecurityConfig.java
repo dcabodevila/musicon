@@ -28,12 +28,26 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.DefaultSecurityFilterChain;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
+import org.springframework.security.web.webauthn.api.PublicKeyCredentialRpEntity;
+import org.springframework.security.web.webauthn.authentication.WebAuthnAuthenticationFilter;
+import org.springframework.security.web.webauthn.management.PublicKeyCredentialUserEntityRepository;
+import org.springframework.security.web.webauthn.management.UserCredentialRepository;
+import org.springframework.security.web.webauthn.management.MapPublicKeyCredentialUserEntityRepository;
+import org.springframework.security.web.webauthn.management.MapUserCredentialRepository;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.security.web.webauthn.management.WebAuthnRelyingPartyOperations;
+import org.springframework.security.web.webauthn.management.Webauthn4JRelyingPartyOperations;
+import es.musicalia.gestmusica.passkey.PasskeyAuthenticationProvider;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import jakarta.servlet.DispatcherType;
 
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.util.HexFormat;
+import java.util.Set;
 
 
 @Slf4j
@@ -43,6 +57,7 @@ import java.util.HexFormat;
 public class WebSecurityConfig {
 	static final String REMEMBER_ME_COOKIE = "remember-me";
 	static final Duration REMEMBER_ME_VALIDITY = Duration.ofDays(30);
+	static final String WEBAUTHN_RP_NAME = "Festia";
 
 	@Bean
 	public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -90,6 +105,19 @@ public class WebSecurityConfig {
         byte[] random = new byte[32];
         new SecureRandom().nextBytes(random);
         return HexFormat.of().formatHex(random);
+    }
+
+    @Bean
+    public WebAuthnRelyingPartyOperations webAuthnRelyingPartyOperations(
+            ObjectProvider<PublicKeyCredentialUserEntityRepository> userEntityRepository,
+            ObjectProvider<UserCredentialRepository> userCredentialRepository) {
+        // Same fallback Spring Security applies when no repository bean exists (web slice tests);
+        // the application always provides the JPA-backed repositories.
+        return new Webauthn4JRelyingPartyOperations(
+                userEntityRepository.getIfAvailable(MapPublicKeyCredentialUserEntityRepository::new),
+                userCredentialRepository.getIfAvailable(MapUserCredentialRepository::new),
+                PublicKeyCredentialRpEntity.builder().id(webauthnRpId).name(WEBAUTHN_RP_NAME).build(),
+                Set.of(webauthnAllowedOrigins));
     }
 
     @Bean
@@ -141,7 +169,7 @@ public class WebSecurityConfig {
 
     @Bean
     @Order(2)
-    public SecurityFilterChain appChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain appChain(HttpSecurity http, WebAuthnRelyingPartyOperations webAuthnRelyingPartyOperations) throws Exception {
         http
             .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))
             .authorizeHttpRequests(authz -> authz
@@ -176,7 +204,7 @@ public class WebSecurityConfig {
 	                .rememberMeServices(rememberMeServices())
 	            )
 	            .webAuthn(webAuthn -> webAuthn
-	                .rpName("Festia")
+	                .rpName(WEBAUTHN_RP_NAME)
 	                .rpId(webauthnRpId)
 	                .allowedOrigins(webauthnAllowedOrigins)
 	                .disableDefaultRegistrationPage(true)
@@ -195,8 +223,32 @@ public class WebSecurityConfig {
 	            )
 	            .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
+        DefaultSecurityFilterChain chain = http.build();
+        securePasskeyLogin(chain, http.getSharedObject(SessionAuthenticationStrategy.class), webAuthnRelyingPartyOperations);
+        return chain;
 	}
+
+    /**
+     * Spring Security's WebAuthn configurer leaves the passkey login filter without session handling
+     * (no session fixation protection, no maximum-sessions control) and authenticates a WebAuthn user entity
+     * instead of the application user. Align it with the form login.
+     */
+    private void securePasskeyLogin(DefaultSecurityFilterChain chain, SessionAuthenticationStrategy sessionStrategy,
+                                    WebAuthnRelyingPartyOperations webAuthnRelyingPartyOperations) {
+        WebAuthnAuthenticationFilter passkeyLogin = chain.getFilters().stream()
+                .filter(WebAuthnAuthenticationFilter.class::isInstance)
+                .map(WebAuthnAuthenticationFilter.class::cast)
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("WebAuthn login filter not found"));
+        if (sessionStrategy == null) {
+            throw new IllegalStateException("Session authentication strategy not available for passkey login");
+        }
+        passkeyLogin.setAuthenticationManager(new ProviderManager(
+                new PasskeyAuthenticationProvider(webAuthnRelyingPartyOperations, this.userDetailsService)));
+        passkeyLogin.setSessionAuthenticationStrategy(sessionStrategy);
+        passkeyLogin.setAuthenticationSuccessHandler(new FunctionalPasskeyLoginSuccessHandler(functionalEventTracker));
+        passkeyLogin.setAuthenticationFailureHandler(new FunctionalPasskeyLoginFailureHandler(functionalEventTracker));
+    }
 	@Bean
 	public MethodSecurityExpressionHandler methodSecurityExpressionHandler(CustomPermissionEvaluator permissionEvaluator) {
 		DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();
