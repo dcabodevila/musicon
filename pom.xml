@@ -235,6 +235,7 @@
 										<argument>src/test/js/passkeys.test.js</argument>
 										<argument>src/test/js/login-passkey.test.js</argument>
 										<argument>src/test/js/passkey-offer.test.js</argument>
+										<argument>src/test/js/passkeys-perfil.test.js</argument>
 									</arguments>
 								</configuration>
 							</execution>

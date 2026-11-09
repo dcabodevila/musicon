@@ -40,7 +40,7 @@ function load({responses = [], credentials = {}, publicKeyCredential = {isCondit
         if (!next) throw new Error('Unexpected request ' + url);
         return next;
     };
-    const context = {window, document, fetch, navigator: {credentials, userAgent}, Uint8Array, ArrayBuffer, String, JSON, Error, Promise, AbortController, console};
+    const context = {window, document, fetch, encodeURIComponent, navigator: {credentials, userAgent}, Uint8Array, ArrayBuffer, String, JSON, Error, Promise, AbortController, console};
     window.window = window;
     vm.createContext(context);
     vm.runInContext(SOURCE, context);
@@ -234,4 +234,29 @@ test('suggestDeviceName: propone un nombre segun el dispositivo', () => {
     assert.equal(name('Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5)'), 'Mac');
     assert.equal(name('Mozilla/5.0 (Windows NT 10.0; Win64; x64)'), 'Windows');
     assert.equal(name('Mozilla/5.0 (X11; Linux x86_64)'), 'Este dispositivo');
+});
+
+test('list: devuelve las passkeys del usuario conectado', async () => {
+    const lista = [{id: 'cred-1', etiqueta: 'iPhone', fechaCreacion: '2026-11-09T10:00:00Z', fechaUltimoUso: null}];
+    const {api, requests} = load({responses: [jsonResponse(200, lista)]});
+
+    assert.deepEqual(await api.list(), lista);
+    assert.equal(requests[0].url, '/passkeys');
+    assert.equal(requests[0].options.method, 'GET');
+});
+
+test('remove: borra la passkey con CSRF y codifica el identificador', async () => {
+    const {api, requests} = load({responses: [{ok: true, status: 204}]});
+
+    await api.remove('a-b_c/d');
+
+    assert.equal(requests[0].url, '/passkeys/a-b_c%2Fd');
+    assert.equal(requests[0].options.method, 'DELETE');
+    assert.equal(requests[0].options.headers['X-CSRF-TOKEN'], 'token-123');
+});
+
+test('remove: si el servidor no la encuentra lanza error "rejected"', async () => {
+    const {api} = load({responses: [{ok: false, status: 404}]});
+
+    await assert.rejects(api.remove('cred-x'), (err) => err.code === 'rejected');
 });

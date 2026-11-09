@@ -133,6 +133,25 @@
                             </div>
                         </div>
 
+                        <div id="passkeys-perfil" class="card" th:if="${esMiPerfil}">
+                            <div class="card-header">
+                                <h5 class="card-title">Acceso con huella o Face ID</h5>
+                                <h6 class="card-subtitle text-muted">Entra sin contraseña desde los dispositivos que añadas. Tu huella o tu cara no salen nunca del dispositivo.</h6>
+                            </div>
+                            <div class="card-body">
+                                <ul id="passkeys-perfil-list" class="list-group mb-3"></ul>
+                                <p id="passkeys-perfil-empty" class="text-muted" hidden>Todavía no has añadido ningún dispositivo.</p>
+                                <div class="d-flex flex-wrap gap-2 align-items-end">
+                                    <div class="flex-grow-1">
+                                        <label for="passkeys-perfil-label" class="form-label">Nombre de este dispositivo</label>
+                                        <input id="passkeys-perfil-label" type="text" class="form-control" maxlength="100" autocomplete="off"/>
+                                    </div>
+                                    <button id="passkeys-perfil-add" type="button" class="btn btn-primary" hidden>Añadir este dispositivo</button>
+                                </div>
+                                <p id="passkeys-perfil-message" class="mt-3 mb-0" role="status" aria-live="polite"></p>
+                            </div>
+                        </div>
+
 
                     </div>
                 </div>
@@ -145,6 +164,10 @@
 
 <script type="text/javascript" th:src="@{/js/comun.js}"></script>
 <script type="text/javascript" th:src="@{/js/usuario-edit.js}"></script>
+<th:block th:if="${esMiPerfil}">
+    <script th:src="@{/js/passkeys.js}" th:attr="data-context-path=@{/}"></script>
+    <script th:src="@{/js/passkeys-perfil.js}"></script>
+</th:block>
 
 </body>
 </html>

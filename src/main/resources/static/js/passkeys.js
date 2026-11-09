@@ -35,14 +35,14 @@
         return element ? element.getAttribute('content') : null;
     }
 
-    async function post(path, body) {
+    async function request(method, path, body) {
         const headers = {'Content-Type': 'application/json'};
         const csrfHeader = meta('_csrf_header');
         const csrfToken = meta('_csrf');
         if (csrfHeader && csrfToken) {
             headers[csrfHeader] = csrfToken;
         }
-        const options = {method: 'POST', headers, credentials: 'same-origin'};
+        const options = {method, headers, credentials: 'same-origin'};
         if (body !== undefined) {
             options.body = JSON.stringify(body);
         }
@@ -50,7 +50,7 @@
     }
 
     async function postJson(path, body) {
-        const response = await post(path, body);
+        const response = await request('POST', path, body);
         if (!response.ok) {
             throw failure('rejected', 'HTTP ' + response.status + ' on ' + path);
         }
@@ -189,6 +189,22 @@
         }
     }
 
+    /** Passkeys of the signed-in user: [{id, etiqueta, fechaCreacion, fechaUltimoUso}]. */
+    async function list() {
+        const response = await request('GET', '/passkeys');
+        if (!response.ok) {
+            throw failure('rejected', 'HTTP ' + response.status + ' on /passkeys');
+        }
+        return response.json();
+    }
+
+    async function remove(id) {
+        const response = await request('DELETE', '/passkeys/' + encodeURIComponent(id));
+        if (!response.ok) {
+            throw failure('rejected', 'HTTP ' + response.status + ' deleting passkey');
+        }
+    }
+
     window.FestiaPasskeys = {
         isSupported,
         isConditionalAvailable,
@@ -196,5 +212,7 @@
         suggestDeviceName,
         authenticate,
         register,
+        list,
+        remove,
     };
 })(window, document);
