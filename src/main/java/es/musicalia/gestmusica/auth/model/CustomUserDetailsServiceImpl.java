@@ -23,7 +23,7 @@ import es.musicalia.gestmusica.usuario.UsuarioRepository;
 
 @Service
 @Transactional(readOnly = true)
-public class CustomUserDetailsServiceImpl implements UserDetailsService {
+public class CustomUserDetailsServiceImpl implements UsuarioUserDetailsService {
 
 
 	private final UsuarioRepository usuarioRepository;
@@ -45,6 +45,22 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService {
 		final String trimmedUsername = username.trim();
 		final Usuario usuario = trimmedUsername.matches(emailPattern) ? this.usuarioRepository.findUsuarioActivoByMail(trimmedUsername).orElseThrow( () -> new UsernameNotFoundException(username)) : this.usuarioRepository.findByUsername(trimmedUsername).orElseThrow(() -> new UsernameNotFoundException(username));
 
+		return crearUserDetails(usuario, true);
+	}
+
+	@Override
+	@Transactional(readOnly = false)
+	public UserDetails loadUserByUsuarioId(Long usuarioId, boolean registrarAcceso) throws UsernameNotFoundException {
+		final Usuario usuario = usuarioId == null ? null : this.usuarioRepository.findById(usuarioId)
+				.filter(Usuario::isActivo)
+				.orElse(null);
+		if (usuario == null) {
+			throw new UsernameNotFoundException("No active user with id " + usuarioId);
+		}
+		return crearUserDetails(usuario, registrarAcceso);
+	}
+
+	private UserDetails crearUserDetails(Usuario usuario, boolean registrarAcceso) {
 		final List<GrantedAuthority> auth = new ArrayList<GrantedAuthority>();
 
 
@@ -61,10 +77,11 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService {
 		final Map<Long, Set<String>> mapPermisosAgencia = this.permisoService.obtenerMapPermisosAgencia(usuario.getId());
 
 		final UserDetails userDetails = new CustomAuthenticatedUser(usuario, true, true, true, true, auth, mapPermisosArtista, mapPermisosAgencia);
-		usuario.setFechaUltimoAcceso(OffsetDateTime.now());
-		this.usuarioRepository.save(usuario);
-
-        this.registroLoginService.registrarLogin(usuario.getId());
+		if (registrarAcceso) {
+			usuario.setFechaUltimoAcceso(OffsetDateTime.now());
+			this.usuarioRepository.save(usuario);
+			this.registroLoginService.registrarLogin(usuario.getId());
+		}
 
 		return userDetails;
 	}

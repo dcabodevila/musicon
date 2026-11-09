@@ -1,6 +1,7 @@
 package es.musicalia.gestmusica.usuario;
 
 import es.musicalia.gestmusica.acceso.AccesoService;
+import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
 import es.musicalia.gestmusica.config.CustomPermissionEvaluator;
 import es.musicalia.gestmusica.config.RateLimitingFilter;
 import es.musicalia.gestmusica.config.WebSecurityConfig;
@@ -12,7 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -22,14 +23,19 @@ import jakarta.servlet.FilterChain;
 
 import java.util.Collections;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
@@ -43,24 +49,24 @@ class UsuarioControllerMvcTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private UserService userService;
-    @MockBean
+    @MockitoBean
     private AccesoService accesoService;
-    @MockBean
+    @MockitoBean
     private LocalizacionService localizacionService;
-    @MockBean
+    @MockitoBean
     private EmailService emailService;
 
-    @MockBean
+    @MockitoBean
     private UserDetailsService userDetailsService;
-    @MockBean
+    @MockitoBean
     private RateLimitingFilter rateLimitingFilter;
-    @MockBean
+    @MockitoBean
     private CustomPermissionEvaluator customPermissionEvaluator;
-    @MockBean
+    @MockitoBean
     private MensajeService mensajeService;
-    @MockBean
+    @MockitoBean
     private FunctionalEventTracker functionalEventTracker;
 
     @BeforeEach
@@ -77,6 +83,46 @@ class UsuarioControllerMvcTest {
                 .authorities("USER")
                 .build()
         );
+    }
+
+    @Test
+    void miPerfil_debeMostrarLaGestionDePasskeys() throws Exception {
+        when(userService.getMiPerfil(7L)).thenReturn(perfil(7L));
+        when(accesoService.getMisAccesos(7L)).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/usuarios/mi-perfil").with(user(usuarioAutenticado(7L))))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("id=\"passkeys-perfil\"")))
+                .andExpect(content().string(containsString("Acceso con huella o Face ID")))
+                .andExpect(content().string(matchesPattern("(?s).*src=\"/js/passkeys-perfil(-[0-9a-f]+)?[.]js\".*")));
+    }
+
+    @Test
+    void editarOtroUsuario_noDebeMostrarLaGestionDePasskeys() throws Exception {
+        when(userService.getUsuarioEdicionDTO(8L)).thenReturn(perfil(8L));
+        when(accesoService.findAllAccesosDetailRecordByIdUsuario(8L)).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/usuarios/editar/8").with(user(usuarioAutenticado(7L))))
+                .andExpect(status().isOk())
+                .andExpect(content().string(not(containsString("id=\"passkeys-perfil\""))))
+                .andExpect(content().string(not(containsString("passkeys-perfil"))));
+    }
+
+    private static UsuarioEdicionDTO perfil(long id) {
+        UsuarioEdicionDTO dto = new UsuarioEdicionDTO();
+        dto.setId(id);
+        dto.setNombre("Juan");
+        dto.setEmail("juan@festia.es");
+        return dto;
+    }
+
+    private static CustomAuthenticatedUser usuarioAutenticado(long id) {
+        Usuario usuario = new Usuario();
+        usuario.setId(id);
+        usuario.setUsername("jperez");
+        usuario.setNombre("Juan");
+        usuario.setPassword("{noop}x");
+        return new CustomAuthenticatedUser(usuario, true, true, true, true, java.util.List.of(), java.util.Map.of(), java.util.Map.of());
     }
 
     @Test

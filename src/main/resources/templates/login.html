@@ -49,8 +49,15 @@
 
 		.login-form__meta {
 			display: flex;
-			justify-content: flex-end;
+			flex-wrap: wrap;
+			gap: .5rem 1rem;
+			align-items: center;
+			justify-content: space-between;
 			margin-top: .9rem;
+		}
+
+		.login-form__meta .form-check {
+			margin-bottom: 0;
 		}
 
 		.login-form__meta a {
@@ -66,6 +73,14 @@
 
 		.login-form__actions {
 			margin-top: 1.4rem;
+		}
+
+		.login-passkey {
+			margin-top: 1rem;
+		}
+
+		.login-passkey .alert {
+			margin-bottom: .75rem;
 		}
 
 		.login-form__brand-mobile {
@@ -163,15 +178,19 @@
 
 							<div class="mb-3">
 								<label for="username" class="form-label">Nombre de usuario o correo electrónico</label>
-								<input id="username" name="username" autofocus="autofocus" class="form-control form-control-lg" type="text" placeholder="usuario o nombre@empresa.com" />
+								<input id="username" name="username" autofocus="autofocus" autocomplete="username webauthn" autocapitalize="none" spellcheck="false" class="form-control form-control-lg" type="text" placeholder="usuario o nombre@empresa.com" />
 							</div>
 
 							<div class="mb-2">
 								<label for="password" class="form-label">Contraseña</label>
-								<input id="password" name="password" class="form-control form-control-lg" type="password" placeholder="Introduce tu contraseña" />
+								<input id="password" name="password" autocomplete="current-password" class="form-control form-control-lg" type="password" placeholder="Introduce tu contraseña" />
 							</div>
 
 							<div class="login-form__meta">
+								<div class="form-check">
+									<input id="remember-me" name="remember-me" class="form-check-input" type="checkbox" />
+									<label for="remember-me" class="form-check-label">Recordarme</label>
+								</div>
 								<a th:href="@{/auth/remember-password}">He olvidado mi contraseña</a>
 							</div>
 
@@ -180,12 +199,21 @@
 								<a class="btn btn-outline-primary btn-lg" th:href="@{/auth/registration}">Crear cuenta</a>
 							</div>
 						</form>
+
+						<div class="login-passkey">
+							<div id="passkey-login-error" class="alert alert-warning login-form__alert" role="alert" hidden></div>
+							<button id="passkey-login" type="button" class="btn btn-outline-secondary btn-lg w-100" hidden>
+								<svg class="me-2" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4"/><path d="M14 13.12c0 2.38 0 6.38-1 8.88"/><path d="M17.29 21.02c.12-.6.43-2.3.5-3.02"/><path d="M2 12a10 10 0 0 1 18-6"/><path d="M2 16h.01"/><path d="M21.8 16c.2-2 .131-5.354 0-6"/><path d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .34-2"/><path d="M8.65 22c.21-.66.45-1.32.57-2"/><path d="M9 6.8a6 6 0 0 1 9 5.2v2"/></svg>Entrar con huella o Face ID
+							</button>
+						</div>
 					</div>
 				</section>
 			</div>
 		</div>
 	</main>
 
+	<script th:src="@{/js/passkeys.js}" th:attr="data-context-path=@{/}"></script>
+	<script th:src="@{/js/login-passkey.js}"></script>
 	</body>
 
    

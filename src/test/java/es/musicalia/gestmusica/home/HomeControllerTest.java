@@ -1,6 +1,11 @@
 package es.musicalia.gestmusica.home;
 
 import es.musicalia.gestmusica.auth.model.CustomAuthenticatedUser;
+import es.musicalia.gestmusica.passkey.PasskeyOffer;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
+import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.Matchers.not;
 import es.musicalia.gestmusica.config.CustomPermissionEvaluator;
 import es.musicalia.gestmusica.config.RateLimitingFilter;
 import es.musicalia.gestmusica.config.ThymeleafConfig;
@@ -16,7 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -52,20 +57,20 @@ class HomeControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private OcupacionService ocupacionService;
-    @MockBean
+    @MockitoBean
     private AgenciaPublicacionEventosService agenciaPublicacionEventosService;
 
-    @MockBean
+    @MockitoBean
     private UserDetailsService userDetailsService;
-    @MockBean
+    @MockitoBean
     private RateLimitingFilter rateLimitingFilter;
-    @MockBean
+    @MockitoBean
     private CustomPermissionEvaluator customPermissionEvaluator;
-    @MockBean
+    @MockitoBean
     private MensajeService mensajeService;
-    @MockBean
+    @MockitoBean
     private FunctionalEventTracker functionalEventTracker;
 
     @BeforeEach
@@ -102,6 +107,23 @@ class HomeControllerTest {
                 .andExpect(content().string(not(containsString("carrousel-lista-ocupaciones-pendientes"))));
 
         verifyNoInteractions(ocupacionService);
+    }
+
+    @Test
+    void home_trasLoginConContrasena_debeOfrecerPasskeyUnaVez() throws Exception {
+        CustomAuthenticatedUser usuario = authenticatedUser(Set.of(new SimpleGrantedAuthority("USER")), Map.of());
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute(PasskeyOffer.SESSION_ATTRIBUTE, true);
+
+        mockMvc.perform(get("/").session(session).accept(MediaType.TEXT_HTML).with(user(usuario)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("id=\"passkey-offer\"")))
+                .andExpect(content().string(containsString("¿Quieres entrar con huella o Face ID la próxima vez?")))
+                .andExpect(content().string(matchesPattern("(?s).*src=\"/js/passkey-offer(-[0-9a-f]+)?[.]js\".*")));
+
+        mockMvc.perform(get("/").session(session).accept(MediaType.TEXT_HTML).with(user(usuario)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(not(containsString("id=\"passkey-offer\""))));
     }
 
     @Test
