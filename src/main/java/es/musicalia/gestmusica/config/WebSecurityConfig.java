@@ -27,6 +27,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.access.AccessDeniedHandlerImpl;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRepository;
 import org.springframework.security.web.DefaultSecurityFilterChain;
@@ -48,9 +50,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import jakarta.servlet.DispatcherType;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.security.SecureRandom;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.HexFormat;
 import java.util.Set;
 
@@ -107,6 +112,27 @@ public class WebSecurityConfig {
             .secure(secureCookies)
             .sameSite("Lax"));
         return repository;
+    }
+
+    /**
+     * Forwards to /403 like {@code accessDeniedPage("/403")} and logs why the request was rejected, so CSRF failures
+     * (missing vs. invalid token) can be told apart in production logs.
+     */
+    private AccessDeniedHandler loggingAccessDeniedHandler() {
+        AccessDeniedHandlerImpl forwardTo403 = new AccessDeniedHandlerImpl();
+        forwardTo403.setErrorPage("/403");
+        return (request, response, accessDeniedException) -> {
+            log.warn("Access denied: {} {} -> {} ({}), session={}, xsrfCookie={}",
+                request.getMethod(), request.getRequestURI(),
+                accessDeniedException.getClass().getSimpleName(), accessDeniedException.getMessage(),
+                request.getRequestedSessionId() != null, hasCookie(request, "XSRF-TOKEN"));
+            forwardTo403.handle(request, response, accessDeniedException);
+        };
+    }
+
+    private static boolean hasCookie(HttpServletRequest request, String name) {
+        Cookie[] cookies = request.getCookies();
+        return cookies != null && Arrays.stream(cookies).anyMatch(cookie -> name.equals(cookie.getName()));
     }
 
     @Bean
@@ -255,7 +281,7 @@ public class WebSecurityConfig {
 	                .disableDefaultRegistrationPage(true)
 	            )
 	            .exceptionHandling(exceptionHandling -> exceptionHandling
-	                .accessDeniedPage("/403")
+	                .accessDeniedHandler(loggingAccessDeniedHandler())
 	            )
 
 	            .logout(logout -> logout

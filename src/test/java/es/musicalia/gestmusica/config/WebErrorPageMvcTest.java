@@ -110,13 +110,13 @@ public class WebErrorPageMvcTest {
     void shouldRender403WithoutRedirectForAnonymousAndAuthenticated() throws Exception {
         mockMvc.perform(get("/403").accept(MediaType.TEXT_HTML))
             .andExpect(status().isOk())
-            .andExpect(view().name("/error/403"));
+            .andExpect(view().name("error/403"));
 
         mockMvc.perform(get("/403")
                 .with(user("auth").roles("USER"))
                 .accept(MediaType.TEXT_HTML))
             .andExpect(status().isOk())
-            .andExpect(view().name("/error/403"));
+            .andExpect(view().name("error/403"));
     }
 
     @Test
@@ -161,7 +161,7 @@ public class WebErrorPageMvcTest {
                 .with(csrf())
                 .accept(MediaType.TEXT_HTML))
             .andExpect(status().isOk())
-            .andExpect(view().name("/error/403"));
+            .andExpect(view().name("error/403"));
     }
 
     @Test

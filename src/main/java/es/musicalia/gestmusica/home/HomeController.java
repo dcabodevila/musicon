@@ -91,7 +91,8 @@ public class HomeController {
      */
     @RequestMapping("/403")
     public String error403() {
-        return "/error/403";
+        // No leading slash: inside the packaged jar "templates//error/403.html" cannot be resolved.
+        return "error/403";
     }
 
 }
