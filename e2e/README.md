@@ -56,7 +56,7 @@ La app permite **una sola sesión por usuario** (`maximumSessions(1)`), así que
 
 1. `setup` (`tests/auth.setup.ts`): inicia sesión por la UI y guarda la sesión en `e2e/.auth/user.json`.
 2. `autenticado`: listados, ocupaciones, tarifas y sincronización reutilizan esa sesión.
-3. `anonimo`: login y registro, al final, porque sus inicios de sesión invalidan la sesión guardada.
+3. `anonimo`: login, registro y sesión perdida con «Recordarme» (`sesion-csrf.spec.ts`), al final, porque sus inicios de sesión invalidan la sesión guardada.
 
 Ejecutar la suite cierra cualquier otra sesión abierta del usuario E2E. El login limita a 10 intentos por ventana de tiempo; una ejecución completa usa 4.
 

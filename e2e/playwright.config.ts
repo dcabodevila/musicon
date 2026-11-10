@@ -46,7 +46,7 @@ export default defineConfig({
     },
     {
       name: 'anonimo',
-      testMatch: /(login|registro)\.spec\.ts/,
+      testMatch: /(login|registro|sesion-csrf)\.spec\.ts/,
       use: { ...devices['Desktop Chrome'], headless: HEADLESS },
     },
   ],
