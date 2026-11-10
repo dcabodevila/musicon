@@ -31,7 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
-/logs/app.log
+/logs/
 /CLAUDE.md
 .env
 /.claude/agent-memory/spec-analyst/domain_email_templates.md
