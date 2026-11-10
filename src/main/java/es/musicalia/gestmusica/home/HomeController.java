@@ -12,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.Map;
 import java.util.Set;
@@ -85,7 +86,10 @@ public class HomeController {
         return "/user";
     }
 
-    @GetMapping("/403")
+    /**
+     * Any method: Spring Security forwards a rejected request here keeping its original method (POST, PUT...).
+     */
+    @RequestMapping("/403")
     public String error403() {
         return "/error/403";
     }
