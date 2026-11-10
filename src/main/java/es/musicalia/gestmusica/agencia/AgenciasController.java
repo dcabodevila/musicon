@@ -21,7 +21,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -79,17 +78,20 @@ public class AgenciasController {
     @GetMapping("/crear")
     public String crearAgencias(Model model) {
         model.addAttribute("agenciaDto", new AgenciaDto());
-        model.addAttribute("listaProvincias", this.localizacionService.findAllProvincias());
-        model.addAttribute("listaUsuarios", this.userService.findAllUsuarioRecordsNotAdmin());
+        addFormularioModelAttributes(model);
 
         return "agencia-detail-edit";
+    }
+
+    private void addFormularioModelAttributes(Model model) {
+        model.addAttribute("listaProvincias", this.localizacionService.findAllProvincias());
+        model.addAttribute("listaUsuarios", this.userService.findAllUsuarioRecordsNotAdmin());
     }
     @GetMapping("/edit/{id}")
     @PreAuthorize("hasPermission(#idAgencia, 'AGENCIA', 'AGENCIA_EDITAR')")
     public String detalleEditarAgencia(Model model, @PathVariable("id") Long idAgencia) {
         model.addAttribute("agenciaDto", this.agenciaService.findAgenciaDtoById(idAgencia));
-        model.addAttribute("listaProvincias", this.localizacionService.findAllProvincias());
-        model.addAttribute("listaUsuarios", this.userService.findAllUsuarioRecordsNotAdmin());
+        addFormularioModelAttributes(model);
 
         return "agencia-detail-edit";
     }
@@ -114,8 +116,9 @@ public class AgenciasController {
     }
 
     @PostMapping("/guardar")
-    public String guardarAgencia(@AuthenticationPrincipal CustomAuthenticatedUser user, Model model, @ModelAttribute("agenciaDto") @Valid AgenciaDto agenciaDto,  @RequestParam(value = "image", required = false) MultipartFile multipartFile,
-                                 BindingResult bindingResult, RedirectAttributes redirectAttributes, Errors errors) {
+    public String guardarAgencia(@AuthenticationPrincipal CustomAuthenticatedUser user, Model model, @ModelAttribute("agenciaDto") @Valid AgenciaDto agenciaDto,
+                                 BindingResult bindingResult, @RequestParam(value = "image", required = false) MultipartFile multipartFile,
+                                 RedirectAttributes redirectAttributes) {
 
         boolean isCreacion = agenciaDto.getId() == null;
 
@@ -129,6 +132,7 @@ public class AgenciasController {
                         Map.of("reason", "validation")
                 );
             }
+            addFormularioModelAttributes(model);
             return "agencia-detail-edit";
         }
 
@@ -178,6 +182,7 @@ public class AgenciasController {
             }
             model.addAttribute("message", "Error guardando agencia");
             model.addAttribute("alertClass", "danger");
+            addFormularioModelAttributes(model);
             return "agencia-detail-edit";
         }
 
