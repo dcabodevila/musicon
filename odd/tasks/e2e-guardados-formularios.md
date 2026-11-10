@@ -14,13 +14,13 @@ Branch: `fix/403-view-in-jar` (tests validate the multipart part-limit fix). Sco
 ## Tasks
 
 - T1 S1 inline: commit the multipart part-limit fix, 403 view and access-denied logging. Commit: c496f4a
-- T2 S1-S4 worker: artista edit re-save and create (E2E-). Commit: pending
-- T3 S1-S4 worker: agencia edit re-save and create (E2E-). Commit: pending
-- T4 S1-S4 worker: usuario mi-perfil / editar re-save. Commit: pending
-- T5 S1-S5 worker: ajustes create/edit/delete and opciones de listado. Commit: pending
-- T6 S1-S4 worker: accesos de agencia y de artista. Commit: pending
-- T7 S1-S5 worker: incrementos y documentos. Commit: pending
-- T8 S5 worker: cleanup SQL for new E2E- rows. Commit: pending
+- T2 S1-S4 worker: artista edit re-save and create (E2E-). Commit: b205995
+- T3 S1-S4 worker: agencia edit re-save and create (E2E-). Commit: b205995
+- T4 S1-S4 worker: usuario mi-perfil / editar re-save. Commit: b205995
+- T5 S1-S5 worker: ajustes create/edit/delete and opciones de listado. Commit: 54f4c90
+- T6 S1-S4 worker: accesos de agencia y de artista. Commit: b205995
+- T7 S1-S5 worker: incrementos y documentos. Commit: 54f4c90
+- T8 S5 worker: cleanup SQL for new E2E- rows. Commit: 54f4c90
 - T9 S1 inline: run the whole e2e suite and report. Commit: n/a
 
 ## Log
@@ -29,3 +29,4 @@ Branch: `fix/403-view-in-jar` (tests validate the multipart part-limit fix). Sco
 - L2 User chose scope: "Seguros + creaciones E2E (Recomendado)".
 - L3 User chose: "El usuario E2E de e2e/.env".
 - L4 Inventory (explorer): saves already covered: ocupacion save/anular (ocupaciones.spec.ts), tarifa save/eliminar (tarifas.spec.ts), listado generar (listados.spec.ts), artista edit (sesion-csrf.spec.ts). Local app runs with dummy Cloudinary credentials, so file uploads may fail locally.
+- L5 T9 full e2e run (tsc ok): 26 passed, 3 skipped (agencia creation: E2E user lacks AGENCIA_CREAR; documento upload fixme: dummy Cloudinary "Unknown API key"; existing sincronizacion skip). Worker findings, not changed: AccesoServiceImpl.guardarPermisosArtistas passes idUsuario/idAgencia swapped to eliminarPermisosArtistas; AgenciasController.guardarAgencia has @RequestParam image between @Valid and BindingResult; creating an artista sends an internal "Nuevo artista" message to every active user.
