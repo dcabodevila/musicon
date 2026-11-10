@@ -211,7 +211,7 @@ public class AccesoServiceImpl implements AccesoService {
 	public void guardarPermisosArtistas(Acceso acceso, Long idArtista, boolean eliminarAntiguos) {
 
         if (eliminarAntiguos) {
-            eliminarPermisosArtistas(acceso.getUsuario().getId(), acceso.getAgencia().getId(), acceso.getRol().getId());
+            eliminarPermisosArtistas(acceso.getAgencia().getId(), acceso.getUsuario().getId(), acceso.getRol().getId());
         }
 
 		Set<Permiso> permisosArtista = obtenerPermisosArtista(acceso.getRol().getId());
