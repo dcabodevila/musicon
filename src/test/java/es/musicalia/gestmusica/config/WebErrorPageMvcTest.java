@@ -25,8 +25,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -141,6 +144,24 @@ public class WebErrorPageMvcTest {
                 .accept(MediaType.TEXT_HTML))
             .andExpect(status().isForbidden())
             .andExpect(forwardedUrl("/403"));
+    }
+
+    @Test
+    void shouldRender403InsteadOf405WhenPostIsRejectedByCsrf() throws Exception {
+        // Security rejects the POST without a valid CSRF token and forwards it, keeping POST, to /403.
+        mockMvc.perform(multipart("/artista/guardar")
+                .with(user("auth").roles("USER"))
+                .accept(MediaType.TEXT_HTML))
+            .andExpect(status().isForbidden())
+            .andExpect(forwardedUrl("/403"));
+
+        // MockMvc does not follow forwards, so replay the forwarded POST on /403.
+        mockMvc.perform(post("/403")
+                .with(user("auth").roles("USER"))
+                .with(csrf())
+                .accept(MediaType.TEXT_HTML))
+            .andExpect(status().isOk())
+            .andExpect(view().name("/error/403"));
     }
 
     @Test

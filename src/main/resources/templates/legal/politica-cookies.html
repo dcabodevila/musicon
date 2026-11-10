@@ -45,8 +45,15 @@
                         <td><code>remember-me</code></td>
                         <td>Funcional</td>
                         <td>Permite recordar el inicio de sesión entre visitas cuando el usuario marca "Recordarme".</td>
-                        <td>14 días</td>
+                        <td>30 días</td>
                         <td>Activada por el usuario voluntariamente</td>
+                    </tr>
+                    <tr>
+                        <td><code>XSRF-TOKEN</code></td>
+                        <td>Técnica / necesaria</td>
+                        <td>Protege los formularios frente a falsificación de peticiones (CSRF) y permite enviarlos aunque la sesión se haya renovado.</td>
+                        <td>30 días</td>
+                        <td>No requerido (cookie técnica)</td>
                     </tr>
                 </tbody>
             </table>
@@ -57,7 +64,7 @@
             </div>
 
             <h2 class="h5 mt-4">3. ¿Es necesario el consentimiento?</h2>
-            <p>Las cookies técnicas estrictamente necesarias (<code>JSESSIONID</code>) están exentas del requisito de consentimiento previo conforme a la Guía de Cookies de la AEPD, ya que son imprescindibles para el funcionamiento del servicio solicitado por el usuario.</p>
+            <p>Las cookies técnicas estrictamente necesarias (<code>JSESSIONID</code> y <code>XSRF-TOKEN</code>) están exentas del requisito de consentimiento previo conforme a la Guía de Cookies de la AEPD, ya que son imprescindibles para el funcionamiento del servicio solicitado por el usuario.</p>
 
             <h2 class="h5 mt-4">4. Cómo gestionar o eliminar las cookies</h2>
             <p>Puede configurar su navegador para bloquear o eliminar cookies. Tenga en cuenta que si bloquea <code>JSESSIONID</code> no podrá iniciar sesión en la plataforma.</p>

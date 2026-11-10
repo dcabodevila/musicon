@@ -26,7 +26,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -189,8 +188,9 @@ public class ArtistaController {
     }
 
     @PostMapping("/guardar")
-    public String guardarArtista(@AuthenticationPrincipal CustomAuthenticatedUser user, Model model, @ModelAttribute("artistaDto") @Valid ArtistaDto artistaDto, @RequestParam(value = "image", required = false) MultipartFile multipartFile,
-                                 BindingResult bindingResult, RedirectAttributes redirectAttributes, Errors errors) {
+    public String guardarArtista(@AuthenticationPrincipal CustomAuthenticatedUser user, Model model, @ModelAttribute("artistaDto") @Valid ArtistaDto artistaDto,
+                                 BindingResult bindingResult, @RequestParam(value = "image", required = false) MultipartFile multipartFile,
+                                 RedirectAttributes redirectAttributes) {
 
         final boolean isCreacion = artistaDto.getId() == null;
         final String eventName = isCreacion ? FunctionalEventNames.ARTISTA_CREATED : FunctionalEventNames.ARTISTA_UPDATED;
@@ -205,7 +205,7 @@ public class ArtistaController {
             );
             getModelAttributeDetail(model, artistaDto);
 
-            return "artista-detail";
+            return "artista-detail-edit";
         }
 
         try {
@@ -243,10 +243,9 @@ public class ArtistaController {
             );
             model.addAttribute("message", "Error guardando artista");
             model.addAttribute("alertClass", "danger");
-            addTarifaAnualModelAttribute(model, artistaDto.getId());
             getModelAttributeDetail(model, artistaDto);
 
-            return "artista-detail";
+            return "artista-detail-edit";
         }
 
 
