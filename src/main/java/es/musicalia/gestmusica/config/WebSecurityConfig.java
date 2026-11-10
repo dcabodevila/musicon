@@ -27,6 +27,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRepository;
 import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
@@ -74,6 +76,8 @@ public class WebSecurityConfig {
     private FunctionalEventTracker functionalEventTracker;
     @Value("${app.security.remember-me.key:}")
     private String rememberMeKey;
+    @Value("${server.servlet.session.cookie.secure:false}")
+    private boolean secureCookies;
     @Value("${app.security.webauthn.rp-id}")
     private String webauthnRpId;
     @Value("${app.security.webauthn.allowed-origins}")
@@ -90,6 +94,21 @@ public class WebSecurityConfig {
 		return http.getSharedObject(AuthenticationManagerBuilder.class)
 				.build();
 	}
+
+    /**
+     * Keeps the CSRF token in a cookie instead of the HTTP session, so it lives as long as the remember-me login:
+     * a form loaded before the session was lost (timeout, restart, deploy) can still be submitted once remember-me
+     * re-authenticates the user. The cookie stays HttpOnly because pages read the token from the {@code _csrf} meta tag.
+     */
+    private CsrfTokenRepository csrfTokenRepository() {
+        CookieCsrfTokenRepository repository = new CookieCsrfTokenRepository();
+        repository.setCookieCustomizer(cookie -> cookie
+            .maxAge(REMEMBER_ME_VALIDITY)
+            .secure(secureCookies)
+            .sameSite("Lax"));
+        return repository;
+    }
+
     @Bean
     public RememberMeServices rememberMeServices() {
         TokenBasedRememberMeServices services = new UsuarioIdRememberMeServices(resolveRememberMeKey(), usuarioUserDetailsService());
@@ -195,7 +214,9 @@ public class WebSecurityConfig {
     public SecurityFilterChain appChain(HttpSecurity http, WebAuthnRelyingPartyOperations webAuthnRelyingPartyOperations,
                                         ObjectProvider<PasskeyOwnerLoader> passkeyOwnerLoader) throws Exception {
         http
-            .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))
+            .csrf(csrf -> csrf
+                .csrfTokenRepository(csrfTokenRepository())
+                .ignoringRequestMatchers("/api/**"))
             .authorizeHttpRequests(authz -> authz
 	                .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
 	                .requestMatchers("/error", "/403").permitAll()
