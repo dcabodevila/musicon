@@ -1,7 +1,7 @@
 # Feature: Security P0 fixes (account takeover)
 
 Goal: close the P0 findings of the security audit: brute-forceable verification codes, REGISTRO codes issued for already verified accounts, reusable password reset codes in the URL, and editing other users' profiles.
-Base: `main` (8c41428). Branch `fix/seguridad-p0`. Inline implementation with test-first; independent verify (high-risk: security).
+Base: `main` (8c41428). Branch: `fix/seguridad-p0`. Inline implementation with test-first; independent verify (high-risk: security).
 
 ## Specs
 - S1 (verification code attempts): User: "ponemos un límite de 5 intentos". Every verification code (REGISTRO and RECUPERACION_PASSWORD) accepts at most 5 failed attempts; on the 5th failure the code is invalidated and even the right code is then rejected. Generating a new code invalidates the previous active codes of the same email and type, so attempts cannot be multiplied by keeping several codes alive. The code stays 4 digits (the user chose the attempt limit). New column via manual script `sql/1.7.2/01_codigo_verificacion_intentos.sql` (AGENTS.md: never touch the local DB).
