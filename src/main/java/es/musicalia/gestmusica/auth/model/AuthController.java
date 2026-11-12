@@ -142,7 +142,9 @@ public class AuthController {
                                                               @RequestParam String codigo,
                                                               HttpServletRequest request) {
         try {
-            boolean verificado = codigoVerificacionService.verificarCodigo(email, codigo, EmailTemplateEnum.REGISTRO, false);
+            // Solo cuentas pendientes de verificar: nunca activar ni iniciar sesión en una cuenta ya verificada
+            boolean verificado = userService.isEmailPendienteVerificacion(email)
+                    && codigoVerificacionService.verificarCodigo(email, codigo, EmailTemplateEnum.REGISTRO, false);
 
             if (verificado) {
 
@@ -183,7 +185,9 @@ public class AuthController {
     @ResponseBody
     public ResponseEntity<Map<String, Object>> reenviarCodigo(@RequestParam String email) {
         try {
-            boolean reenviado = codigoVerificacionService.reenviarCodigo(email, EmailTemplateEnum.REGISTRO);
+            // Misma respuesta para cuentas inexistentes o ya verificadas: no se envía nada y no se revela si existen
+            boolean reenviado = !userService.isEmailPendienteVerificacion(email)
+                    || codigoVerificacionService.reenviarCodigo(email, EmailTemplateEnum.REGISTRO);
 
             if (reenviado) {
                 return ResponseEntity.ok(Map.of(

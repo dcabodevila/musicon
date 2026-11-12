@@ -345,6 +345,8 @@ class RegistroControllerTest {
 
     @Test
     void verifyEmail_post_validCode_activatesUserAndAutologins() throws Exception {
+        // Registration codes are only issued and accepted for accounts pending email verification
+        when(userService.isEmailPendienteVerificacion(anyString())).thenReturn(true);
         when(codigoVerificacionService.verificarCodigo("nuevo@test.com", "1234", EmailTemplateEnum.REGISTRO, false))
                 .thenReturn(true);
 
@@ -362,6 +364,8 @@ class RegistroControllerTest {
 
     @Test
     void verifyEmail_post_validCodeButAutologinFails_stillActivatesAndSendsToLogin() throws Exception {
+        // Registration codes are only issued and accepted for accounts pending email verification
+        when(userService.isEmailPendienteVerificacion(anyString())).thenReturn(true);
         when(codigoVerificacionService.verificarCodigo("nuevo@test.com", "1234", EmailTemplateEnum.REGISTRO, false))
                 .thenReturn(true);
         doThrow(new IllegalStateException("no session")).when(securityService).autologin(eq("nuevo@test.com"), any());
@@ -396,6 +400,8 @@ class RegistroControllerTest {
 
     @Test
     void verifyEmail_post_userNotFoundOnActivation_returnsGenericErrorWithoutLogin() throws Exception {
+        // Registration codes are only issued and accepted for accounts pending email verification
+        when(userService.isEmailPendienteVerificacion(anyString())).thenReturn(true);
         when(codigoVerificacionService.verificarCodigo("huerfano@test.com", "1234", EmailTemplateEnum.REGISTRO, false))
                 .thenReturn(true);
         when(userService.activateUserByEmail("huerfano@test.com"))
@@ -415,6 +421,8 @@ class RegistroControllerTest {
 
     @Test
     void resendCode_post_usesRegistroTemplateAndReturnsMessages() throws Exception {
+        // Registration codes are only issued and accepted for accounts pending email verification
+        when(userService.isEmailPendienteVerificacion(anyString())).thenReturn(true);
         when(codigoVerificacionService.reenviarCodigo("nuevo@test.com", EmailTemplateEnum.REGISTRO)).thenReturn(true);
         when(codigoVerificacionService.reenviarCodigo("pronto@test.com", EmailTemplateEnum.REGISTRO)).thenReturn(false);
 

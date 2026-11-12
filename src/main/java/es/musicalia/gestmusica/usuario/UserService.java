@@ -31,6 +31,12 @@ public interface UserService {
 
     boolean existsUsuarioActivoByEmail(String email);
 
+    /**
+     * True only when a user with this email exists and has not verified the email yet.
+     * Registration codes are issued and accepted only for these accounts.
+     */
+    boolean isEmailPendienteVerificacion(String email);
+
     List<UsuarioAdminListRecord> findAllUsuarioAdminListRecords();
 
 	@Transactional(readOnly = false)

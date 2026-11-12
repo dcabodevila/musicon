@@ -187,6 +187,16 @@ public class UserServiceImpl implements UserService {
         return userRepository.existsUsuarioActivoByEmail(email);
     }
 
+    @Override
+    public boolean isEmailPendienteVerificacion(String email) {
+        if (email == null || email.isBlank()) {
+            return false;
+        }
+        return userRepository.findUsuarioByMail(email.trim())
+                .map(usuario -> !usuario.isEmailVerified())
+                .orElse(false);
+    }
+
 
 	@Override
 	public List<UsuarioAdminListRecord> findAllUsuarioAdminListRecords(){

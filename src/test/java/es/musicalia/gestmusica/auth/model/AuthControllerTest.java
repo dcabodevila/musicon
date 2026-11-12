@@ -26,6 +26,8 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -234,6 +236,7 @@ class AuthControllerTest {
 
     @Test
     void verifyEmail_codigoCorrecto_autologinExitoso_successYRedirectRaiz() throws Exception {
+        when(userService.isEmailPendienteVerificacion("test@test.com")).thenReturn(true);
         when(codigoVerificacionService.verificarCodigo("test@test.com", "1234", EmailTemplateEnum.REGISTRO, false))
             .thenReturn(true);
 
@@ -248,6 +251,7 @@ class AuthControllerTest {
 
     @Test
     void verifyEmail_codigoCorrecto_autologinFallido_successYRedirectLogin() throws Exception {
+        when(userService.isEmailPendienteVerificacion("test@test.com")).thenReturn(true);
         when(codigoVerificacionService.verificarCodigo("test@test.com", "1234", EmailTemplateEnum.REGISTRO, false))
             .thenReturn(true);
         doThrow(new RuntimeException("Autologin fallido")).when(securityService).autologin(eq("test@test.com"), any());
@@ -263,6 +267,7 @@ class AuthControllerTest {
 
     @Test
     void verifyEmail_codigoIncorrecto_badRequest() throws Exception {
+        when(userService.isEmailPendienteVerificacion("test@test.com")).thenReturn(true);
         when(codigoVerificacionService.verificarCodigo("test@test.com", "0000", EmailTemplateEnum.REGISTRO, false))
             .thenReturn(false);
 
@@ -276,6 +281,7 @@ class AuthControllerTest {
 
     @Test
     void verifyEmail_exception_badRequest() throws Exception {
+        when(userService.isEmailPendienteVerificacion("test@test.com")).thenReturn(true);
         when(codigoVerificacionService.verificarCodigo(any(), any(), any(), anyBoolean()))
             .thenThrow(new RuntimeException("Error"));
 
@@ -287,10 +293,44 @@ class AuthControllerTest {
             .andExpect(jsonPath("$.success", is(false)));
     }
 
+    @Test
+    void verifyEmail_cuentaYaVerificada_rechazaSinActivarNiAutologin() throws Exception {
+        when(userService.isEmailPendienteVerificacion("victima@test.com")).thenReturn(false);
+        when(codigoVerificacionService.verificarCodigo(any(), any(), any(), anyBoolean())).thenReturn(true);
+
+        mockMvc.perform(post("/auth/verify-email")
+                .with(csrf())
+                .param("email", "victima@test.com")
+                .param("codigo", "1234"))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.success", is(false)))
+            .andExpect(jsonPath("$.message", is("Código incorrecto o expirado.")));
+
+        verify(codigoVerificacionService, never()).verificarCodigo(any(), any(), any(), anyBoolean());
+        verify(userService, never()).activateUserByEmail(any());
+        verify(securityService, never()).autologin(any(), any());
+    }
+
+    @Test
+    void resendCode_cuentaYaVerificadaOInexistente_mismaRespuestaSinEnviarCodigo() throws Exception {
+        when(userService.isEmailPendienteVerificacion("victima@test.com")).thenReturn(false);
+
+        mockMvc.perform(post("/auth/resend-code")
+                .with(csrf())
+                .param("email", "victima@test.com"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success", is(true)))
+            .andExpect(jsonPath("$.message", is("Código reenviado correctamente.")));
+
+        verify(codigoVerificacionService, never()).reenviarCodigo(any(), any());
+        verify(codigoVerificacionService, never()).generarYEnviarCodigo(any(), any());
+    }
+
     // ==================== POST /auth/resend-code ====================
 
     @Test
     void resendCode_reenvioExitoso_success() throws Exception {
+        when(userService.isEmailPendienteVerificacion("test@test.com")).thenReturn(true);
         when(codigoVerificacionService.reenviarCodigo("test@test.com", EmailTemplateEnum.REGISTRO))
             .thenReturn(true);
 
@@ -303,6 +343,7 @@ class AuthControllerTest {
 
     @Test
     void resendCode_reenvioFallido_badRequest() throws Exception {
+        when(userService.isEmailPendienteVerificacion("test@test.com")).thenReturn(true);
         when(codigoVerificacionService.reenviarCodigo("test@test.com", EmailTemplateEnum.REGISTRO))
             .thenReturn(false);
 
@@ -315,6 +356,7 @@ class AuthControllerTest {
 
     @Test
     void resendCode_exception_badRequest() throws Exception {
+        when(userService.isEmailPendienteVerificacion("test@test.com")).thenReturn(true);
         when(codigoVerificacionService.reenviarCodigo(any(), any()))
             .thenThrow(new RuntimeException("Error"));
 
