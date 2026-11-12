@@ -168,8 +168,8 @@ class CodigoVerificacionServiceTest {
         CodigoVerificacion vigente = codigo("1234", now.minusMinutes(1), now.plusMinutes(14));
         when(codigoRepository.findByEmailAndCodigoAndTipoAndActivoTrueAndUsado(EMAIL, "0000", EmailTemplateEnum.REGISTRO, false))
                 .thenReturn(Optional.empty());
-        when(codigoRepository.findCodigoValidoByEmailAndTipo(eq(EMAIL), eq(EmailTemplateEnum.REGISTRO), any(LocalDateTime.class)))
-                .thenReturn(Optional.of(vigente));
+        when(codigoRepository.findCodigosVigentesParaIntentoFallido(eq(EMAIL), eq(EmailTemplateEnum.REGISTRO), any(LocalDateTime.class)))
+                .thenReturn(java.util.List.of(vigente));
 
         assertThat(service.verificarCodigo(EMAIL, "0000", EmailTemplateEnum.REGISTRO, false)).isFalse();
 
@@ -187,8 +187,8 @@ class CodigoVerificacionServiceTest {
         vigente.setIntentosFallidos(4);
         when(codigoRepository.findByEmailAndCodigoAndTipoAndActivoTrueAndUsado(EMAIL, "0000", EmailTemplateEnum.REGISTRO, false))
                 .thenReturn(Optional.empty());
-        when(codigoRepository.findCodigoValidoByEmailAndTipo(eq(EMAIL), eq(EmailTemplateEnum.REGISTRO), any(LocalDateTime.class)))
-                .thenReturn(Optional.of(vigente));
+        when(codigoRepository.findCodigosVigentesParaIntentoFallido(eq(EMAIL), eq(EmailTemplateEnum.REGISTRO), any(LocalDateTime.class)))
+                .thenReturn(java.util.List.of(vigente));
 
         assertThat(service.verificarCodigo(EMAIL, "0000", EmailTemplateEnum.REGISTRO, false)).isFalse();
 

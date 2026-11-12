@@ -1,19 +1,24 @@
 package es.musicalia.gestmusica.usuario;
 
 import es.musicalia.gestmusica.mail.EmailTemplateEnum;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface CodigoVerificacionRepository extends JpaRepository<CodigoVerificacion, Long> {
 
-	// Buscar código específico con ENUM, no String
+	// Buscar código específico con ENUM, no String.
+	// Bloquea la fila: dos verificaciones simultáneas del mismo código no pueden usarlo dos veces.
+	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	@Query("SELECT c FROM CodigoVerificacion c WHERE c.email = :email AND c.codigo = :codigo " +
 			"AND c.tipo = :tipo AND c.activo = true AND c.usado = :usado")
 	Optional<CodigoVerificacion> findByEmailAndCodigoAndTipoAndActivoTrueAndUsado(
@@ -25,6 +30,17 @@ public interface CodigoVerificacionRepository extends JpaRepository<CodigoVerifi
 			"AND c.activo = true AND c.usado = false AND c.fechaExpiracion > :now " +
 			"ORDER BY c.fechaCreacion DESC")
 	Optional<CodigoVerificacion> findCodigoValidoByEmailAndTipo(
+			@Param("email") String email,
+			@Param("tipo") EmailTemplateEnum tipo,
+			@Param("now") LocalDateTime now);
+
+	// Código vigente bloqueado para contar un intento fallido: los intentos en paralelo se serializan
+	// y no pueden superar el límite pisándose el contador.
+	@Lock(LockModeType.PESSIMISTIC_WRITE)
+	@Query("SELECT c FROM CodigoVerificacion c WHERE c.email = :email AND c.tipo = :tipo " +
+			"AND c.activo = true AND c.usado = false AND c.fechaExpiracion > :now " +
+			"ORDER BY c.fechaCreacion DESC")
+	List<CodigoVerificacion> findCodigosVigentesParaIntentoFallido(
 			@Param("email") String email,
 			@Param("tipo") EmailTemplateEnum tipo,
 			@Param("now") LocalDateTime now);

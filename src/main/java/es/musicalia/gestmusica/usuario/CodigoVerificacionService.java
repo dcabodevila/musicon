@@ -107,8 +107,8 @@ public class CodigoVerificacionService {
      * Cuenta un intento fallido contra el código vigente y lo invalida al llegar al máximo.
      */
     private void registrarIntentoFallido(String email, EmailTemplateEnum tipo) {
-        codigoRepository.findCodigoValidoByEmailAndTipo(email, tipo, LocalDateTime.now())
-                .ifPresent(vigente -> {
+        codigoRepository.findCodigosVigentesParaIntentoFallido(email, tipo, LocalDateTime.now())
+                .forEach(vigente -> {
                     vigente.setIntentosFallidos(vigente.getIntentosFallidos() + 1);
                     if (vigente.isAgotado()) {
                         vigente.setActivo(false);
