@@ -102,7 +102,7 @@ class UsuarioControllerMvcTest {
         when(userService.getUsuarioEdicionDTO(8L)).thenReturn(perfil(8L));
         when(accesoService.findAllAccesosDetailRecordByIdUsuario(8L)).thenReturn(Collections.emptyList());
 
-        mockMvc.perform(get("/usuarios/editar/8").with(user(usuarioAutenticado(7L))))
+        mockMvc.perform(get("/usuarios/editar/8").with(user(usuarioAutenticado(7L, "USUARIOS"))))
                 .andExpect(status().isOk())
                 .andExpect(content().string(not(containsString("id=\"passkeys-perfil\""))))
                 .andExpect(content().string(not(containsString("passkeys-perfil"))));
@@ -116,13 +116,15 @@ class UsuarioControllerMvcTest {
         return dto;
     }
 
-    private static CustomAuthenticatedUser usuarioAutenticado(long id) {
+    private static CustomAuthenticatedUser usuarioAutenticado(long id, String... autoridades) {
         Usuario usuario = new Usuario();
         usuario.setId(id);
         usuario.setUsername("jperez");
         usuario.setNombre("Juan");
         usuario.setPassword("{noop}x");
-        return new CustomAuthenticatedUser(usuario, true, true, true, true, java.util.List.of(), java.util.Map.of(), java.util.Map.of());
+        return new CustomAuthenticatedUser(usuario, true, true, true, true,
+                java.util.Arrays.stream(autoridades).map(org.springframework.security.core.authority.SimpleGrantedAuthority::new).toList(),
+                java.util.Map.of(), java.util.Map.of());
     }
 
     @Test
@@ -133,7 +135,7 @@ class UsuarioControllerMvcTest {
 
         mockMvc.perform(multipart("/usuarios/guardar")
                 .with(csrf())
-                .with(user("auth").roles("USER"))
+                .with(user(usuarioAutenticado(1L)))
                 .param("id", "1")
                 .param("username", "usuario")
                 .param("nombre", "Nombre")
@@ -164,7 +166,7 @@ class UsuarioControllerMvcTest {
 
         mockMvc.perform(multipart("/usuarios/guardar")
                 .with(csrf())
-                .with(user("auth").roles("USER"))
+                .with(user(usuarioAutenticado(1L)))
                 .param("id", "1")
                 .param("username", "usuario")
                 .param("nombre", "Nombre")
@@ -184,7 +186,7 @@ class UsuarioControllerMvcTest {
 
         mockMvc.perform(multipart("/usuarios/guardar")
                 .with(csrf())
-                .with(user("auth").roles("USER"))
+                .with(user(usuarioAutenticado(1L)))
                 .param("id", "1")
                 .param("username", "usuario")
                 .param("nombre", "Nombre")
@@ -197,5 +199,58 @@ class UsuarioControllerMvcTest {
             .andExpect(redirectedUrl("/usuarios/editar/1"))
             .andExpect(flash().attribute("alertClass", "success"))
             .andExpect(flash().attribute("message", "Usuario actualizado correctamente"));
+    }
+
+    // ==================== ownership (S3) ====================
+
+    @Test
+    void guardarUsuario_otroUsuarioSinPermisoUsuarios_prohibidoYNoGuarda() throws Exception {
+        mockMvc.perform(multipart("/usuarios/guardar")
+                .with(csrf())
+                .with(user(usuarioAutenticado(7L)))
+                .param("id", "1")
+                .param("username", "victima")
+                .param("nombre", "Nombre")
+                .param("email", "atacante@correo.com")
+                .param("idProvincia", "10"))
+            .andExpect(status().isForbidden());
+
+        org.mockito.Mockito.verify(userService, org.mockito.Mockito.never()).guardarUsuario(any(), any());
+    }
+
+    @Test
+    void guardarUsuario_otroUsuarioConPermisoUsuarios_guardaYRedirige() throws Exception {
+        when(userService.guardarUsuario(any(), any())).thenReturn(new Usuario());
+
+        mockMvc.perform(multipart("/usuarios/guardar")
+                .with(csrf())
+                .with(user(usuarioAutenticado(7L, "USUARIOS")))
+                .param("id", "1")
+                .param("username", "usuario")
+                .param("nombre", "Nombre")
+                .param("email", "ok@correo.com")
+                .param("idProvincia", "10"))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrl("/usuarios/editar/1"));
+
+        org.mockito.Mockito.verify(userService).guardarUsuario(any(), any());
+    }
+
+    @Test
+    void editarUsuario_otroUsuarioSinPermisoUsuarios_prohibido() throws Exception {
+        mockMvc.perform(get("/usuarios/editar/8").with(user(usuarioAutenticado(7L))))
+            .andExpect(status().isForbidden());
+
+        org.mockito.Mockito.verify(userService, org.mockito.Mockito.never()).getUsuarioEdicionDTO(any());
+    }
+
+    @Test
+    void editarUsuario_propioUsuario_permitido() throws Exception {
+        when(userService.getUsuarioEdicionDTO(7L)).thenReturn(perfil(7L));
+        when(accesoService.findAllAccesosDetailRecordByIdUsuario(7L)).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/usuarios/editar/7").with(user(usuarioAutenticado(7L))))
+            .andExpect(status().isOk())
+            .andExpect(view().name("usuario-detail-edit"));
     }
 }

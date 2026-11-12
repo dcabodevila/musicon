@@ -7,6 +7,7 @@ import es.musicalia.gestmusica.mail.EmailService;
 import es.musicalia.gestmusica.mail.EmailTemplateEnum;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -78,7 +79,8 @@ public class UsuarioController {
     }
 
     @GetMapping("/editar/{id}")
-    public String editarUsuario(@PathVariable Long id, ModelMap model) {
+    public String editarUsuario(@AuthenticationPrincipal CustomAuthenticatedUser user, @PathVariable Long id, ModelMap model) {
+        comprobarPuedeEditarUsuario(user, id);
         final UsuarioEdicionDTO usuarioEdicionDTO = this.userService.getUsuarioEdicionDTO(id);
         cargarModeloFormularioEdicion(model, usuarioEdicionDTO, this.accesoService.findAllAccesosDetailRecordByIdUsuario(id));
 
@@ -86,11 +88,13 @@ public class UsuarioController {
     }
 
     @PostMapping("/guardar")
-    public String guardarUsuario(@Valid @ModelAttribute UsuarioEdicionDTO usuarioEdicionDTO,
+    public String guardarUsuario(@AuthenticationPrincipal CustomAuthenticatedUser user,
+                                 @Valid @ModelAttribute UsuarioEdicionDTO usuarioEdicionDTO,
                                  BindingResult bindingResult,
                                  @RequestParam(value = "image", required = false) MultipartFile multipartFile,
                                  RedirectAttributes redirectAttributes,
                                  ModelMap model) {
+        comprobarPuedeEditarUsuario(user, usuarioEdicionDTO.getId());
         if (bindingResult.hasErrors()) {
             cargarModeloFormularioEdicion(model, usuarioEdicionDTO, obtenerAccesosPorUsuario(usuarioEdicionDTO));
             return "usuario-detail-edit";
@@ -116,6 +120,18 @@ public class UsuarioController {
         cargarModeloFormularioEdicion(model, usuarioEdicionDTO, this.accesoService.getMisAccesos(user.getUserId()));
         model.addAttribute("esMiPerfil", true);
         return "usuario-detail-edit";
+    }
+
+    /**
+     * A user may only edit their own profile; editing other users requires the {@code USUARIOS} authority.
+     */
+    private static void comprobarPuedeEditarUsuario(CustomAuthenticatedUser user, Long idUsuario) {
+        boolean esPropio = user != null && idUsuario != null && idUsuario.equals(user.getUserId());
+        boolean gestionaUsuarios = user != null && user.getAuthorities().stream()
+                .anyMatch(authority -> "USUARIOS".equals(authority.getAuthority()));
+        if (!esPropio && !gestionaUsuarios) {
+            throw new AccessDeniedException("No tiene permiso para editar este usuario");
+        }
     }
 
     private List<?> obtenerAccesosPorUsuario(UsuarioEdicionDTO usuarioEdicionDTO) {
