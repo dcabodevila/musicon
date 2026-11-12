@@ -34,8 +34,8 @@ public class CodigoVerificacionService {
     public void generarYEnviarCodigo(String email, EmailTemplateEnum tipo) throws EnvioEmailException {
         log.info("Generando código de verificación para email: {} tipo: {}", email, tipo);
 
-        // Desactivar códigos previos
-        //codigoRepository.desactivarCodigosPrevios(email, tipo);
+        // Desactivar códigos previos: un único código vivo por email y tipo, así el límite de intentos no se multiplica
+        codigoRepository.desactivarCodigosPrevios(email, tipo);
 
         // Generar nuevo código
         String codigo = generarCodigoAleatorio();
@@ -71,10 +71,16 @@ public class CodigoVerificacionService {
 
         if (codigoOpt.isEmpty()) {
             log.warn("Código no encontrado o inválido para email: {}", email);
+            registrarIntentoFallido(email, tipo);
             return false;
         }
 
         CodigoVerificacion codigoVerificacion = codigoOpt.get();
+
+        if (codigoVerificacion.isAgotado()) {
+            log.warn("Código agotado por intentos fallidos para email: {}", email);
+            return false;
+        }
 
         if (codigoVerificacion.isExpirado()) {
             log.warn("Código expirado para email: {}", email);
@@ -95,6 +101,21 @@ public class CodigoVerificacionService {
 
         log.info("Código verificado correctamente para email: {}", email);
         return true;
+    }
+
+    /**
+     * Cuenta un intento fallido contra el código vigente y lo invalida al llegar al máximo.
+     */
+    private void registrarIntentoFallido(String email, EmailTemplateEnum tipo) {
+        codigoRepository.findCodigoValidoByEmailAndTipo(email, tipo, LocalDateTime.now())
+                .ifPresent(vigente -> {
+                    vigente.setIntentosFallidos(vigente.getIntentosFallidos() + 1);
+                    if (vigente.isAgotado()) {
+                        vigente.setActivo(false);
+                        log.warn("Código invalidado tras {} intentos fallidos para email: {}", CodigoVerificacion.MAX_INTENTOS_FALLIDOS, email);
+                    }
+                    codigoRepository.save(vigente);
+                });
     }
 
     /**

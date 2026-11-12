@@ -151,6 +151,69 @@ class CodigoVerificacionServiceTest {
         verify(usuarioRepository, never()).save(any());
     }
 
+    // ==================== failed attempts (S1) ====================
+
+    @Test
+    void generarYEnviarCodigo_invalidatesPreviousCodesBeforeSavingTheNewOne() throws Exception {
+        service.generarYEnviarCodigo(EMAIL, EmailTemplateEnum.REGISTRO);
+
+        var inOrder = inOrder(codigoRepository);
+        inOrder.verify(codigoRepository).desactivarCodigosPrevios(EMAIL, EmailTemplateEnum.REGISTRO);
+        inOrder.verify(codigoRepository).save(any(CodigoVerificacion.class));
+    }
+
+    @Test
+    void verificarCodigo_wrongCode_countsAFailedAttemptOnTheCurrentCode() {
+        LocalDateTime now = LocalDateTime.now();
+        CodigoVerificacion vigente = codigo("1234", now.minusMinutes(1), now.plusMinutes(14));
+        when(codigoRepository.findByEmailAndCodigoAndTipoAndActivoTrueAndUsado(EMAIL, "0000", EmailTemplateEnum.REGISTRO, false))
+                .thenReturn(Optional.empty());
+        when(codigoRepository.findCodigoValidoByEmailAndTipo(eq(EMAIL), eq(EmailTemplateEnum.REGISTRO), any(LocalDateTime.class)))
+                .thenReturn(Optional.of(vigente));
+
+        assertThat(service.verificarCodigo(EMAIL, "0000", EmailTemplateEnum.REGISTRO, false)).isFalse();
+
+        assertThat(vigente.getIntentosFallidos()).isEqualTo(1);
+        assertThat(vigente.getActivo()).isTrue();
+        assertThat(vigente.getUsado()).isFalse();
+        verify(codigoRepository).save(vigente);
+        verifyNoInteractions(usuarioRepository);
+    }
+
+    @Test
+    void verificarCodigo_fifthWrongCode_invalidatesTheCurrentCode() {
+        LocalDateTime now = LocalDateTime.now();
+        CodigoVerificacion vigente = codigo("1234", now.minusMinutes(1), now.plusMinutes(14));
+        vigente.setIntentosFallidos(4);
+        when(codigoRepository.findByEmailAndCodigoAndTipoAndActivoTrueAndUsado(EMAIL, "0000", EmailTemplateEnum.REGISTRO, false))
+                .thenReturn(Optional.empty());
+        when(codigoRepository.findCodigoValidoByEmailAndTipo(eq(EMAIL), eq(EmailTemplateEnum.REGISTRO), any(LocalDateTime.class)))
+                .thenReturn(Optional.of(vigente));
+
+        assertThat(service.verificarCodigo(EMAIL, "0000", EmailTemplateEnum.REGISTRO, false)).isFalse();
+
+        assertThat(vigente.getIntentosFallidos()).isEqualTo(5);
+        assertThat(vigente.getActivo()).isFalse();
+        assertThat(vigente.isValido()).isFalse();
+        verify(codigoRepository).save(vigente);
+    }
+
+    @Test
+    void verificarCodigo_rightCodeAfterFiveFailedAttempts_isRejectedAndNotUsed() {
+        LocalDateTime now = LocalDateTime.now();
+        CodigoVerificacion agotado = codigo("1234", now.minusMinutes(1), now.plusMinutes(14));
+        agotado.setIntentosFallidos(5);
+        when(codigoRepository.findByEmailAndCodigoAndTipoAndActivoTrueAndUsado(EMAIL, "1234", EmailTemplateEnum.REGISTRO, false))
+                .thenReturn(Optional.of(agotado));
+
+        assertThat(service.verificarCodigo(EMAIL, "1234", EmailTemplateEnum.REGISTRO, false)).isFalse();
+
+        assertThat(agotado.getUsado()).isFalse();
+        assertThat(agotado.isValido()).isFalse();
+        verify(codigoRepository, never()).save(any());
+        verifyNoInteractions(usuarioRepository);
+    }
+
     // ==================== reenviarCodigo ====================
 
     @Test

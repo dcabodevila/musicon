@@ -31,7 +31,7 @@ public interface CodigoVerificacionRepository extends JpaRepository<CodigoVerifi
 
 	@Modifying
 	@Query("UPDATE CodigoVerificacion c SET c.activo = false WHERE c.email = :email AND c.tipo = :tipo")
-	void desactivarCodigosPrevios(@Param("email") String email, @Param("tipo") String tipo);
+	void desactivarCodigosPrevios(@Param("email") String email, @Param("tipo") EmailTemplateEnum tipo);
 
 	@Modifying
 	@Query("DELETE FROM CodigoVerificacion c WHERE c.fechaExpiracion < :fecha")

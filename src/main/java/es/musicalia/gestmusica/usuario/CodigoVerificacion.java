@@ -17,6 +17,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class CodigoVerificacion {
 
+    /** Failed attempts after which the code is no longer accepted. */
+    public static final int MAX_INTENTOS_FALLIDOS = 5;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -45,12 +48,20 @@ public class CodigoVerificacion {
     @Column(nullable = false)
     private EmailTemplateEnum tipo;
 
+    @Column(name = "intentos_fallidos", nullable = false)
+    @Builder.Default
+    private Integer intentosFallidos = 0;
+
 
     public boolean isExpirado() {
         return LocalDateTime.now().isAfter(fechaExpiracion);
     }
 
     public boolean isValido() {
-        return activo && !usado && !isExpirado();
+        return activo && !usado && !isExpirado() && !isAgotado();
+    }
+
+    public boolean isAgotado() {
+        return intentosFallidos != null && intentosFallidos >= MAX_INTENTOS_FALLIDOS;
     }
 }
