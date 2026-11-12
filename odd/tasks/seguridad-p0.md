@@ -14,7 +14,7 @@ Base: `main` (8c41428). Branch `fix/seguridad-p0`. Inline implementation with te
 - T2 (S2): REGISTRO resend/verify only for unverified accounts. Route: inline, test-first. Commit: dee7d9f.
 - T3 (S3): UsuarioController ownership checks. Route: inline, test-first. Commit: 77263b4.
 - T4 (S4): session-bound single-use reset grant. Route: gentle-ai-worker (context backstop reached), test-first. Commit: 6869ffa.
-- T5: independent verify (gentle-ai-verify) + RDD assess. Route: subagent. Commit: n/a.
+- T5: independent verify (gentle-ai-verify) + RDD. Route: subagent + native review. Commit: n/a (review of 8c41428..a92edcb).
 
 ## Log
 - L1: User: "quiero abordar una versión de mejora en la seguridad, analiza el código y dime las tareas que debo abordar antes"
@@ -27,3 +27,4 @@ Base: `main` (8c41428). Branch `fix/seguridad-p0`. Inline implementation with te
 - L8: Independent verify (gentle-ai-verify): 129 tests, 0 failures (CodigoVerificacionService 14, AuthController 39, RegistroController 26, UserServiceImpl 4, RegistroUserService 11, UsuarioControllerMvc 9, FormLoginSecurity 17, RememberMeLogin 9). Verdicts: S1 partial (non-atomic attempt counter under concurrency), S2 met, S3 met, S4 partial (grant consumption not atomic). Own probes: 0 executed (setup failed to compile). SQL/JPQL checked statically only, not executed against PostgreSQL (parent denied a temporary cluster outside the workspace). No reproduced blocking defect.
 - L9: Fix for the S1 race: PESSIMISTIC_WRITE (SELECT ... FOR UPDATE) on the code lookup used to verify and on the new lookup used to count failed attempts, so parallel attempts serialize and a code cannot be used twice. Commit 16a0d21. GREEN `./mvnw -q test -Dtest=CodigoVerificacionServiceTest,AuthControllerTest,RegistroControllerTest` EXIT=0. No meaningful RED: lock behavior needs a real database; not executed against PostgreSQL. S4 race accepted: only the session that verified the code holds the grant and it changes the password of that same email, so a double POST has no security impact.
 - L10: Slice: ~560 authored lines in 6 commits, past the ~400-line guide; delivered as one branch whose commits are reviewable one by one (each high-risk unit has its own commit).
+- L11: RDD native review lineage review-d0e32c297f8e07e7 over 8c41428..a92edcb (committed-only, tier high, lenses risk + reliability): approved and acknowledged (authority burned). Non-blocking advisories: R3-generation-concurrency (CodigoVerificacionService.java:38, two simultaneous code generations could both stay active) and R3-grant-concurrency (AuthController.java:335, grant consumption not atomic; accepted in L9).
