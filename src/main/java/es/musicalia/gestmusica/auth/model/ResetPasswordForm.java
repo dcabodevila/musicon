@@ -14,8 +14,8 @@ public class ResetPasswordForm implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	// Display only: the email used for the reset always comes from the session grant
 	private String email;
-	private String codigo;
 
 	@NotNull
 	@NotEmpty

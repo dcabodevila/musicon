@@ -7,6 +7,7 @@ import es.musicalia.gestmusica.observabilidad.FunctionalEventOutcome;
 import es.musicalia.gestmusica.observabilidad.FunctionalEventTracker;
 import es.musicalia.gestmusica.usuario.*;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -259,17 +260,20 @@ public class AuthController {
     @PostMapping("/verify-reset-password")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> verificarCodigoResetPassword(@RequestParam String email,
-                                                                            @RequestParam String codigo) {
+                                                                            @RequestParam String codigo,
+                                                                            HttpSession session) {
         try {
             boolean verificado = codigoVerificacionService.verificarCodigo(
                     email, codigo, EmailTemplateEnum.RECUPERACION_PASSWORD, false
             );
 
             if (verificado) {
+                // The grant stays server-side: neither the email nor the code travel in the URL
+                session.setAttribute(ResetPasswordGrant.SESSION_ATTRIBUTE, ResetPasswordGrant.forEmail(email));
                 return ResponseEntity.ok(Map.of(
                         "success", true,
                         "message", "Código verificado correctamente.",
-                        "redirect", "/auth/reset-password?email=" + email + "&codigo=" + codigo
+                        "redirect", "/auth/reset-password"
                 ));
             } else {
                 return ResponseEntity.badRequest().body(Map.of(
@@ -287,12 +291,13 @@ public class AuthController {
     }
 
     @GetMapping("/reset-password")
-    public String mostrarResetPassword(@RequestParam String email,
-                                       @RequestParam String codigo,
-                                       Model model) {
+    public String mostrarResetPassword(HttpSession session, Model model) {
+        ResetPasswordGrant grant = validResetPasswordGrant(session);
+        if (grant == null) {
+            return "redirect:/auth/remember-password";
+        }
         ResetPasswordForm form = new ResetPasswordForm();
-        form.setEmail(email);
-        form.setCodigo(codigo);
+        form.setEmail(grant.email());
         model.addAttribute("resetPasswordForm", form);
         return "reset-password";
     }
@@ -301,7 +306,12 @@ public class AuthController {
     public String procesarResetPassword(@ModelAttribute("resetPasswordForm") @Valid ResetPasswordForm form,
                                         BindingResult bindingResult,
                                         Model model,
+                                        HttpSession session,
                                         RedirectAttributes redirectAttributes) {
+
+        // The email always comes from the server-side grant, never from the request
+        ResetPasswordGrant grant = validResetPasswordGrant(session);
+        form.setEmail(grant != null ? grant.email() : null);
 
         // Validar que las contraseñas coincidan
         if (!form.getNewPassword().equals(form.getConfirmPassword())) {
@@ -313,22 +323,16 @@ public class AuthController {
             return "reset-password";
         }
 
+        if (grant == null) {
+            model.addAttribute("error", "El código ha expirado. Solicita uno nuevo.");
+            return "reset-password";
+        }
+
         try {
-            // Verificar el código una vez más por seguridad
-            boolean codigoValido = codigoVerificacionService.verificarCodigo(
-                    form.getEmail(), form.getCodigo(), EmailTemplateEnum.RECUPERACION_PASSWORD, true
-            );
+            userService.changePasswordByEmail(grant.email(), form.getNewPassword());
 
-            if (!codigoValido) {
-                model.addAttribute("error", "El código ha expirado. Solicita uno nuevo.");
-                return "reset-password";
-            }
-
-            // Cambiar la contraseña
-            userService.changePasswordByEmail(form.getEmail(), form.getNewPassword());
-
-            // Marcar el código como usado para evitar reutilización
-            codigoVerificacionService.marcarCodigoComoUsado(form.getEmail(), form.getCodigo());
+            // Single use: consume the grant so the password cannot be changed again
+            session.removeAttribute(ResetPasswordGrant.SESSION_ATTRIBUTE);
 
             redirectAttributes.addFlashAttribute("message",
                     "Contraseña cambiada correctamente. Ya puedes iniciar sesión.");
@@ -340,6 +344,19 @@ public class AuthController {
             model.addAttribute("error", "Error cambiando la contraseña. Inténtalo de nuevo.");
             return "reset-password";
         }
+    }
+
+    /**
+     * Returns the reset grant stored in the session when it is still valid; an expired grant is discarded.
+     */
+    private ResetPasswordGrant validResetPasswordGrant(HttpSession session) {
+        if (session.getAttribute(ResetPasswordGrant.SESSION_ATTRIBUTE) instanceof ResetPasswordGrant grant) {
+            if (!grant.isExpired()) {
+                return grant;
+            }
+            session.removeAttribute(ResetPasswordGrant.SESSION_ATTRIBUTE);
+        }
+        return null;
     }
 
     @PostMapping("/resend-reset-code")

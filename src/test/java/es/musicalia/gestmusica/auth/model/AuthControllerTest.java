@@ -16,17 +16,23 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import jakarta.servlet.FilterChain;
 
+import java.time.Instant;
 import java.util.Collections;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -437,17 +443,27 @@ class AuthControllerTest {
     // ==================== POST /auth/verify-reset-password ====================
 
     @Test
-    void verifyResetPassword_post_codigoCorrecto_successYRedirectUrl() throws Exception {
+    void verifyResetPassword_post_codigoCorrecto_guardaGrantEnSesionYRedirectSinCodigo() throws Exception {
         when(codigoVerificacionService.verificarCodigo("test@test.com", "1234", EmailTemplateEnum.RECUPERACION_PASSWORD, false))
             .thenReturn(true);
+        MockHttpSession session = new MockHttpSession();
 
-        mockMvc.perform(post("/auth/verify-reset-password")
+        MvcResult result = mockMvc.perform(post("/auth/verify-reset-password")
                 .with(csrf())
+                .session(session)
                 .param("email", "test@test.com")
                 .param("codigo", "1234"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.success", is(true)))
-            .andExpect(jsonPath("$.redirect", is("/auth/reset-password?email=test@test.com&codigo=1234")));
+            .andExpect(jsonPath("$.message", is("Código verificado correctamente.")))
+            .andExpect(jsonPath("$.redirect", is("/auth/reset-password")))
+            .andReturn();
+
+        Object grant = result.getRequest().getSession().getAttribute(ResetPasswordGrant.SESSION_ATTRIBUTE);
+        assertThat(grant).isInstanceOf(ResetPasswordGrant.class);
+        assertThat(((ResetPasswordGrant) grant).email()).isEqualTo("test@test.com");
+        assertThat(((ResetPasswordGrant) grant).isExpired()).isFalse();
+        assertThat(result.getResponse().getContentAsString()).doesNotContain("1234");
     }
 
     @Test
@@ -460,7 +476,8 @@ class AuthControllerTest {
                 .param("email", "test@test.com")
                 .param("codigo", "0000"))
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.success", is(false)));
+            .andExpect(jsonPath("$.success", is(false)))
+            .andExpect(request().sessionAttributeDoesNotExist(ResetPasswordGrant.SESSION_ATTRIBUTE));
     }
 
     @Test
@@ -479,77 +496,149 @@ class AuthControllerTest {
     // ==================== GET /auth/reset-password ====================
 
     @Test
-    void resetPassword_get_muestraFormularioConEmailYCodigo() throws Exception {
+    void resetPassword_get_sinGrant_redirectARememberPassword() throws Exception {
         mockMvc.perform(get("/auth/reset-password")
                 .param("email", "test@test.com")
                 .param("codigo", "1234"))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrl("/auth/remember-password"));
+    }
+
+    @Test
+    void resetPassword_get_grantExpirado_redirectARememberPassword() throws Exception {
+        mockMvc.perform(get("/auth/reset-password").session(sessionWith(expiredGrant("grant@test.com"))))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrl("/auth/remember-password"));
+    }
+
+    @Test
+    void resetPassword_get_conGrant_muestraFormularioConEmailDelGrant() throws Exception {
+        mockMvc.perform(get("/auth/reset-password").session(sessionWith(ResetPasswordGrant.forEmail("grant@test.com"))))
             .andExpect(status().isOk())
             .andExpect(view().name("reset-password"))
-            .andExpect(model().attributeExists("resetPasswordForm"));
+            .andExpect(model().attribute("resetPasswordForm", hasProperty("email", is("grant@test.com"))));
     }
 
     // ==================== POST /auth/reset-password ====================
 
     @Test
-    void resetPassword_post_passwordsNoCoinciden_error() throws Exception {
+    void resetPassword_post_passwordsNoCoinciden_errorYGrantConservado() throws Exception {
+        MockHttpSession session = sessionWith(ResetPasswordGrant.forEmail("grant@test.com"));
+
         mockMvc.perform(post("/auth/reset-password")
                 .with(csrf())
-                .param("email", "test@test.com")
-                .param("codigo", "1234")
+                .session(session)
                 .param("newPassword", "password123")
                 .param("confirmPassword", "otropassword"))
             .andExpect(status().isOk())
             .andExpect(view().name("reset-password"))
             .andExpect(model().attributeHasFieldErrors("resetPasswordForm", "newPassword", "confirmPassword"));
+
+        assertThat(session.getAttribute(ResetPasswordGrant.SESSION_ATTRIBUTE)).isNotNull();
+        verify(userService, never()).changePasswordByEmail(any(), any());
     }
 
     @Test
-    void resetPassword_post_codigoInvalido_error() throws Exception {
-        when(codigoVerificacionService.verificarCodigo("test@test.com", "1234", EmailTemplateEnum.RECUPERACION_PASSWORD, true))
-            .thenReturn(false);
-
+    void resetPassword_post_sinGrant_errorSinCambiarPassword() throws Exception {
         mockMvc.perform(post("/auth/reset-password")
                 .with(csrf())
-                .param("email", "test@test.com")
+                .param("email", "victima@test.com")
                 .param("codigo", "1234")
                 .param("newPassword", "password123")
                 .param("confirmPassword", "password123"))
             .andExpect(status().isOk())
             .andExpect(view().name("reset-password"))
             .andExpect(model().attribute("error", "El código ha expirado. Solicita uno nuevo."));
+
+        verify(userService, never()).changePasswordByEmail(any(), any());
     }
 
     @Test
-    void resetPassword_post_exito_redirectALoginConMensaje() throws Exception {
-        when(codigoVerificacionService.verificarCodigo("test@test.com", "1234", EmailTemplateEnum.RECUPERACION_PASSWORD, true))
-            .thenReturn(true);
+    void resetPassword_post_grantExpirado_errorSinCambiarPassword() throws Exception {
+        mockMvc.perform(post("/auth/reset-password")
+                .with(csrf())
+                .session(sessionWith(expiredGrant("grant@test.com")))
+                .param("newPassword", "password123")
+                .param("confirmPassword", "password123"))
+            .andExpect(status().isOk())
+            .andExpect(view().name("reset-password"))
+            .andExpect(model().attribute("error", "El código ha expirado. Solicita uno nuevo."));
+
+        verify(userService, never()).changePasswordByEmail(any(), any());
+    }
+
+    @Test
+    void resetPassword_post_exito_cambiaPasswordDelEmailDelGrantYConsumeGrant() throws Exception {
+        MockHttpSession session = sessionWith(ResetPasswordGrant.forEmail("grant@test.com"));
 
         mockMvc.perform(post("/auth/reset-password")
                 .with(csrf())
-                .param("email", "test@test.com")
-                .param("codigo", "1234")
+                .session(session)
+                .param("email", "victima@test.com")
+                .param("codigo", "9999")
                 .param("newPassword", "password123")
                 .param("confirmPassword", "password123"))
             .andExpect(status().is3xxRedirection())
             .andExpect(redirectedUrl("/auth/login"))
             .andExpect(flash().attribute("message", "Contraseña cambiada correctamente. Ya puedes iniciar sesión."));
+
+        verify(userService).changePasswordByEmail("grant@test.com", "password123");
+        verify(userService, never()).changePasswordByEmail(eq("victima@test.com"), any());
+        verify(codigoVerificacionService, never()).verificarCodigo(any(), any(), any(), anyBoolean());
+        verify(codigoVerificacionService, never()).marcarCodigoComoUsado(any(), any());
+        assertThat(session.getAttribute(ResetPasswordGrant.SESSION_ATTRIBUTE)).isNull();
     }
 
     @Test
-    void resetPassword_post_exception_error() throws Exception {
-        when(codigoVerificacionService.verificarCodigo("test@test.com", "1234", EmailTemplateEnum.RECUPERACION_PASSWORD, true))
-            .thenReturn(true);
-        doThrow(new RuntimeException("Error cambiando password")).when(userService).changePasswordByEmail(any(), any());
+    void resetPassword_post_segundoEnvioMismaSesion_noCambiaPasswordDeNuevo() throws Exception {
+        MockHttpSession session = sessionWith(ResetPasswordGrant.forEmail("grant@test.com"));
 
         mockMvc.perform(post("/auth/reset-password")
                 .with(csrf())
-                .param("email", "test@test.com")
+                .session(session)
+                .param("newPassword", "password123")
+                .param("confirmPassword", "password123"))
+            .andExpect(redirectedUrl("/auth/login"));
+
+        mockMvc.perform(post("/auth/reset-password")
+                .with(csrf())
+                .session(session)
+                .param("email", "grant@test.com")
                 .param("codigo", "1234")
+                .param("newPassword", "otraPassword1")
+                .param("confirmPassword", "otraPassword1"))
+            .andExpect(status().isOk())
+            .andExpect(view().name("reset-password"))
+            .andExpect(model().attribute("error", "El código ha expirado. Solicita uno nuevo."));
+
+        verify(userService, times(1)).changePasswordByEmail(any(), any());
+    }
+
+    @Test
+    void resetPassword_post_exception_errorYGrantConservado() throws Exception {
+        doThrow(new RuntimeException("Error cambiando password")).when(userService).changePasswordByEmail(any(), any());
+        MockHttpSession session = sessionWith(ResetPasswordGrant.forEmail("grant@test.com"));
+
+        mockMvc.perform(post("/auth/reset-password")
+                .with(csrf())
+                .session(session)
                 .param("newPassword", "password123")
                 .param("confirmPassword", "password123"))
             .andExpect(status().isOk())
             .andExpect(view().name("reset-password"))
             .andExpect(model().attribute("error", "Error cambiando la contraseña. Inténtalo de nuevo."));
+
+        assertThat(session.getAttribute(ResetPasswordGrant.SESSION_ATTRIBUTE)).isNotNull();
+    }
+
+    private static MockHttpSession sessionWith(ResetPasswordGrant grant) {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute(ResetPasswordGrant.SESSION_ATTRIBUTE, grant);
+        return session;
+    }
+
+    private static ResetPasswordGrant expiredGrant(String email) {
+        return new ResetPasswordGrant(email, Instant.now().minusSeconds(1));
     }
 
     // ==================== POST /auth/resend-reset-code ====================
