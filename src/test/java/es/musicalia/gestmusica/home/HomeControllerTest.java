@@ -61,6 +61,8 @@ class HomeControllerTest {
     private OcupacionService ocupacionService;
     @MockitoBean
     private AgenciaPublicacionEventosService agenciaPublicacionEventosService;
+    @MockitoBean
+    private HomeEstadisticasService homeEstadisticasService;
 
     @MockitoBean
     private UserDetailsService userDetailsService;
@@ -110,6 +112,22 @@ class HomeControllerTest {
     }
 
     @Test
+    void home_muestraContadoresDeLaPlataformaFueraDelHero() throws Exception {
+        HomeEstadisticasDto estadisticas = new HomeEstadisticasDto(80L, 1234L, 410L, 96L);
+        when(homeEstadisticasService.obtenerEstadisticas()).thenReturn(estadisticas);
+        CustomAuthenticatedUser usuario = authenticatedUser(Set.of(new SimpleGrantedAuthority("USER")), Map.of());
+
+        mockMvc.perform(get("/").with(user(usuario)))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("estadisticasPlataforma", estadisticas))
+                .andExpect(content().string(containsString("id=\"home-cifras\"")))
+                .andExpect(content().string(matchesPattern("(?s).*>80<.*Artistas activos.*>1.234<.*Usuarios activos.*>410<.*Presupuestos generados.*>96<.*Ocupaciones creadas.*")))
+                .andExpect(content().string(containsString("Últimos 30 días")))
+                .andExpect(content().string(not(containsString("Agencias activas"))))
+                .andExpect(content().string(not(containsString("home-hero__stats"))));
+    }
+
+    @Test
     void home_trasLoginConContrasena_debeOfrecerPasskeyUnaVez() throws Exception {
         CustomAuthenticatedUser usuario = authenticatedUser(Set.of(new SimpleGrantedAuthority("USER")), Map.of());
         MockHttpSession session = new MockHttpSession();
@@ -124,6 +142,36 @@ class HomeControllerTest {
         mockMvc.perform(get("/").session(session).accept(MediaType.TEXT_HTML).with(user(usuario)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(not(containsString("id=\"passkey-offer\""))));
+    }
+
+    @Test
+    void home_agenciaConFechasPendientesMuestraBannerDeAvisoFueraDelHero() throws Exception {
+        CustomAuthenticatedUser agencia = authenticatedUser(
+                Set.of(new SimpleGrantedAuthority("USER")),
+                Map.of(7L, Set.of(PermisoAgenciaEnum.CONFIRMAR_OCUPACION.name()))
+        );
+        OcupacionRecord pendiente = new OcupacionRecord(10L, LocalDateTime.now(), 1L, "Artista", "100", false, "BOLO", "Pontevedra", "Vigo", "Centro", false, false, "PENDIENTE", 2L, "Usuario");
+        when(ocupacionService.findOcupacionesDtoByAgenciaPendientes(Set.of(7L))).thenReturn(List.of(pendiente, pendiente));
+
+        mockMvc.perform(get("/").with(user(agencia)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("id=\"home-aviso-pendientes\"")))
+                .andExpect(content().string(containsString("Tienes 2 fechas pendientes de confirmar")))
+                .andExpect(content().string(matchesPattern("(?s).*id=\"home-aviso-pendientes\".*href=\"#ocupaciones-pendientes\"[^>]*>\s*Revisar fechas.*")))
+                .andExpect(content().string(not(containsString("home-hero__notice-cta"))));
+    }
+
+    @Test
+    void home_sinFechasPendientesNoMuestraBannerDeAviso() throws Exception {
+        CustomAuthenticatedUser agencia = authenticatedUser(
+                Set.of(new SimpleGrantedAuthority("USER")),
+                Map.of(7L, Set.of(PermisoAgenciaEnum.CONFIRMAR_OCUPACION.name()))
+        );
+        when(ocupacionService.findOcupacionesDtoByAgenciaPendientes(Set.of(7L))).thenReturn(List.of());
+
+        mockMvc.perform(get("/").with(user(agencia)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(not(containsString("home-aviso-pendientes"))));
     }
 
     @Test

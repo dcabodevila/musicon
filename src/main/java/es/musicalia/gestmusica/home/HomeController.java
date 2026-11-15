@@ -25,11 +25,14 @@ public class HomeController {
 
     private final OcupacionService ocupacionService;
     private final AgenciaPublicacionEventosService agenciaPublicacionEventosService;
+    private final HomeEstadisticasService homeEstadisticasService;
 
     public HomeController(OcupacionService ocupacionService,
-                          AgenciaPublicacionEventosService agenciaPublicacionEventosService){
+                          AgenciaPublicacionEventosService agenciaPublicacionEventosService,
+                          HomeEstadisticasService homeEstadisticasService){
         this.ocupacionService = ocupacionService;
         this.agenciaPublicacionEventosService = agenciaPublicacionEventosService;
+        this.homeEstadisticasService = homeEstadisticasService;
     }
 
     @GetMapping("/")
@@ -55,6 +58,7 @@ public class HomeController {
                 agenciaPublicacionEventosService.debeMostrarModal(user.getUsuario().getId()));
 
         model.addAttribute("isUsuarioAutenticado", !SecurityContextHolder.getContext().getAuthentication().getName().equals("anonymousUser"));
+        model.addAttribute("estadisticasPlataforma", homeEstadisticasService.obtenerEstadisticas());
         if (isAdminHome) {
             model.addAttribute("listaOcupacionPendiente", Collections.emptyList());
             return "main.html";

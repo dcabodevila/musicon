@@ -70,6 +70,8 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
 	long countByRolGeneralCodigoInAndActivoTrue(List<String> codigos);
 
+	long countByActivoTrueAndValidadoTrue();
+
 	@Query("""
 		SELECT u FROM Usuario u
 		LEFT JOIN FETCH u.provincia p
