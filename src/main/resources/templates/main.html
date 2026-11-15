@@ -8,6 +8,7 @@
         <meta name="description" content=""/>
         <link rel="manifest" href="/manifest.json"/>
         <div th:replace="~{fragments/main-template :: header-css}"/>
+        <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&display=swap" rel="stylesheet"/>
 
     </head>
 
@@ -33,141 +34,167 @@
                 <div id="content-usuario" th:if="${isUsuarioValidado}">
                     <div class="container-fluid p-0">
 
-                        <!-- HERO -->
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <div class="dashboard-hero js-gsap-hero">
-                                     <img src="https://res.cloudinary.com/hseoceuyz/image/upload/v1760835633/landing-festia_epbr7a.png"
-                                          alt="Concierto multitudinario"
-                                         class="dashboard-hero__img js-gsap-hero-image"/>
-                                    <div class="dashboard-hero__overlay js-gsap-hero-overlay"></div>
-                                    <img src="/logo/logo-name-transparente-alt-color.png"
-                                         alt="festia.es"
-                                         class="dashboard-hero__logo js-gsap-hero-logo"/>
+                        <div class="home">
+
+                        <!-- HERO: corporate stage + live notices -->
+                        <section class="home-hero js-gsap-hero" aria-labelledby="home-hero-title">
+                            <img src="https://res.cloudinary.com/hseoceuyz/image/upload/v1760835633/landing-festia_epbr7a.png"
+                                 alt="" aria-hidden="true"
+                                 class="home-hero__photo js-gsap-hero-image"/>
+
+                            <div class="home-hero__copy">
+                                <img src="/logo/logo-simbolo.png"
+                                     alt="festia.es"
+                                     class="home-hero__brand js-gsap-hero-logo"/>
+                                <h1 id="home-hero-title" class="home-hero__title">
+                                    <span class="home-hero__line"><span class="js-gsap-hero-line">Conectando</span></span>
+                                    <span class="home-hero__line"><span class="js-gsap-hero-line"><em class="is-artist">artistas</em> y</span></span>
+                                    <span class="home-hero__line"><span class="js-gsap-hero-line"><em class="is-rep">representantes</em></span></span>
+                                </h1>
+                            </div>
+
+                            <div class="home-hero__rail js-gsap-hero-rail">
+                                <span th:if="${!isAdminHome && listaOcupacionPendiente != null && #lists.isEmpty(listaOcupacionPendiente) && misAgencias != null && #sets.size(misAgencias) > 0}"
+                                      class="home-hero__notice is-calm">
+                                    <i class="fas fa-check" aria-hidden="true"></i> Sin fechas pendientes de confirmación
+                                </span>
+                            </div>
+                        </section>
+
+                        <!-- CIFRAS DE LA PLATAFORMA -->
+                        <!-- AVISO: FECHAS PENDIENTES (agencias) -->
+                        <section id="home-aviso-pendientes" class="home-notice home-notice--alert" aria-labelledby="home-aviso-pendientes-title"
+                                 th:if="${!isAdminHome && listaOcupacionPendiente != null && not #lists.isEmpty(listaOcupacionPendiente)}">
+                            <div class="home-notice__icon" aria-hidden="true">
+                                <i class="fas fa-calendar-check"></i>
+                                <span class="home-hero__pulse home-notice__pulse"></span>
+                            </div>
+                            <div class="home-notice__body">
+                                <h2 id="home-aviso-pendientes-title" class="home-notice__title"
+                                    th:text="${#lists.size(listaOcupacionPendiente) == 1 ? 'Tienes 1 fecha pendiente de confirmar' : 'Tienes ' + #lists.size(listaOcupacionPendiente) + ' fechas pendientes de confirmar'}">Tienes fechas pendientes de confirmar</h2>
+                                <p class="home-notice__text">Revísalas para confirmarlas o anularlas cuanto antes.</p>
+                            </div>
+                            <a href="#ocupaciones-pendientes" class="home-button home-button--alert">Revisar fechas <i class="fas fa-arrow-down" aria-hidden="true"></i></a>
+                        </section>
+
+                        <section id="home-cifras" class="home-figures" aria-label="festia en cifras" th:if="${estadisticasPlataforma != null}">
+                            <div class="home-figures__grid" role="list">
+                                <div class="home-figure" role="listitem">
+                                    <span class="home-figure__value js-home-counter" th:attr="data-count-target=${estadisticasPlataforma.artistasActivos}" th:text="${#numbers.formatInteger(estadisticasPlataforma.artistasActivos,1,'POINT')}">0</span>
+                                    <span class="home-figure__label">Artistas activos</span>
+                                </div>
+                                <div class="home-figure" role="listitem">
+                                    <span class="home-figure__value js-home-counter" th:attr="data-count-target=${estadisticasPlataforma.usuariosActivos}" th:text="${#numbers.formatInteger(estadisticasPlataforma.usuariosActivos,1,'POINT')}">0</span>
+                                    <span class="home-figure__label">Usuarios activos</span>
+                                </div>
+                                <div class="home-figure" role="listitem">
+                                    <span class="home-figure__value js-home-counter" th:attr="data-count-target=${estadisticasPlataforma.presupuestosUltimoMes}" th:text="${#numbers.formatInteger(estadisticasPlataforma.presupuestosUltimoMes,1,'POINT')}">0</span>
+                                    <span class="home-figure__label">Presupuestos generados <span class="home-figure__period">Últimos 30 días</span></span>
+                                </div>
+                                <div class="home-figure" role="listitem">
+                                    <span class="home-figure__value js-home-counter" th:attr="data-count-target=${estadisticasPlataforma.ocupacionesUltimoMes}" th:text="${#numbers.formatInteger(estadisticasPlataforma.ocupacionesUltimoMes,1,'POINT')}">0</span>
+                                    <span class="home-figure__label">Ocupaciones creadas <span class="home-figure__period">Últimos 30 días</span></span>
                                 </div>
                             </div>
-                        </div>
+                        </section>
+
+                        <!-- ONBOARDING NOTICE -->
+                        <section class="home-notice" th:if="${mostrarBannerOnboardingAgencia}" aria-labelledby="home-onboarding-title">
+                            <div class="home-notice__icon" aria-hidden="true"><i class="fas fa-building"></i></div>
+                            <div class="home-notice__body">
+                                <h2 id="home-onboarding-title" class="home-notice__title">Crea tu agencia</h2>
+                                <p class="home-notice__text">Completa la creación de tu perfil de agencia para comenzar a gestionar artistas y crear listados de disponibilidad.</p>
+                            </div>
+                            <a th:href="@{/agencia/onboarding}" class="home-button">
+                                Comenzar <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                            </a>
+                        </section>
 
                         <!-- ACCESO RÁPIDO -->
-                        <div class="row mb-4">
-                            <div class="col-12 mb-2">
-                                <p class="text-muted small text-uppercase fw-semibold mb-0 js-gsap-section-header" style="letter-spacing:.07em;">Acceso rápido</p>
+                        <section aria-labelledby="home-actions-title">
+                            <div class="home-section__head">
+                                <h2 id="home-actions-title" class="home-section__title">Acceso rápido</h2>
                             </div>
+                            <nav class="home-actions" aria-labelledby="home-actions-title">
+                                <a th:if="${#sets.size(misAgencias)==1}" th:href="@{'/agencia/{id}'(id=${misAgencias[0]})}" class="home-action home-action--agency">
+                                    <span class="home-action__icon" aria-hidden="true"><i class="fas fa-suitcase"></i></span>
+                                    <span class="home-action__body">
+                                        <span class="home-action__title">Mi agencia</span>
+                                        <span class="home-action__subtitle">Ver perfil completo</span>
+                                    </span>
+                                    <span class="home-action__arrow" aria-hidden="true"><i class="fas fa-arrow-right"></i></span>
+                                </a>
+                                <a th:if="${#sets.size(misAgencias)>1}" th:href="@{/agencia/mis-agencias}" class="home-action home-action--agency">
+                                    <span class="home-action__icon" aria-hidden="true"><i class="fas fa-suitcase"></i></span>
+                                    <span class="home-action__body">
+                                        <span class="home-action__title">Mis agencias</span>
+                                        <span class="home-action__subtitle" th:text="${#sets.size(misAgencias) + ' agencias activas'}">Ver todas</span>
+                                    </span>
+                                    <span class="home-action__arrow" aria-hidden="true"><i class="fas fa-arrow-right"></i></span>
+                                </a>
 
-                            <div class="col-12 col-sm-6 col-xl-3 mb-2" th:if="${#sets.size(misAgencias)==1}">
-                                <a th:href="@{'/agencia/{id}'(id=${misAgencias[0]})}" class="quick-card quick-card--agency js-gsap-quick-card">
-                                    <div class="quick-card__icon"><i class="fas fa-suitcase"></i></div>
-                                    <div class="quick-card__body">
-                                        <span class="quick-card__title">Mi agencia</span>
-                                        <span class="quick-card__subtitle">Ver perfil completo</span>
-                                    </div>
-                                    <i class="fas fa-chevron-right quick-card__arrow"></i>
+                                <a th:if="${#sets.size(misArtistas)==1}" th:href="@{'/artista/{id}'(id=${misArtistas[0]})}" class="home-action home-action--artist">
+                                    <span class="home-action__icon" aria-hidden="true"><i class="fas fa-music"></i></span>
+                                    <span class="home-action__body">
+                                        <span class="home-action__title">Mi artista</span>
+                                        <span class="home-action__subtitle">Ver perfil completo</span>
+                                    </span>
+                                    <span class="home-action__arrow" aria-hidden="true"><i class="fas fa-arrow-right"></i></span>
                                 </a>
-                            </div>
-                            <div class="col-12 col-sm-6 col-xl-3 mb-2" th:if="${#sets.size(misAgencias)>1}">
-                                <a th:href="@{/agencia/mis-agencias}" class="quick-card quick-card--agency js-gsap-quick-card">
-                                    <div class="quick-card__icon"><i class="fas fa-suitcase"></i></div>
-                                    <div class="quick-card__body">
-                                        <span class="quick-card__title">Mis agencias</span>
-                                        <span class="quick-card__subtitle" th:text="${#sets.size(misAgencias) + ' agencias activas'}">Ver todas</span>
-                                    </div>
-                                    <i class="fas fa-chevron-right quick-card__arrow"></i>
+                                <a th:if="${#sets.size(misArtistas)>1}" th:href="@{/artista/mis-artistas}" class="home-action home-action--artist">
+                                    <span class="home-action__icon" aria-hidden="true"><i class="fas fa-music"></i></span>
+                                    <span class="home-action__body">
+                                        <span class="home-action__title">Mis artistas</span>
+                                        <span class="home-action__subtitle">Artistas de mis agencias</span>
+                                    </span>
+                                    <span class="home-action__arrow" aria-hidden="true"><i class="fas fa-arrow-right"></i></span>
                                 </a>
-                            </div>
 
-                            <div class="col-12 col-sm-6 col-xl-3 mb-2" th:if="${#sets.size(misArtistas)==1}">
-                                <a th:href="@{'/artista/{id}'(id=${misArtistas[0]})}" class="quick-card quick-card--artist js-gsap-quick-card">
-                                    <div class="quick-card__icon"><i class="fas fa-music"></i></div>
-                                    <div class="quick-card__body">
-                                        <span class="quick-card__title">Mi artista</span>
-                                        <span class="quick-card__subtitle">Ver perfil completo</span>
-                                    </div>
-                                    <i class="fas fa-chevron-right quick-card__arrow"></i>
+                                <a th:if="${hasPermisoOcupaciones != null and hasPermisoOcupaciones}" th:href="@{/ocupacion/list}" class="home-action home-action--occupations">
+                                    <span class="home-action__icon" aria-hidden="true"><i class="fas fa-calendar-plus"></i></span>
+                                    <span class="home-action__body">
+                                        <span class="home-action__title">Ocupaciones</span>
+                                        <span class="home-action__subtitle">Gestionar disponibilidad</span>
+                                    </span>
+                                    <span class="home-action__arrow" aria-hidden="true"><i class="fas fa-arrow-right"></i></span>
                                 </a>
-                            </div>
-                            <div class="col-12 col-sm-6 col-xl-3 mb-2" th:if="${#sets.size(misArtistas)>1}">
-                                <a th:href="@{/artista/mis-artistas}" class="quick-card quick-card--artist js-gsap-quick-card">
-                                    <div class="quick-card__icon"><i class="fas fa-music"></i></div>
-                                    <div class="quick-card__body">
-                                        <span class="quick-card__title">Mis artistas</span>
-                                        <span class="quick-card__subtitle">Artistas de mis agencias</span>
-                                    </div>
-                                    <i class="fas fa-chevron-right quick-card__arrow"></i>
-                                </a>
-                            </div>
 
-                            <div class="col-12 col-sm-6 col-xl-3 mb-2" th:if="${hasPermisoOcupaciones != null and hasPermisoOcupaciones}">
-                                <a th:href="@{/ocupacion/list}" class="quick-card quick-card--occupations js-gsap-quick-card">
-                                    <div class="quick-card__icon"><i class="fas fa-calendar-plus"></i></div>
-                                    <div class="quick-card__body">
-                                        <span class="quick-card__title">Ocupaciones</span>
-                                        <span class="quick-card__subtitle">Gestionar disponibilidad</span>
-                                    </div>
-                                    <i class="fas fa-chevron-right quick-card__arrow"></i>
+                                <a sec:authorize="hasAuthority('MENU_LISTADOS')" href="/listado" class="home-action home-action--budgets">
+                                    <span class="home-action__icon" aria-hidden="true"><i class="fas fa-calendar-alt"></i></span>
+                                    <span class="home-action__body">
+                                        <span class="home-action__title">Presupuestos</span>
+                                        <span class="home-action__subtitle">Ver listados y fechas</span>
+                                    </span>
+                                    <span class="home-action__arrow" aria-hidden="true"><i class="fas fa-arrow-right"></i></span>
                                 </a>
-                            </div>
 
-                            <div class="col-12 col-sm-6 col-xl-3 mb-2" sec:authorize="hasAuthority('MENU_LISTADOS')">
-                                <a href="/listado" class="quick-card quick-card--budgets js-gsap-quick-card">
-                                    <div class="quick-card__icon"><i class="fas fa-calendar-alt"></i></div>
-                                    <div class="quick-card__body">
-                                        <span class="quick-card__title">Presupuestos</span>
-                                        <span class="quick-card__subtitle">Ver listados y fechas</span>
-                                    </div>
-                                    <i class="fas fa-chevron-right quick-card__arrow"></i>
+                                <a th:if="${misAgencias != null and #sets.size(misAgencias) == 0}" th:href="@{/ajustes}" class="home-action home-action--settings">
+                                    <span class="home-action__icon" aria-hidden="true"><i class="fas fa-cog"></i></span>
+                                    <span class="home-action__body">
+                                        <span class="home-action__title">Configuración presupuestos</span>
+                                        <span class="home-action__subtitle">Ajustes y preferencias</span>
+                                    </span>
+                                    <span class="home-action__arrow" aria-hidden="true"><i class="fas fa-arrow-right"></i></span>
                                 </a>
-                            </div>
 
-                            <div class="col-12 col-sm-6 col-xl-3 mb-2" th:if="${misAgencias != null and #sets.size(misAgencias) == 0}">
-                                <a th:href="@{/ajustes}" class="quick-card quick-card--settings js-gsap-quick-card">
-                                    <div class="quick-card__icon"><i class="fas fa-cog"></i></div>
-                                    <div class="quick-card__body">
-                                        <span class="quick-card__title">Configuración presupuestos</span>
-                                        <span class="quick-card__subtitle">Ajustes y preferencias</span>
-                                    </div>
-                                    <i class="fas fa-chevron-right quick-card__arrow"></i>
+                                <a th:if="${misAgencias != null and #sets.size(misAgencias) == 0}" th:href="@{/usuarios/mi-perfil}" class="home-action home-action--profile">
+                                    <span class="home-action__icon" aria-hidden="true"><i class="fas fa-user"></i></span>
+                                    <span class="home-action__body">
+                                        <span class="home-action__title">Mi perfil</span>
+                                        <span class="home-action__subtitle">Editar datos personales</span>
+                                    </span>
+                                    <span class="home-action__arrow" aria-hidden="true"><i class="fas fa-arrow-right"></i></span>
                                 </a>
-                            </div>
-
-                            <div class="col-12 col-sm-6 col-xl-3 mb-2" th:if="${misAgencias != null and #sets.size(misAgencias) == 0}">
-                                <a th:href="@{/usuarios/mi-perfil}" class="quick-card quick-card--profile js-gsap-quick-card">
-                                    <div class="quick-card__icon"><i class="fas fa-user"></i></div>
-                                    <div class="quick-card__body">
-                                        <span class="quick-card__title">Mi perfil</span>
-                                        <span class="quick-card__subtitle">Editar datos personales</span>
-                                    </div>
-                                    <i class="fas fa-chevron-right quick-card__arrow"></i>
-                                </a>
-                            </div>
-                        </div>
-
-                        <!-- ONBOARDING BANNER -->
-                        <div class="row mb-4" th:if="${mostrarBannerOnboardingAgencia}">
-                            <div class="col-12">
-                                <div class="onboarding-banner js-gsap-onboarding-banner">
-                                    <div class="onboarding-banner__icon">
-                                        <i class="fas fa-building"></i>
-                                    </div>
-                                    <div class="onboarding-banner__body">
-                                        <h5 class="onboarding-banner__title">Crea tu agencia</h5>
-                                        <p class="onboarding-banner__text">Completa la creación de tu perfil de agencia para comenzar a gestionar artistas y crear listados de disponibilidad.</p>
-                                    </div>
-                                    <div class="onboarding-banner__action">
-                                        <a th:href="@{/agencia/onboarding}" class="btn btn-primary btn-sm">
-                                            Comenzar <i class="fas fa-arrow-right ms-1"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                            </nav>
+                        </section>
 
                         <!-- OCUPACIONES PENDIENTES -->
-                        <div class="row mb-4 main-pending-occupations-block" th:if="${!isAdminHome && listaOcupacionPendiente != null && not #lists.isEmpty(listaOcupacionPendiente)}">
-                            <div class="col-12">
-                                <div class="section-header mb-3 js-gsap-section-header">
-                                    <h3 class="section-header__title">Ocupaciones pendientes</h3>
-                                    <span class="section-header__badge" th:text="${#lists.size(listaOcupacionPendiente)}">0</span>
-                                    <span class="section-header__sub text-muted small">de confirmación</span>
+                        <section id="ocupaciones-pendientes" class="main-pending-occupations-block" aria-labelledby="home-pending-title"
+                                 th:if="${!isAdminHome && listaOcupacionPendiente != null && not #lists.isEmpty(listaOcupacionPendiente)}">
+                                <div class="home-section__head">
+                                    <h2 id="home-pending-title" class="home-section__title">Ocupaciones pendientes</h2>
+                                    <span class="home-section__count" th:text="${#lists.size(listaOcupacionPendiente)}">0</span>
+                                    <span class="home-section__sub">de confirmación</span>
                                 </div>
 
                                 <div id="carrousel-lista-ocupaciones-pendientes" class="carousel" data-bs-ride="carousel">
@@ -203,7 +230,7 @@
                                         <span class="visually-hidden">Siguiente</span>
                                     </button>
                                 </div>
-                            </div>
+                            </section>
                         </div>
 
                     </div>

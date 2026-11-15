@@ -41,8 +41,54 @@ $(document).ready(function(){
 //    });
 
     initializeGsapHomeAnimations();
+    initializeHomeCounters();
 
 });
+
+function initializeHomeCounters() {
+    const counters = Array.from(document.querySelectorAll(".js-home-counter"));
+    if (!counters.length
+        || !("IntersectionObserver" in window)
+        || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        return;
+    }
+
+    const formatCount = function (value) {
+        return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    };
+
+    const runCounter = function (counter) {
+        const target = parseInt(counter.dataset.countTarget, 10);
+        if (!Number.isFinite(target) || target <= 0) {
+            return;
+        }
+        const duration = 1600;
+        const start = performance.now();
+        const step = function (now) {
+            const progress = Math.min((now - start) / duration, 1);
+            const eased = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+            counter.textContent = formatCount(Math.round(target * eased));
+            if (progress < 1) {
+                requestAnimationFrame(step);
+            }
+        };
+        counter.textContent = "0";
+        requestAnimationFrame(step);
+    };
+
+    const observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+                observer.unobserve(entry.target);
+                runCounter(entry.target);
+            }
+        });
+    }, { threshold: 0.4 });
+
+    counters.forEach(function (counter) {
+        observer.observe(counter);
+    });
+}
 
 function initializeGsapHomeAnimations() {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -56,12 +102,6 @@ function initializeGsapHomeAnimations() {
     }
 
     const hero = document.querySelector(".js-gsap-hero");
-    const heroImage = document.querySelector(".js-gsap-hero-image");
-    const heroOverlay = document.querySelector(".js-gsap-hero-overlay");
-    const heroLogo = document.querySelector(".js-gsap-hero-logo");
-    const quickCards = gsap.utils.toArray(".js-gsap-quick-card");
-    const sectionHeaders = gsap.utils.toArray(".js-gsap-section-header");
-    const onboardingBanner = document.querySelector(".js-gsap-onboarding-banner");
     const pendingCards = gsap.utils.toArray(".js-gsap-pending-card");
 
     document.body.style.opacity = "1";
@@ -71,100 +111,7 @@ function initializeGsapHomeAnimations() {
     }
 
     if (hero) {
-        if (heroLogo) {
-            gsap.set(heroLogo, {
-                xPercent: -50,
-                yPercent: -50,
-                x: 0,
-                y: 0,
-                scale: 1,
-                autoAlpha: 1,
-                transformOrigin: "center center"
-            });
-        }
-
-        const heroTimeline = gsap.timeline({ defaults: { ease: "sine.out" } });
-
-        heroTimeline
-            .from(hero, { autoAlpha: 0, y: 18, duration: 0.95 })
-            .from(heroImage, { scale: 1.1, duration: 2.2, ease: "sine.out" }, 0)
-            .from(heroOverlay, { opacity: 0, duration: 1.4, ease: "sine.out" }, 0.08)
-            .fromTo(heroLogo,
-                { autoAlpha: 0, y: 12, scale: 0.94, filter: "blur(10px) drop-shadow(0 4px 16px rgba(0,0,0,0.2))" },
-                { autoAlpha: 1, y: 0, scale: 1, filter: "blur(0px) drop-shadow(0 12px 30px rgba(0,0,0,0.35))", duration: 1.25, ease: "power2.out", clearProps: "opacity,visibility" },
-                0.28
-            );
-
-        const moveImageX = gsap.quickTo(heroImage, "x", { duration: 1.2, ease: "power3.out" });
-        const moveImageY = gsap.quickTo(heroImage, "y", { duration: 1.2, ease: "power3.out" });
-        const scaleImage = gsap.quickTo(heroImage, "scale", { duration: 1.6, ease: "power2.out" });
-        const moveLogoX = gsap.quickTo(heroLogo, "x", { duration: 1.25, ease: "power3.out" });
-        const moveLogoY = gsap.quickTo(heroLogo, "y", { duration: 1.25, ease: "power3.out" });
-
-        hero.addEventListener("mousemove", function (event) {
-            const bounds = hero.getBoundingClientRect();
-            const progressX = (event.clientX - bounds.left) / bounds.width - 0.5;
-            const progressY = (event.clientY - bounds.top) / bounds.height - 0.5;
-            const x = progressX * 8;
-            const y = progressY * 6;
-
-            moveImageX(x);
-            moveImageY(y);
-            scaleImage(1.04);
-            moveLogoX(-x * 0.12);
-            moveLogoY(-y * 0.12);
-        });
-
-        hero.addEventListener("mouseleave", function () {
-            moveImageX(0);
-            moveImageY(0);
-            scaleImage(1);
-            moveLogoX(0);
-            moveLogoY(0);
-        });
-    }
-
-    if (sectionHeaders.length && window.ScrollTrigger) {
-        sectionHeaders.forEach(function (header) {
-            gsap.from(header, {
-                autoAlpha: 0,
-                y: 18,
-                duration: 0.6,
-                ease: "power2.out",
-                scrollTrigger: {
-                    trigger: header,
-                    start: "top 88%"
-                }
-            });
-        });
-    }
-
-    if (quickCards.length) {
-        gsap.from(quickCards, {
-            autoAlpha: 0,
-            y: 24,
-            duration: 0.65,
-            stagger: 0.08,
-            ease: "power2.out",
-            delay: hero ? 0.2 : 0,
-            scrollTrigger: window.ScrollTrigger ? {
-                trigger: quickCards[0].closest(".row") || quickCards[0],
-                start: "top 85%"
-            } : undefined
-        });
-    }
-
-    if (onboardingBanner) {
-        gsap.from(onboardingBanner, {
-            autoAlpha: 0,
-            x: -28,
-            duration: 0.75,
-            ease: "power2.out",
-            scrollTrigger: window.ScrollTrigger ? {
-                trigger: onboardingBanner,
-                start: "top 88%"
-            } : undefined
-        });
+        animateHomeHero(hero);
     }
 
     const pendingCarousel = document.querySelector("#carrousel-lista-ocupaciones-pendientes");
@@ -176,6 +123,31 @@ function initializeGsapHomeAnimations() {
         initializeGsapPendingCarousel(pendingCarousel);
     } else {
         animatePendingCards(pendingCards);
+    }
+}
+
+function animateHomeHero(hero) {
+    const photo = hero.querySelector(".js-gsap-hero-image");
+    const brand = hero.querySelector(".js-gsap-hero-logo");
+    const lines = hero.querySelectorAll(".js-gsap-hero-line");
+    const rail = hero.querySelector(".js-gsap-hero-rail");
+
+    const timeline = gsap.timeline({ defaults: { ease: "expo.out" } });
+
+    if (photo) {
+        timeline.fromTo(photo,
+            { scale: 1.08, filter: "blur(8px) saturate(1.15) contrast(1.05) brightness(0.8)" },
+            { scale: 1, filter: "blur(0px) saturate(1.15) contrast(1.05) brightness(0.8)", duration: 1.8, clearProps: "transform" },
+            0);
+    }
+    if (brand) {
+        timeline.from(brand, { autoAlpha: 0, y: -8, duration: 0.9, clearProps: "opacity,visibility,transform" }, 0.1);
+    }
+    if (lines.length) {
+        timeline.from(lines, { yPercent: 105, duration: 1.1, stagger: 0.09, clearProps: "transform" }, 0.15);
+    }
+    if (rail) {
+        timeline.from(rail, { autoAlpha: 0, y: 10, duration: 0.8, clearProps: "opacity,visibility,transform" }, 0.75);
     }
 }
 
@@ -421,7 +393,6 @@ function animatePendingCarouselChrome(carousel) {
     }
 
     const controls = carousel.querySelectorAll(".carousel-control-prev, .carousel-control-next");
-    const header = carousel.closest(".row") ? carousel.closest(".row").querySelector(".js-gsap-section-header") : null;
 
     if (controls.length) {
         gsap.fromTo(controls,
@@ -441,28 +412,6 @@ function animatePendingCarouselChrome(carousel) {
                 } : undefined
             }
         );
-    }
-
-    if (header) {
-        const badge = header.querySelector(".section-header__badge");
-        if (badge) {
-            gsap.fromTo(badge,
-                {
-                    scale: 0.9,
-                    boxShadow: "0 0 0 0 rgba(231, 76, 60, 0)"
-                },
-                {
-                    scale: 1,
-                    boxShadow: "0 10px 24px rgba(231, 76, 60, 0.18)",
-                    duration: 0.9,
-                    ease: "power2.out",
-                    scrollTrigger: window.ScrollTrigger ? {
-                        trigger: carousel,
-                        start: "top 88%"
-                    } : undefined
-                }
-            );
-        }
     }
 }
 
